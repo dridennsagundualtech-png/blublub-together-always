@@ -9,151 +9,227 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as BudgetRouteImport } from './routes/budget'
-import { Route as CalendarRouteImport } from './routes/calendar'
-import { Route as ChatRouteImport } from './routes/chat'
-import { Route as DiaryRouteImport } from './routes/diary'
-import { Route as MoreRouteImport } from './routes/more'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
+import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
+import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
+import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
+import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const BudgetRoute = BudgetRouteImport.update({
+const AuthenticatedBudgetRoute = AuthenticatedBudgetRouteImport.update({
   id: '/budget',
   path: '/budget',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const CalendarRoute = CalendarRouteImport.update({
+const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const ChatRoute = ChatRouteImport.update({
+const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   id: '/chat',
   path: '/chat',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const DiaryRoute = DiaryRouteImport.update({
+const AuthenticatedDiaryRoute = AuthenticatedDiaryRouteImport.update({
   id: '/diary',
   path: '/diary',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const MoreRoute = MoreRouteImport.update({
+const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   id: '/more',
   path: '/more',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPhotosRoute = AuthenticatedPhotosRouteImport.update({
+  id: '/photos',
+  path: '/photos',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/budget': typeof BudgetRoute
-  '/calendar': typeof CalendarRoute
-  '/chat': typeof ChatRoute
-  '/diary': typeof DiaryRoute
-  '/more': typeof MoreRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/budget': typeof AuthenticatedBudgetRoute
+  '/calendar': typeof AuthenticatedCalendarRoute
+  '/chat': typeof AuthenticatedChatRoute
+  '/diary': typeof AuthenticatedDiaryRoute
+  '/more': typeof AuthenticatedMoreRoute
+  '/photos': typeof AuthenticatedPhotosRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/budget': typeof BudgetRoute
-  '/calendar': typeof CalendarRoute
-  '/chat': typeof ChatRoute
-  '/diary': typeof DiaryRoute
-  '/more': typeof MoreRoute
+  '/auth': typeof AuthRoute
+  '/budget': typeof AuthenticatedBudgetRoute
+  '/calendar': typeof AuthenticatedCalendarRoute
+  '/chat': typeof AuthenticatedChatRoute
+  '/diary': typeof AuthenticatedDiaryRoute
+  '/more': typeof AuthenticatedMoreRoute
+  '/photos': typeof AuthenticatedPhotosRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/budget': typeof BudgetRoute
-  '/calendar': typeof CalendarRoute
-  '/chat': typeof ChatRoute
-  '/diary': typeof DiaryRoute
-  '/more': typeof MoreRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/budget': typeof AuthenticatedBudgetRoute
+  '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
+  '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/diary': typeof AuthenticatedDiaryRoute
+  '/_authenticated/more': typeof AuthenticatedMoreRoute
+  '/_authenticated/photos': typeof AuthenticatedPhotosRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/budget' | '/calendar' | '/chat' | '/diary' | '/more'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/budget'
+    | '/calendar'
+    | '/chat'
+    | '/diary'
+    | '/more'
+    | '/photos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/budget' | '/calendar' | '/chat' | '/diary' | '/more'
-  id: '__root__' | '/' | '/budget' | '/calendar' | '/chat' | '/diary' | '/more'
+  to:
+    | '/auth'
+    | '/budget'
+    | '/calendar'
+    | '/chat'
+    | '/diary'
+    | '/more'
+    | '/photos'
+    | '/'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/budget'
+    | '/_authenticated/calendar'
+    | '/_authenticated/chat'
+    | '/_authenticated/diary'
+    | '/_authenticated/more'
+    | '/_authenticated/photos'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  BudgetRoute: typeof BudgetRoute
-  CalendarRoute: typeof CalendarRoute
-  ChatRoute: typeof ChatRoute
-  DiaryRoute: typeof DiaryRoute
-  MoreRoute: typeof MoreRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/budget': {
-      id: '/budget'
+    '/_authenticated/budget': {
+      id: '/_authenticated/budget'
       path: '/budget'
       fullPath: '/budget'
-      preLoaderRoute: typeof BudgetRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedBudgetRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/calendar': {
-      id: '/calendar'
+    '/_authenticated/calendar': {
+      id: '/_authenticated/calendar'
       path: '/calendar'
       fullPath: '/calendar'
-      preLoaderRoute: typeof CalendarRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedCalendarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/chat': {
-      id: '/chat'
+    '/_authenticated/chat': {
+      id: '/_authenticated/chat'
       path: '/chat'
       fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/diary': {
-      id: '/diary'
+    '/_authenticated/diary': {
+      id: '/_authenticated/diary'
       path: '/diary'
       fullPath: '/diary'
-      preLoaderRoute: typeof DiaryRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedDiaryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/more': {
-      id: '/more'
+    '/_authenticated/more': {
+      id: '/_authenticated/more'
       path: '/more'
       fullPath: '/more'
-      preLoaderRoute: typeof MoreRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedMoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/photos': {
+      id: '/_authenticated/photos'
+      path: '/photos'
+      fullPath: '/photos'
+      preLoaderRoute: typeof AuthenticatedPhotosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
+  AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
+  AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
+  AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
+  AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
+  AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
+  AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
+  AuthenticatedMoreRoute: AuthenticatedMoreRoute,
+  AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  BudgetRoute: BudgetRoute,
-  CalendarRoute: CalendarRoute,
-  ChatRoute: ChatRoute,
-  DiaryRoute: DiaryRoute,
-  MoreRoute: MoreRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

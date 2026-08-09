@@ -1,0 +1,147 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { CalendarDays, HelpCircle, Images, PiggyBank } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { AppLayout } from "@/components/AppLayout";
+import { Doodle } from "@/components/Doodles";
+import { Card, Money, ProgressBar, SectionTitle } from "@/components/ui-kit";
+import { useBadges, todayISO } from "@/lib/badges";
+import { daysTogether, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
+
+export const Route = createFileRoute("/_authenticated/")({
+  head: () => ({
+    meta: [
+      { title: "BLUBLUB — Your private couples space" },
+      {
+        name: "description",
+        content:
+          "BLUBLUB is a cozy private app for two: shared calendar, photo timeline, diary, budget and chat.",
+      },
+      { property: "og:title", content: "BLUBLUB — Your private couples space" },
+      {
+        property: "og:description",
+        content: "A cozy private app for two: calendar, memories, diary, budget and chat.",
+      },
+    ],
+  }),
+  component: HomePage,
+});
+
+function HomePage() {
+  const coupleId = useCoupleId();
+  const { data: profile } = useProfile();
+  const { data: members } = useMembers();
+  const partner = usePartner();
+  const { data: badges } = useBadges();
+
+  const anniversary =
+    members?.map((m) => m.anniversary_date).filter(Boolean).sort()[0] ??
+    profile?.anniversary_date ??
+    null;
+  const days = daysTogether(anniversary);
+
+  const { data: upcoming } = useQuery({
+    queryKey: ["upcoming-events", coupleId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("couple_id", coupleId!)
+        .gte("event_date", todayISO())
+        .order("event_date")
+        .limit(3);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: savings } = useQuery({
+    queryKey: ["home-savings", coupleId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data: goals } = await supabase
+        .from("savings_goals")
+        .select("*")
+        .eq("couple_id", coupleId!)
+        .order("created_at")
+        .limit(1);
+      const goal = goals?.[0];
+      if (!goal) return null;
+      const { data: contribs } = await supabase
+        .from("savings_contributions")
+        .select("amount")
+        .eq("goal_id", goal.id);
+      const saved = (contribs ?? []).reduce((s, c) => s + Number(c.amount), 0);
+      return { goal, saved };
+    },
+  });
+
+  return (
+    <AppLayout title="BLUBLUB" subtitle={`Hi ${profile?.display_name ?? "you"} 🩷`} critter="cat">
+      <section className="card-soft relative overflow-hidden p-6 text-center">
+        <Doodle critter="penguin" size={48} className="absolute -left-1 bottom-1 opacity-40" />
+        <Doodle critter="seal" size={40} className="absolute right-1 top-1 opacity-35" />
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          Days together
+        </p>
+        <p className="mt-1 text-5xl font-extrabold text-primary">{days ?? "—"}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {partner
+            ? days !== null
+              ? `You and ${partner.display_name}`
+              : "Add your anniversary in Profile to start counting."
+            : "Share your invite code so your partner can join."}
+        </p>
+      </section>
+
+      <SectionTitle>Coming up</SectionTitle>
+      {upcoming && upcoming.length > 0 ? (
+        <ul className="space-y-2">
+          {upcoming.map((e) => (
+            <li key={e.id} className="card-soft flex items-center gap-3 p-4">
+              <CalendarDays className="size-5 shrink-0 text-primary" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{e.title}</p>
+                <p className="text-xs text-muted-foreground">{e.event_date}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <Card className="text-sm text-muted-foreground">Nothing planned yet — add a date!</Card>
+      )}
+
+      <SectionTitle>Quick hops</SectionTitle>
+      <div className="grid grid-cols-2 gap-3">
+        <Link to="/questions" className="card-soft press relative flex items-center gap-2 p-4">
+          <HelpCircle className="size-5 text-primary" />
+          <span className="text-sm font-bold">Today&apos;s question</span>
+          {badges?.question ? (
+            <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive" />
+          ) : null}
+        </Link>
+        <Link to="/photos" className="card-soft press flex items-center gap-2 p-4">
+          <Images className="size-5 text-primary" />
+          <span className="text-sm font-bold">Timeline</span>
+        </Link>
+      </div>
+
+      {savings ? (
+        <>
+          <SectionTitle>Joint savings</SectionTitle>
+          <Card>
+            <div className="mb-2 flex items-center gap-2">
+              <PiggyBank className="size-5 text-primary" />
+              <p className="text-sm font-bold">{savings.goal.title}</p>
+            </div>
+            <ProgressBar value={(savings.saved / Number(savings.goal.target_amount)) * 100} />
+            <p className="mt-2 text-xs text-muted-foreground">
+              <Money value={savings.saved} /> of <Money value={Number(savings.goal.target_amount)} />
+            </p>
+          </Card>
+        </>
+      ) : null}
+    </AppLayout>
+  );
+}
