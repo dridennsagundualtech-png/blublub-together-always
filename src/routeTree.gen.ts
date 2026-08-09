@@ -18,6 +18,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
+import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -63,6 +64,11 @@ const AuthenticatedPhotosRoute = AuthenticatedPhotosRouteImport.update({
   path: '/photos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedQuestionsRoute = AuthenticatedQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/diary': typeof AuthenticatedDiaryRoute
   '/more': typeof AuthenticatedMoreRoute
   '/photos': typeof AuthenticatedPhotosRoute
+  '/questions': typeof AuthenticatedQuestionsRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/diary': typeof AuthenticatedDiaryRoute
   '/more': typeof AuthenticatedMoreRoute
   '/photos': typeof AuthenticatedPhotosRoute
+  '/questions': typeof AuthenticatedQuestionsRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
+  '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/diary'
     | '/more'
     | '/photos'
+    | '/questions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/diary'
     | '/more'
     | '/photos'
+    | '/questions'
     | '/'
   id:
     | '__root__'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diary'
     | '/_authenticated/more'
     | '/_authenticated/photos'
+    | '/_authenticated/questions'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
@@ -200,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPhotosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/questions': {
+      id: '/_authenticated/questions'
+      path: '/questions'
+      fullPath: '/questions'
+      preLoaderRoute: typeof AuthenticatedQuestionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -210,6 +229,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
+  AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -220,6 +240,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
+  AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
