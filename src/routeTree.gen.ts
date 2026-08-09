@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
@@ -50,6 +51,11 @@ const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDatesRoute = AuthenticatedDatesRouteImport.update({
+  id: '/dates',
+  path: '/dates',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDiaryRoute = AuthenticatedDiaryRouteImport.update({
   id: '/diary',
   path: '/diary',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/more': typeof AuthenticatedMoreRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/more': typeof AuthenticatedMoreRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/_authenticated/budget': typeof AuthenticatedBudgetRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/budget'
     | '/calendar'
     | '/chat'
+    | '/dates'
     | '/diary'
     | '/more'
     | '/photos'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/budget'
     | '/calendar'
     | '/chat'
+    | '/dates'
     | '/diary'
     | '/more'
     | '/photos'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/_authenticated/budget'
     | '/_authenticated/calendar'
     | '/_authenticated/chat'
+    | '/_authenticated/dates'
     | '/_authenticated/diary'
     | '/_authenticated/more'
     | '/_authenticated/photos'
@@ -203,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dates': {
+      id: '/_authenticated/dates'
+      path: '/dates'
+      fullPath: '/dates'
+      preLoaderRoute: typeof AuthenticatedDatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/diary': {
       id: '/_authenticated/diary'
       path: '/diary'
@@ -245,6 +264,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
@@ -257,6 +277,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
