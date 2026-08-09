@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
 import { useSoundSetting } from "@/hooks/use-sound";
 
-export const Route = createFileRoute("/more")({
+export const Route = createFileRoute("/_authenticated/more")({
   head: () => ({
     meta: [
       { title: "More — BLUBLUB" },

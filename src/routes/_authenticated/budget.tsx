@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
 import { PremiumGate } from "@/components/PremiumGate";
 
-export const Route = createFileRoute("/budget")({
+export const Route = createFileRoute("/_authenticated/budget")({
   head: () => ({
     meta: [
       { title: "Shared Budget — BLUBLUB" },
