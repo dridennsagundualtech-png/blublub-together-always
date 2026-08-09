@@ -14,13 +14,721 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bills: {
+        Row: {
+          amount: number
+          category: string
+          couple_id: string
+          created_at: string
+          due_day: number
+          id: string
+          last_paid_on: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category?: string
+          couple_id: string
+          created_at?: string
+          due_day?: number
+          id?: string
+          last_paid_on?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          couple_id?: string
+          created_at?: string
+          due_day?: number
+          id?: string
+          last_paid_on?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bills_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_goals: {
+        Row: {
+          category: string
+          couple_id: string
+          created_at: string
+          id: string
+          monthly_limit: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          couple_id: string
+          created_at?: string
+          id?: string
+          monthly_limit: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          couple_id?: string
+          created_at?: string
+          id?: string
+          monthly_limit?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_goals_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      couples: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          invite_code: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          invite_code: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          invite_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cycle_logs: {
+        Row: {
+          couple_id: string | null
+          created_at: string
+          cycle_length: number
+          id: string
+          notes: string | null
+          period_length: number
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          couple_id?: string | null
+          created_at?: string
+          cycle_length?: number
+          id?: string
+          notes?: string | null
+          period_length?: number
+          start_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string | null
+          created_at?: string
+          cycle_length?: number
+          id?: string
+          notes?: string | null
+          period_length?: number
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cycle_logs_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      date_ideas: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          done: boolean
+          id: string
+          is_private_note: boolean
+          notes: string | null
+          planned_for: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          done?: boolean
+          id?: string
+          is_private_note?: boolean
+          notes?: string | null
+          planned_for?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          done?: boolean
+          id?: string
+          is_private_note?: boolean
+          notes?: string | null
+          planned_for?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "date_ideas_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diary_entries: {
+        Row: {
+          body: string
+          couple_id: string
+          created_at: string
+          created_by: string
+          entry_date: string
+          id: string
+          mood: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          couple_id: string
+          created_at?: string
+          created_by: string
+          entry_date?: string
+          id?: string
+          mood?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          entry_date?: string
+          id?: string
+          mood?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_entries_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          event_date: string
+          event_time: string | null
+          id: string
+          kind: string
+          notes: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          event_date: string
+          event_time?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          couple_id: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          paid_by: string
+          spent_on: string
+          split_ratio: number
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category?: string
+          couple_id: string
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          paid_by: string
+          spent_on?: string
+          split_ratio?: number
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          paid_by?: string
+          spent_on?: string
+          split_ratio?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          progress: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          progress?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          progress?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          couple_id: string
+          created_at: string
+          created_by: string
+          id: string
+          read_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          couple_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          read_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          read_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          caption: string | null
+          couple_id: string
+          created_at: string
+          created_by: string
+          id: string
+          storage_path: string
+          taken_on: string
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          couple_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          storage_path: string
+          taken_on?: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          storage_path?: string
+          taken_on?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          anniversary_date: string | null
+          avatar_url: string | null
+          couple_id: string | null
+          created_at: string
+          display_name: string
+          id: string
+          is_premium: boolean
+          share_cycle: boolean
+          updated_at: string
+        }
+        Insert: {
+          anniversary_date?: string | null
+          avatar_url?: string | null
+          couple_id?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+          is_premium?: boolean
+          share_cycle?: boolean
+          updated_at?: string
+        }
+        Update: {
+          anniversary_date?: string | null
+          avatar_url?: string | null
+          couple_id?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_premium?: boolean
+          share_cycle?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_answers: {
+        Row: {
+          answer_date: string
+          body: string
+          couple_id: string
+          created_at: string
+          created_by: string
+          id: string
+          question_id: string
+          seen_by_partner: boolean
+          updated_at: string
+        }
+        Insert: {
+          answer_date?: string
+          body: string
+          couple_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          question_id: string
+          seen_by_partner?: boolean
+          updated_at?: string
+        }
+        Update: {
+          answer_date?: string
+          body?: string
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          question_id?: string
+          seen_by_partner?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_answers_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          day_index: number
+          id: string
+          prompt: string
+        }
+        Insert: {
+          day_index: number
+          id?: string
+          prompt: string
+        }
+        Update: {
+          day_index?: number
+          id?: string
+          prompt?: string
+        }
+        Relationships: []
+      }
+      redeem_codes: {
+        Row: {
+          code: string
+          created_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      savings_contributions: {
+        Row: {
+          amount: number
+          couple_id: string
+          created_at: string
+          created_by: string
+          goal_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          couple_id: string
+          created_at?: string
+          created_by: string
+          goal_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          goal_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_contributions_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_contributions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_goals: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          target_amount: number
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          target_amount: number
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          target_amount?: number
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_goals_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      todos: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          done: boolean
+          due_date: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todos_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_couple_id: { Args: never; Returns: string }
+      join_couple: { Args: { _code: string }; Returns: string }
+      redeem_premium: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
