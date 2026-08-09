@@ -18,6 +18,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
+import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
@@ -66,6 +67,11 @@ const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   path: '/more',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPeriodRoute = AuthenticatedPeriodRouteImport.update({
+  id: '/period',
+  path: '/period',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPhotosRoute = AuthenticatedPhotosRouteImport.update({
   id: '/photos',
   path: '/photos',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/more': typeof AuthenticatedMoreRoute
+  '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/todos': typeof AuthenticatedTodosRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/more': typeof AuthenticatedMoreRoute
+  '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/todos': typeof AuthenticatedTodosRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
+  '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/dates'
     | '/diary'
     | '/more'
+    | '/period'
     | '/photos'
     | '/questions'
     | '/todos'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/dates'
     | '/diary'
     | '/more'
+    | '/period'
     | '/photos'
     | '/questions'
     | '/todos'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dates'
     | '/_authenticated/diary'
     | '/_authenticated/more'
+    | '/_authenticated/period'
     | '/_authenticated/photos'
     | '/_authenticated/questions'
     | '/_authenticated/todos'
@@ -236,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMoreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/period': {
+      id: '/_authenticated/period'
+      path: '/period'
+      fullPath: '/period'
+      preLoaderRoute: typeof AuthenticatedPeriodRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/photos': {
       id: '/_authenticated/photos'
       path: '/photos'
@@ -267,6 +286,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
+  AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
@@ -280,6 +300,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
+  AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
