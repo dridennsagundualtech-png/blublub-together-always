@@ -1,6 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  CalendarHeart,
+  HelpCircle,
+  Images,
+  ListChecks,
+  Droplets,
+  UserCog,
+  ChevronRight,
+} from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useSoundSetting } from "@/hooks/use-sound";
+import { useBadges } from "@/lib/badges";
 
 export const Route = createFileRoute("/_authenticated/more")({
   head: () => ({
@@ -21,23 +31,34 @@ export const Route = createFileRoute("/_authenticated/more")({
 });
 
 const SECTIONS = [
-  "To-dos & Goals",
-  "Date Night Planner",
-  "Photo Timeline",
-  "Daily Questions",
-  "Period Tracking",
-  "Profile & Settings",
-];
+  { to: "/todos", label: "To-dos & Goals", icon: ListChecks },
+  { to: "/dates", label: "Date Night Planner", icon: CalendarHeart },
+  { to: "/photos", label: "Photo Timeline", icon: Images },
+  { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question" },
+  { to: "/period", label: "Cycle Tracking", icon: Droplets },
+  { to: "/profile", label: "Profile & Settings", icon: UserCog },
+] as const;
 
 function MorePage() {
   const { enabled, setEnabled } = useSoundSetting();
+  const { data: badges } = useBadges();
 
   return (
     <AppLayout title="More" subtitle="Everything else" critter="seal">
       <ul className="space-y-3">
         {SECTIONS.map((s) => (
-          <li key={s} className="card-soft press p-4 text-sm font-semibold">
-            {s}
+          <li key={s.to}>
+            <Link
+              to={s.to}
+              className="card-soft press flex items-center gap-3 p-4 text-sm font-semibold"
+            >
+              <s.icon className="size-5 text-primary" />
+              <span className="flex-1">{s.label}</span>
+              {"badge" in s && badges?.question ? (
+                <span className="size-2.5 rounded-full bg-destructive" />
+              ) : null}
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </Link>
           </li>
         ))}
       </ul>
