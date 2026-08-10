@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { Mic, Send, Square } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
+import { VoiceNote } from "@/components/VoiceNote";
 import { playChirp } from "@/hooks/use-sound";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
