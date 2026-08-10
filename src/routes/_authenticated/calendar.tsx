@@ -138,7 +138,7 @@ function CalendarPage() {
     setView({ year: d.getFullYear(), month: d.getMonth() });
   };
 
-  const selectedEvents = (events ?? []).filter((e) => e.event_date === date);
+  const selectedEvents = allItems.filter((e) => e.date === date);
 
   return (
     <AppLayout title="Calendar" subtitle="Dates & anniversaries" critter="penguin">
