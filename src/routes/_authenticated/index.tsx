@@ -114,7 +114,7 @@ function HomePage() {
 
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <Card className="text-center">
+        <StatCard className="text-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Next date night
           </p>
@@ -133,8 +133,8 @@ function HomePage() {
           <p className="truncate text-xs text-muted-foreground">
             {upcoming && upcoming.length > 0 ? `days · ${upcoming[0]!.title}` : "nothing planned"}
           </p>
-        </Card>
-        <Card className="text-center">
+        </StatCard>
+        <StatCard className="text-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Anniversary in
           </p>
@@ -142,7 +142,7 @@ function HomePage() {
           <p className="text-xs text-muted-foreground">
             {untilAnniversary === null ? "add a date" : "days"}
           </p>
-        </Card>
+        </StatCard>
       </div>
 
       <SectionTitle>Our song</SectionTitle>
