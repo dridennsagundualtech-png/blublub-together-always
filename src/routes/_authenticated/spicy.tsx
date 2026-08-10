@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Dices } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { PremiumGate } from "@/components/PremiumGate";
+import { DiceRoller, type DieDef } from "@/components/games/DiceRoller";
 import { Card, GhostButton, PrimaryButton } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { playChirp } from "@/hooks/use-sound";
@@ -27,15 +28,46 @@ export const Route = createFileRoute("/_authenticated/spicy")({
   component: SpicyPage,
 });
 
-const SIDES = [
-  "Missionary",
-  "Doggy Style",
-  "Spoons",
-  "Cowgirl",
-  "Reverse Cowgirl",
-  "69",
-  "Standing",
-  "Scissors",
+const POSITION_DICE: DieDef[] = [
+  {
+    label: "Focus",
+    tone: "tile-pink",
+    sides: ["Lips", "Neck", "Chest", "Inner thighs", "Back", "Ears", "Hips", "Wild — you pick"],
+  },
+  {
+    label: "Action",
+    tone: "tile-lilac",
+    sides: ["Kiss", "Lick", "Nibble", "Massage", "Tease", "Caress", "Breathe on", "Wild — you pick"],
+  },
+  {
+    label: "Position / pace",
+    tone: "tile-peach",
+    sides: [
+      "Missionary",
+      "From behind",
+      "On top",
+      "Spoons",
+      "Standing",
+      "Slow",
+      "Faster",
+      "Wild — you pick",
+    ],
+  },
+];
+
+const CLOTHING_DICE: DieDef[] = [
+  {
+    label: "Remove",
+    tone: "tile-sky",
+    sides: [
+      "Top / shirt",
+      "Pants / bottoms",
+      "Socks / shoes",
+      "Bra / undershirt",
+      "Underwear",
+      "Wild — partner's choice",
+    ],
+  },
 ];
 
 function SpicyPage() {
@@ -89,43 +121,50 @@ function SpicyPage() {
   );
 }
 
-function DiceGame() {
-  const [result, setResult] = useState<string | null>(null);
-  const [rolling, setRolling] = useState(false);
+const TABS = [
+  { id: "position", label: "Position dice" },
+  { id: "clothing", label: "Clothing removal" },
+] as const;
 
-  function roll() {
-    if (rolling) return;
-    playChirp("pop");
-    setRolling(true);
-    const spin = setInterval(() => {
-      setResult(SIDES[Math.floor(Math.random() * SIDES.length)]!);
-    }, 90);
-    setTimeout(() => {
-      clearInterval(spin);
-      setResult(SIDES[Math.floor(Math.random() * SIDES.length)]!);
-      setRolling(false);
-      playChirp("success");
-    }, 1200);
-  }
+function DiceGame() {
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("position");
 
   return (
-    <Card className="text-center">
-      <div
-        className={`mx-auto grid size-36 place-items-center rounded-3xl bg-accent text-accent-foreground shadow-soft ${
-          rolling ? "animate-[pulse_0.4s_ease-in-out_infinite]" : ""
-        }`}
-        style={{ transform: rolling ? "rotate(8deg)" : "rotate(0deg)", transition: "transform .2s" }}
-      >
-        <span className="px-3 text-lg font-extrabold leading-tight">{result ?? "Tap to roll"}</span>
+    <div className="space-y-3">
+      <div className="card-soft grid grid-cols-2 gap-1 p-1.5">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => {
+              playChirp("tap");
+              setTab(t.id);
+            }}
+            className={`press rounded-2xl py-2 text-xs font-extrabold ${
+              tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
-      <div className="mt-5">
-        <PrimaryButton disabled={rolling} onClick={roll}>
-          <span className="inline-flex items-center gap-2">
-            <Dices className="size-4" /> {rolling ? "Rolling…" : "Roll the 8-sided dice"}
-          </span>
-        </PrimaryButton>
-      </div>
-      <p className="mt-3 text-xs text-muted-foreground">Eight sides. No pressure — reroll anytime.</p>
-    </Card>
+
+      {tab === "position" ? (
+        <DiceRoller
+          key="position"
+          dice={POSITION_DICE}
+          withTimer
+          cta="Roll all three"
+          footnote="Take turns: the roller performs the combo for the round, then swap. Wild means you choose."
+        />
+      ) : (
+        <DiceRoller
+          key="clothing"
+          dice={CLOTHING_DICE}
+          cta="Roll the clothing dice"
+          footnote="Tap to roll — whatever lands, one item comes off. Wild is your partner's choice."
+        />
+      )}
+    </div>
   );
 }

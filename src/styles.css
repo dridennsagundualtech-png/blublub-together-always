@@ -303,3 +303,26 @@
   color: var(--color-accent-foreground);
   border: 1px solid var(--color-border);
 }
+
+/* Rolling dice animation */
+@keyframes dice-tumble {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-14deg) scale(1.06); }
+  50% { transform: rotate(10deg) scale(0.95); }
+  75% { transform: rotate(-6deg) scale(1.04); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes dice-settle {
+  0% { transform: scale(0.82) rotate(-8deg); opacity: 0.4; }
+  60% { transform: scale(1.08) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@utility dice-rolling {
+  animation: dice-tumble 0.45s ease-in-out infinite;
+}
+
+@utility dice-settled {
+  animation: dice-settle 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
