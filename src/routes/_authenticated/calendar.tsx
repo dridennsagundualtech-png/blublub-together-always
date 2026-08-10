@@ -92,11 +92,9 @@ function CalendarPage() {
   const past = (events ?? []).filter((e) => e.event_date < today).reverse();
 
   const byDate = useMemo(() => {
-    const map = new Map<string, typeof events>();
+    const map = new Map<string, number>();
     for (const e of events ?? []) {
-      const list = map.get(e.event_date) ?? [];
-      list.push(e);
-      map.set(e.event_date, list as typeof events);
+      map.set(e.event_date, (map.get(e.event_date) ?? 0) + 1);
     }
     return map;
   }, [events]);
