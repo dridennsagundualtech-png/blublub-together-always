@@ -1,7 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Droplets, HeartHandshake, MapPin } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, SectionTitle } from "@/components/ui-kit";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthUser, useCoupleId, usePartner, useProfile } from "@/lib/session";
+import { useLocations, timeAgo } from "@/lib/location";
+import { todayISO } from "@/lib/badges";
+
 
 export const Route = createFileRoute("/_authenticated/wellbeing")({
   head: () => ({
