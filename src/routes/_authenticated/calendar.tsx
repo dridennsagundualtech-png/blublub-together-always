@@ -215,20 +215,27 @@ function CalendarPage() {
           {selectedEvents.map((e) => (
             <li key={e.id} className="card-soft flex items-center justify-between gap-3 p-4">
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{e.title}</p>
-                {e.event_time ? (
-                  <p className="text-xs text-muted-foreground">{e.event_time.slice(0, 5)}</p>
-                ) : null}
+                <p className="truncate text-sm font-bold">
+                  {e.kind === "event" ? "" : `${DERIVED_META[e.kind].emoji} `}
+                  {e.title}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {e.time ? `${e.time.slice(0, 5)}` : ""}
+                  {e.kind === "event" ? "" : `${e.time ? " · " : ""}${DERIVED_META[e.kind].label}`}
+                </p>
               </div>
-              <button
-                aria-label="Delete event"
-                onClick={() => remove.mutate(e.id)}
-                className="press rounded-full p-2 text-muted-foreground"
-              >
-                <Trash2 className="size-4" />
-              </button>
+              {e.removable ? (
+                <button
+                  aria-label="Delete event"
+                  onClick={() => remove.mutate(e.id)}
+                  className="press rounded-full p-2 text-muted-foreground"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              ) : null}
             </li>
           ))}
+
         </ul>
       )}
 
