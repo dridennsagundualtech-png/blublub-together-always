@@ -216,6 +216,10 @@ function BudgetContent() {
     .filter((e) => monthKey(e.spent_on) === prevMonth)
     .reduce((s, e) => s + Number(e.amount), 0);
   const delta = prevTotal > 0 ? ((monthTotal - prevTotal) / prevTotal) * 100 : null;
+  const biggest =
+    byCategory.length > 0 && monthTotal > 0
+      ? byCategory.reduce((a, b) => (b.value > a.value ? b : a))
+      : null;
 
   const nameOf = (id: string) => members?.find((m) => m.id === id)?.display_name ?? "Partner";
 
