@@ -64,7 +64,7 @@ function AuthPage() {
     return (
       <main className="grid min-h-screen place-items-center bg-background px-5">
         <div className="card-soft max-w-sm p-7 text-center">
-          <Doodle critter="penguin" size={72} className="mx-auto" />
+          <Doodle critter="penguin" pose="sleep" size={72} className="mx-auto" />
           <h1 className="mt-3 text-2xl font-extrabold">Check your email</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             We sent a confirmation link to {email}. Tap it, then come back and sign in.
@@ -87,10 +87,11 @@ function AuthPage() {
     <main className="grid min-h-screen place-items-center bg-background px-5 py-10">
       <div className="w-full max-w-sm">
         <div className="relative mb-6 text-center">
-          <Doodle critter="cat" size={84} className="mx-auto" />
+          <Doodle critter="cat" pose="wave" size={84} className="mx-auto" />
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight">BLUBLUB</h1>
           <p className="text-sm text-muted-foreground">Your cozy space for two</p>
-          <Doodle critter="seal" size={44} className="absolute right-2 top-8 opacity-50" />
+          <Doodle critter="seal" pose="peek" size={44} className="absolute right-2 top-8 opacity-50" />
+
         </div>
 
         <form onSubmit={submit} className="card-soft space-y-3 p-5">

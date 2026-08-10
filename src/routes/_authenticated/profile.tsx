@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -7,7 +7,9 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { compressImage } from "@/lib/image";
+import { useIsAdmin } from "@/lib/admin";
 import { useAuthUser, useCouple, usePartner, useProfile, useRefreshSession } from "@/lib/session";
+
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -30,6 +32,8 @@ function ProfilePage() {
   const { data: couple } = useCouple();
   const partner = usePartner();
   const refresh = useRefreshSession();
+  const { data: isAdmin } = useIsAdmin();
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(profile?.display_name ?? "");
@@ -109,7 +113,7 @@ function ProfilePage() {
             {avatarUrl ? (
               <img src={avatarUrl} alt="Your avatar" className="size-full object-cover" />
             ) : (
-              <Doodle critter="seal" size={56} />
+              <Doodle critter="seal" pose="wave" size={56} />
             )}
           </button>
           <div className="min-w-0">
@@ -179,9 +183,20 @@ function ProfilePage() {
           </PrimaryButton>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          {profile?.is_premium ? "Premium is active on your account ✨" : "Unlocks premium areas."}
+          {profile?.is_premium
+            ? "Premium is active on your account ✨"
+            : "Codes are single-use and expire."}
         </p>
       </Card>
+
+      {isAdmin ? (
+        <div className="mt-4 flex justify-center">
+          <Link to="/admin-codes" className="press text-xs font-semibold text-muted-foreground underline">
+            Code generator
+          </Link>
+        </div>
+      ) : null}
+
 
       <div className="mt-6 flex justify-center">
         <GhostButton onClick={() => void signOut()}>Sign out</GhostButton>

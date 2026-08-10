@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { BottomNav } from "@/components/BottomNav";
-import { Doodle, type Critter } from "@/components/Doodles";
+import { Doodle, poseFor, type Critter, type Pose } from "@/components/Doodles";
 import { PairingScreen } from "@/components/CoupleGate";
 import { useBadges } from "@/lib/badges";
 import { useCoupleId, useProfile } from "@/lib/session";
@@ -9,12 +9,14 @@ export function AppLayout({
   title,
   subtitle,
   critter,
+  critterPose,
   requireCouple = true,
   children,
 }: {
   title: string;
   subtitle?: string;
   critter?: Critter;
+  critterPose?: Pose;
   requireCouple?: boolean;
   children: ReactNode;
 }) {
@@ -32,8 +34,16 @@ export function AppLayout({
               <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
-          {critter ? <Doodle critter={critter} size={52} className="shrink-0" /> : null}
+          {critter ? (
+            <Doodle
+              critter={critter}
+              pose={critterPose ?? poseFor(`${critter}:${title}`)}
+              size={52}
+              className="shrink-0"
+            />
+          ) : null}
         </header>
+
         {isLoading ? (
           <div className="card-soft p-5 text-sm text-muted-foreground">Loading…</div>
         ) : requireCouple && !coupleId ? (
