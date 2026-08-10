@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Dices, Grid3x3, Hand, Layers, Utensils, Sparkles, Heart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, EmptyState, SectionTitle } from "@/components/ui-kit";
+import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui-kit";
 import { GAME_META, useGameHistory, useSeats, type GameKind } from "@/lib/games";
 
 export const Route = createFileRoute("/_authenticated/games/")({
@@ -49,7 +49,7 @@ function GamesPage() {
   return (
     <AppLayout title="Games" subtitle="Winner picks, loser pays" critter="penguin" critterPose="wave">
       <SectionTitle>Lifetime scoreboard</SectionTitle>
-      <Card>
+      <StatCard>
         <div className="grid grid-cols-3 text-center">
           <div>
             <p className="text-2xl font-extrabold text-primary">{tally.mine}</p>

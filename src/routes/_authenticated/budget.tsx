@@ -304,7 +304,7 @@ function BudgetContent() {
       </Card>
 
       <SectionTitle>This month</SectionTitle>
-      <Card>
+      <StatCard>
         <p className="text-sm font-bold">
           <Money value={monthTotal} /> spent
         </p>

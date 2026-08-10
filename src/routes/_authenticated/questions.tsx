@@ -4,8 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, PrimaryButton, SectionTitle, TextArea } from "@/components/ui-kit";
-import { todayISO } from "@/lib/badges";
+import { Card, PrimaryButton, SectionTitle, StreakChip, TextArea } from "@/components/ui-kit";
+import { todayISO, useAnswerStreak } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/questions")({
@@ -30,6 +30,7 @@ function QuestionsPage() {
   const qc = useQueryClient();
   const [draft, setDraft] = useState("");
   const today = todayISO();
+  const { data: streak } = useAnswerStreak();
 
   const { data: question } = useQuery({
     queryKey: ["daily-question", today],
@@ -99,6 +100,11 @@ function QuestionsPage() {
     <AppLayout title="Daily question" subtitle="One a day, just for you two" critter="cat">
       <Card className="text-center">
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Today</p>
+        {streak ? (
+          <div className="mt-2">
+            <StreakChip days={streak} />
+          </div>
+        ) : null}
         <p className="mt-2 text-lg font-extrabold">{question?.prompt ?? "Loading…"}</p>
       </Card>
 
