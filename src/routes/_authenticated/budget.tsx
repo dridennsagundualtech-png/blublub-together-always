@@ -20,6 +20,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { PremiumGate } from "@/components/PremiumGate";
 import {
   Card,
+  StatCard,
   Field,
   Money,
   PrimaryButton,
@@ -304,7 +305,7 @@ function BudgetContent() {
       </Card>
 
       <SectionTitle>This month</SectionTitle>
-      <Card>
+      <StatCard>
         <p className="text-sm font-bold">
           <Money value={monthTotal} /> spent
         </p>
@@ -333,7 +334,7 @@ function BudgetContent() {
             </ResponsiveContainer>
           </div>
         ) : null}
-      </Card>
+      </StatCard>
 
       {byMonth.length > 1 ? (
         <Card className="mt-3">

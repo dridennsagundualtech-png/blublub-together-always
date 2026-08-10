@@ -29,12 +29,44 @@ export type Pose = keyof (typeof SOURCES)["cat"];
 
 const POSES: Pose[] = ["default", "wave", "peek", "sleep", "curious"];
 
+/**
+ * Intentional pose per screen: the expression should echo what the screen is for.
+ * Keys are matched as lowercase substrings of the screen title/context.
+ */
+const CONTEXT_POSES: [string, Pose][] = [
+  ["cycle", "sleep"],
+  ["period", "sleep"],
+  ["cool-down", "sleep"],
+  ["memory book", "sleep"],
+  ["daily question", "curious"],
+  ["question", "curious"],
+  ["food", "curious"],
+  ["bucket", "curious"],
+  ["games", "wave"],
+  ["game", "wave"],
+  ["chat", "wave"],
+  ["profile", "wave"],
+  ["diary", "default"],
+  ["timeline", "default"],
+  ["photos", "default"],
+  ["date night", "default"],
+  ["calendar", "peek"],
+  ["budget", "peek"],
+  ["to-dos", "peek"],
+  ["more", "peek"],
+  ["18+", "peek"],
+];
+
 /** Deterministic pose for a given context string, so each screen keeps a stable look. */
 export function poseFor(seed: string): Pose {
+  const key = seed.toLowerCase();
+  const match = CONTEXT_POSES.find(([needle]) => key.includes(needle));
+  if (match) return match[1];
   let h = 0;
   for (let i = 0; i < seed.length; i += 1) h = (h * 31 + seed.charCodeAt(i)) % 100_000;
   return POSES[h % POSES.length]!;
 }
+
 
 /** A small decorative critter illustration. Purely ornamental. */
 export function Doodle({

@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
+import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playChirp } from "@/hooks/use-sound";
 
@@ -122,5 +123,30 @@ export function ProgressBar({ value }: { value: number }) {
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
+  );
+}
+
+/** A gradient hero surface for headline stats. Palette-safe (pink → cream). */
+export function StatHero({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <section className={cn("card-soft hero-gradient relative overflow-hidden p-6", className)}>
+      {children}
+    </section>
+  );
+}
+
+/** Gradient card for secondary stats. */
+export function StatCard({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn("card-soft stat-gradient p-4", className)}>{children}</div>;
+}
+
+/** Small consistency indicator: 🔥 + count of consecutive days. */
+export function StreakChip({ days, label = "day streak" }: { days: number; label?: string }) {
+  if (days <= 0) return null;
+  return (
+    <span className="streak-chip">
+      <Flame className="size-3.5" aria-hidden="true" />
+      {days} {label}
+    </span>
   );
 }

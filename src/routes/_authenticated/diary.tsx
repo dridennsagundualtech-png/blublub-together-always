@@ -4,8 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, SectionTitle, TextArea, TextInput } from "@/components/ui-kit";
-import { todayISO } from "@/lib/badges";
+import { Card, Field, PrimaryButton, SectionTitle, StreakChip, TextArea, TextInput } from "@/components/ui-kit";
+import { streakFromDates, todayISO } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
 const MOODS = ["🩷", "😊", "🥹", "😴", "🔥", "😤", "🌧️", "✨"];
@@ -67,6 +67,8 @@ function DiaryPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const streak = streakFromDates((entries ?? []).map((e) => e.entry_date));
+
   const nameOf = (id: string) => members?.find((m) => m.id === id)?.display_name ?? "Someone";
 
   return (
@@ -107,7 +109,7 @@ function DiaryPage() {
         </div>
       </Card>
 
-      <SectionTitle>Entries</SectionTitle>
+      <SectionTitle action={streak ? <StreakChip days={streak} /> : undefined}>Entries</SectionTitle>
       {!entries || entries.length === 0 ? (
         <Card className="text-sm text-muted-foreground">No entries yet.</Card>
       ) : (

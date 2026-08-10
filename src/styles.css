@@ -184,3 +184,51 @@
 .press:active {
   transform: scale(0.96);
 }
+
+/* --- Polish pass: gradient stat surfaces & streak chips (palette-safe) --- */
+:root {
+  --gradient-hero: linear-gradient(
+    140deg,
+    color-mix(in oklab, var(--primary) 20%, var(--card)) 0%,
+    color-mix(in oklab, var(--cream) 75%, var(--card)) 100%
+  );
+  --gradient-stat: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--accent) 70%, var(--card)) 0%,
+    color-mix(in oklab, var(--honey) 22%, var(--card)) 100%
+  );
+}
+
+.dark {
+  --gradient-hero: linear-gradient(
+    140deg,
+    color-mix(in oklab, var(--primary) 26%, var(--card)) 0%,
+    color-mix(in oklab, var(--berry) 18%, var(--card)) 100%
+  );
+  --gradient-stat: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--accent) 75%, var(--card)) 0%,
+    color-mix(in oklab, var(--honey) 18%, var(--card)) 100%
+  );
+}
+
+@utility hero-gradient {
+  background-image: var(--gradient-hero);
+}
+
+@utility stat-gradient {
+  background-image: var(--gradient-stat);
+}
+
+@utility streak-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 9999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background-image: var(--gradient-stat);
+  color: var(--color-accent-foreground);
+  border: 1px solid var(--color-border);
+}
