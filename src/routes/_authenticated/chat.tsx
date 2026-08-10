@@ -7,7 +7,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { VoiceNote } from "@/components/VoiceNote";
 import { playChirp } from "@/hooks/use-sound";
-import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
+import { useAuthUser, useCoupleId, useMemberAvatars, useMembers } from "@/lib/session";
+
+/** Small round avatar next to every bubble — uses the profile photo when set. */
+function ChatAvatar({ userId, name }: { userId: string; name: string }) {
+  const { data: avatars } = useMemberAvatars();
+  const url = avatars?.[userId];
+  return (
+    <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-accent text-xs font-bold text-accent-foreground shadow-soft">
+      {url ? (
+        <img src={url} alt={name} className="size-full object-cover" />
+      ) : (
+        (name.trim()[0] ?? "?").toUpperCase()
+      )}
+    </span>
+  );
+}
+
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({
