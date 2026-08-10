@@ -722,19 +722,40 @@ function Bills({ coupleId, bills }: { coupleId: string | null; bills: BillRow[] 
       </Card>
       <ul className="mt-3 space-y-2">
         {bills.map((b) => {
-          const soon = b.due_day >= today && b.due_day - today <= 5;
+          const due = b.next_due_on ?? rollForward(b.due_day, new Date(Date.now() - 86_400_000));
+          const daysLeft = Math.round(
+            (new Date(`${due}T00:00:00`).getTime() - new Date(`${todayISO()}T00:00:00`).getTime()) /
+              86_400_000,
+          );
+          const soon = daysLeft <= 2;
           return (
             <li key={b.id} className="card-soft flex items-center gap-3 p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{b.title}</p>
                 <p className={`text-xs ${soon ? "font-bold text-destructive" : "text-muted-foreground"}`}>
-                  Due on the {b.due_day}
-                  {soon ? " · coming up" : ""}
+                  Due {due}
+                  {daysLeft < 0
+                    ? " · overdue"
+                    : daysLeft === 0
+                      ? " · today"
+                      : soon
+                        ? ` · in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`
+                        : ""}
                 </p>
+                {b.last_paid_on ? (
+                  <p className="text-[10px] text-muted-foreground">Last paid {b.last_paid_on}</p>
+                ) : null}
               </div>
               <span className="text-sm font-bold">
                 <Money value={Number(b.amount)} />
               </span>
+              <button
+                type="button"
+                onClick={() => markPaid.mutate(b)}
+                className="press rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground"
+              >
+                Paid
+              </button>
               <button
                 aria-label="Delete bill"
                 onClick={() => remove.mutate(b.id)}
