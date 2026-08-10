@@ -4,6 +4,7 @@ import { Doodle, poseFor, type Critter, type Pose } from "@/components/Doodles";
 import { PairingScreen } from "@/components/CoupleGate";
 import { useBadges } from "@/lib/badges";
 import { useCoupleId, useProfile } from "@/lib/session";
+import { useLocationPublisher } from "@/lib/location";
 
 export function AppLayout({
   title,
@@ -23,6 +24,7 @@ export function AppLayout({
   const { isLoading } = useProfile();
   const coupleId = useCoupleId();
   const { data: badges } = useBadges();
+  useLocationPublisher();
 
   return (
     <div className="page-wash min-h-screen bg-background pb-28">
