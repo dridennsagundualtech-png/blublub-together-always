@@ -85,14 +85,24 @@ function HomePage() {
 
   return (
     <AppLayout title="BLUBLUB" subtitle={`Hi ${profile?.display_name ?? "you"} 🩷`} critter="cat">
-      <section className="card-soft relative overflow-hidden p-6 text-center">
+      <StatHero className="text-center">
         <Doodle critter="penguin" pose="wave" size={48} className="absolute -left-1 bottom-1 opacity-40" />
         <Doodle critter="seal" pose="peek" size={40} className="absolute right-1 top-1 opacity-35" />
 
         <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Days together
         </p>
-        <p className="mt-1 text-5xl font-extrabold text-primary">{days ?? "—"}</p>
+        <p className="mt-1 font-display text-5xl font-extrabold text-primary">
+          {days !== null ? `Day ${days}` : "—"}
+        </p>
+        {days !== null ? (
+          <div className="mx-auto mt-3 max-w-xs">
+            <ProgressBar value={((days % 100) / 100) * 100} />
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              {100 - (days % 100)} days to day {Math.floor(days / 100) * 100 + 100}
+            </p>
+          </div>
+        ) : null}
         <p className="mt-2 text-sm text-muted-foreground">
           {partner
             ? days !== null
@@ -100,7 +110,8 @@ function HomePage() {
               : "Add your anniversary in Profile to start counting."
             : "Share your invite code so your partner can join."}
         </p>
-      </section>
+      </StatHero>
+
 
       <div className="mt-3 grid grid-cols-2 gap-3">
         <Card className="text-center">
