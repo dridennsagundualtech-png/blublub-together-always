@@ -22,18 +22,17 @@ const ITEMS = [
 
 export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>> }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-      <ul className="mx-auto grid max-w-lg grid-cols-7">
-
+    <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] pt-2">
+      <ul className="card-soft mx-auto grid max-w-lg grid-cols-7 gap-1 bg-card/90 p-1.5 shadow-float backdrop-blur">
         {ITEMS.map(({ to, label, icon: Icon }) => (
           <li key={to}>
             <Link
               to={to}
               onClick={() => playChirp("tap")}
               activeOptions={{ exact: to === "/" }}
-              activeProps={{ className: "text-primary" }}
+              activeProps={{ className: "tile-lilac text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="press flex flex-col items-center gap-1 py-2.5"
+              className="press flex flex-col items-center gap-1 rounded-2xl py-2"
             >
               <span className="relative">
                 <Icon className="size-5" />
@@ -49,3 +48,4 @@ export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>
     </nav>
   );
 }
+

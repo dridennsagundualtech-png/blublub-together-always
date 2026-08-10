@@ -35,16 +35,16 @@ export const Route = createFileRoute("/_authenticated/more")({
 });
 
 const SECTIONS = [
-  { to: "/todos", label: "To-dos & Goals", icon: ListChecks },
-  { to: "/bucket", label: "Bucket List", icon: Sparkles },
-  { to: "/dates", label: "Date Night Planner", icon: CalendarHeart },
-  { to: "/photos", label: "Photo Timeline", icon: Images },
-  { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question" },
-  { to: "/map", label: "Where We Are", icon: MapPin },
-  { to: "/cooldown", label: "Cool-Down Tool", icon: HeartHandshake },
-  { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart },
-  { to: "/period", label: "Cycle Tracking", icon: Droplets },
-  { to: "/profile", label: "Profile & Settings", icon: UserCog },
+  { to: "/todos", label: "To-dos & Goals", icon: ListChecks, tint: "tile-pink" },
+  { to: "/bucket", label: "Bucket List", icon: Sparkles, tint: "tile-lilac" },
+  { to: "/dates", label: "Date Night Planner", icon: CalendarHeart, tint: "tile-peach" },
+  { to: "/photos", label: "Photo Timeline", icon: Images, tint: "tile-sky" },
+  { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question", tint: "tile-lilac" },
+  { to: "/map", label: "Where We Are", icon: MapPin, tint: "tile-cream" },
+  { to: "/cooldown", label: "Cool-Down Tool", icon: HeartHandshake, tint: "tile-sky" },
+  { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart, tint: "tile-pink" },
+  { to: "/period", label: "Cycle Tracking", icon: Droplets, tint: "tile-peach" },
+  { to: "/profile", label: "Profile & Settings", icon: UserCog, tint: "tile-cream" },
 ] as const;
 
 function MorePage() {
@@ -53,23 +53,27 @@ function MorePage() {
 
   return (
     <AppLayout title="More" subtitle="Everything else" critter="seal">
-      <ul className="space-y-3">
+      <ul className="grid grid-cols-2 gap-3">
         {SECTIONS.map((s) => (
           <li key={s.to}>
             <Link
               to={s.to}
-              className="card-soft press flex items-center gap-3 p-4 text-sm font-semibold"
+              className="card-soft press relative flex h-full flex-col gap-3 p-4 text-sm font-semibold"
             >
-              <s.icon className="size-5 text-primary" />
-              <span className="flex-1">{s.label}</span>
+              <span className={`grid size-11 place-items-center rounded-2xl ${s.tint} text-primary`}>
+                <s.icon className="size-5" />
+              </span>
+              <span className="leading-snug">{s.label}</span>
               {"badge" in s && badges?.question ? (
-                <span className="size-2.5 rounded-full bg-destructive" />
-              ) : null}
-              <ChevronRight className="size-4 text-muted-foreground" />
+                <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive" />
+              ) : (
+                <ChevronRight className="absolute right-3 top-3 size-4 text-muted-foreground" />
+              )}
             </Link>
           </li>
         ))}
       </ul>
+
 
       <div className="card-soft mt-4 flex items-center justify-between p-4">
         <span className="text-sm font-semibold">Sound effects</span>

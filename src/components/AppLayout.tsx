@@ -25,34 +25,34 @@ export function AppLayout({
   const { data: badges } = useBadges();
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="page-wash min-h-screen bg-background pb-28">
       <div className="mx-auto max-w-lg px-4">
-        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 pb-4 pt-6">
+        <header className="card-soft lilac-gradient mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-4">
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-extrabold">{title}</h1>
+            <h1 className="truncate font-display text-2xl font-extrabold">{title}</h1>
             {subtitle ? (
               <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
           {critter ? (
-            <Doodle
-              critter={critter}
-              pose={critterPose ?? poseFor(title)}
-              size={52}
-              className="shrink-0"
-            />
+            <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-card/80 shadow-soft">
+              <Doodle critter={critter} pose={critterPose ?? poseFor(title)} size={44} />
+            </span>
           ) : null}
         </header>
 
-        {isLoading ? (
-          <div className="card-soft p-5 text-sm text-muted-foreground">Loading…</div>
-        ) : requireCouple && !coupleId ? (
-          <PairingScreen />
-        ) : (
-          children
-        )}
+        <div className="mt-4">
+          {isLoading ? (
+            <div className="card-soft p-5 text-sm text-muted-foreground">Loading…</div>
+          ) : requireCouple && !coupleId ? (
+            <PairingScreen />
+          ) : (
+            children
+          )}
+        </div>
       </div>
       <BottomNav badges={{ "/chat": badges?.unreadChat }} />
     </div>
   );
 }
+
