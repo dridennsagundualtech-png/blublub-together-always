@@ -333,7 +333,7 @@ function BudgetContent() {
             </ResponsiveContainer>
           </div>
         ) : null}
-      </Card>
+      </StatCard>
 
       {byMonth.length > 1 ? (
         <Card className="mt-3">

@@ -71,7 +71,7 @@ function GamesPage() {
         <p className="mt-2 text-center text-xs text-muted-foreground">
           Across all five games · {history.length} played
         </p>
-      </Card>
+      </StatCard>
 
       <SectionTitle>Loser-task games</SectionTitle>
       <ul className="space-y-2">
