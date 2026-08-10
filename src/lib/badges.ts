@@ -83,7 +83,7 @@ export function useBadges() {
         latestPartnerAt("expenses", coupleId!, myId),
         supabase
           .from("games")
-          .select("status, turn, finished_at, created_by")
+          .select("kind, status, turn, finished_at, created_by")
           .eq("couple_id", coupleId!)
           .order("updated_at", { ascending: false })
           .limit(20),
@@ -95,10 +95,15 @@ export function useBadges() {
 
       const gameRows = games.data ?? [];
       const gamesSeenAt = readSeenAt(myId, "games");
-      const myTurn = gameRows.some((g) => g.status === "playing" && g.turn === myId);
-      const newlyFinished = gameRows.some(
-        (g) => g.status === "done" && g.created_by !== myId && isNew(g.finished_at, gamesSeenAt),
-      );
+      const needsMe = (g: (typeof gameRows)[number]) =>
+        (g.status === "playing" && g.turn === myId) ||
+        (g.status === "done" && g.created_by !== myId && isNew(g.finished_at, gamesSeenAt));
+
+      // Per-game dots so the Games list shows exactly which game needs you.
+      const gameKinds: Record<string, boolean> = {};
+      for (const g of gameRows) {
+        if (needsMe(g)) gameKinds[g.kind] = true;
+      }
 
       // Partner replied today and you haven't opened the question screen today.
       const questionSeenAt = readSeenAt(myId, "questions");
@@ -110,8 +115,10 @@ export function useBadges() {
         diary: isNew(diaryAt, readSeenAt(myId, "diary")),
         calendar: isNew(eventAt, readSeenAt(myId, "calendar")),
         budget: isNew(expenseAt, readSeenAt(myId, "budget")),
-        games: myTurn || newlyFinished,
+        games: Object.keys(gameKinds).length > 0,
+        gameKinds,
       };
+
     },
   });
 }
