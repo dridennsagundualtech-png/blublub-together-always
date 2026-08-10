@@ -45,6 +45,12 @@
   --color-honey: var(--honey);
   --color-mint: var(--mint);
   --color-berry: var(--berry);
+  --color-lavender: var(--lavender);
+  --color-lavender-soft: var(--lavender-soft);
+  --color-lavender-foreground: var(--lavender-foreground);
+  --color-peach: var(--peach);
+  --color-sky: var(--sky);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
