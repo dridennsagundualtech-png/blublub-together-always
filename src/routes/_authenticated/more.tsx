@@ -7,6 +7,10 @@ import {
   Droplets,
   UserCog,
   ChevronRight,
+  MapPin,
+  Sparkles,
+  HeartHandshake,
+  BookHeart,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useSoundSetting } from "@/hooks/use-sound";
@@ -18,12 +22,12 @@ export const Route = createFileRoute("/_authenticated/more")({
       { title: "More — BLUBLUB" },
       {
         name: "description",
-        content: "Goals, to-dos, date planner, period tracking and settings.",
+        content: "Goals, to-dos, date planner, map, bucket list, cool-down and settings.",
       },
       { property: "og:title", content: "More — BLUBLUB" },
       {
         property: "og:description",
-        content: "Goals, to-dos, date planner, period tracking and settings.",
+        content: "Goals, to-dos, date planner, map, bucket list, cool-down and settings.",
       },
     ],
   }),
@@ -32,9 +36,13 @@ export const Route = createFileRoute("/_authenticated/more")({
 
 const SECTIONS = [
   { to: "/todos", label: "To-dos & Goals", icon: ListChecks },
+  { to: "/bucket", label: "Bucket List", icon: Sparkles },
   { to: "/dates", label: "Date Night Planner", icon: CalendarHeart },
   { to: "/photos", label: "Photo Timeline", icon: Images },
   { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question" },
+  { to: "/map", label: "Where We Are", icon: MapPin },
+  { to: "/cooldown", label: "Cool-Down Tool", icon: HeartHandshake },
+  { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart },
   { to: "/period", label: "Cycle Tracking", icon: Droplets },
   { to: "/profile", label: "Profile & Settings", icon: UserCog },
 ] as const;

@@ -22,6 +22,7 @@ import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
 import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/food'
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
+import { Route as AuthenticatedMemoryBookRouteImport } from './routes/_authenticated/memory-book'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
@@ -96,6 +97,11 @@ const AuthenticatedMapRoute = AuthenticatedMapRouteImport.update({
   path: '/map',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMemoryBookRoute = AuthenticatedMemoryBookRouteImport.update({
+  id: '/memory-book',
+  path: '/memory-book',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   id: '/more',
   path: '/more',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
   '/map': typeof AuthenticatedMapRoute
+  '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
   '/map': typeof AuthenticatedMapRoute
+  '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
   '/_authenticated/food': typeof AuthenticatedFoodRoute
   '/_authenticated/map': typeof AuthenticatedMapRoute
+  '/_authenticated/memory-book': typeof AuthenticatedMemoryBookRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/diary'
     | '/food'
     | '/map'
+    | '/memory-book'
     | '/more'
     | '/period'
     | '/photos'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/diary'
     | '/food'
     | '/map'
+    | '/memory-book'
     | '/more'
     | '/period'
     | '/photos'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diary'
     | '/_authenticated/food'
     | '/_authenticated/map'
+    | '/_authenticated/memory-book'
     | '/_authenticated/more'
     | '/_authenticated/period'
     | '/_authenticated/photos'
@@ -384,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMapRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/memory-book': {
+      id: '/_authenticated/memory-book'
+      path: '/memory-book'
+      fullPath: '/memory-book'
+      preLoaderRoute: typeof AuthenticatedMemoryBookRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/more': {
       id: '/_authenticated/more'
       path: '/more'
@@ -461,6 +480,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
   AuthenticatedFoodRoute: typeof AuthenticatedFoodRoute
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
+  AuthenticatedMemoryBookRoute: typeof AuthenticatedMemoryBookRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
@@ -484,6 +504,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
   AuthenticatedFoodRoute: AuthenticatedFoodRoute,
   AuthenticatedMapRoute: AuthenticatedMapRoute,
+  AuthenticatedMemoryBookRoute: AuthenticatedMemoryBookRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
