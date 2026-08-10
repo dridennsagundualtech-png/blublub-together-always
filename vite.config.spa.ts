@@ -8,9 +8,17 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import path from "node:path";
 
 export default defineConfig({
+  // The SPA entry HTML lives in spa/ so it is never served by the SSR deployment.
+  root: path.resolve(process.cwd(), "spa"),
+  publicDir: path.resolve(process.cwd(), "public"),
   plugins: [
-    tsConfigPaths(),
-    tanstackRouter({ target: "react", autoCodeSplitting: true }),
+    tsConfigPaths({ root: process.cwd() }),
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+      routesDirectory: path.resolve(process.cwd(), "src/routes"),
+      generatedRouteTree: path.resolve(process.cwd(), "src/routeTree.gen.ts"),
+    }),
     react(),
     tailwindcss(),
   ],
@@ -19,7 +27,7 @@ export default defineConfig({
   },
   base: "./",
   build: {
-    outDir: "dist",
+    outDir: path.resolve(process.cwd(), "dist"),
     emptyOutDir: true,
   },
 });
