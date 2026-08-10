@@ -199,7 +199,7 @@ function ChatPage() {
           e.preventDefault();
           if (text.trim()) send.mutate();
         }}
-        className="fixed inset-x-0 bottom-16 z-40 mx-auto flex max-w-lg items-center gap-2 px-4 pb-2"
+        className="fixed inset-x-0 bottom-16 z-40 mx-auto mb-2 flex max-w-lg items-center gap-2 px-4 pb-2"
       >
         <input
           value={text}
