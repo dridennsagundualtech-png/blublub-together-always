@@ -4,12 +4,9 @@ import {
   HelpCircle,
   Images,
   ListChecks,
-  Droplets,
   UserCog,
   ChevronRight,
-  MapPin,
   Sparkles,
-  HeartHandshake,
   BookHeart,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";

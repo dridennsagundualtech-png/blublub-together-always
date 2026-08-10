@@ -30,6 +30,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 import { Route as AuthenticatedSpicyRouteImport } from './routes/_authenticated/spicy'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
+import { Route as AuthenticatedWellbeingRouteImport } from './routes/_authenticated/wellbeing'
 import { Route as AuthenticatedGamesIndexRouteImport } from './routes/_authenticated/games.index'
 import { Route as AuthenticatedGamesKindRouteImport } from './routes/_authenticated/games.$kind'
 
@@ -137,6 +138,11 @@ const AuthenticatedTodosRoute = AuthenticatedTodosRouteImport.update({
   path: '/todos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWellbeingRoute = AuthenticatedWellbeingRouteImport.update({
+  id: '/wellbeing',
+  path: '/wellbeing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedGamesIndexRoute = AuthenticatedGamesIndexRouteImport.update({
   id: '/games/',
   path: '/games/',
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/questions': typeof AuthenticatedQuestionsRoute
   '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
+  '/wellbeing': typeof AuthenticatedWellbeingRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games/': typeof AuthenticatedGamesIndexRoute
 }
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/questions': typeof AuthenticatedQuestionsRoute
   '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
+  '/wellbeing': typeof AuthenticatedWellbeingRoute
   '/': typeof AuthenticatedIndexRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games': typeof AuthenticatedGamesIndexRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/spicy': typeof AuthenticatedSpicyRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
+  '/_authenticated/wellbeing': typeof AuthenticatedWellbeingRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/games/$kind': typeof AuthenticatedGamesKindRoute
   '/_authenticated/games/': typeof AuthenticatedGamesIndexRoute
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/questions'
     | '/spicy'
     | '/todos'
+    | '/wellbeing'
     | '/games/$kind'
     | '/games/'
   fileRoutesByTo: FileRoutesByTo
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/questions'
     | '/spicy'
     | '/todos'
+    | '/wellbeing'
     | '/'
     | '/games/$kind'
     | '/games'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/_authenticated/questions'
     | '/_authenticated/spicy'
     | '/_authenticated/todos'
+    | '/_authenticated/wellbeing'
     | '/_authenticated/'
     | '/_authenticated/games/$kind'
     | '/_authenticated/games/'
@@ -452,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTodosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/wellbeing': {
+      id: '/_authenticated/wellbeing'
+      path: '/wellbeing'
+      fullPath: '/wellbeing'
+      preLoaderRoute: typeof AuthenticatedWellbeingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/games/': {
       id: '/_authenticated/games/'
       path: '/games'
@@ -488,6 +507,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedSpicyRoute: typeof AuthenticatedSpicyRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
+  AuthenticatedWellbeingRoute: typeof AuthenticatedWellbeingRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedGamesKindRoute: typeof AuthenticatedGamesKindRoute
   AuthenticatedGamesIndexRoute: typeof AuthenticatedGamesIndexRoute
@@ -512,6 +532,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedSpicyRoute: AuthenticatedSpicyRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
+  AuthenticatedWellbeingRoute: AuthenticatedWellbeingRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedGamesKindRoute: AuthenticatedGamesKindRoute,
   AuthenticatedGamesIndexRoute: AuthenticatedGamesIndexRoute,
@@ -527,3 +548,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
