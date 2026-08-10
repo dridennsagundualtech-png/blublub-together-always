@@ -64,6 +64,45 @@ function ProfilePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveSong = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ song_title: songTitle.trim() || null, song_artist: songArtist.trim() || null })
+        .eq("id", user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refresh();
+      toast.success("Our song saved 🎵");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleLocation = useMutation({
+    mutationFn: async (next: boolean) => {
+      if (next && typeof navigator !== "undefined" && navigator.geolocation) {
+        await new Promise<void>((resolve) =>
+          navigator.geolocation.getCurrentPosition(
+            () => resolve(),
+            () => resolve(),
+            { timeout: 10_000 },
+          ),
+        );
+      }
+      const { error } = await supabase
+        .from("profiles")
+        .update({ share_location: next })
+        .eq("id", user!.id);
+      if (error) throw error;
+      if (!next) await clearMyLocation(user!.id);
+    },
+    onSuccess: () => refresh(),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
+
   const uploadAvatar = useMutation({
     mutationFn: async (file: File) => {
       const blob = await compressImage(file, 512);
