@@ -98,7 +98,7 @@ function BucketPage() {
   const doneCount = rows.filter((r) => r.done).length;
 
   return (
-    <AppLayout title="Bucket list" subtitle="Someday, together" critter="seal" critterPose="play">
+    <AppLayout title="Bucket list" subtitle="Someday, together" critter="seal" critterPose="peek">
       <Card>
         <div className="space-y-3">
           <Field label="Something to do together">

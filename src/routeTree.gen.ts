@@ -13,6 +13,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authenticated/admin-codes'
+import { Route as AuthenticatedBucketRouteImport } from './routes/_authenticated/bucket'
 import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
@@ -47,6 +48,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedAdminCodesRoute = AuthenticatedAdminCodesRouteImport.update({
   id: '/admin-codes',
   path: '/admin-codes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBucketRoute = AuthenticatedBucketRouteImport.update({
+  id: '/bucket',
+  path: '/bucket',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBudgetRoute = AuthenticatedBudgetRouteImport.update({
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
+  '/bucket': typeof AuthenticatedBucketRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
+  '/bucket': typeof AuthenticatedBucketRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/admin-codes': typeof AuthenticatedAdminCodesRoute
+  '/_authenticated/bucket': typeof AuthenticatedBucketRoute
   '/_authenticated/budget': typeof AuthenticatedBudgetRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin-codes'
+    | '/bucket'
     | '/budget'
     | '/calendar'
     | '/chat'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/admin-codes'
+    | '/bucket'
     | '/budget'
     | '/calendar'
     | '/chat'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/admin-codes'
+    | '/_authenticated/bucket'
     | '/_authenticated/budget'
     | '/_authenticated/calendar'
     | '/_authenticated/chat'
@@ -295,6 +307,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-codes'
       fullPath: '/admin-codes'
       preLoaderRoute: typeof AuthenticatedAdminCodesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/bucket': {
+      id: '/_authenticated/bucket'
+      path: '/bucket'
+      fullPath: '/bucket'
+      preLoaderRoute: typeof AuthenticatedBucketRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/budget': {
@@ -414,6 +433,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCodesRoute: typeof AuthenticatedAdminCodesRoute
+  AuthenticatedBucketRoute: typeof AuthenticatedBucketRoute
   AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
@@ -435,6 +455,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCodesRoute: AuthenticatedAdminCodesRoute,
+  AuthenticatedBucketRoute: AuthenticatedBucketRoute,
   AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
