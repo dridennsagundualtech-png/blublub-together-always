@@ -50,7 +50,11 @@ export function TicTacToe({ game, me, seat, players, nameOf }: GameViewProps) {
 
   return (
     <>
-      <TaskBar game={game} status={myTurn ? "Your turn" : `${nameOf(game.turn)}'s turn`} />
+      <TaskBar
+        game={game}
+        status={myTurn ? "Your turn" : `${nameOf(game.turn)}'s turn`}
+        onResignTo={players[seat === 0 ? 1 : 0]}
+      />
       <Card className="mt-4">
         <div className="mx-auto grid max-w-xs grid-cols-3 gap-2">
           {board.map((cell, i) => (
