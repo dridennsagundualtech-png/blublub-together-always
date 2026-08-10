@@ -37,7 +37,7 @@ export function AppLayout({
           {critter ? (
             <Doodle
               critter={critter}
-              pose={critterPose ?? poseFor(`${critter}:${title}`)}
+              pose={critterPose ?? poseFor(title)}
               size={52}
               className="shrink-0"
             />
