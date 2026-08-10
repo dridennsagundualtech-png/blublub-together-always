@@ -266,7 +266,10 @@
 @utility page-wash {
   background-image: var(--page-wash);
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  /* Fixed attachment triggers repaint jank / stuck taps in mobile webviews
+     (Android WebView + iOS Safari) when the on-screen keyboard opens. */
+  background-attachment: scroll;
+  background-size: 100% 100vh;
 }
 
 /* Pastel tinted tiles, inspired by soft bento app dashboards. */
