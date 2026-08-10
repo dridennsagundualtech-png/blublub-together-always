@@ -88,16 +88,40 @@ function CalendarPage() {
   });
 
   const today = todayISO();
-  const upcoming = (events ?? []).filter((e) => e.event_date >= today);
-  const past = (events ?? []).filter((e) => e.event_date < today).reverse();
+  const { data: derived } = useDerivedDates();
+
+  // Everything with a date in the app, normalised into one list.
+  const allItems = useMemo(() => {
+    const fromEvents = (events ?? []).map((e) => ({
+      id: e.id,
+      date: e.event_date,
+      title: e.title,
+      time: e.event_time as string | null,
+      kind: "event" as const,
+      removable: true,
+    }));
+    const fromDerived = (derived ?? []).map((d) => ({
+      id: d.id,
+      date: d.date,
+      title: d.title,
+      time: null,
+      kind: d.kind,
+      removable: false,
+    }));
+    return [...fromEvents, ...fromDerived].sort((a, b) => a.date.localeCompare(b.date));
+  }, [events, derived]);
+
+  const upcoming = allItems.filter((e) => e.date >= today);
+  const past = allItems.filter((e) => e.date < today).reverse();
 
   const byDate = useMemo(() => {
     const map = new Map<string, number>();
-    for (const e of events ?? []) {
-      map.set(e.event_date, (map.get(e.event_date) ?? 0) + 1);
+    for (const e of allItems) {
+      map.set(e.date, (map.get(e.date) ?? 0) + 1);
     }
     return map;
-  }, [events]);
+  }, [allItems]);
+
 
   const firstWeekday = new Date(view.year, view.month, 1).getDay();
   const daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
