@@ -203,30 +203,51 @@
   transform: scale(0.96);
 }
 
-/* --- Polish pass: gradient stat surfaces & streak chips (palette-safe) --- */
+/* --- Polish pass: gradient stat surfaces, lilac accents, soft tiles --- */
 :root {
   --gradient-hero: linear-gradient(
     140deg,
-    color-mix(in oklab, var(--primary) 20%, var(--card)) 0%,
-    color-mix(in oklab, var(--cream) 75%, var(--card)) 100%
+    color-mix(in oklab, var(--primary) 22%, var(--card)) 0%,
+    color-mix(in oklab, var(--lavender) 20%, var(--card)) 100%
   );
   --gradient-stat: linear-gradient(
     135deg,
     color-mix(in oklab, var(--accent) 70%, var(--card)) 0%,
-    color-mix(in oklab, var(--honey) 22%, var(--card)) 100%
+    color-mix(in oklab, var(--lavender) 16%, var(--card)) 100%
   );
+  --gradient-lilac: linear-gradient(
+    140deg,
+    color-mix(in oklab, var(--lavender) 24%, var(--card)) 0%,
+    color-mix(in oklab, var(--primary) 14%, var(--card)) 100%
+  );
+  --page-wash:
+    radial-gradient(
+      120% 55% at 8% -8%,
+      color-mix(in oklab, var(--lavender) 16%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      110% 50% at 100% 0%,
+      color-mix(in oklab, var(--primary) 14%, transparent) 0%,
+      transparent 55%
+    );
 }
 
 .dark {
   --gradient-hero: linear-gradient(
     140deg,
     color-mix(in oklab, var(--primary) 26%, var(--card)) 0%,
-    color-mix(in oklab, var(--berry) 18%, var(--card)) 100%
+    color-mix(in oklab, var(--lavender) 26%, var(--card)) 100%
   );
   --gradient-stat: linear-gradient(
     135deg,
     color-mix(in oklab, var(--accent) 75%, var(--card)) 0%,
-    color-mix(in oklab, var(--honey) 18%, var(--card)) 100%
+    color-mix(in oklab, var(--lavender) 22%, var(--card)) 100%
+  );
+  --gradient-lilac: linear-gradient(
+    140deg,
+    color-mix(in oklab, var(--lavender) 30%, var(--card)) 0%,
+    color-mix(in oklab, var(--primary) 18%, var(--card)) 100%
   );
 }
 
@@ -237,6 +258,38 @@
 @utility stat-gradient {
   background-image: var(--gradient-stat);
 }
+
+@utility lilac-gradient {
+  background-image: var(--gradient-lilac);
+}
+
+@utility page-wash {
+  background-image: var(--page-wash);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Pastel tinted tiles, inspired by soft bento app dashboards. */
+@utility tile-pink {
+  background-color: color-mix(in oklab, var(--primary) 16%, var(--card));
+}
+
+@utility tile-lilac {
+  background-color: color-mix(in oklab, var(--lavender) 18%, var(--card));
+}
+
+@utility tile-peach {
+  background-color: color-mix(in oklab, var(--peach) 55%, var(--card));
+}
+
+@utility tile-sky {
+  background-color: color-mix(in oklab, var(--sky) 55%, var(--card));
+}
+
+@utility tile-cream {
+  background-color: color-mix(in oklab, var(--cream) 80%, var(--card));
+}
+
 
 @utility streak-chip {
   display: inline-flex;
