@@ -622,6 +622,51 @@ export type Database = {
           },
         ]
       }
+      photo_comments: {
+        Row: {
+          body: string
+          couple_id: string
+          created_at: string
+          created_by: string
+          id: string
+          photo_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          couple_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          photo_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          photo_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_comments_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_comments_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           caption: string | null

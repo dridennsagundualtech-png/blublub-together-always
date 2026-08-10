@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { ImagePlus } from "lucide-react";
+import { ImagePlus, MessageCircle, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
-import { useAuthUser, useCoupleId } from "@/lib/session";
+import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/photos")({
   head: () => ({
@@ -138,11 +138,121 @@ function PhotosPage() {
               <div className="p-4">
                 <p className="text-sm font-bold">{p.caption ?? "Untitled"}</p>
                 <p className="text-xs text-muted-foreground">{p.taken_on}</p>
+                <PhotoComments photoId={p.id} />
               </div>
             </li>
           ))}
         </ul>
       )}
     </AppLayout>
+  );
+}
+
+function PhotoComments({ photoId }: { photoId: string }) {
+  const coupleId = useCoupleId();
+  const { data: user } = useAuthUser();
+  const { data: members } = useMembers();
+  const qc = useQueryClient();
+  const [body, setBody] = useState("");
+
+  const { data: comments } = useQuery({
+    queryKey: ["photo-comments", photoId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("photo_comments")
+        .select("*")
+        .eq("photo_id", photoId)
+        .order("created_at");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const add = useMutation({
+    mutationFn: async () => {
+      const text = body.trim();
+      if (!text) throw new Error("Write something first");
+      const { error } = await supabase.from("photo_comments").insert({
+        photo_id: photoId,
+        couple_id: coupleId!,
+        created_by: user!.id,
+        body: text,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setBody("");
+      void qc.invalidateQueries({ queryKey: ["photo-comments", photoId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("photo_comments").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["photo-comments", photoId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const nameOf = (id: string) =>
+    members?.find((m) => m.id === id)?.display_name ?? (id === user?.id ? "You" : "Partner");
+
+  return (
+    <div className="mt-3 border-t border-border pt-3">
+      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        <MessageCircle className="size-3.5" />
+        {comments?.length ? `${comments.length} comment${comments.length > 1 ? "s" : ""}` : "Comments"}
+      </p>
+
+      {comments && comments.length > 0 ? (
+        <ul className="mt-2 space-y-2">
+          {comments.map((c) => (
+            <li key={c.id} className="flex items-start gap-2 rounded-2xl bg-muted/60 px-3 py-2">
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-bold text-primary">{nameOf(c.created_by)}</span>
+                <span className="block whitespace-pre-wrap break-words text-sm">{c.body}</span>
+              </span>
+              {c.created_by === user?.id ? (
+                <button
+                  type="button"
+                  aria-label="Delete comment"
+                  onClick={() => remove.mutate(c.id)}
+                  className="press mt-0.5 shrink-0 text-muted-foreground"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      <form
+        className="mt-2 flex items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          add.mutate();
+        }}
+      >
+        <TextInput
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          maxLength={300}
+          placeholder="Say something sweet…"
+          className="!py-2 text-sm"
+        />
+        <button
+          type="submit"
+          disabled={!body.trim() || add.isPending}
+          aria-label="Post comment"
+          className="press grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"
+        >
+          <Send className="size-4" />
+        </button>
+      </form>
+    </div>
   );
 }
