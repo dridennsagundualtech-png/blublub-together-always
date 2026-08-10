@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   Home,
   CalendarDays,
-  BookHeart,
+  HeartPulse,
   Wallet,
   MessageCircle,
   Menu,
@@ -13,7 +13,7 @@ import { playChirp } from "@/hooks/use-sound";
 const ITEMS = [
   { to: "/", label: "Home", icon: Home },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
-  { to: "/diary", label: "Diary", icon: BookHeart },
+  { to: "/wellbeing", label: "Wellbeing", icon: HeartPulse },
   { to: "/games", label: "Games", icon: Gamepad2 },
   { to: "/budget", label: "Budget", icon: Wallet },
   { to: "/chat", label: "Chat", icon: MessageCircle },

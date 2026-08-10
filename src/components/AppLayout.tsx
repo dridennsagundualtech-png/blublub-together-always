@@ -54,7 +54,6 @@ export function AppLayout({
       <BottomNav
         badges={{
           "/chat": badges?.unreadChat,
-          "/diary": badges?.diary,
           "/calendar": badges?.calendar,
           "/budget": badges?.budget,
           "/games": badges?.games,
