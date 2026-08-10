@@ -19,6 +19,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
 import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/food'
+import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
@@ -78,6 +79,11 @@ const AuthenticatedFoodRoute = AuthenticatedFoodRouteImport.update({
   path: '/food',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMapRoute = AuthenticatedMapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   id: '/more',
   path: '/more',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
+  '/map': typeof AuthenticatedMapRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
+  '/map': typeof AuthenticatedMapRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
   '/_authenticated/food': typeof AuthenticatedFoodRoute
+  '/_authenticated/map': typeof AuthenticatedMapRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/dates'
     | '/diary'
     | '/food'
+    | '/map'
     | '/more'
     | '/period'
     | '/photos'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/dates'
     | '/diary'
     | '/food'
+    | '/map'
     | '/more'
     | '/period'
     | '/photos'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dates'
     | '/_authenticated/diary'
     | '/_authenticated/food'
+    | '/_authenticated/map'
     | '/_authenticated/more'
     | '/_authenticated/period'
     | '/_authenticated/photos'
@@ -327,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFoodRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/map': {
+      id: '/_authenticated/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof AuthenticatedMapRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/more': {
       id: '/_authenticated/more'
       path: '/more'
@@ -401,6 +420,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
   AuthenticatedFoodRoute: typeof AuthenticatedFoodRoute
+  AuthenticatedMapRoute: typeof AuthenticatedMapRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
@@ -421,6 +441,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
   AuthenticatedFoodRoute: AuthenticatedFoodRoute,
+  AuthenticatedMapRoute: AuthenticatedMapRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
@@ -443,13 +464,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

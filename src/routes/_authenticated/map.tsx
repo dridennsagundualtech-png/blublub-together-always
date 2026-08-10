@@ -34,19 +34,19 @@ function MapPage() {
   useLocationPublisher();
 
   const rows = members ?? [];
-  const points: MapPoint[] = rows
-    .map((m) => {
-      const loc = locations?.find((l) => l.user_id === m.id);
-      if (!loc) return null;
-      return {
+  const points: MapPoint[] = rows.flatMap((m) => {
+    const loc = locations?.find((l) => l.user_id === m.id);
+    if (!loc) return [];
+    return [
+      {
         id: m.id,
         lat: loc.lat,
         lng: loc.lng,
         label: m.id === user?.id ? "You" : (m.display_name ?? "Partner"),
         mine: m.id === user?.id,
-      } satisfies MapPoint;
-    })
-    .filter((p): p is MapPoint => p !== null);
+      },
+    ];
+  });
 
   return (
     <AppLayout title="Where we are" subtitle="Only when you both opt in" critter="penguin" critterPose="curious">
