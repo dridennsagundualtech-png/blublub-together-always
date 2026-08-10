@@ -77,8 +77,9 @@ export function PairingScreen() {
   return (
     <div className="space-y-4">
       <div className="card-soft relative overflow-hidden p-6 text-center">
-        <Doodle critter="penguin" size={56} className="absolute -left-1 bottom-0 opacity-40" />
-        <Doodle critter="cat" size={64} className="mx-auto" />
+        <Doodle critter="penguin" pose="curious" size={56} className="absolute -left-1 bottom-0 opacity-40" />
+        <Doodle critter="cat" pose="wave" size={64} className="mx-auto" />
+
         <h2 className="mt-2 text-xl font-extrabold">Pair with your partner</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Create a private space and share the 6-character code, or enter theirs.

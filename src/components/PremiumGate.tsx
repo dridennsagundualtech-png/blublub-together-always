@@ -24,7 +24,7 @@ export function PremiumGate({
 
   return (
     <div className="card-soft relative overflow-hidden p-6 text-center">
-      <Doodle critter="seal" size={64} className="absolute -right-2 -top-2 opacity-40" />
+      <Doodle critter="seal" pose="sleep" size={64} className="absolute -right-2 -top-2 opacity-40" />
       <div className="mx-auto grid size-14 place-items-center rounded-full bg-accent text-accent-foreground">
         <Lock className="size-6" />
       </div>

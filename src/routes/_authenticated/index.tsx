@@ -80,8 +80,9 @@ function HomePage() {
   return (
     <AppLayout title="BLUBLUB" subtitle={`Hi ${profile?.display_name ?? "you"} 🩷`} critter="cat">
       <section className="card-soft relative overflow-hidden p-6 text-center">
-        <Doodle critter="penguin" size={48} className="absolute -left-1 bottom-1 opacity-40" />
-        <Doodle critter="seal" size={40} className="absolute right-1 top-1 opacity-35" />
+        <Doodle critter="penguin" pose="wave" size={48} className="absolute -left-1 bottom-1 opacity-40" />
+        <Doodle critter="seal" pose="peek" size={40} className="absolute right-1 top-1 opacity-35" />
+
         <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Days together
         </p>
