@@ -40,6 +40,8 @@ function GamesPage() {
   const { data: badges } = useBadges();
   const history = useGameHistory();
   const { nameOf, me } = useSeats(null);
+  const [showHistory, setShowHistory] = useState(false);
+
 
 
   const tally = history.reduce(
