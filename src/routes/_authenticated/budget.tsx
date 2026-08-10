@@ -303,11 +303,17 @@ function BudgetContent() {
         <p className="text-sm font-bold">
           <Money value={monthTotal} /> spent
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className={`text-xs ${delta !== null && delta > 0 ? "text-destructive" : "text-muted-foreground"}`}>
           {delta === null
             ? "No data for last month yet."
-            : `${delta >= 0 ? "+" : ""}${delta.toFixed(0)}% vs last month`}
+            : `${delta >= 0 ? "+" : ""}${delta.toFixed(0)}% vs last month (${prevTotal.toFixed(0)} then)`}
         </p>
+        {biggest ? (
+          <p className="mt-2 rounded-2xl bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground">
+            Biggest category: {biggest.name} — <Money value={biggest.value} /> (
+            {Math.round((biggest.value / monthTotal) * 100)}% of the month)
+          </p>
+        ) : null}
         {byCategory.length > 0 ? (
           <div className="mt-3 h-48">
             <ResponsiveContainer width="100%" height="100%">
