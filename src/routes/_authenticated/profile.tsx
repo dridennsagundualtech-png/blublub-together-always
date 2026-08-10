@@ -32,6 +32,8 @@ function ProfilePage() {
   const { data: couple } = useCouple();
   const partner = usePartner();
   const refresh = useRefreshSession();
+  const { data: isAdmin } = useIsAdmin();
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(profile?.display_name ?? "");
