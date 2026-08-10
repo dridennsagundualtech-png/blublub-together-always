@@ -86,8 +86,11 @@ function GamesPage() {
               params={{ kind }}
               className="press card-soft flex items-center gap-3 p-4"
             >
-              <span className="grid size-10 place-items-center rounded-full bg-accent text-accent-foreground">
+              <span className="relative grid size-10 place-items-center rounded-full bg-accent text-accent-foreground">
                 <Icon className="size-5" />
+                {badges?.gameKinds?.[kind] ? (
+                  <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-card" />
+                ) : null}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold">{GAME_META[kind].label}</span>
@@ -96,6 +99,7 @@ function GamesPage() {
                 </span>
               </span>
               <ChevronRight className="size-4 text-muted-foreground" />
+
             </Link>
           </li>
         ))}
