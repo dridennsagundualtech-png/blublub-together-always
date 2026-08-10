@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Dices } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { PremiumGate } from "@/components/PremiumGate";
+import { DiceRoller, type DieDef } from "@/components/games/DiceRoller";
 import { Card, GhostButton, PrimaryButton } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { playChirp } from "@/hooks/use-sound";
