@@ -586,14 +586,26 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          created_by: string | null
+          expires_at: string
+          used_at: string | null
+          used_by: string | null
         }
         Insert: {
           code: string
           created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          used_at?: string | null
+          used_by?: string | null
         }
         Update: {
           code?: string
           created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          used_at?: string | null
+          used_by?: string | null
         }
         Relationships: []
       }
@@ -721,17 +733,62 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       current_couple_id: { Args: never; Returns: string }
+      generate_redeem_code: {
+        Args: { _valid_hours?: number }
+        Returns: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          used_at: string | null
+          used_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "redeem_codes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       join_couple: { Args: { _code: string }; Returns: string }
       redeem_premium: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -858,6 +915,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
