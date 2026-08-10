@@ -260,22 +260,28 @@ function CalendarPage() {
         <Card className="text-sm text-muted-foreground">Nothing yet — plan something cozy.</Card>
       ) : (
         <ul className="space-y-2">
-          {upcoming.map((e) => (
+          {upcoming.slice(0, 20).map((e) => (
             <li key={e.id} className="card-soft flex items-center justify-between gap-3 p-4">
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{e.title}</p>
+                <p className="truncate text-sm font-bold">
+                  {e.kind === "event" ? "" : `${DERIVED_META[e.kind].emoji} `}
+                  {e.title}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {e.event_date}
-                  {e.event_time ? ` · ${e.event_time.slice(0, 5)}` : ""}
+                  {e.date}
+                  {e.time ? ` · ${e.time.slice(0, 5)}` : ""}
+                  {e.kind === "event" ? "" : ` · ${DERIVED_META[e.kind].label}`}
                 </p>
               </div>
-              <button
-                aria-label="Delete event"
-                onClick={() => remove.mutate(e.id)}
-                className="press rounded-full p-2 text-muted-foreground"
-              >
-                <Trash2 className="size-4" />
-              </button>
+              {e.removable ? (
+                <button
+                  aria-label="Delete event"
+                  onClick={() => remove.mutate(e.id)}
+                  className="press rounded-full p-2 text-muted-foreground"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -285,15 +291,16 @@ function CalendarPage() {
         <>
           <SectionTitle>Been there</SectionTitle>
           <ul className="space-y-2 opacity-70">
-            {past.map((e) => (
+            {past.slice(0, 20).map((e) => (
               <li key={e.id} className="card-soft p-4">
                 <p className="truncate text-sm font-bold">{e.title}</p>
-                <p className="text-xs text-muted-foreground">{e.event_date}</p>
+                <p className="text-xs text-muted-foreground">{e.date}</p>
               </li>
             ))}
           </ul>
         </>
       ) : null}
+
     </AppLayout>
   );
 }
