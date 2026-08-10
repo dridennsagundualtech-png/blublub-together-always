@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuthUser, useCoupleId, useProfile } from "@/lib/session";
+
 
 export type LocationRow = Tables<"locations">;
 
@@ -46,39 +47,77 @@ export function useLocations() {
 /**
  * While the app is open and this user opted in, push their position up.
  * Foreground only — background tracking is intentionally out of scope.
+ * Returns a human-readable status so screens can explain why a pin is missing.
  */
 export function useLocationPublisher() {
   const { data: user } = useAuthUser();
   const { data: profile } = useProfile();
   const coupleId = useCoupleId();
+  const qc = useQueryClient();
   const sharing = !!profile?.share_location;
   const lastSent = useRef(0);
+  const [status, setStatus] = useState<string | null>(null);
+
+  const push = useCallback(
+    async (pos: GeolocationPosition, force = false) => {
+      if (!user?.id) return;
+      const now = Date.now();
+      if (!force && now - lastSent.current < 20_000) return;
+      lastSent.current = now;
+      const { error } = await supabase.from("locations").upsert(
+        {
+          user_id: user.id,
+          couple_id: coupleId ?? null,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" },
+      );
+      if (error) {
+        console.warn("location upsert failed", error);
+        setStatus(`Couldn't save your location: ${error.message}`);
+        return;
+      }
+      setStatus(null);
+      void qc.invalidateQueries({ queryKey: ["locations", coupleId] });
+    },
+    [user?.id, coupleId, qc],
+  );
 
   useEffect(() => {
-    if (!sharing || !user?.id || typeof navigator === "undefined" || !navigator.geolocation) return;
+    if (!user?.id) return;
+    if (!sharing) {
+      setStatus(null);
+      return;
+    }
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setStatus("This device or browser doesn't provide location.");
+      return;
+    }
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      setStatus("Location needs a secure (https) connection.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => void push(pos, true),
+      (err) => setStatus(`Location unavailable: ${err.message}`),
+      { enableHighAccuracy: false, maximumAge: 0, timeout: 20_000 },
+    );
+
     const id = navigator.geolocation.watchPosition(
-      (pos) => {
-        const now = Date.now();
-        if (now - lastSent.current < 20_000) return;
-        lastSent.current = now;
-        void supabase.from("locations").upsert(
-          {
-            user_id: user.id,
-            couple_id: coupleId,
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id" },
-        );
-      },
-      (err) => console.warn("geolocation error", err.message),
+      (pos) => void push(pos),
+      (err) => setStatus(`Location unavailable: ${err.message}`),
       { enableHighAccuracy: false, maximumAge: 15_000, timeout: 20_000 },
     );
     return () => navigator.geolocation.clearWatch(id);
-  }, [sharing, user?.id, coupleId]);
+  }, [sharing, user?.id, push]);
+
+  return status;
 }
+
 
 /** Removes my stored position (used when I switch sharing off). */
 export async function clearMyLocation(userId: string) {
