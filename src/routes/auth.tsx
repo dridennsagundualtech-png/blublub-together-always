@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Doodle } from "@/components/Doodles";
@@ -20,16 +20,21 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const refresh = useRefreshSession();
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Uncontrolled inputs: read values only on submit. Android WebView IMEs drop
+    // characters when React re-writes the input `value` mid-composition.
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+    const name = String(form.get("name") ?? "").trim();
+
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -43,7 +48,7 @@ function AuthPage() {
         });
         if (error) throw error;
         if (!data.session) {
-          setSent(true);
+          setSentTo(email);
           return;
         }
       } else {
@@ -60,19 +65,19 @@ function AuthPage() {
     }
   }
 
-  if (sent) {
+  if (sentTo) {
     return (
-      <main className="page-wash flex min-h-[100svh] items-center justify-center bg-background px-5">
+      <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
         <div className="card-soft max-w-sm p-7 text-center">
           <Doodle critter="penguin" pose="sleep" size={72} className="mx-auto" />
           <h1 className="mt-3 text-2xl font-extrabold">Check your email</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            We sent a confirmation link to {email}. Tap it, then come back and sign in.
+            We sent a confirmation link to {sentTo}. Tap it, then come back and sign in.
           </p>
           <button
             className="press mt-5 text-sm font-bold text-primary"
             onClick={() => {
-              setSent(false);
+              setSentTo(null);
               setMode("signin");
             }}
           >
@@ -83,29 +88,33 @@ function AuthPage() {
     );
   }
 
+  const inputClass =
+    "mt-1 w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring";
+
   return (
-    <main className="page-wash flex min-h-[100svh] items-center justify-center bg-background px-5 py-10">
+    <main className="flex min-h-[100dvh] items-start justify-center bg-background px-5 py-10">
       <div className="w-full max-w-sm">
         <div className="relative mb-6 text-center">
           <Doodle critter="cat" pose="wave" size={84} className="mx-auto" />
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight">BLUBLUB</h1>
           <p className="text-sm text-muted-foreground">Your cozy space for two</p>
           <Doodle critter="seal" pose="peek" size={44} className="absolute right-2 top-8 opacity-50" />
-
         </div>
 
-        <form onSubmit={submit} className="card-soft space-y-3 p-5">
+        <form ref={formRef} onSubmit={submit} className="card-soft space-y-3 p-5">
           {mode === "signup" ? (
             <label className="block">
               <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 Your name
               </span>
               <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                name="name"
                 maxLength={60}
                 placeholder="Mimi"
-                className="mt-1 w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring"
+                autoCapitalize="words"
+                autoComplete="name"
+                enterKeyHint="next"
+                className={inputClass}
               />
             </label>
           ) : null}
@@ -115,12 +124,16 @@ function AuthPage() {
               Email
             </span>
             <input
+              name="email"
               type="email"
               required
+              inputMode="email"
               autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="next"
+              className={inputClass}
             />
           </label>
 
@@ -129,13 +142,16 @@ function AuthPage() {
               Password
             </span>
             <input
+              name="password"
               type="password"
               required
               minLength={6}
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="go"
+              className={inputClass}
             />
           </label>
 
@@ -153,7 +169,10 @@ function AuthPage() {
           <button
             type="button"
             className="font-bold text-primary"
-            onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+            onClick={() => {
+              formRef.current?.reset();
+              setMode(mode === "signup" ? "signin" : "signup");
+            }}
           >
             {mode === "signup" ? "Sign in" : "Create one"}
           </button>
