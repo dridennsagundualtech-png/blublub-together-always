@@ -459,6 +459,7 @@ function BudgetGoals({
         {goals.map((g) => {
           const spent = spentByCategory[g.category] ?? 0;
           const pct = (spent / Number(g.monthly_limit)) * 100;
+          const left = Number(g.monthly_limit) - spent;
           return (
             <li key={g.id} className="card-soft p-4">
               <div className="flex items-center justify-between text-sm font-bold">
@@ -470,6 +471,25 @@ function BudgetGoals({
               <div className="mt-2">
                 <ProgressBar value={pct} />
               </div>
+              <p
+                className={`mt-2 text-xs font-semibold ${
+                  pct >= 100 ? "text-destructive" : pct >= 80 ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {pct >= 100 ? (
+                  <>
+                    Over by <Money value={Math.abs(left)} /> — ease off this one
+                  </>
+                ) : pct >= 80 ? (
+                  <>
+                    Careful — only <Money value={left} /> left
+                  </>
+                ) : (
+                  <>
+                    <Money value={left} /> left this month
+                  </>
+                )}
+              </p>
             </li>
           );
         })}
