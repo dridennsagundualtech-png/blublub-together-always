@@ -349,6 +349,62 @@ export type Database = {
           },
         ]
       }
+      games: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          finished_at: string | null
+          id: string
+          is_draw: boolean
+          kind: string
+          state: Json
+          status: string
+          task: string
+          turn: string | null
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          finished_at?: string | null
+          id?: string
+          is_draw?: boolean
+          kind: string
+          state?: Json
+          status?: string
+          task?: string
+          turn?: string | null
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          finished_at?: string | null
+          id?: string
+          is_draw?: boolean
+          kind?: string
+          state?: Json
+          status?: string
+          task?: string
+          turn?: string | null
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           couple_id: string
@@ -471,6 +527,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          adult_confirmed: boolean
           anniversary_date: string | null
           avatar_url: string | null
           couple_id: string | null
@@ -482,6 +539,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adult_confirmed?: boolean
           anniversary_date?: string | null
           avatar_url?: string | null
           couple_id?: string | null
@@ -493,6 +551,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adult_confirmed?: boolean
           anniversary_date?: string | null
           avatar_url?: string | null
           couple_id?: string | null
