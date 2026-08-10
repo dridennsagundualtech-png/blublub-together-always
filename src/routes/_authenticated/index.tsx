@@ -40,6 +40,11 @@ function HomePage() {
     profile?.anniversary_date ??
     null;
   const days = daysTogether(anniversary);
+  const untilAnniversary = daysUntilAnniversary(anniversary);
+  useAnniversaryReminder();
+
+  const song = members?.find((m) => m.song_title)?.song_title ?? profile?.song_title ?? null;
+  const songArtist = members?.find((m) => m.song_title)?.song_artist ?? profile?.song_artist ?? null;
 
   const { data: upcoming } = useQuery({
     queryKey: ["upcoming-events", coupleId],
