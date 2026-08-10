@@ -147,7 +147,7 @@ function HomePage() {
 
       <SectionTitle>Our song</SectionTitle>
       <Link to="/profile" className="card-soft press flex items-center gap-3 p-4">
-        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+        <span className="tile-lilac grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
           <Music4 className="size-5" />
         </span>
         <span className="min-w-0 flex-1">
@@ -165,7 +165,9 @@ function HomePage() {
         <ul className="space-y-2">
           {upcoming.map((e) => (
             <li key={e.id} className="card-soft flex items-center gap-3 p-4">
-              <CalendarDays className="size-5 shrink-0 text-primary" />
+              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
+                <CalendarDays className="size-5" />
+              </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">{e.title}</p>
                 <p className="text-xs text-muted-foreground">{e.event_date}</p>
@@ -179,18 +181,23 @@ function HomePage() {
 
       <SectionTitle>Quick hops</SectionTitle>
       <div className="grid grid-cols-2 gap-3">
-        <Link to="/questions" className="card-soft press relative flex items-center gap-2 p-4">
-          <HelpCircle className="size-5 text-primary" />
+        <Link to="/questions" className="card-soft press relative flex flex-col gap-3 p-4">
+          <span className="tile-lilac grid size-11 place-items-center rounded-2xl text-primary">
+            <HelpCircle className="size-5" />
+          </span>
           <span className="text-sm font-bold">Today&apos;s question</span>
           {badges?.question ? (
             <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive" />
           ) : null}
         </Link>
-        <Link to="/photos" className="card-soft press flex items-center gap-2 p-4">
-          <Images className="size-5 text-primary" />
+        <Link to="/photos" className="card-soft press flex flex-col gap-3 p-4">
+          <span className="tile-sky grid size-11 place-items-center rounded-2xl text-primary">
+            <Images className="size-5" />
+          </span>
           <span className="text-sm font-bold">Timeline</span>
         </Link>
       </div>
+
 
       {savings ? (
         <>
