@@ -4,12 +4,9 @@ import {
   HelpCircle,
   Images,
   ListChecks,
-  Droplets,
   UserCog,
   ChevronRight,
-  MapPin,
   Sparkles,
-  HeartHandshake,
   BookHeart,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
@@ -35,15 +32,13 @@ export const Route = createFileRoute("/_authenticated/more")({
 });
 
 const SECTIONS = [
+  { to: "/diary", label: "Couple Diary", icon: BookHeart, tint: "tile-lilac" },
   { to: "/todos", label: "To-dos & Goals", icon: ListChecks, tint: "tile-pink" },
   { to: "/bucket", label: "Bucket List", icon: Sparkles, tint: "tile-lilac" },
   { to: "/dates", label: "Date Night Planner", icon: CalendarHeart, tint: "tile-peach" },
   { to: "/photos", label: "Photo Timeline", icon: Images, tint: "tile-sky" },
   { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question", tint: "tile-lilac" },
-  { to: "/map", label: "Where We Are", icon: MapPin, tint: "tile-cream" },
-  { to: "/cooldown", label: "Cool-Down Tool", icon: HeartHandshake, tint: "tile-sky" },
   { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart, tint: "tile-pink" },
-  { to: "/period", label: "Cycle Tracking", icon: Droplets, tint: "tile-peach" },
   { to: "/profile", label: "Profile & Settings", icon: UserCog, tint: "tile-cream" },
 ] as const;
 
