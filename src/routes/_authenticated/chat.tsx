@@ -7,7 +7,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { VoiceNote } from "@/components/VoiceNote";
 import { playChirp } from "@/hooks/use-sound";
-import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
+import { useAuthUser, useCoupleId, useMemberAvatars, useMembers } from "@/lib/session";
+
+/** Small round avatar next to every bubble — uses the profile photo when set. */
+function ChatAvatar({ userId, name }: { userId: string; name: string }) {
+  const { data: avatars } = useMemberAvatars();
+  const url = avatars?.[userId];
+  return (
+    <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-accent text-xs font-bold text-accent-foreground shadow-soft">
+      {url ? (
+        <img src={url} alt={name} className="size-full object-cover" />
+      ) : (
+        (name.trim()[0] ?? "?").toUpperCase()
+      )}
+    </span>
+  );
+}
+
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({
@@ -172,27 +188,33 @@ function ChatPage() {
           return (
             <div
               key={m.id}
-              className={`max-w-[80%] px-4 py-2.5 text-sm shadow-soft ${
-                mine
-                  ? "self-end rounded-3xl rounded-br-md bg-primary text-primary-foreground"
-                  : "self-start rounded-3xl rounded-bl-md border border-border bg-cream text-foreground"
-              }`}
+              className={`flex max-w-[85%] items-end gap-2 ${mine ? "self-end flex-row-reverse" : "self-start"}`}
             >
-              {!mine ? (
-                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {nameOf(m.created_by)}
-                </p>
-              ) : null}
-              {m.audio_path ? (
-                <VoiceNote path={m.audio_path} durationMs={m.duration_ms} mine={mine} />
-              ) : (
-                <p className="whitespace-pre-wrap">{m.body}</p>
-              )}
+              <ChatAvatar userId={m.created_by} name={mine ? "You" : nameOf(m.created_by)} />
+              <div
+                className={`px-4 py-2.5 text-sm shadow-soft ${
+                  mine
+                    ? "rounded-3xl rounded-br-md bg-primary text-primary-foreground"
+                    : "rounded-3xl rounded-bl-md border border-border bg-cream text-foreground"
+                }`}
+              >
+                {!mine ? (
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                    {nameOf(m.created_by)}
+                  </p>
+                ) : null}
+                {m.audio_path ? (
+                  <VoiceNote path={m.audio_path} durationMs={m.duration_ms} mine={mine} />
+                ) : (
+                  <p className="whitespace-pre-wrap">{m.body}</p>
+                )}
+              </div>
             </div>
           );
         })}
         <div ref={endRef} />
       </div>
+
 
       <form
         onSubmit={(e) => {

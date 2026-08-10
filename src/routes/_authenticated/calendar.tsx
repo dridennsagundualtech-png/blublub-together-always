@@ -8,6 +8,8 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { todayISO, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId } from "@/lib/session";
+import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
+
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"] as const;
 const MONTH_NAMES = [
@@ -88,16 +90,40 @@ function CalendarPage() {
   });
 
   const today = todayISO();
-  const upcoming = (events ?? []).filter((e) => e.event_date >= today);
-  const past = (events ?? []).filter((e) => e.event_date < today).reverse();
+  const { data: derived } = useDerivedDates();
+
+  // Everything with a date in the app, normalised into one list.
+  const allItems = useMemo(() => {
+    const fromEvents = (events ?? []).map((e) => ({
+      id: e.id,
+      date: e.event_date,
+      title: e.title,
+      time: e.event_time as string | null,
+      kind: "event" as const,
+      removable: true,
+    }));
+    const fromDerived = (derived ?? []).map((d) => ({
+      id: d.id,
+      date: d.date,
+      title: d.title,
+      time: null,
+      kind: d.kind,
+      removable: false,
+    }));
+    return [...fromEvents, ...fromDerived].sort((a, b) => a.date.localeCompare(b.date));
+  }, [events, derived]);
+
+  const upcoming = allItems.filter((e) => e.date >= today);
+  const past = allItems.filter((e) => e.date < today).reverse();
 
   const byDate = useMemo(() => {
     const map = new Map<string, number>();
-    for (const e of events ?? []) {
-      map.set(e.event_date, (map.get(e.event_date) ?? 0) + 1);
+    for (const e of allItems) {
+      map.set(e.date, (map.get(e.date) ?? 0) + 1);
     }
     return map;
-  }, [events]);
+  }, [allItems]);
+
 
   const firstWeekday = new Date(view.year, view.month, 1).getDay();
   const daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
@@ -112,7 +138,7 @@ function CalendarPage() {
     setView({ year: d.getFullYear(), month: d.getMonth() });
   };
 
-  const selectedEvents = (events ?? []).filter((e) => e.event_date === date);
+  const selectedEvents = allItems.filter((e) => e.date === date);
 
   return (
     <AppLayout title="Calendar" subtitle="Dates & anniversaries" critter="penguin">
@@ -189,20 +215,27 @@ function CalendarPage() {
           {selectedEvents.map((e) => (
             <li key={e.id} className="card-soft flex items-center justify-between gap-3 p-4">
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{e.title}</p>
-                {e.event_time ? (
-                  <p className="text-xs text-muted-foreground">{e.event_time.slice(0, 5)}</p>
-                ) : null}
+                <p className="truncate text-sm font-bold">
+                  {e.kind === "event" ? "" : `${DERIVED_META[e.kind].emoji} `}
+                  {e.title}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {e.time ? `${e.time.slice(0, 5)}` : ""}
+                  {e.kind === "event" ? "" : `${e.time ? " · " : ""}${DERIVED_META[e.kind].label}`}
+                </p>
               </div>
-              <button
-                aria-label="Delete event"
-                onClick={() => remove.mutate(e.id)}
-                className="press rounded-full p-2 text-muted-foreground"
-              >
-                <Trash2 className="size-4" />
-              </button>
+              {e.removable ? (
+                <button
+                  aria-label="Delete event"
+                  onClick={() => remove.mutate(e.id)}
+                  className="press rounded-full p-2 text-muted-foreground"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              ) : null}
             </li>
           ))}
+
         </ul>
       )}
 
@@ -236,22 +269,28 @@ function CalendarPage() {
         <Card className="text-sm text-muted-foreground">Nothing yet — plan something cozy.</Card>
       ) : (
         <ul className="space-y-2">
-          {upcoming.map((e) => (
+          {upcoming.slice(0, 20).map((e) => (
             <li key={e.id} className="card-soft flex items-center justify-between gap-3 p-4">
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{e.title}</p>
+                <p className="truncate text-sm font-bold">
+                  {e.kind === "event" ? "" : `${DERIVED_META[e.kind].emoji} `}
+                  {e.title}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {e.event_date}
-                  {e.event_time ? ` · ${e.event_time.slice(0, 5)}` : ""}
+                  {e.date}
+                  {e.time ? ` · ${e.time.slice(0, 5)}` : ""}
+                  {e.kind === "event" ? "" : ` · ${DERIVED_META[e.kind].label}`}
                 </p>
               </div>
-              <button
-                aria-label="Delete event"
-                onClick={() => remove.mutate(e.id)}
-                className="press rounded-full p-2 text-muted-foreground"
-              >
-                <Trash2 className="size-4" />
-              </button>
+              {e.removable ? (
+                <button
+                  aria-label="Delete event"
+                  onClick={() => remove.mutate(e.id)}
+                  className="press rounded-full p-2 text-muted-foreground"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -261,15 +300,16 @@ function CalendarPage() {
         <>
           <SectionTitle>Been there</SectionTitle>
           <ul className="space-y-2 opacity-70">
-            {past.map((e) => (
+            {past.slice(0, 20).map((e) => (
               <li key={e.id} className="card-soft p-4">
                 <p className="truncate text-sm font-bold">{e.title}</p>
-                <p className="text-xs text-muted-foreground">{e.event_date}</p>
+                <p className="text-xs text-muted-foreground">{e.date}</p>
               </li>
             ))}
           </ul>
         </>
       ) : null}
+
     </AppLayout>
   );
 }

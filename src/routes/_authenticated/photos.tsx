@@ -2,37 +2,57 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { ImagePlus, MessageCircle, Send, Trash2 } from "lucide-react";
+import { ImagePlus, MapPin, MessageCircle, Send, Sparkles, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
-import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
+import { useAuthUser, useCoupleId, useMembers, useProfile } from "@/lib/session";
+
+const FREE_BATCH = 1;
+const PREMIUM_EXTRA = 5;
 
 export const Route = createFileRoute("/_authenticated/photos")({
   head: () => ({
     meta: [
-      { title: "Photo Timeline — BLUBLUB" },
-      { name: "description", content: "A shared scrollable timeline of your favourite moments." },
-      { property: "og:title", content: "Photo Timeline — BLUBLUB" },
+      { title: "Memories — BLUBLUB" },
+      { name: "description", content: "A shared gallery of your favourite moments together." },
+      { property: "og:title", content: "Memories — BLUBLUB" },
       {
         property: "og:description",
-        content: "A shared scrollable timeline of your favourite moments.",
+        content: "A shared gallery of your favourite moments together.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: PhotosPage,
 });
 
+type PhotoWithUrl = {
+  id: string;
+  caption: string | null;
+  location: string | null;
+  taken_on: string;
+  created_by: string;
+  url: string | null;
+};
+
 function PhotosPage() {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
+  const { data: profile } = useProfile();
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [caption, setCaption] = useState("");
+  const [place, setPlace] = useState("");
   const [takenOn, setTakenOn] = useState(todayISO());
+  const [open, setOpen] = useState<PhotoWithUrl | null>(null);
+
+  const isPremium = !!profile?.is_premium;
+  const maxBatch = isPremium ? FREE_BATCH + PREMIUM_EXTRA : FREE_BATCH;
 
   const { data: photos } = useQuery({
     queryKey: ["photos", coupleId],
@@ -47,7 +67,7 @@ function PhotosPage() {
       if (error) throw error;
       const paths = (data ?? []).map((p) => p.storage_path);
       const signed = paths.length
-        ? (await supabase.storage.from("photos").createSignedUrls(paths, 3600)).data ?? []
+        ? ((await supabase.storage.from("photos").createSignedUrls(paths, 3600)).data ?? [])
         : [];
       return (data ?? []).map((p, i) => ({ ...p, url: signed[i]?.signedUrl ?? null }));
     },
@@ -55,34 +75,38 @@ function PhotosPage() {
 
   const upload = useMutation({
     mutationFn: async () => {
-      if (!file) throw new Error("Pick a photo first");
-      const blob = await compressImage(file);
-      const path = `${coupleId}/${crypto.randomUUID()}.jpg`;
-      const { error: upErr } = await supabase.storage
-        .from("photos")
-        .upload(path, blob, { contentType: "image/jpeg" });
-      if (upErr) throw upErr;
-      const { error } = await supabase.from("photos").insert({
-        couple_id: coupleId!,
-        created_by: user!.id,
-        storage_path: path,
-        caption: caption.trim() || null,
-        taken_on: takenOn,
-      });
-      if (error) throw error;
+      if (files.length === 0) throw new Error("Pick a photo first");
+      for (const file of files.slice(0, maxBatch)) {
+        const blob = await compressImage(file);
+        const path = `${coupleId}/${crypto.randomUUID()}.jpg`;
+        const { error: upErr } = await supabase.storage
+          .from("photos")
+          .upload(path, blob, { contentType: "image/jpeg" });
+        if (upErr) throw upErr;
+        const { error } = await supabase.from("photos").insert({
+          couple_id: coupleId!,
+          created_by: user!.id,
+          storage_path: path,
+          caption: caption.trim() || null,
+          location: place.trim() || null,
+          taken_on: takenOn,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
-      setFile(null);
+      setFiles([]);
       setCaption("");
+      setPlace("");
       if (fileRef.current) fileRef.current.value = "";
       void qc.invalidateQueries({ queryKey: ["photos"] });
-      toast.success("Added to your timeline");
+      toast.success("Added to your memories");
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
-    <AppLayout title="Timeline" subtitle="Your favourite moments" critter="seal">
+    <AppLayout title="Memories" subtitle="Your shared gallery" critter="seal">
       <Card>
         <div className="space-y-3">
           <button
@@ -91,14 +115,29 @@ function PhotosPage() {
             className="press flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-background py-6 text-sm font-bold text-muted-foreground"
           >
             <ImagePlus className="size-5" />
-            {file ? file.name : "Choose a photo"}
+            {files.length === 0
+              ? maxBatch > 1
+                ? `Choose up to ${maxBatch} photos`
+                : "Choose a photo"
+              : `${files.length} photo${files.length > 1 ? "s" : ""} selected`}
           </button>
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
+            multiple={maxBatch > 1}
             className="hidden"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              const picked = Array.from(e.target.files ?? []);
+              if (picked.length > maxBatch) {
+                toast.error(
+                  isPremium
+                    ? `You can upload ${maxBatch} at a time.`
+                    : `Free spaces upload ${FREE_BATCH} at a time — Premium adds ${PREMIUM_EXTRA} more.`,
+                );
+              }
+              setFiles(picked.slice(0, maxBatch));
+            }}
           />
           <Field label="Caption">
             <TextInput
@@ -108,43 +147,103 @@ function PhotosPage() {
               placeholder="That perfect afternoon"
             />
           </Field>
+          <Field label="Where was this?">
+            <TextInput
+              value={place}
+              onChange={(e) => setPlace(e.target.value)}
+              maxLength={120}
+              placeholder="Kyoto, the little ramen place"
+            />
+          </Field>
           <Field label="Date">
             <TextInput type="date" value={takenOn} onChange={(e) => setTakenOn(e.target.value)} />
           </Field>
-          <PrimaryButton disabled={!file || upload.isPending} onClick={() => upload.mutate()}>
-            {upload.isPending ? "Uploading…" : "Add to timeline"}
+          <PrimaryButton disabled={files.length === 0 || upload.isPending} onClick={() => upload.mutate()}>
+            {upload.isPending ? "Uploading…" : "Add to memories"}
           </PrimaryButton>
+          {!isPremium ? (
+            <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+              <Sparkles className="size-3.5" />
+              Premium unlocks {PREMIUM_EXTRA} extra photos per upload.
+            </p>
+          ) : null}
           <p className="text-center text-xs text-muted-foreground">
             Photos are resized before upload to keep things light.
           </p>
         </div>
       </Card>
 
-      <SectionTitle>Timeline</SectionTitle>
+      <SectionTitle>Gallery</SectionTitle>
       {!photos || photos.length === 0 ? (
-        <Card className="text-sm text-muted-foreground">No photos yet.</Card>
+        <Card className="text-sm text-muted-foreground">No memories yet.</Card>
       ) : (
-        <ul className="space-y-4">
+        <div className="grid grid-cols-3 gap-1.5">
           {photos.map((p) => (
-            <li key={p.id} className="card-soft overflow-hidden p-0">
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setOpen(p as PhotoWithUrl)}
+              className="press relative aspect-square overflow-hidden rounded-2xl bg-muted"
+            >
               {p.url ? (
                 <img
                   src={p.url}
                   alt={p.caption ?? "Shared memory"}
                   loading="lazy"
-                  className="aspect-square w-full object-cover"
+                  className="size-full object-cover"
                 />
               ) : null}
-              <div className="p-4">
-                <p className="text-sm font-bold">{p.caption ?? "Untitled"}</p>
-                <p className="text-xs text-muted-foreground">{p.taken_on}</p>
-                <PhotoComments photoId={p.id} />
-              </div>
-            </li>
+              {p.location ? (
+                <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/60 to-transparent px-1.5 pb-1 pt-4 text-left text-[10px] font-bold text-white">
+                  {p.location}
+                </span>
+              ) : null}
+            </button>
           ))}
-        </ul>
+        </div>
       )}
+
+      {open ? <PhotoDetail photo={open} onClose={() => setOpen(null)} /> : null}
     </AppLayout>
+  );
+}
+
+function PhotoDetail({ photo, onClose }: { photo: PhotoWithUrl; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto max-w-lg px-4 py-4">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="press grid size-10 place-items-center rounded-full bg-card shadow-soft"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="card-soft mt-2 overflow-hidden p-0">
+          {photo.url ? (
+            <img
+              src={photo.url}
+              alt={photo.caption ?? "Shared memory"}
+              className="w-full object-cover"
+            />
+          ) : null}
+          <div className="p-4">
+            <p className="text-sm font-bold">{photo.caption ?? "Untitled"}</p>
+            <p className="text-xs text-muted-foreground">{photo.taken_on}</p>
+            {photo.location ? (
+              <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
+                <MapPin className="size-3.5" />
+                {photo.location}
+              </p>
+            ) : null}
+            <PhotoComments photoId={photo.id} />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

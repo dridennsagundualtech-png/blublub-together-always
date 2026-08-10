@@ -57,6 +57,31 @@ export function usePartner() {
   return members?.find((m) => m.id !== profile?.id) ?? null;
 }
 
+/** Signed avatar URLs for everyone in the couple space, keyed by user id. */
+export function useMemberAvatars() {
+  const { data: members } = useMembers();
+  const paths = (members ?? [])
+    .map((m) => m.avatar_url)
+    .filter((p): p is string => !!p)
+    .sort();
+  return useQuery({
+    queryKey: ["member-avatars", paths],
+    enabled: paths.length > 0,
+    staleTime: 30 * 60_000,
+    queryFn: async () => {
+      const { data } = await supabase.storage.from("avatars").createSignedUrls(paths, 3600);
+      const byPath = new Map((data ?? []).map((d) => [d.path ?? "", d.signedUrl]));
+      const map: Record<string, string> = {};
+      for (const m of members ?? []) {
+        const url = m.avatar_url ? byPath.get(m.avatar_url) : null;
+        if (url) map[m.id] = url;
+      }
+      return map;
+    },
+  });
+}
+
+
 export function useCouple() {
   const { data: profile } = useProfile();
   const coupleId = profile?.couple_id ?? null;
