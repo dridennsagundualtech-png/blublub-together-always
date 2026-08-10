@@ -28,6 +28,7 @@ import {
   SelectInput,
   TextInput,
 } from "@/components/ui-kit";
+import { playChirp } from "@/hooks/use-sound";
 import { todayISO } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers, useProfile } from "@/lib/session";
 
