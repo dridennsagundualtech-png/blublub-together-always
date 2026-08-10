@@ -35,8 +35,10 @@ const GAMES: { kind: GameKind; icon: typeof Grid3x3 }[] = [
 
 function GamesPage() {
   useMarkSeen("games");
+  const { data: badges } = useBadges();
   const history = useGameHistory();
   const { nameOf, me } = useSeats(null);
+
 
   const tally = history.reduce(
     (acc, g) => {
