@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, SectionTitle, StreakChip, TextArea, TextInput } from "@/components/ui-kit";
-import { streakFromDates, todayISO } from "@/lib/badges";
+import { streakFromDates, todayISO, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
 const MOODS = ["🩷", "😊", "🥹", "😴", "🔥", "😤", "🌧️", "✨"];
@@ -23,6 +23,7 @@ export const Route = createFileRoute("/_authenticated/diary")({
 });
 
 function DiaryPage() {
+  useMarkSeen("diary");
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const { data: members } = useMembers();

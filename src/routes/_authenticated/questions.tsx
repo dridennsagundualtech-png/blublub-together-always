@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, PrimaryButton, SectionTitle, StreakChip, TextArea } from "@/components/ui-kit";
-import { todayISO, useAnswerStreak } from "@/lib/badges";
+import { todayISO, useAnswerStreak, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/questions")({
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/questions")({
 });
 
 function QuestionsPage() {
+  useMarkSeen("questions");
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const { data: members } = useMembers();

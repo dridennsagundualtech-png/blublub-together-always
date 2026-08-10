@@ -51,7 +51,17 @@ export function AppLayout({
           )}
         </div>
       </div>
-      <BottomNav badges={{ "/chat": badges?.unreadChat }} />
+      <BottomNav
+        badges={{
+          "/chat": badges?.unreadChat,
+          "/diary": badges?.diary,
+          "/calendar": badges?.calendar,
+          "/budget": badges?.budget,
+          "/games": badges?.games,
+          "/more": badges?.question,
+        }}
+      />
+
     </div>
   );
 }

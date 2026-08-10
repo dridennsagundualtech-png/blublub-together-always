@@ -6,7 +6,7 @@ import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
-import { todayISO } from "@/lib/badges";
+import { todayISO, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/calendar")({
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/calendar")({
 });
 
 function CalendarPage() {
+  useMarkSeen("calendar");
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const qc = useQueryClient();
