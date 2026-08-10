@@ -43,6 +43,8 @@ function ProfilePage() {
   const [anniversary, setAnniversary] = useState(profile?.anniversary_date ?? "");
   const [code, setCode] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [songTitle, setSongTitle] = useState(profile?.song_title ?? "");
+  const [songArtist, setSongArtist] = useState(profile?.song_artist ?? "");
 
   // Sync local edit state once the profile loads.
   if (profile && name === "" && profile.display_name) setName(profile.display_name);
