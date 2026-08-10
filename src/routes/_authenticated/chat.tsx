@@ -172,27 +172,33 @@ function ChatPage() {
           return (
             <div
               key={m.id}
-              className={`max-w-[80%] px-4 py-2.5 text-sm shadow-soft ${
-                mine
-                  ? "self-end rounded-3xl rounded-br-md bg-primary text-primary-foreground"
-                  : "self-start rounded-3xl rounded-bl-md border border-border bg-cream text-foreground"
-              }`}
+              className={`flex max-w-[85%] items-end gap-2 ${mine ? "self-end flex-row-reverse" : "self-start"}`}
             >
-              {!mine ? (
-                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {nameOf(m.created_by)}
-                </p>
-              ) : null}
-              {m.audio_path ? (
-                <VoiceNote path={m.audio_path} durationMs={m.duration_ms} mine={mine} />
-              ) : (
-                <p className="whitespace-pre-wrap">{m.body}</p>
-              )}
+              <ChatAvatar userId={m.created_by} name={mine ? "You" : nameOf(m.created_by)} />
+              <div
+                className={`px-4 py-2.5 text-sm shadow-soft ${
+                  mine
+                    ? "rounded-3xl rounded-br-md bg-primary text-primary-foreground"
+                    : "rounded-3xl rounded-bl-md border border-border bg-cream text-foreground"
+                }`}
+              >
+                {!mine ? (
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                    {nameOf(m.created_by)}
+                  </p>
+                ) : null}
+                {m.audio_path ? (
+                  <VoiceNote path={m.audio_path} durationMs={m.duration_ms} mine={mine} />
+                ) : (
+                  <p className="whitespace-pre-wrap">{m.body}</p>
+                )}
+              </div>
             </div>
           );
         })}
         <div ref={endRef} />
       </div>
+
 
       <form
         onSubmit={(e) => {
