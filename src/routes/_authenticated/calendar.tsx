@@ -8,6 +8,8 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { todayISO, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId } from "@/lib/session";
+import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
+
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"] as const;
 const MONTH_NAMES = [
