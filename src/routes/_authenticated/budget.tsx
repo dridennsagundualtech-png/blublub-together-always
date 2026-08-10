@@ -20,6 +20,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { PremiumGate } from "@/components/PremiumGate";
 import {
   Card,
+  StatCard,
   Field,
   Money,
   PrimaryButton,
