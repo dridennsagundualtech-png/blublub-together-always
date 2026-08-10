@@ -31,7 +31,8 @@ function MapPage() {
   const { data: profile } = useProfile();
   const { data: members } = useMembers();
   const { data: locations } = useLocations();
-  useLocationPublisher();
+  const locationStatus = useLocationPublisher();
+
 
   const rows = members ?? [];
   const points: MapPoint[] = rows.flatMap((m) => {
@@ -51,6 +52,14 @@ function MapPage() {
   return (
     <AppLayout title="Where we are" subtitle="Only when you both opt in" critter="penguin" critterPose="curious">
       <MiniMap points={points} />
+
+      {locationStatus ? (
+        <p className="mt-3 rounded-2xl bg-muted px-4 py-3 text-xs text-muted-foreground">
+          {locationStatus}
+        </p>
+      ) : null}
+
+
 
       <SectionTitle>Pins</SectionTitle>
       <ul className="space-y-2">
