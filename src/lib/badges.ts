@@ -100,16 +100,13 @@ export function useBadges() {
         (g) => g.status === "done" && g.created_by !== myId && isNew(g.finished_at, gamesSeenAt),
       );
 
+      // Partner replied today and you haven't opened the question screen today.
       const questionSeenAt = readSeenAt(myId, "questions");
-      const questionRevealPending =
-        partnerAnswered && !isNew(null, questionSeenAt) === false
-          ? partnerAnswered && (!questionSeenAt || questionSeenAt.slice(0, 10) !== todayISO())
-          : false;
+      const seenToday = !!questionSeenAt && questionSeenAt.slice(0, 10) === todayISO();
 
       return {
         unreadChat: (msgs.count ?? 0) > 0,
-        // Partner replied today and you haven't opened the question screen since.
-        question: (partnerAnswered && !iAnswered) || questionRevealPending,
+        question: (partnerAnswered && !iAnswered) || (partnerAnswered && !seenToday),
         diary: isNew(diaryAt, readSeenAt(myId, "diary")),
         calendar: isNew(eventAt, readSeenAt(myId, "calendar")),
         budget: isNew(expenseAt, readSeenAt(myId, "budget")),
