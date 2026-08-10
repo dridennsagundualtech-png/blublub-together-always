@@ -102,6 +102,53 @@ function HomePage() {
         </p>
       </section>
 
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Card className="text-center">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Next date night
+          </p>
+          <p className="mt-1 text-2xl font-extrabold text-primary">
+            {upcoming && upcoming.length > 0
+              ? Math.max(
+                  0,
+                  Math.round(
+                    (new Date(`${upcoming[0]!.event_date}T00:00:00`).getTime() -
+                      new Date(`${todayISO()}T00:00:00`).getTime()) /
+                      86_400_000,
+                  ),
+                )
+              : "—"}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
+            {upcoming && upcoming.length > 0 ? `days · ${upcoming[0]!.title}` : "nothing planned"}
+          </p>
+        </Card>
+        <Card className="text-center">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Anniversary in
+          </p>
+          <p className="mt-1 text-2xl font-extrabold text-primary">{untilAnniversary ?? "—"}</p>
+          <p className="text-xs text-muted-foreground">
+            {untilAnniversary === null ? "add a date" : "days"}
+          </p>
+        </Card>
+      </div>
+
+      <SectionTitle>Our song</SectionTitle>
+      <Link to="/profile" className="card-soft press flex items-center gap-3 p-4">
+        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+          <Music4 className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-bold">{song ?? "Pick your song"}</span>
+          <span className="block truncate text-xs text-muted-foreground">
+            {song ? (songArtist ?? "Your song 🩷") : "Save it in Profile & Settings"}
+          </span>
+        </span>
+        <Sparkles className="size-4 text-muted-foreground" />
+      </Link>
+
+
       <SectionTitle>Coming up</SectionTitle>
       {upcoming && upcoming.length > 0 ? (
         <ul className="space-y-2">
