@@ -105,6 +105,63 @@ function ChatPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const sendVoice = useMutation({
+    mutationFn: async ({ blob, durationMs }: { blob: Blob; durationMs: number }) => {
+      const path = `${coupleId}/${user!.id}-${Date.now()}.webm`;
+      const { error: upErr } = await supabase.storage
+        .from("voice")
+        .upload(path, blob, { contentType: blob.type || "audio/webm" });
+      if (upErr) throw upErr;
+      const { error } = await supabase.from("messages").insert({
+        couple_id: coupleId!,
+        created_by: user!.id,
+        body: "",
+        audio_path: path,
+        duration_ms: durationMs,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["messages", coupleId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Voice recording (foreground, MediaRecorder).
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const startedAtRef = useRef(0);
+  const [recording, setRecording] = useState(false);
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const rec = new MediaRecorder(stream);
+      chunksRef.current = [];
+      startedAtRef.current = Date.now();
+      rec.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      rec.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        const durationMs = Date.now() - startedAtRef.current;
+        if (blob.size > 0 && durationMs > 500) sendVoice.mutate({ blob, durationMs });
+      };
+      rec.start();
+      recorderRef.current = rec;
+      setRecording(true);
+      playChirp("pop");
+    } catch {
+      toast.error("Microphone permission is needed for voice notes");
+    }
+  }
+
+  function stopRecording() {
+    recorderRef.current?.stop();
+    recorderRef.current = null;
+    setRecording(false);
+    playChirp("tap");
+  }
+
   const nameOf = (id: string) => members?.find((m) => m.id === id)?.display_name ?? "Partner";
 
   return (
@@ -126,7 +183,11 @@ function ChatPage() {
                   {nameOf(m.created_by)}
                 </p>
               ) : null}
-              <p className="whitespace-pre-wrap">{m.body}</p>
+              {m.audio_path ? (
+                <VoiceNote path={m.audio_path} durationMs={m.duration_ms} mine={mine} />
+              ) : (
+                <p className="whitespace-pre-wrap">{m.body}</p>
+              )}
             </div>
           );
         })}
@@ -143,10 +204,21 @@ function ChatPage() {
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Say something sweet…"
+          placeholder={recording ? "Recording…" : "Say something sweet…"}
           maxLength={2000}
           className="flex-1 rounded-full border border-border bg-card px-4 py-3 text-base shadow-soft outline-none focus:ring-2 focus:ring-ring"
         />
+        <button
+          type="button"
+          aria-label={recording ? "Stop recording" : "Record a voice note"}
+          onClick={() => (recording ? stopRecording() : void startRecording())}
+          disabled={sendVoice.isPending}
+          className={`press grid size-12 shrink-0 place-items-center rounded-full shadow-soft disabled:opacity-60 ${
+            recording ? "bg-destructive text-destructive-foreground" : "bg-card text-primary"
+          }`}
+        >
+          {recording ? <Square className="size-5" /> : <Mic className="size-5" />}
+        </button>
         <button
           type="submit"
           aria-label="Send"
@@ -156,6 +228,7 @@ function ChatPage() {
           <Send className="size-5" />
         </button>
       </form>
+
     </AppLayout>
   );
 }
