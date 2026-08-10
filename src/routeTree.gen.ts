@@ -25,6 +25,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
 import { Route as AuthenticatedGamesIndexRouteImport } from './routes/_authenticated/games.index'
+import { Route as AuthenticatedGamesKindRouteImport } from './routes/_authenticated/games.$kind'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -105,6 +106,11 @@ const AuthenticatedGamesIndexRoute = AuthenticatedGamesIndexRouteImport.update({
   path: '/games/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGamesKindRoute = AuthenticatedGamesKindRouteImport.update({
+  id: '/games/$kind',
+  path: '/games/$kind',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/todos': typeof AuthenticatedTodosRoute
+  '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games/': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/questions': typeof AuthenticatedQuestionsRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/': typeof AuthenticatedIndexRoute
+  '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRoutesById {
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/games/$kind': typeof AuthenticatedGamesKindRoute
   '/_authenticated/games/': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRouteTypes {
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/questions'
     | '/todos'
+    | '/games/$kind'
     | '/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/questions'
     | '/todos'
     | '/'
+    | '/games/$kind'
     | '/games'
   id:
     | '__root__'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/_authenticated/questions'
     | '/_authenticated/todos'
     | '/_authenticated/'
+    | '/_authenticated/games/$kind'
     | '/_authenticated/games/'
   fileRoutesById: FileRoutesById
 }
@@ -333,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGamesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/games/$kind': {
+      id: '/_authenticated/games/$kind'
+      path: '/games/$kind'
+      fullPath: '/games/$kind'
+      preLoaderRoute: typeof AuthenticatedGamesKindRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -350,6 +369,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedGamesKindRoute: typeof AuthenticatedGamesKindRoute
   AuthenticatedGamesIndexRoute: typeof AuthenticatedGamesIndexRoute
 }
 
@@ -367,6 +387,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedGamesKindRoute: AuthenticatedGamesKindRoute,
   AuthenticatedGamesIndexRoute: AuthenticatedGamesIndexRoute,
 }
 
