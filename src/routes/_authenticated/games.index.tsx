@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { ChevronRight, Dices, Grid3x3, Hand, Layers, Utensils, Sparkles, Heart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui-kit";
 import { useBadges, useMarkSeen } from "@/lib/badges";
 import { GAME_META, useGameHistory, useSeats, type GameKind } from "@/lib/games";
+
 
 export const Route = createFileRoute("/_authenticated/games/")({
   head: () => ({
@@ -137,32 +139,49 @@ function GamesPage() {
         </li>
       </ul>
 
-      <SectionTitle>Game history</SectionTitle>
-      {history.length === 0 ? (
-        <EmptyState text="No games played yet — pick one above." />
-      ) : (
-        <ul className="space-y-2">
-          {history.map((g) => (
-            <li key={g.id}>
-              <Card>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-bold">{GAME_META[g.kind as GameKind]?.label ?? g.kind}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(g.finished_at ?? g.created_at).toLocaleDateString()}
+      <SectionTitle
+        action={
+          <button
+            type="button"
+            onClick={() => setShowHistory((v) => !v)}
+            className="press rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
+          >
+            {showHistory ? "Hide" : `Show (${history.length})`}
+          </button>
+        }
+      >
+        Game history
+      </SectionTitle>
+      {showHistory ? (
+        history.length === 0 ? (
+          <EmptyState text="No games played yet — pick one above." />
+        ) : (
+          <ul className="space-y-2">
+            {history.map((g) => (
+              <li key={g.id}>
+                <Card>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-bold">
+                      {GAME_META[g.kind as GameKind]?.label ?? g.kind}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(g.finished_at ?? g.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {g.is_draw
+                      ? "Draw — no task owed"
+                      : `${nameOf(g.winner_id)} won · ${
+                          g.winner_id === me ? "partner" : "you"
+                        } owed: ${g.task}`}
                   </p>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {g.is_draw
-                    ? "Draw — no task owed"
-                    : `${nameOf(g.winner_id)} won · ${
-                        g.winner_id === me ? "partner" : "you"
-                      } owed: ${g.task}`}
-                </p>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : null}
+
     </AppLayout>
   );
 }
