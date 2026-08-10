@@ -50,7 +50,7 @@ function ChatPage() {
   useEffect(() => {
     if (!coupleId) return;
     const channel = supabase
-      .channel(`messages-${coupleId}`)
+      .channel(`messages-${coupleId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `couple_id=eq.${coupleId}` },
