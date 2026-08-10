@@ -38,8 +38,11 @@ export function useGames() {
 
   useEffect(() => {
     if (!coupleId) return;
+    // Unique topic per subscriber: several components can mount useGames at the
+    // same time (and StrictMode double-mounts), and reusing one topic makes
+    // supabase-js throw "cannot add postgres_changes callbacks after subscribe()".
     const channel = supabase
-      .channel(`games-${coupleId}`)
+      .channel(`games-${coupleId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "games", filter: `couple_id=eq.${coupleId}` },
