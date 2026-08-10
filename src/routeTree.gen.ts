@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as QaGameRouteImport } from './routes/qa-game'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authenticated/admin-codes'
 import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
@@ -37,11 +36,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QaGameRoute = QaGameRouteImport.update({
-  id: '/qa-game',
-  path: '/qa-game',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
@@ -133,7 +127,6 @@ const AuthenticatedGamesKindRoute = AuthenticatedGamesKindRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/qa-game': typeof QaGameRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
@@ -153,7 +146,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
-  '/qa-game': typeof QaGameRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
@@ -176,7 +168,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/qa-game': typeof QaGameRoute
   '/_authenticated/admin-codes': typeof AuthenticatedAdminCodesRoute
   '/_authenticated/budget': typeof AuthenticatedBudgetRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
@@ -200,7 +191,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/qa-game'
     | '/admin-codes'
     | '/budget'
     | '/calendar'
@@ -220,7 +210,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
-    | '/qa-game'
     | '/admin-codes'
     | '/budget'
     | '/calendar'
@@ -242,7 +231,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
-    | '/qa-game'
     | '/_authenticated/admin-codes'
     | '/_authenticated/budget'
     | '/_authenticated/calendar'
@@ -265,7 +253,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  QaGameRoute: typeof QaGameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -282,13 +269,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/qa-game': {
-      id: '/qa-game'
-      path: '/qa-game'
-      fullPath: '/qa-game'
-      preLoaderRoute: typeof QaGameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -459,8 +439,17 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  QaGameRoute: QaGameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
