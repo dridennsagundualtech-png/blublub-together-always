@@ -18,6 +18,7 @@ import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
+import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/food'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
@@ -71,6 +72,11 @@ const AuthenticatedDiaryRoute = AuthenticatedDiaryRouteImport.update({
   path: '/diary',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFoodRoute = AuthenticatedFoodRouteImport.update({
+  id: '/food',
+  path: '/food',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   id: '/more',
   path: '/more',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof AuthenticatedChatRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
+  '/food': typeof AuthenticatedFoodRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
+  '/food': typeof AuthenticatedFoodRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
+  '/_authenticated/food': typeof AuthenticatedFoodRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dates'
     | '/diary'
+    | '/food'
     | '/more'
     | '/period'
     | '/photos'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dates'
     | '/diary'
+    | '/food'
     | '/more'
     | '/period'
     | '/photos'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chat'
     | '/_authenticated/dates'
     | '/_authenticated/diary'
+    | '/_authenticated/food'
     | '/_authenticated/more'
     | '/_authenticated/period'
     | '/_authenticated/photos'
@@ -296,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDiaryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/food': {
+      id: '/_authenticated/food'
+      path: '/food'
+      fullPath: '/food'
+      preLoaderRoute: typeof AuthenticatedFoodRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/more': {
       id: '/_authenticated/more'
       path: '/more'
@@ -362,6 +381,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
+  AuthenticatedFoodRoute: typeof AuthenticatedFoodRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
@@ -380,6 +400,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
+  AuthenticatedFoodRoute: AuthenticatedFoodRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
