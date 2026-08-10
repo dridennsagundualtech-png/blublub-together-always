@@ -66,7 +66,7 @@ function MapPage() {
         {rows.map((m) => {
           const loc = locations?.find((l) => l.user_id === m.id);
           const mine = m.id === user?.id;
-          const sharing = mine ? !!profile?.share_location : !!loc;
+          const sharing = mine ? !!profile?.share_location : !!m.share_location;
           return (
             <li key={m.id}>
               <Card>
@@ -83,9 +83,13 @@ function MapPage() {
                       {mine ? "You" : (m.display_name ?? "Partner")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {sharing && loc
+                      {loc
                         ? `Updated ${timeAgo(loc.updated_at)}`
-                        : "Sharing is off — location unavailable"}
+                        : sharing
+                          ? mine
+                            ? "Sharing is on — waiting for your first location fix"
+                            : "Sharing is on — waiting for them to open the app and allow location"
+                          : "Sharing is off — location unavailable"}
                     </p>
                   </div>
                 </div>
