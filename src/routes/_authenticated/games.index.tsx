@@ -36,8 +36,43 @@ function GamesPage() {
   const history = useGameHistory();
   const { nameOf, me } = useSeats(null);
 
+  const tally = history.reduce(
+    (acc, g) => {
+      if (g.is_draw) acc.draws += 1;
+      else if (g.winner_id === me) acc.mine += 1;
+      else if (g.winner_id) acc.theirs += 1;
+      return acc;
+    },
+    { mine: 0, theirs: 0, draws: 0 },
+  );
+
   return (
     <AppLayout title="Games" subtitle="Winner picks, loser pays" critter="penguin" critterPose="wave">
+      <SectionTitle>Lifetime scoreboard</SectionTitle>
+      <Card>
+        <div className="grid grid-cols-3 text-center">
+          <div>
+            <p className="text-2xl font-extrabold text-primary">{tally.mine}</p>
+            <p className="text-xs text-muted-foreground">You</p>
+          </div>
+          <div>
+            <p className="text-2xl font-extrabold text-muted-foreground">{tally.draws}</p>
+            <p className="text-xs text-muted-foreground">Draws</p>
+          </div>
+          <div>
+            <p className="text-2xl font-extrabold text-primary">{tally.theirs}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {history.find((g) => g.winner_id && g.winner_id !== me)
+                ? nameOf(history.find((g) => g.winner_id && g.winner_id !== me)!.winner_id)
+                : "Partner"}
+            </p>
+          </div>
+        </div>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          Across all five games · {history.length} played
+        </p>
+      </Card>
+
       <SectionTitle>Loser-task games</SectionTitle>
       <ul className="space-y-2">
         {GAMES.map(({ kind, icon: Icon }) => (

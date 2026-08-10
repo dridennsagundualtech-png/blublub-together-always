@@ -23,6 +23,7 @@ export type Database = {
           due_day: number
           id: string
           last_paid_on: string | null
+          next_due_on: string | null
           title: string
           updated_at: string
         }
@@ -34,6 +35,7 @@ export type Database = {
           due_day?: number
           id?: string
           last_paid_on?: string | null
+          next_due_on?: string | null
           title: string
           updated_at?: string
         }
@@ -45,12 +47,60 @@ export type Database = {
           due_day?: number
           id?: string
           last_paid_on?: string | null
+          next_due_on?: string | null
           title?: string
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "bills_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bucket_list: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          done: boolean
+          done_on: string | null
+          id: string
+          notes: string | null
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          done?: boolean
+          done_on?: string | null
+          id?: string
+          notes?: string | null
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          done?: boolean
+          done_on?: string | null
+          id?: string
+          notes?: string | null
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bucket_list_couple_id_fkey"
             columns: ["couple_id"]
             isOneToOne: false
             referencedRelation: "couples"
@@ -86,6 +136,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "budget_goals_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooldowns: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          feeling: string
+          id: string
+          need: string
+          responsibility: string
+          shared: boolean
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          feeling?: string
+          id?: string
+          need?: string
+          responsibility?: string
+          shared?: boolean
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          feeling?: string
+          id?: string
+          need?: string
+          responsibility?: string
+          shared?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooldowns_couple_id_fkey"
             columns: ["couple_id"]
             isOneToOne: false
             referencedRelation: "couples"
@@ -446,30 +540,74 @@ export type Database = {
           },
         ]
       }
+      locations: {
+        Row: {
+          accuracy: number | null
+          couple_id: string | null
+          created_at: string
+          lat: number
+          lng: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          couple_id?: string | null
+          created_at?: string
+          lat: number
+          lng: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          couple_id?: string | null
+          created_at?: string
+          lat?: number
+          lng?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
+          audio_path: string | null
           body: string
           couple_id: string
           created_at: string
           created_by: string
+          duration_ms: number | null
           id: string
           read_at: string | null
           updated_at: string
         }
         Insert: {
-          body: string
+          audio_path?: string | null
+          body?: string
           couple_id: string
           created_at?: string
           created_by: string
+          duration_ms?: number | null
           id?: string
           read_at?: string | null
           updated_at?: string
         }
         Update: {
+          audio_path?: string | null
           body?: string
           couple_id?: string
           created_at?: string
           created_by?: string
+          duration_ms?: number | null
           id?: string
           read_at?: string | null
           updated_at?: string
@@ -536,6 +674,9 @@ export type Database = {
           id: string
           is_premium: boolean
           share_cycle: boolean
+          share_location: boolean
+          song_artist: string | null
+          song_title: string | null
           updated_at: string
         }
         Insert: {
@@ -548,6 +689,9 @@ export type Database = {
           id: string
           is_premium?: boolean
           share_cycle?: boolean
+          share_location?: boolean
+          song_artist?: string | null
+          song_title?: string | null
           updated_at?: string
         }
         Update: {
@@ -560,6 +704,9 @@ export type Database = {
           id?: string
           is_premium?: boolean
           share_cycle?: boolean
+          share_location?: boolean
+          song_artist?: string | null
+          song_title?: string | null
           updated_at?: string
         }
         Relationships: [

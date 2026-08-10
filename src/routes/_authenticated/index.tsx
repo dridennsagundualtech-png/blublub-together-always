@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, HelpCircle, Images, PiggyBank } from "lucide-react";
+import { CalendarDays, HelpCircle, Images, Music4, PiggyBank, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
 import { Card, Money, ProgressBar, SectionTitle } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
+import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import { daysTogether, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -39,6 +40,11 @@ function HomePage() {
     profile?.anniversary_date ??
     null;
   const days = daysTogether(anniversary);
+  const untilAnniversary = daysUntilAnniversary(anniversary);
+  useAnniversaryReminder();
+
+  const song = members?.find((m) => m.song_title)?.song_title ?? profile?.song_title ?? null;
+  const songArtist = members?.find((m) => m.song_title)?.song_artist ?? profile?.song_artist ?? null;
 
   const { data: upcoming } = useQuery({
     queryKey: ["upcoming-events", coupleId],
@@ -95,6 +101,53 @@ function HomePage() {
             : "Share your invite code so your partner can join."}
         </p>
       </section>
+
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Card className="text-center">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Next date night
+          </p>
+          <p className="mt-1 text-2xl font-extrabold text-primary">
+            {upcoming && upcoming.length > 0
+              ? Math.max(
+                  0,
+                  Math.round(
+                    (new Date(`${upcoming[0]!.event_date}T00:00:00`).getTime() -
+                      new Date(`${todayISO()}T00:00:00`).getTime()) /
+                      86_400_000,
+                  ),
+                )
+              : "—"}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
+            {upcoming && upcoming.length > 0 ? `days · ${upcoming[0]!.title}` : "nothing planned"}
+          </p>
+        </Card>
+        <Card className="text-center">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Anniversary in
+          </p>
+          <p className="mt-1 text-2xl font-extrabold text-primary">{untilAnniversary ?? "—"}</p>
+          <p className="text-xs text-muted-foreground">
+            {untilAnniversary === null ? "add a date" : "days"}
+          </p>
+        </Card>
+      </div>
+
+      <SectionTitle>Our song</SectionTitle>
+      <Link to="/profile" className="card-soft press flex items-center gap-3 p-4">
+        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+          <Music4 className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-bold">{song ?? "Pick your song"}</span>
+          <span className="block truncate text-xs text-muted-foreground">
+            {song ? (songArtist ?? "Your song 🩷") : "Save it in Profile & Settings"}
+          </span>
+        </span>
+        <Sparkles className="size-4 text-muted-foreground" />
+      </Link>
+
 
       <SectionTitle>Coming up</SectionTitle>
       {upcoming && upcoming.length > 0 ? (

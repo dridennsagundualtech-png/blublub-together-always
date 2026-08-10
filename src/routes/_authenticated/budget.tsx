@@ -28,6 +28,7 @@ import {
   SelectInput,
   TextInput,
 } from "@/components/ui-kit";
+import { playChirp } from "@/hooks/use-sound";
 import { todayISO } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers, useProfile } from "@/lib/session";
 
@@ -216,6 +217,10 @@ function BudgetContent() {
     .filter((e) => monthKey(e.spent_on) === prevMonth)
     .reduce((s, e) => s + Number(e.amount), 0);
   const delta = prevTotal > 0 ? ((monthTotal - prevTotal) / prevTotal) * 100 : null;
+  const biggest =
+    byCategory.length > 0 && monthTotal > 0
+      ? byCategory.reduce((a, b) => (b.value > a.value ? b : a))
+      : null;
 
   const nameOf = (id: string) => members?.find((m) => m.id === id)?.display_name ?? "Partner";
 
@@ -303,11 +308,17 @@ function BudgetContent() {
         <p className="text-sm font-bold">
           <Money value={monthTotal} /> spent
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className={`text-xs ${delta !== null && delta > 0 ? "text-destructive" : "text-muted-foreground"}`}>
           {delta === null
             ? "No data for last month yet."
-            : `${delta >= 0 ? "+" : ""}${delta.toFixed(0)}% vs last month`}
+            : `${delta >= 0 ? "+" : ""}${delta.toFixed(0)}% vs last month (${prevTotal.toFixed(0)} then)`}
         </p>
+        {biggest ? (
+          <p className="mt-2 rounded-2xl bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground">
+            Biggest category: {biggest.name} — <Money value={biggest.value} /> (
+            {Math.round((biggest.value / monthTotal) * 100)}% of the month)
+          </p>
+        ) : null}
         {byCategory.length > 0 ? (
           <div className="mt-3 h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -449,6 +460,7 @@ function BudgetGoals({
         {goals.map((g) => {
           const spent = spentByCategory[g.category] ?? 0;
           const pct = (spent / Number(g.monthly_limit)) * 100;
+          const left = Number(g.monthly_limit) - spent;
           return (
             <li key={g.id} className="card-soft p-4">
               <div className="flex items-center justify-between text-sm font-bold">
@@ -460,6 +472,25 @@ function BudgetGoals({
               <div className="mt-2">
                 <ProgressBar value={pct} />
               </div>
+              <p
+                className={`mt-2 text-xs font-semibold ${
+                  pct >= 100 ? "text-destructive" : pct >= 80 ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {pct >= 100 ? (
+                  <>
+                    Over by <Money value={Math.abs(left)} /> — ease off this one
+                  </>
+                ) : pct >= 80 ? (
+                  <>
+                    Careful — only <Money value={left} /> left
+                  </>
+                ) : (
+                  <>
+                    <Money value={left} /> left this month
+                  </>
+                )}
+              </p>
             </li>
           );
         })}
@@ -581,34 +612,66 @@ function SavingsGoals({
   );
 }
 
-function Bills({
-  coupleId,
-  bills,
-}: {
-  coupleId: string | null;
-  bills: { id: string; title: string; amount: number; due_day: number; category: string | null }[];
-}) {
+type BillRow = {
+  id: string;
+  title: string;
+  amount: number;
+  due_day: number;
+  category: string | null;
+  next_due_on: string | null;
+  last_paid_on: string | null;
+};
+
+/** Next occurrence of `dueDay` strictly after the given date. */
+function rollForward(dueDay: number, from: Date) {
+  const day = Math.min(28, Math.max(1, dueDay));
+  const next = new Date(from.getFullYear(), from.getMonth(), day);
+  if (next <= from) next.setMonth(next.getMonth() + 1);
+  return next.toISOString().slice(0, 10);
+}
+
+function Bills({ coupleId, bills }: { coupleId: string | null; bills: BillRow[] }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [dueDay, setDueDay] = useState("1");
-  const today = new Date().getDate();
 
   const add = useMutation({
     mutationFn: async () => {
       const value = Number(amount);
       if (!Number.isFinite(value) || value <= 0) throw new Error("Enter a valid amount");
+      const day = Math.min(28, Math.max(1, Number(dueDay)));
       const { error } = await supabase.from("bills").insert({
         couple_id: coupleId!,
         title: title.trim(),
         amount: value,
-        due_day: Math.min(28, Math.max(1, Number(dueDay))),
+        due_day: day,
+        next_due_on: rollForward(day, new Date(Date.now() - 86_400_000)),
       });
       if (error) throw error;
     },
     onSuccess: () => {
       setTitle("");
       setAmount("");
+      void qc.invalidateQueries({ queryKey: ["bills"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const markPaid = useMutation({
+    mutationFn: async (bill: BillRow) => {
+      const { error } = await supabase
+        .from("bills")
+        .update({
+          last_paid_on: todayISO(),
+          next_due_on: rollForward(bill.due_day, new Date()),
+        })
+        .eq("id", bill.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      playChirp("success");
+      toast.success("Paid — rolled over to next month");
       void qc.invalidateQueries({ queryKey: ["bills"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -621,6 +684,7 @@ function Bills({
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["bills"] }),
   });
+
 
   return (
     <>
@@ -659,19 +723,40 @@ function Bills({
       </Card>
       <ul className="mt-3 space-y-2">
         {bills.map((b) => {
-          const soon = b.due_day >= today && b.due_day - today <= 5;
+          const due = b.next_due_on ?? rollForward(b.due_day, new Date(Date.now() - 86_400_000));
+          const daysLeft = Math.round(
+            (new Date(`${due}T00:00:00`).getTime() - new Date(`${todayISO()}T00:00:00`).getTime()) /
+              86_400_000,
+          );
+          const soon = daysLeft <= 2;
           return (
             <li key={b.id} className="card-soft flex items-center gap-3 p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{b.title}</p>
                 <p className={`text-xs ${soon ? "font-bold text-destructive" : "text-muted-foreground"}`}>
-                  Due on the {b.due_day}
-                  {soon ? " · coming up" : ""}
+                  Due {due}
+                  {daysLeft < 0
+                    ? " · overdue"
+                    : daysLeft === 0
+                      ? " · today"
+                      : soon
+                        ? ` · in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`
+                        : ""}
                 </p>
+                {b.last_paid_on ? (
+                  <p className="text-[10px] text-muted-foreground">Last paid {b.last_paid_on}</p>
+                ) : null}
               </div>
               <span className="text-sm font-bold">
                 <Money value={Number(b.amount)} />
               </span>
+              <button
+                type="button"
+                onClick={() => markPaid.mutate(b)}
+                className="press rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground"
+              >
+                Paid
+              </button>
               <button
                 aria-label="Delete bill"
                 onClick={() => remove.mutate(b.id)}

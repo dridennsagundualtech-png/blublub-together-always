@@ -13,12 +13,16 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authenticated/admin-codes'
+import { Route as AuthenticatedBucketRouteImport } from './routes/_authenticated/bucket'
 import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedCooldownRouteImport } from './routes/_authenticated/cooldown'
 import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
 import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/food'
+import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
+import { Route as AuthenticatedMemoryBookRouteImport } from './routes/_authenticated/memory-book'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
@@ -48,6 +52,11 @@ const AuthenticatedAdminCodesRoute = AuthenticatedAdminCodesRouteImport.update({
   path: '/admin-codes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBucketRoute = AuthenticatedBucketRouteImport.update({
+  id: '/bucket',
+  path: '/bucket',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedBudgetRoute = AuthenticatedBudgetRouteImport.update({
   id: '/budget',
   path: '/budget',
@@ -63,6 +72,11 @@ const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCooldownRoute = AuthenticatedCooldownRouteImport.update({
+  id: '/cooldown',
+  path: '/cooldown',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDatesRoute = AuthenticatedDatesRouteImport.update({
   id: '/dates',
   path: '/dates',
@@ -76,6 +90,16 @@ const AuthenticatedDiaryRoute = AuthenticatedDiaryRouteImport.update({
 const AuthenticatedFoodRoute = AuthenticatedFoodRouteImport.update({
   id: '/food',
   path: '/food',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMapRoute = AuthenticatedMapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMemoryBookRoute = AuthenticatedMemoryBookRouteImport.update({
+  id: '/memory-book',
+  path: '/memory-book',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
@@ -128,12 +152,16 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
+  '/bucket': typeof AuthenticatedBucketRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/cooldown': typeof AuthenticatedCooldownRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
+  '/map': typeof AuthenticatedMapRoute
+  '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -147,12 +175,16 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
+  '/bucket': typeof AuthenticatedBucketRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/cooldown': typeof AuthenticatedCooldownRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
+  '/map': typeof AuthenticatedMapRoute
+  '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
@@ -169,12 +201,16 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/admin-codes': typeof AuthenticatedAdminCodesRoute
+  '/_authenticated/bucket': typeof AuthenticatedBucketRoute
   '/_authenticated/budget': typeof AuthenticatedBudgetRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/cooldown': typeof AuthenticatedCooldownRoute
   '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
   '/_authenticated/food': typeof AuthenticatedFoodRoute
+  '/_authenticated/map': typeof AuthenticatedMapRoute
+  '/_authenticated/memory-book': typeof AuthenticatedMemoryBookRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
@@ -192,12 +228,16 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin-codes'
+    | '/bucket'
     | '/budget'
     | '/calendar'
     | '/chat'
+    | '/cooldown'
     | '/dates'
     | '/diary'
     | '/food'
+    | '/map'
+    | '/memory-book'
     | '/more'
     | '/period'
     | '/photos'
@@ -211,12 +251,16 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/admin-codes'
+    | '/bucket'
     | '/budget'
     | '/calendar'
     | '/chat'
+    | '/cooldown'
     | '/dates'
     | '/diary'
     | '/food'
+    | '/map'
+    | '/memory-book'
     | '/more'
     | '/period'
     | '/photos'
@@ -232,12 +276,16 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/admin-codes'
+    | '/_authenticated/bucket'
     | '/_authenticated/budget'
     | '/_authenticated/calendar'
     | '/_authenticated/chat'
+    | '/_authenticated/cooldown'
     | '/_authenticated/dates'
     | '/_authenticated/diary'
     | '/_authenticated/food'
+    | '/_authenticated/map'
+    | '/_authenticated/memory-book'
     | '/_authenticated/more'
     | '/_authenticated/period'
     | '/_authenticated/photos'
@@ -285,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCodesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/bucket': {
+      id: '/_authenticated/bucket'
+      path: '/bucket'
+      fullPath: '/bucket'
+      preLoaderRoute: typeof AuthenticatedBucketRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/budget': {
       id: '/_authenticated/budget'
       path: '/budget'
@@ -306,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cooldown': {
+      id: '/_authenticated/cooldown'
+      path: '/cooldown'
+      fullPath: '/cooldown'
+      preLoaderRoute: typeof AuthenticatedCooldownRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dates': {
       id: '/_authenticated/dates'
       path: '/dates'
@@ -325,6 +387,20 @@ declare module '@tanstack/react-router' {
       path: '/food'
       fullPath: '/food'
       preLoaderRoute: typeof AuthenticatedFoodRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/map': {
+      id: '/_authenticated/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof AuthenticatedMapRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/memory-book': {
+      id: '/_authenticated/memory-book'
+      path: '/memory-book'
+      fullPath: '/memory-book'
+      preLoaderRoute: typeof AuthenticatedMemoryBookRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/more': {
@@ -395,12 +471,16 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCodesRoute: typeof AuthenticatedAdminCodesRoute
+  AuthenticatedBucketRoute: typeof AuthenticatedBucketRoute
   AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedCooldownRoute: typeof AuthenticatedCooldownRoute
   AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
   AuthenticatedFoodRoute: typeof AuthenticatedFoodRoute
+  AuthenticatedMapRoute: typeof AuthenticatedMapRoute
+  AuthenticatedMemoryBookRoute: typeof AuthenticatedMemoryBookRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
@@ -415,12 +495,16 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCodesRoute: AuthenticatedAdminCodesRoute,
+  AuthenticatedBucketRoute: AuthenticatedBucketRoute,
   AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedCooldownRoute: AuthenticatedCooldownRoute,
   AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
   AuthenticatedFoodRoute: AuthenticatedFoodRoute,
+  AuthenticatedMapRoute: AuthenticatedMapRoute,
+  AuthenticatedMemoryBookRoute: AuthenticatedMemoryBookRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
