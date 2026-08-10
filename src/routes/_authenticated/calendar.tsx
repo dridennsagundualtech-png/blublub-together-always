@@ -148,7 +148,7 @@ function CalendarPage() {
           {cells.map((day, i) => {
             if (day === null) return <span key={`e${i}`} />;
             const iso = isoOf(view.year, view.month, day);
-            const count = byDate.get(iso)?.length ?? 0;
+            const count = byDate.get(iso) ?? 0;
             const isToday = iso === today;
             const isSelected = iso === date;
             return (
