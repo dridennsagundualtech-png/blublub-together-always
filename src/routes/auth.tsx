@@ -84,7 +84,7 @@ function AuthPage() {
   }
 
   return (
-    <main className="page-wash grid min-h-screen place-items-center bg-background px-5 py-10">
+    <main className="page-wash flex min-h-[100svh] items-center justify-center bg-background px-5 py-10">
       <div className="w-full max-w-sm">
         <div className="relative mb-6 text-center">
           <Doodle critter="cat" pose="wave" size={84} className="mx-auto" />
