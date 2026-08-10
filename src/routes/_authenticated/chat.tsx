@@ -60,7 +60,7 @@ function ChatPage() {
           const row = payload.new as { created_by: string; body: string };
           if (row.created_by !== user?.id) {
             playChirp("pop");
-            notify(row.body);
+            notify(row.body || "🎤 Voice note");
           }
         },
       )
