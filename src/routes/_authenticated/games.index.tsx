@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, SectionTitle } from "@/components/ui-kit";
 import { GAME_META, useGameHistory, useSeats, type GameKind } from "@/lib/games";
 
-export const Route = createFileRoute("/_authenticated/games")({
+export const Route = createFileRoute("/_authenticated/games/")({
   head: () => ({
     meta: [
       { title: "Games — BLUBLUB" },
