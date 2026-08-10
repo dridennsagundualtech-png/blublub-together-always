@@ -2,28 +2,12 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { GameShell } from "@/components/games/GameShell";
-import { TicTacToe, newTicTacToe } from "@/components/games/TicTacToe";
-import { Rps, newRps } from "@/components/games/Rps";
-import { Memory, newMemory } from "@/components/games/Memory";
-import { ConnectFour, newConnect4 } from "@/components/games/ConnectFour";
-import { War, newWar } from "@/components/games/War";
+import { GAME_REGISTRY, isGameKind } from "@/components/games/registry";
 import { GAME_META, type GameKind } from "@/lib/games";
-import type { GameViewProps } from "@/components/games/GameShell";
-
-const REGISTRY: Record<
-  GameKind,
-  { view: (p: GameViewProps) => React.ReactElement; newState: () => unknown }
-> = {
-  tictactoe: { view: TicTacToe, newState: newTicTacToe },
-  rps: { view: Rps, newState: newRps },
-  memory: { view: Memory, newState: newMemory },
-  connect4: { view: ConnectFour, newState: newConnect4 },
-  war: { view: War, newState: newWar },
-};
 
 export const Route = createFileRoute("/_authenticated/games/$kind")({
   beforeLoad: ({ params }) => {
-    if (!(params.kind in REGISTRY)) throw notFound();
+    if (!isGameKind(params.kind)) throw notFound();
   },
   head: ({ params }) => {
     const meta = GAME_META[params.kind as GameKind];
@@ -45,11 +29,17 @@ export const Route = createFileRoute("/_authenticated/games/$kind")({
       <p className="card-soft p-5 text-sm text-muted-foreground">That game doesn't exist.</p>
     </AppLayout>
   ),
-  errorComponent: () => (
+  errorComponent: ({ error }) => (
     <AppLayout title="Games" subtitle="Something went wrong" critter="seal">
-      <p className="card-soft p-5 text-sm text-muted-foreground">
-        We couldn't load that game. Please try again.
-      </p>
+      <div className="card-soft space-y-2 p-5">
+        <p className="text-sm text-muted-foreground">
+          We couldn't load that game. Please try again.
+        </p>
+        <p className="break-words text-xs text-muted-foreground/80">{error?.message}</p>
+        <Link to="/games" className="press inline-block text-xs font-bold text-primary">
+          Back to games
+        </Link>
+      </div>
     </AppLayout>
   ),
   component: GameRoute,
@@ -57,8 +47,17 @@ export const Route = createFileRoute("/_authenticated/games/$kind")({
 
 function GameRoute() {
   const { kind } = Route.useParams();
-  const entry = REGISTRY[kind as GameKind]!;
-  const meta = GAME_META[kind as GameKind]!;
+  const meta = GAME_META[kind as GameKind];
+  const entry = isGameKind(kind) ? GAME_REGISTRY[kind] : null;
+
+  if (!entry || !meta) {
+    return (
+      <AppLayout title="Not found" subtitle="No such game" critter="seal">
+        <p className="card-soft p-5 text-sm text-muted-foreground">That game doesn't exist.</p>
+      </AppLayout>
+    );
+  }
+
   const View = entry.view;
 
   return (
