@@ -269,7 +269,9 @@
   /* Fixed attachment triggers repaint jank / stuck taps in mobile webviews
      (Android WebView + iOS Safari) when the on-screen keyboard opens. */
   background-attachment: scroll;
-  background-size: 100% 100vh;
+  /* lvh stays constant while the Android keyboard is open, so the large radial
+     gradients are not re-rasterized on every IME-driven viewport resize. */
+  background-size: 100% 100lvh;
 }
 
 /* Pastel tinted tiles, inspired by soft bento app dashboards. */
