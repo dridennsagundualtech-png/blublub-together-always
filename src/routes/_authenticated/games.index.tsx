@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Dices, Grid3x3, Hand, Layers, Utensils, Sparkles, Heart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui-kit";
+import { useMarkSeen } from "@/lib/badges";
 import { GAME_META, useGameHistory, useSeats, type GameKind } from "@/lib/games";
 
 export const Route = createFileRoute("/_authenticated/games/")({
@@ -33,6 +34,7 @@ const GAMES: { kind: GameKind; icon: typeof Grid3x3 }[] = [
 ];
 
 function GamesPage() {
+  useMarkSeen("games");
   const history = useGameHistory();
   const { nameOf, me } = useSeats(null);
 

@@ -30,7 +30,7 @@ import {
   TextInput,
 } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
-import { todayISO } from "@/lib/badges";
+import { todayISO, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers, useProfile } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/budget")({
@@ -64,6 +64,7 @@ function monthKey(iso: string) {
 }
 
 function BudgetPage() {
+  useMarkSeen("budget");
   const { data: profile } = useProfile();
 
   return (
