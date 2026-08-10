@@ -50,40 +50,65 @@ function Wheel({
   angle: number;
   spinning: boolean;
 }) {
-  const slice = 360 / options.length;
-  const gradient = options
-    .map((_, i) => `${WHEEL_COLORS[i % WHEEL_COLORS.length]} ${i * slice}deg ${(i + 1) * slice}deg`)
-    .join(", ");
+  const n = options.length;
+  const slice = 360 / n;
+  const R = 130;
+  const toXY = (deg: number, r: number) => {
+    const rad = ((deg - 90) * Math.PI) / 180;
+    return [160 + r * Math.cos(rad), 160 + r * Math.sin(rad)] as const;
+  };
 
   return (
-    <div className="relative mx-auto size-64">
-      <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 text-2xl">▼</div>
-      <div
-        className="size-64 rounded-full border-4 border-card shadow-soft"
+    <div className="relative mx-auto size-72">
+      <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 text-2xl leading-none">▼</div>
+      <svg
+        viewBox="0 0 320 320"
+        className="size-72 drop-shadow-sm"
         style={{
-          background: `conic-gradient(${gradient})`,
           transform: `rotate(${angle}deg)`,
           transition: spinning ? "transform 4s cubic-bezier(0.15, 0.9, 0.2, 1)" : "none",
         }}
       >
-        {options.map((o, i) => (
-          <span
-            key={o}
-            className="absolute left-1/2 top-1/2 origin-left text-[11px] font-extrabold text-foreground"
-            style={{
-              transform: `rotate(${i * slice + slice / 2}deg) translateX(26px)`,
-            }}
-          >
-            {o}
-          </span>
-        ))}
-      </div>
-      <div className="absolute left-1/2 top-1/2 grid size-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-card shadow-soft">
-        <Doodle critter="cat" pose="curious" size={40} />
+        {options.map((o, i) => {
+          const start = i * slice;
+          const end = (i + 1) * slice;
+          const [x1, y1] = toXY(start, R);
+          const [x2, y2] = toXY(end, R);
+          const mid = start + slice / 2;
+          return (
+            <g key={o}>
+              <path
+                d={`M160 160 L${x1} ${y1} A${R} ${R} 0 ${slice > 180 ? 1 : 0} 1 ${x2} ${y2} Z`}
+                fill={WHEEL_COLORS[i % WHEEL_COLORS.length]}
+                stroke="var(--color-card)"
+                strokeWidth={2}
+              />
+              <text
+                x={160}
+                y={160}
+                transform={`rotate(${mid} 160 160) translate(0 -${R - 14})`}
+                textAnchor="middle"
+                dominantBaseline="hanging"
+                className="font-display"
+                fontSize={n > 5 ? 13 : 15}
+                fontWeight={800}
+                fill="oklch(0.32 0.05 15)"
+                style={{ letterSpacing: "-0.01em" }}
+              >
+                {o}
+              </text>
+            </g>
+          );
+        })}
+        <circle cx={160} cy={160} r={34} fill="var(--color-card)" stroke="var(--color-border)" strokeWidth={2} />
+      </svg>
+      <div className="pointer-events-none absolute left-1/2 top-1/2 grid size-[68px] -translate-x-1/2 -translate-y-1/2 place-items-center">
+        <Doodle critter="cat" pose="curious" size={48} />
       </div>
     </div>
   );
 }
+
 
 function FoodPage() {
   const [stage, setStage] = useState(0);
