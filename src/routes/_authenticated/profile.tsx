@@ -196,6 +196,95 @@ function ProfilePage() {
         </div>
       </Card>
 
+      <SectionTitle>Our song</SectionTitle>
+      <Card>
+        <div className="flex items-start gap-3">
+          <span className="mt-1 grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+            <Music4 className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1 space-y-3">
+            <Field label="Song title">
+              <TextInput
+                value={songTitle}
+                onChange={(e) => setSongTitle(e.target.value)}
+                placeholder="Iris"
+                maxLength={120}
+              />
+            </Field>
+            <Field label="Artist">
+              <TextInput
+                value={songArtist}
+                onChange={(e) => setSongArtist(e.target.value)}
+                placeholder="Goo Goo Dolls"
+                maxLength={120}
+              />
+            </Field>
+            <PrimaryButton disabled={saveSong.isPending} onClick={() => saveSong.mutate()}>
+              Save our song
+            </PrimaryButton>
+          </div>
+        </div>
+      </Card>
+
+      <SectionTitle>Privacy</SectionTitle>
+      <Card>
+        <div className="flex items-center gap-3">
+          <MapPin className="size-5 shrink-0 text-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">Share my location</p>
+            <p className="text-xs text-muted-foreground">
+              Only you control this. Off by default; your partner sees you only while it&apos;s on.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!!profile?.share_location}
+            aria-label="Share my location"
+            disabled={toggleLocation.isPending}
+            onClick={() => toggleLocation.mutate(!profile?.share_location)}
+            className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
+              profile?.share_location ? "bg-primary" : "bg-muted"
+            }`}
+          >
+            <span
+              className={`block size-6 rounded-full bg-card shadow-soft transition-transform ${
+                profile?.share_location ? "translate-x-5" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </div>
+      </Card>
+
+      <Card className="mt-3">
+        <div className="flex items-center gap-3">
+          <Bell className="size-5 shrink-0 text-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">Anniversary reminders</p>
+            <p className="text-xs text-muted-foreground">
+              Get a nudge 30, 7, 3 and 1 days before — and on the day itself.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              void askNotificationPermission().then((r) =>
+                toast[r === "granted" ? "success" : "message"](
+                  r === "granted" ? "Reminders on 🩷" : "Notifications are blocked in your browser",
+                ),
+              );
+            }}
+            className="press shrink-0 rounded-full bg-accent px-3 py-2 text-xs font-bold text-accent-foreground"
+          >
+            {canNotify() && typeof Notification !== "undefined" && Notification.permission === "granted"
+              ? "Enabled"
+              : "Enable"}
+          </button>
+        </div>
+      </Card>
+
+
+
       <SectionTitle>Your couple space</SectionTitle>
       <Card>
         <p className="text-sm">
