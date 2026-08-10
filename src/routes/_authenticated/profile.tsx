@@ -109,7 +109,7 @@ function ProfilePage() {
             {avatarUrl ? (
               <img src={avatarUrl} alt="Your avatar" className="size-full object-cover" />
             ) : (
-              <Doodle critter="seal" size={56} />
+              <Doodle critter="seal" pose="wave" size={56} />
             )}
           </button>
           <div className="min-w-0">
