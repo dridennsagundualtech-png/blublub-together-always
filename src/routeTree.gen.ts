@@ -24,6 +24,7 @@ import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
+import { Route as AuthenticatedSpicyRouteImport } from './routes/_authenticated/spicy'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
 import { Route as AuthenticatedGamesIndexRouteImport } from './routes/_authenticated/games.index'
 import { Route as AuthenticatedGamesKindRouteImport } from './routes/_authenticated/games.$kind'
@@ -102,6 +103,11 @@ const AuthenticatedQuestionsRoute = AuthenticatedQuestionsRouteImport.update({
   path: '/questions',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSpicyRoute = AuthenticatedSpicyRouteImport.update({
+  id: '/spicy',
+  path: '/spicy',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTodosRoute = AuthenticatedTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
+  '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games/': typeof AuthenticatedGamesIndexRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
+  '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/': typeof AuthenticatedIndexRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
+  '/_authenticated/spicy': typeof AuthenticatedSpicyRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/games/$kind': typeof AuthenticatedGamesKindRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/photos'
     | '/profile'
     | '/questions'
+    | '/spicy'
     | '/todos'
     | '/games/$kind'
     | '/games/'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/photos'
     | '/profile'
     | '/questions'
+    | '/spicy'
     | '/todos'
     | '/'
     | '/games/$kind'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/_authenticated/photos'
     | '/_authenticated/profile'
     | '/_authenticated/questions'
+    | '/_authenticated/spicy'
     | '/_authenticated/todos'
     | '/_authenticated/'
     | '/_authenticated/games/$kind'
@@ -350,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQuestionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/spicy': {
+      id: '/_authenticated/spicy'
+      path: '/spicy'
+      fullPath: '/spicy'
+      preLoaderRoute: typeof AuthenticatedSpicyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/todos': {
       id: '/_authenticated/todos'
       path: '/todos'
@@ -387,6 +406,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
+  AuthenticatedSpicyRoute: typeof AuthenticatedSpicyRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedGamesKindRoute: typeof AuthenticatedGamesKindRoute
@@ -406,6 +426,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
+  AuthenticatedSpicyRoute: AuthenticatedSpicyRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedGamesKindRoute: AuthenticatedGamesKindRoute,
