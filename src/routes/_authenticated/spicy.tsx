@@ -27,15 +27,46 @@ export const Route = createFileRoute("/_authenticated/spicy")({
   component: SpicyPage,
 });
 
-const SIDES = [
-  "Missionary",
-  "Doggy Style",
-  "Spoons",
-  "Cowgirl",
-  "Reverse Cowgirl",
-  "69",
-  "Standing",
-  "Scissors",
+const POSITION_DICE: DieDef[] = [
+  {
+    label: "Focus",
+    tone: "tile-pink",
+    sides: ["Lips", "Neck", "Chest", "Inner thighs", "Back", "Ears", "Hips", "Wild — you pick"],
+  },
+  {
+    label: "Action",
+    tone: "tile-lilac",
+    sides: ["Kiss", "Lick", "Nibble", "Massage", "Tease", "Caress", "Breathe on", "Wild — you pick"],
+  },
+  {
+    label: "Position / pace",
+    tone: "tile-peach",
+    sides: [
+      "Missionary",
+      "From behind",
+      "On top",
+      "Spoons",
+      "Standing",
+      "Slow",
+      "Faster",
+      "Wild — you pick",
+    ],
+  },
+];
+
+const CLOTHING_DICE: DieDef[] = [
+  {
+    label: "Remove",
+    tone: "tile-sky",
+    sides: [
+      "Top / shirt",
+      "Pants / bottoms",
+      "Socks / shoes",
+      "Bra / undershirt",
+      "Underwear",
+      "Wild — partner's choice",
+    ],
+  },
 ];
 
 function SpicyPage() {
