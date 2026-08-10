@@ -194,7 +194,7 @@ function HomePage() {
           <span className="tile-sky grid size-11 place-items-center rounded-2xl text-primary">
             <Images className="size-5" />
           </span>
-          <span className="text-sm font-bold">Timeline</span>
+          <span className="text-sm font-bold">Memories</span>
         </Link>
       </div>
 

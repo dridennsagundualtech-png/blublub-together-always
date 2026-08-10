@@ -36,7 +36,7 @@ const SECTIONS = [
   { to: "/todos", label: "To-dos & Goals", icon: ListChecks, tint: "tile-pink" },
   { to: "/bucket", label: "Bucket List", icon: Sparkles, tint: "tile-lilac" },
   { to: "/dates", label: "Date Night Planner", icon: CalendarHeart, tint: "tile-peach" },
-  { to: "/photos", label: "Photo Timeline", icon: Images, tint: "tile-sky" },
+  { to: "/photos", label: "Memories", icon: Images, tint: "tile-sky" },
   { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question", tint: "tile-lilac" },
   { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart, tint: "tile-pink" },
   { to: "/profile", label: "Profile & Settings", icon: UserCog, tint: "tile-cream" },
