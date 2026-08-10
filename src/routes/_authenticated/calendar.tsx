@@ -39,6 +39,8 @@ function CalendarPage() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(todayISO());
   const [time, setTime] = useState("");
+  const now = new Date();
+  const [view, setView] = useState({ year: now.getFullYear(), month: now.getMonth() });
 
   const { data: events } = useQuery({
     queryKey: ["events", coupleId],
@@ -89,8 +91,124 @@ function CalendarPage() {
   const upcoming = (events ?? []).filter((e) => e.event_date >= today);
   const past = (events ?? []).filter((e) => e.event_date < today).reverse();
 
+  const byDate = useMemo(() => {
+    const map = new Map<string, typeof events>();
+    for (const e of events ?? []) {
+      const list = map.get(e.event_date) ?? [];
+      list.push(e);
+      map.set(e.event_date, list as typeof events);
+    }
+    return map;
+  }, [events]);
+
+  const firstWeekday = new Date(view.year, view.month, 1).getDay();
+  const daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const shiftMonth = (delta: number) => {
+    const d = new Date(view.year, view.month + delta, 1);
+    setView({ year: d.getFullYear(), month: d.getMonth() });
+  };
+
+  const selectedEvents = (events ?? []).filter((e) => e.event_date === date);
+
   return (
     <AppLayout title="Calendar" subtitle="Dates & anniversaries" critter="penguin">
+      <Card>
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            aria-label="Previous month"
+            onClick={() => shiftMonth(-1)}
+            className="press rounded-full p-2 text-muted-foreground"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <p className="font-display text-base font-extrabold">
+            {MONTH_NAMES[view.month]} {view.year}
+          </p>
+          <button
+            type="button"
+            aria-label="Next month"
+            onClick={() => shiftMonth(1)}
+            className="press rounded-full p-2 text-muted-foreground"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {WEEKDAYS.map((w, i) => (
+            <span key={i} className="text-[10px] font-bold uppercase text-muted-foreground">
+              {w}
+            </span>
+          ))}
+          {cells.map((day, i) => {
+            if (day === null) return <span key={`e${i}`} />;
+            const iso = isoOf(view.year, view.month, day);
+            const count = byDate.get(iso)?.length ?? 0;
+            const isToday = iso === today;
+            const isSelected = iso === date;
+            return (
+              <button
+                key={iso}
+                type="button"
+                onClick={() => setDate(iso)}
+                className={`press flex aspect-square flex-col items-center justify-center rounded-2xl text-sm font-semibold ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground"
+                    : isToday
+                      ? "tile-lilac text-primary"
+                      : "bg-muted/60"
+                }`}
+              >
+                {day}
+                <span className="mt-0.5 flex h-1.5 items-center gap-0.5">
+                  {count > 0
+                    ? Array.from({ length: Math.min(count, 3) }, (_, k) => (
+                        <span
+                          key={k}
+                          className={`size-1.5 rounded-full ${isSelected ? "bg-primary-foreground" : "bg-primary"}`}
+                        />
+                      ))
+                    : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
+      <SectionTitle>{date === today ? "Today" : date}</SectionTitle>
+      {selectedEvents.length === 0 ? (
+        <Card className="text-sm text-muted-foreground">Nothing planned on this day yet.</Card>
+      ) : (
+        <ul className="space-y-2">
+          {selectedEvents.map((e) => (
+            <li key={e.id} className="card-soft flex items-center justify-between gap-3 p-4">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{e.title}</p>
+                {e.event_time ? (
+                  <p className="text-xs text-muted-foreground">{e.event_time.slice(0, 5)}</p>
+                ) : null}
+              </div>
+              <button
+                aria-label="Delete event"
+                onClick={() => remove.mutate(e.id)}
+                className="press rounded-full p-2 text-muted-foreground"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <SectionTitle>Add an event</SectionTitle>
       <Card>
         <div className="space-y-3">
           <Field label="What's happening?">
