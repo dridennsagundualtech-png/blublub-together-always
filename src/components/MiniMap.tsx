@@ -67,8 +67,7 @@ export function MiniMap({
   for (let tx = Math.floor(left / TILE); tx <= Math.floor((left + width) / TILE); tx++) {
     for (let ty = Math.floor(top / TILE); ty <= Math.floor((top + height) / TILE); ty++) {
       if (ty < 0 || ty >= maxTile) continue;
-      tiles.push({ x: ((tx % maxTile) + maxTile) % maxTile, y: ty });
-      tiles[tiles.length - 1]!.x = tx; // keep raw x for positioning below
+      tiles.push({ x: tx, y: ty });
     }
   }
 
