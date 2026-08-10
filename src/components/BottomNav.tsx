@@ -1,11 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { Home, CalendarDays, BookHeart, Wallet, MessageCircle, Menu } from "lucide-react";
+import {
+  Home,
+  CalendarDays,
+  BookHeart,
+  Wallet,
+  MessageCircle,
+  Menu,
+  Gamepad2,
+} from "lucide-react";
 import { playChirp } from "@/hooks/use-sound";
 
 const ITEMS = [
   { to: "/", label: "Home", icon: Home },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/diary", label: "Diary", icon: BookHeart },
+  { to: "/games", label: "Games", icon: Gamepad2 },
   { to: "/budget", label: "Budget", icon: Wallet },
   { to: "/chat", label: "Chat", icon: MessageCircle },
   { to: "/more", label: "More", icon: Menu },
@@ -14,7 +23,8 @@ const ITEMS = [
 export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>> }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-      <ul className="mx-auto grid max-w-lg grid-cols-6">
+      <ul className="mx-auto grid max-w-lg grid-cols-7">
+
         {ITEMS.map(({ to, label, icon: Icon }) => (
           <li key={to}>
             <Link

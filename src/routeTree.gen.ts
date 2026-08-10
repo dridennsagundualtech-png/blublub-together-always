@@ -18,12 +18,16 @@ import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
+import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/food'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
+import { Route as AuthenticatedSpicyRouteImport } from './routes/_authenticated/spicy'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
+import { Route as AuthenticatedGamesIndexRouteImport } from './routes/_authenticated/games.index'
+import { Route as AuthenticatedGamesKindRouteImport } from './routes/_authenticated/games.$kind'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -69,6 +73,11 @@ const AuthenticatedDiaryRoute = AuthenticatedDiaryRouteImport.update({
   path: '/diary',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFoodRoute = AuthenticatedFoodRouteImport.update({
+  id: '/food',
+  path: '/food',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   id: '/more',
   path: '/more',
@@ -94,9 +103,24 @@ const AuthenticatedQuestionsRoute = AuthenticatedQuestionsRouteImport.update({
   path: '/questions',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSpicyRoute = AuthenticatedSpicyRouteImport.update({
+  id: '/spicy',
+  path: '/spicy',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTodosRoute = AuthenticatedTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGamesIndexRoute = AuthenticatedGamesIndexRouteImport.update({
+  id: '/games/',
+  path: '/games/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGamesKindRoute = AuthenticatedGamesKindRouteImport.update({
+  id: '/games/$kind',
+  path: '/games/$kind',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
@@ -109,12 +133,16 @@ export interface FileRoutesByFullPath {
   '/chat': typeof AuthenticatedChatRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
+  '/food': typeof AuthenticatedFoodRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
+  '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
+  '/games/$kind': typeof AuthenticatedGamesKindRoute
+  '/games/': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -124,13 +152,17 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
+  '/food': typeof AuthenticatedFoodRoute
   '/more': typeof AuthenticatedMoreRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
+  '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/': typeof AuthenticatedIndexRoute
+  '/games/$kind': typeof AuthenticatedGamesKindRoute
+  '/games': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,13 +174,17 @@ export interface FileRoutesById {
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
+  '/_authenticated/food': typeof AuthenticatedFoodRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
+  '/_authenticated/spicy': typeof AuthenticatedSpicyRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/games/$kind': typeof AuthenticatedGamesKindRoute
+  '/_authenticated/games/': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,12 +197,16 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dates'
     | '/diary'
+    | '/food'
     | '/more'
     | '/period'
     | '/photos'
     | '/profile'
     | '/questions'
+    | '/spicy'
     | '/todos'
+    | '/games/$kind'
+    | '/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -176,13 +216,17 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dates'
     | '/diary'
+    | '/food'
     | '/more'
     | '/period'
     | '/photos'
     | '/profile'
     | '/questions'
+    | '/spicy'
     | '/todos'
     | '/'
+    | '/games/$kind'
+    | '/games'
   id:
     | '__root__'
     | '/_authenticated'
@@ -193,13 +237,17 @@ export interface FileRouteTypes {
     | '/_authenticated/chat'
     | '/_authenticated/dates'
     | '/_authenticated/diary'
+    | '/_authenticated/food'
     | '/_authenticated/more'
     | '/_authenticated/period'
     | '/_authenticated/photos'
     | '/_authenticated/profile'
     | '/_authenticated/questions'
+    | '/_authenticated/spicy'
     | '/_authenticated/todos'
     | '/_authenticated/'
+    | '/_authenticated/games/$kind'
+    | '/_authenticated/games/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -272,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDiaryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/food': {
+      id: '/_authenticated/food'
+      path: '/food'
+      fullPath: '/food'
+      preLoaderRoute: typeof AuthenticatedFoodRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/more': {
       id: '/_authenticated/more'
       path: '/more'
@@ -307,11 +362,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQuestionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/spicy': {
+      id: '/_authenticated/spicy'
+      path: '/spicy'
+      fullPath: '/spicy'
+      preLoaderRoute: typeof AuthenticatedSpicyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/todos': {
       id: '/_authenticated/todos'
       path: '/todos'
       fullPath: '/todos'
       preLoaderRoute: typeof AuthenticatedTodosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/games/': {
+      id: '/_authenticated/games/'
+      path: '/games'
+      fullPath: '/games/'
+      preLoaderRoute: typeof AuthenticatedGamesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/games/$kind': {
+      id: '/_authenticated/games/$kind'
+      path: '/games/$kind'
+      fullPath: '/games/$kind'
+      preLoaderRoute: typeof AuthenticatedGamesKindRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -324,13 +400,17 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
+  AuthenticatedFoodRoute: typeof AuthenticatedFoodRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
+  AuthenticatedSpicyRoute: typeof AuthenticatedSpicyRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedGamesKindRoute: typeof AuthenticatedGamesKindRoute
+  AuthenticatedGamesIndexRoute: typeof AuthenticatedGamesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -340,13 +420,17 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
+  AuthenticatedFoodRoute: AuthenticatedFoodRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
+  AuthenticatedSpicyRoute: AuthenticatedSpicyRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedGamesKindRoute: AuthenticatedGamesKindRoute,
+  AuthenticatedGamesIndexRoute: AuthenticatedGamesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -359,13 +443,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
