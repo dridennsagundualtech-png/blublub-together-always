@@ -2,12 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { Bell, MapPin, Music4 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { compressImage } from "@/lib/image";
 import { useIsAdmin } from "@/lib/admin";
+import { clearMyLocation } from "@/lib/location";
+import { askNotificationPermission, canNotify } from "@/lib/reminders";
 import { useAuthUser, useCouple, usePartner, useProfile, useRefreshSession } from "@/lib/session";
 
 
