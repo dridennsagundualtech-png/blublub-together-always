@@ -172,14 +172,14 @@ function ChatPage() {
           return (
             <div
               key={m.id}
-              className={`max-w-[80%] rounded-3xl px-4 py-2.5 text-sm shadow-soft ${
+              className={`max-w-[80%] px-4 py-2.5 text-sm shadow-soft ${
                 mine
-                  ? "self-end bg-primary text-primary-foreground"
-                  : "self-start bg-card text-card-foreground"
+                  ? "self-end rounded-3xl rounded-br-md bg-primary text-primary-foreground"
+                  : "self-start rounded-3xl rounded-bl-md border border-border bg-cream text-foreground"
               }`}
             >
               {!mine ? (
-                <p className="text-[10px] font-bold uppercase tracking-wide opacity-60">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                   {nameOf(m.created_by)}
                 </p>
               ) : null}
