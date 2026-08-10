@@ -674,6 +674,7 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          location: string | null
           storage_path: string
           taken_on: string
           updated_at: string
@@ -684,6 +685,7 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          location?: string | null
           storage_path: string
           taken_on?: string
           updated_at?: string
@@ -694,6 +696,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          location?: string | null
           storage_path?: string
           taken_on?: string
           updated_at?: string
