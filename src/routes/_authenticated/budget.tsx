@@ -611,34 +611,66 @@ function SavingsGoals({
   );
 }
 
-function Bills({
-  coupleId,
-  bills,
-}: {
-  coupleId: string | null;
-  bills: { id: string; title: string; amount: number; due_day: number; category: string | null }[];
-}) {
+type BillRow = {
+  id: string;
+  title: string;
+  amount: number;
+  due_day: number;
+  category: string | null;
+  next_due_on: string | null;
+  last_paid_on: string | null;
+};
+
+/** Next occurrence of `dueDay` strictly after the given date. */
+function rollForward(dueDay: number, from: Date) {
+  const day = Math.min(28, Math.max(1, dueDay));
+  const next = new Date(from.getFullYear(), from.getMonth(), day);
+  if (next <= from) next.setMonth(next.getMonth() + 1);
+  return next.toISOString().slice(0, 10);
+}
+
+function Bills({ coupleId, bills }: { coupleId: string | null; bills: BillRow[] }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [dueDay, setDueDay] = useState("1");
-  const today = new Date().getDate();
 
   const add = useMutation({
     mutationFn: async () => {
       const value = Number(amount);
       if (!Number.isFinite(value) || value <= 0) throw new Error("Enter a valid amount");
+      const day = Math.min(28, Math.max(1, Number(dueDay)));
       const { error } = await supabase.from("bills").insert({
         couple_id: coupleId!,
         title: title.trim(),
         amount: value,
-        due_day: Math.min(28, Math.max(1, Number(dueDay))),
+        due_day: day,
+        next_due_on: rollForward(day, new Date(Date.now() - 86_400_000)),
       });
       if (error) throw error;
     },
     onSuccess: () => {
       setTitle("");
       setAmount("");
+      void qc.invalidateQueries({ queryKey: ["bills"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const markPaid = useMutation({
+    mutationFn: async (bill: BillRow) => {
+      const { error } = await supabase
+        .from("bills")
+        .update({
+          last_paid_on: todayISO(),
+          next_due_on: rollForward(bill.due_day, new Date()),
+        })
+        .eq("id", bill.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      playChirp("success");
+      toast.success("Paid — rolled over to next month");
       void qc.invalidateQueries({ queryKey: ["bills"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -651,6 +683,7 @@ function Bills({
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["bills"] }),
   });
+
 
   return (
     <>
