@@ -4,7 +4,7 @@ import { CalendarDays, HelpCircle, Images, Music4, PiggyBank, Sparkles } from "l
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
-import { Card, Money, ProgressBar, SectionTitle } from "@/components/ui-kit";
+import { Card, Money, ProgressBar, SectionTitle, StatCard, StatHero } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import { daysTogether, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
