@@ -62,7 +62,7 @@ function AuthPage() {
 
   if (sent) {
     return (
-      <main className="page-wash grid min-h-screen place-items-center bg-background px-5">
+      <main className="page-wash flex min-h-[100svh] items-center justify-center bg-background px-5">
         <div className="card-soft max-w-sm p-7 text-center">
           <Doodle critter="penguin" pose="sleep" size={72} className="mx-auto" />
           <h1 className="mt-3 text-2xl font-extrabold">Check your email</h1>
