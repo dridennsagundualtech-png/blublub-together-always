@@ -38,18 +38,27 @@ export function useGames() {
 
   useEffect(() => {
     if (!coupleId) return;
-    const channel = supabase
-      .channel(`games-${coupleId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "games", filter: `couple_id=eq.${coupleId}` },
-        () => {
-          void qc.invalidateQueries({ queryKey: ["games", coupleId] });
-        },
-      )
-      .subscribe();
+    // Unique topic per subscriber: several components can mount useGames at the
+    // same time (and StrictMode double-mounts), and reusing one topic makes
+    // supabase-js throw "cannot add postgres_changes callbacks after subscribe()".
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    try {
+      channel = supabase
+        .channel(`games-${coupleId}-${Math.random().toString(36).slice(2)}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "games", filter: `couple_id=eq.${coupleId}` },
+          () => {
+            void qc.invalidateQueries({ queryKey: ["games", coupleId] });
+          },
+        )
+        .subscribe();
+    } catch (err) {
+      // Realtime is a nice-to-have; never let it take down the games screen.
+      console.warn("games realtime subscribe failed", err);
+    }
     return () => {
-      void supabase.removeChannel(channel);
+      if (channel) void supabase.removeChannel(channel);
     };
   }, [coupleId, qc]);
 
