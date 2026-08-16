@@ -8,12 +8,13 @@ import { TaskBar } from "@/components/games/TaskBar";
 
 const FACES: { critter: Critter; pose: Pose }[] = [
   { critter: "cat", pose: "default" },
-  { critter: "cat", pose: "sleep" },
-  { critter: "seal", pose: "default" },
+  { critter: "cat", pose: "love" },
+  { critter: "seal", pose: "cheer" },
   { critter: "seal", pose: "wave" },
   { critter: "penguin", pose: "curious" },
   { critter: "penguin", pose: "sleep" },
 ];
+
 
 type MemoryState = {
   deck: number[];

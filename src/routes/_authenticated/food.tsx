@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Plus, RotateCcw, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, GhostButton, PrimaryButton, SectionTitle } from "@/components/ui-kit";
+import { Card, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { playChirp } from "@/hooks/use-sound";
 
 export const Route = createFileRoute("/_authenticated/food")({
   head: () => ({
+
     meta: [
       { title: "Food Roulette — BLUBLUB" },
       {
@@ -109,8 +110,44 @@ function Wheel({
   );
 }
 
+const TABS = [
+  { id: "classic", label: "Classic roulette" },
+  { id: "custom", label: "Your own list" },
+] as const;
 
 function FoodPage() {
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("classic");
+
+  return (
+    <AppLayout title="Food Roulette" subtitle="Narrow it down, one spin at a time" critter="cat">
+      <Link to="/games" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
+        <ArrowLeft className="size-3.5" /> Back to games
+      </Link>
+
+      <div className="card-soft mb-3 grid grid-cols-2 gap-1 p-1.5">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => {
+              playChirp("tap");
+              setTab(t.id);
+            }}
+            className={`press rounded-2xl py-2 text-xs font-extrabold ${
+              tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "classic" ? <ClassicRoulette /> : <CustomRoulette />}
+    </AppLayout>
+  );
+}
+
+function ClassicRoulette() {
   const [stage, setStage] = useState(0);
   const [angle, setAngle] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -145,11 +182,7 @@ function FoodPage() {
   const craving = [results[0], results[1], results[2]].filter(Boolean).join(", ");
 
   return (
-    <AppLayout title="Food Roulette" subtitle="Narrow it down, one spin at a time" critter="cat">
-      <Link to="/games" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
-        <ArrowLeft className="size-3.5" /> Back to games
-      </Link>
-
+    <>
       <Card>
         {done ? (
           <div className="text-center">
@@ -203,6 +236,171 @@ function FoodPage() {
           ))}
         </ul>
       </Card>
-    </AppLayout>
+    </>
   );
 }
+
+const STORAGE_KEY = "blublub.food.custom-options";
+const MAX_OPTIONS = 12;
+
+function CustomRoulette() {
+  const [options, setOptions] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
+  const [angle, setAngle] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  // Keep the list on the device so the spots around you stick between visits.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed: unknown = JSON.parse(raw);
+        if (Array.isArray(parsed)) setOptions(parsed.filter((v): v is string => typeof v === "string"));
+      }
+    } catch {
+      // ignore unreadable storage
+    }
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(options));
+    } catch {
+      // ignore full/blocked storage
+    }
+  }, [options, loaded]);
+
+  function add() {
+    const value = draft.trim();
+    if (!value || options.length >= MAX_OPTIONS) return;
+    if (options.some((o) => o.toLowerCase() === value.toLowerCase())) {
+      setDraft("");
+      return;
+    }
+    playChirp("tap");
+    setOptions((o) => [...o, value]);
+    setDraft("");
+    setResult(null);
+  }
+
+  function remove(name: string) {
+    setOptions((o) => o.filter((v) => v !== name));
+    setResult(null);
+  }
+
+  function spin() {
+    if (spinning || options.length < 2) return;
+    playChirp("pop");
+    const slice = 360 / options.length;
+    const pick = Math.floor(Math.random() * options.length);
+    const target = 360 * (4 + Math.floor(Math.random() * 3)) - (pick * slice + slice / 2);
+    setSpinning(true);
+    setResult(null);
+    setAngle((a) => a + ((target - (a % 360)) + 360) % 360 + 1440);
+    setTimeout(() => {
+      setSpinning(false);
+      setResult(options[pick]!);
+      playChirp("success");
+    }, 4100);
+  }
+
+  return (
+    <>
+      <Card>
+        <p className="mb-3 text-center text-sm font-bold">
+          {options.length < 2 ? "Add at least 2 places or dishes" : "Your wheel"}
+        </p>
+        {options.length >= 2 ? (
+          <Wheel options={options} angle={angle} spinning={spinning} />
+        ) : (
+          <div className="grid place-items-center py-8">
+            <Doodle critter="cat" pose="curious" size={64} />
+          </div>
+        )}
+
+        {result ? (
+          <div className="mt-4 rounded-2xl bg-accent px-4 py-3 text-center text-accent-foreground">
+            <p className="text-xs font-bold uppercase tracking-wide opacity-70">Tonight it's</p>
+            <p className="mt-1 text-xl font-extrabold">{result}</p>
+          </div>
+        ) : null}
+
+        <div className="mt-5">
+          <PrimaryButton disabled={spinning || options.length < 2} onClick={spin}>
+            {spinning ? "Spinning…" : result ? "Spin again" : "Spin the wheel"}
+          </PrimaryButton>
+        </div>
+      </Card>
+
+      <SectionTitle>Your options ({options.length}/{MAX_OPTIONS})</SectionTitle>
+      <Card>
+        <div className="flex gap-2">
+          <TextInput
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                add();
+              }
+            }}
+            placeholder="e.g. Ramen place downstairs"
+            maxLength={40}
+            disabled={options.length >= MAX_OPTIONS}
+          />
+          <button
+            type="button"
+            onClick={add}
+            disabled={!draft.trim() || options.length >= MAX_OPTIONS}
+            className="press grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground disabled:opacity-40"
+            aria-label="Add option"
+          >
+            <Plus className="size-5" />
+          </button>
+        </div>
+
+        {options.length ? (
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {options.map((o) => (
+              <li
+                key={o}
+                className="flex items-center gap-1 rounded-full bg-secondary px-3 py-1.5 text-sm font-bold text-secondary-foreground"
+              >
+                {o}
+                <button
+                  type="button"
+                  onClick={() => remove(o)}
+                  className="press opacity-60"
+                  aria-label={`Remove ${o}`}
+                >
+                  <X className="size-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Add the spots and dishes actually around you — the list is saved on this device.
+          </p>
+        )}
+
+        {options.length ? (
+          <GhostButton
+            className="mt-3 w-full"
+            onClick={() => {
+              setOptions([]);
+              setResult(null);
+            }}
+          >
+            Clear list
+          </GhostButton>
+        ) : null}
+      </Card>
+    </>
+  );
+}
+

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
+import { SignInPanel } from "@/components/SignInPanel";
 import { compressImage } from "@/lib/image";
 import { useIsAdmin } from "@/lib/admin";
 import { clearMyLocation } from "@/lib/location";
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
 });
 
 function ProfilePage() {
+  const navigate = useNavigate();
   const { data: user } = useAuthUser();
   const { data: profile } = useProfile();
   const { data: couple } = useCouple();
@@ -142,12 +144,24 @@ function ProfilePage() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    window.location.href = "/auth";
+    await navigate({ to: "/", replace: true });
+  }
+
+  if (!user) {
+    return (
+      <AppLayout title="Profile" subtitle="Sign in to your space" critter="cat" requireCouple={false}>
+        <p className="mb-3 px-1 text-sm text-muted-foreground">
+          Sign in or create an account to load your couple space.
+        </p>
+        <SignInPanel />
+      </AppLayout>
+    );
   }
 
   return (
     <AppLayout title="Profile" subtitle="You & your space" critter="cat">
       <Card>
+
         <div className="flex items-center gap-4">
           <button
             type="button"
