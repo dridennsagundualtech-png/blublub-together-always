@@ -863,6 +863,120 @@ export type Database = {
         }
         Relationships: []
       }
+      room_items: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          id: string
+          item_key: string
+          rotation: number
+          scale: number
+          updated_at: string
+          x: number
+          y: number
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          item_key: string
+          rotation?: number
+          scale?: number
+          updated_at?: string
+          x?: number
+          y?: number
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          item_key?: string
+          rotation?: number
+          scale?: number
+          updated_at?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_items_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_unlocks: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          item_key: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          item_key: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          item_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_unlocks_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          couple_id: string
+          created_at: string
+          love_points: number
+          plant_growth: number
+          plant_watered_on: string | null
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          love_points?: number
+          plant_growth?: number
+          plant_watered_on?: string | null
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          love_points?: number
+          plant_growth?: number
+          plant_watered_on?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: true
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       savings_contributions: {
         Row: {
           amount: number
