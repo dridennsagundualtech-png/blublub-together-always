@@ -43,6 +43,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
+  const detail =
+    error instanceof Error
+      ? `${error.name}: ${error.message}\n\n${error.stack ?? ""}`
+      : String(error);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -69,10 +74,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Go home
           </a>
         </div>
+        {/* Shown so failures inside a packaged app (Capacitor webview, no devtools) are diagnosable. */}
+        <details className="mt-6 text-left">
+          <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+            Error details
+          </summary>
+          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted p-3 text-left text-[11px] leading-snug text-muted-foreground">
+            {detail}
+          </pre>
+        </details>
       </div>
     </div>
   );
 }
+
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({

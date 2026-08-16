@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { BottomNav } from "@/components/BottomNav";
-import { Doodle, poseFor, type Critter, type Pose } from "@/components/Doodles";
+import { Doodle, critterFor, poseFor, type Critter, type Pose } from "@/components/Doodles";
 import { PairingScreen } from "@/components/CoupleGate";
 import { useBadges } from "@/lib/badges";
-import { useCoupleId, useProfile } from "@/lib/session";
+import { useAuthUser, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
+
 
 export function AppLayout({
   title,
@@ -22,6 +24,7 @@ export function AppLayout({
   children: ReactNode;
 }) {
   const { isLoading } = useProfile();
+  const { data: user } = useAuthUser();
   const coupleId = useCoupleId();
   const { data: badges } = useBadges();
   useLocationPublisher();
@@ -36,23 +39,39 @@ export function AppLayout({
               <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
-          {critter ? (
-            <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-card/80 shadow-soft">
-              <Doodle critter={critter} pose={critterPose ?? poseFor(title)} size={44} />
-            </span>
-          ) : null}
+          <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-card/80 shadow-soft">
+            <Doodle
+              critter={critter ?? critterFor(title)}
+              pose={critterPose ?? poseFor(title)}
+              size={44}
+            />
+          </span>
+
         </header>
+
+        {!user ? (
+          <Link
+            to="/profile"
+            className="card-soft press mt-3 flex items-center justify-between gap-3 px-4 py-3"
+          >
+            <span className="text-xs text-muted-foreground">
+              You&apos;re browsing signed out — your data won&apos;t load.
+            </span>
+            <span className="shrink-0 text-xs font-bold text-primary">Sign in</span>
+          </Link>
+        ) : null}
 
         <div className="mt-4">
           {isLoading ? (
             <div className="card-soft p-5 text-sm text-muted-foreground">Loading…</div>
-          ) : requireCouple && !coupleId ? (
+          ) : user && requireCouple && !coupleId ? (
             <PairingScreen />
           ) : (
             children
           )}
         </div>
       </div>
+
       <BottomNav
         badges={{
           "/chat": badges?.unreadChat,
