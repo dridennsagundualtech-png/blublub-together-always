@@ -33,6 +33,7 @@ import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedWellbeingRouteImport } from './routes/_authenticated/wellbeing'
 import { Route as AuthenticatedGamesIndexRouteImport } from './routes/_authenticated/games.index'
 import { Route as AuthenticatedGamesKindRouteImport } from './routes/_authenticated/games.$kind'
+import { Route as AuthenticatedGamesArcadeRouteImport } from './routes/_authenticated/games.arcade'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -153,6 +154,12 @@ const AuthenticatedGamesKindRoute = AuthenticatedGamesKindRouteImport.update({
   path: '/games/$kind',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGamesArcadeRoute =
+  AuthenticatedGamesArcadeRouteImport.update({
+    id: '/games/arcade',
+    path: '/games/arcade',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/todos': typeof AuthenticatedTodosRoute
   '/wellbeing': typeof AuthenticatedWellbeingRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
+  '/games/arcade': typeof AuthenticatedGamesArcadeRoute
   '/games/': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -202,6 +210,7 @@ export interface FileRoutesByTo {
   '/wellbeing': typeof AuthenticatedWellbeingRoute
   '/': typeof AuthenticatedIndexRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
+  '/games/arcade': typeof AuthenticatedGamesArcadeRoute
   '/games': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRoutesById {
@@ -229,6 +238,7 @@ export interface FileRoutesById {
   '/_authenticated/wellbeing': typeof AuthenticatedWellbeingRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/games/$kind': typeof AuthenticatedGamesKindRoute
+  '/_authenticated/games/arcade': typeof AuthenticatedGamesArcadeRoute
   '/_authenticated/games/': typeof AuthenticatedGamesIndexRoute
 }
 export interface FileRouteTypes {
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/todos'
     | '/wellbeing'
     | '/games/$kind'
+    | '/games/arcade'
     | '/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/wellbeing'
     | '/'
     | '/games/$kind'
+    | '/games/arcade'
     | '/games'
   id:
     | '__root__'
@@ -307,6 +319,7 @@ export interface FileRouteTypes {
     | '/_authenticated/wellbeing'
     | '/_authenticated/'
     | '/_authenticated/games/$kind'
+    | '/_authenticated/games/arcade'
     | '/_authenticated/games/'
   fileRoutesById: FileRoutesById
 }
@@ -485,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGamesKindRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/games/arcade': {
+      id: '/_authenticated/games/arcade'
+      path: '/games/arcade'
+      fullPath: '/games/arcade'
+      preLoaderRoute: typeof AuthenticatedGamesArcadeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -510,6 +530,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWellbeingRoute: typeof AuthenticatedWellbeingRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedGamesKindRoute: typeof AuthenticatedGamesKindRoute
+  AuthenticatedGamesArcadeRoute: typeof AuthenticatedGamesArcadeRoute
   AuthenticatedGamesIndexRoute: typeof AuthenticatedGamesIndexRoute
 }
 
@@ -535,6 +556,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWellbeingRoute: AuthenticatedWellbeingRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedGamesKindRoute: AuthenticatedGamesKindRoute,
+  AuthenticatedGamesArcadeRoute: AuthenticatedGamesArcadeRoute,
   AuthenticatedGamesIndexRoute: AuthenticatedGamesIndexRoute,
 }
 

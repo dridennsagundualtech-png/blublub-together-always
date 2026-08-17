@@ -120,7 +120,7 @@ function FoodPage() {
 
   return (
     <AppLayout title="Food Roulette" subtitle="Narrow it down, one spin at a time" critter="cat">
-      <Link to="/games" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
+      <Link to="/games/arcade" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
         <ArrowLeft className="size-3.5" /> Back to games
       </Link>
 

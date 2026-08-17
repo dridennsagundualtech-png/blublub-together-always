@@ -211,10 +211,11 @@ export function useRoomActions() {
 
   const transform = useMutation({
     mutationFn: async (v: { id: string; rotation?: number; scale?: number }) => {
-      const patch: Record<string, number> = {};
+      const patch: { rotation?: number; scale?: number } = {};
       if (v.rotation !== undefined) patch.rotation = v.rotation;
       if (v.scale !== undefined) patch.scale = v.scale;
       const { error } = await supabase.from("room_items").update(patch).eq("id", v.id);
+
       if (error) throw error;
     },
     onSuccess: () => void refreshItems(),

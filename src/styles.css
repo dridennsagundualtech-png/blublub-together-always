@@ -331,3 +331,29 @@
 @utility dice-settled {
   animation: dice-settle 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
+
+/* --- Our Room: gentle, object-scoped idle motion --- */
+@keyframes room-float {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, calc(-50% - 5px)); }
+}
+
+@keyframes room-sway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50% { transform: rotate(2.5deg); }
+}
+
+@keyframes room-pop {
+  0% { opacity: 0; transform: translate(-50%, 6px) scale(0.9); }
+  15% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -14px) scale(0.98); }
+}
+
+.room-float { animation: room-float 4.2s ease-in-out infinite; }
+.room-sway { animation: room-sway 3.4s ease-in-out infinite; transform-origin: 50% 90%; }
+.room-pop { animation: room-pop 2.2s ease-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .room-float, .room-sway { animation: none; }
+}
