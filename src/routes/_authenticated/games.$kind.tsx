@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/games/$kind")({
           We couldn't load that game. Please try again.
         </p>
         <p className="break-words text-xs text-muted-foreground/80">{error?.message}</p>
-        <Link to="/games" className="press inline-block text-xs font-bold text-primary">
+        <Link to="/games/arcade" className="press inline-block text-xs font-bold text-primary">
           Back to games
         </Link>
       </div>
@@ -62,7 +62,7 @@ function GameRoute() {
 
   return (
     <AppLayout title={meta.label} subtitle={meta.blurb} critter="cat">
-      <Link to="/games" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
+      <Link to="/games/arcade" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
         <ArrowLeft className="size-3.5" /> All games
       </Link>
       <GameShell kind={kind as GameKind} newState={entry.newState}>
