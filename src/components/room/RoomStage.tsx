@@ -166,6 +166,8 @@ export function RoomStage({
         if (!meta) return null;
         const live = drag && drag.id === it.id ? drag : null;
         const selected = selectedId === it.id;
+        const art = artFor(it.item_key);
+        const px = meta.size * Number(it.scale) * 1.5;
         return (
           <button
             key={it.id}
@@ -179,7 +181,7 @@ export function RoomStage({
             style={{
               left: `${live ? live.x : Number(it.x)}%`,
               top: `${live ? live.y : Number(it.y)}%`,
-              fontSize: meta.size * Number(it.scale) * 0.6,
+              fontSize: art ? undefined : meta.size * Number(it.scale) * 0.6,
               transform: `translate(-50%,-50%) rotate(${it.rotation}deg)`,
             }}
             className={cn(
@@ -189,10 +191,21 @@ export function RoomStage({
               live && "scale-105",
             )}
           >
-            <span className="drop-shadow">{meta.glyph}</span>
+            {art ? (
+              <img
+                src={art}
+                alt={meta.label}
+                draggable={false}
+                style={{ width: px }}
+                className="pointer-events-none max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.12)]"
+              />
+            ) : (
+              <span className="drop-shadow">{meta.glyph}</span>
+            )}
           </button>
         );
       })}
+
 
       {/* Selected item controls */}
       {editing && selectedId ? (
