@@ -2,6 +2,8 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
 import { RotateCw, Trash2 } from "lucide-react";
 import { Doodle, type Critter } from "@/components/Doodles";
 import { ITEM_BY_KEY, plantStage, type RoomItemRow } from "@/lib/room";
+import { artFor } from "@/lib/room-art";
+
 import { cn } from "@/lib/utils";
 
 type Bubble = { id: number; x: number; y: number; text: string };
