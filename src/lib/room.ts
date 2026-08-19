@@ -38,12 +38,15 @@ export const CATEGORY_LABELS: Record<RoomCategory, string> = {
 export const ROOM_CATALOG: RoomItem[] = [
   // Furniture
   { key: "bed", label: "Cosy bed", glyph: "🛏️", category: "furniture", cost: 0, size: 88 },
+  { key: "star-bed", label: "Starry bed", glyph: "🛏️", category: "furniture", cost: 120, size: 88 },
   { key: "couch", label: "Cosy couch", glyph: "🛋️", category: "furniture", cost: 50, size: 84 },
   { key: "chair", label: "Little chair", glyph: "🪑", category: "furniture", cost: 30, size: 60 },
   { key: "table", label: "Small table", glyph: "🪵", category: "furniture", cost: 40, size: 64 },
+  { key: "coffee-table", label: "Coffee table", glyph: "🍰", category: "furniture", cost: 70, size: 70 },
   { key: "bookshelf", label: "Bookshelf", glyph: "📚", category: "furniture", cost: 80, size: 68 },
   { key: "cabinet", label: "Cabinet", glyph: "🗄️", category: "furniture", cost: 90, size: 66 },
-  { key: "desk", label: "Small desk", glyph: "🖥️", category: "furniture", cost: 110, size: 64 },
+  { key: "desk", label: "TV stand", glyph: "🖥️", category: "furniture", cost: 110, size: 74 },
+
   // Plants
   { key: "starter-plant", label: "Starter plant", glyph: "🌱", category: "plants", cost: 0, size: 44 },
   { key: "potted-plant", label: "Potted plant", glyph: "🪴", category: "plants", cost: 60, size: 52 },
