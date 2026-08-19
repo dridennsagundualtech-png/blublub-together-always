@@ -16,7 +16,9 @@ import {
   useRoomUnlocks,
   type RoomCategory,
 } from "@/lib/room";
+import { artFor } from "@/lib/room-art";
 import { playChirp } from "@/hooks/use-sound";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/games/")({
@@ -246,7 +248,16 @@ function RoomPage() {
                         !owned && !affordable && "opacity-60",
                       )}
                     >
-                      <span className="text-2xl">{item.glyph}</span>
+                      {artFor(item.key) ? (
+                        <img
+                          src={artFor(item.key)}
+                          alt={item.label}
+                          className="h-12 w-auto max-w-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-2xl">{item.glyph}</span>
+                      )}
+
                       <span className="text-[11px] font-bold leading-tight">{item.label}</span>
                       <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
                         {owned ? (

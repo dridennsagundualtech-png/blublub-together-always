@@ -38,12 +38,15 @@ export const CATEGORY_LABELS: Record<RoomCategory, string> = {
 export const ROOM_CATALOG: RoomItem[] = [
   // Furniture
   { key: "bed", label: "Cosy bed", glyph: "🛏️", category: "furniture", cost: 0, size: 88 },
+  { key: "star-bed", label: "Starry bed", glyph: "🛏️", category: "furniture", cost: 120, size: 88 },
   { key: "couch", label: "Cosy couch", glyph: "🛋️", category: "furniture", cost: 50, size: 84 },
   { key: "chair", label: "Little chair", glyph: "🪑", category: "furniture", cost: 30, size: 60 },
   { key: "table", label: "Small table", glyph: "🪵", category: "furniture", cost: 40, size: 64 },
+  { key: "coffee-table", label: "Coffee table", glyph: "🍰", category: "furniture", cost: 70, size: 70 },
   { key: "bookshelf", label: "Bookshelf", glyph: "📚", category: "furniture", cost: 80, size: 68 },
   { key: "cabinet", label: "Cabinet", glyph: "🗄️", category: "furniture", cost: 90, size: 66 },
-  { key: "desk", label: "Small desk", glyph: "🖥️", category: "furniture", cost: 110, size: 64 },
+  { key: "desk", label: "TV stand", glyph: "🖥️", category: "furniture", cost: 110, size: 74 },
+
   // Plants
   { key: "starter-plant", label: "Starter plant", glyph: "🌱", category: "plants", cost: 0, size: 44 },
   { key: "potted-plant", label: "Potted plant", glyph: "🪴", category: "plants", cost: 60, size: 52 },
@@ -56,10 +59,12 @@ export const ROOM_CATALOG: RoomItem[] = [
   { key: "window", label: "Extra window", glyph: "🪟", category: "wall", cost: 120, size: 64, wall: true },
   { key: "lantern", label: "Hanging lantern", glyph: "🏮", category: "wall", cost: 90, size: 46, wall: true },
   // Floor
-  { key: "rug", label: "Soft rug", glyph: "🟫", category: "floor", cost: 50, size: 80 },
-  { key: "lamp", label: "Warm lamp", glyph: "🪔", category: "floor", cost: 45, size: 48 },
+  { key: "rug", label: "Soft rug", glyph: "🟫", category: "floor", cost: 50, size: 96 },
+  { key: "lamp", label: "Warm lamp", glyph: "🪔", category: "floor", cost: 45, size: 56 },
   { key: "beanbag", label: "Bean bag", glyph: "🟣", category: "floor", cost: 65, size: 60 },
+  { key: "book-stack", label: "Book stack", glyph: "📚", category: "floor", cost: 40, size: 44 },
   { key: "guitar", label: "Guitar", glyph: "🎸", category: "floor", cost: 100, size: 56 },
+
   // Mascot items
   { key: "penguin-plushie", label: "Penguin plushie", glyph: "🐧", category: "mascot", cost: 100, size: 48 },
   { key: "seal-plushie", label: "Seal plushie", glyph: "🦭", category: "mascot", cost: 100, size: 48 },
