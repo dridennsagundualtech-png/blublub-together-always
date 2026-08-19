@@ -90,43 +90,42 @@ export function RoomStage({
       style={{ touchAction: "none" }}
     >
       {/* Back wall */}
-      <div className="tile-lilac absolute inset-x-0 top-0 h-[62%]">
-        <div className="absolute inset-0 opacity-60 [background:repeating-linear-gradient(90deg,transparent_0_28px,color-mix(in_oklab,var(--lavender)_18%,transparent)_28px_30px)]" />
-        {/* Window */}
-        <div className="tile-sky absolute left-[8%] top-[14%] h-[34%] w-[26%] rounded-2xl border border-border shadow-soft">
-          <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-          <div className="absolute inset-y-0 left-1/2 w-px bg-border" />
-          <span className="absolute right-2 top-2 text-lg">☀️</span>
-        </div>
-        {/* Shelf */}
-        <div className="absolute right-[10%] top-[20%] w-[30%]">
-          <div className="flex items-end justify-center gap-1 pb-1 text-lg">
-            <span>📗</span>
-            <span>🕯️</span>
-            <span>🐚</span>
-          </div>
-          <div className="tile-cream h-2 w-full rounded-full border border-border" />
-        </div>
+      <div className="absolute inset-x-0 top-0 h-[62%] bg-[linear-gradient(180deg,color-mix(in_oklab,var(--lavender)_28%,white)_0%,color-mix(in_oklab,var(--blush,var(--lavender))_16%,white)_100%)]">
+        <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(90deg,transparent_0_38px,color-mix(in_oklab,var(--lavender)_22%,transparent)_38px_41px)]" />
+        <img
+          src={artFor("window")}
+          alt=""
+          className="pointer-events-none absolute left-[6%] top-[8%] w-[30%] select-none"
+        />
+        <img
+          src={artFor("bookshelf")}
+          alt=""
+          className="pointer-events-none absolute right-[6%] top-[28%] w-[28%] select-none"
+        />
       </div>
 
       {/* Floor */}
-      <div className="tile-peach absolute inset-x-0 bottom-0 h-[38%]">
-        <div className="absolute inset-0 opacity-50 [background:repeating-linear-gradient(115deg,transparent_0_34px,color-mix(in_oklab,var(--honey)_22%,transparent)_34px_36px)]" />
+      <div className="absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(180deg,color-mix(in_oklab,var(--honey,var(--peach))_26%,white)_0%,color-mix(in_oklab,var(--peach)_34%,white)_100%)]">
+        <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(115deg,transparent_0_40px,color-mix(in_oklab,var(--honey,var(--peach))_26%,transparent)_40px_43px)]" />
       </div>
 
       {/* Built-in cosy furniture */}
-      <div className="pointer-events-none absolute left-[8%] top-[44%] w-[30%]">
-        <div className="tile-pink h-10 rounded-2xl border border-border shadow-soft" />
-        <div className="tile-cream -mt-2 mx-2 h-6 rounded-xl border border-border" />
-      </div>
-      <div className="pointer-events-none absolute right-[6%] top-[40%] w-[32%]">
-        <div className="tile-cream h-14 rounded-3xl border border-border shadow-soft" />
-        <div className="tile-pink -mt-3 mx-3 h-5 rounded-full border border-border" />
-      </div>
-      <div className="pointer-events-none absolute left-[44%] top-[66%] w-[16%]">
-        <div className="tile-cream h-3 rounded-full border border-border shadow-soft" />
-        <div className="mx-auto h-6 w-1.5 rounded-full bg-border" />
-      </div>
+      <img
+        src={artFor("rug")}
+        alt=""
+        className="pointer-events-none absolute bottom-[8%] left-1/2 w-[56%] -translate-x-1/2 select-none"
+      />
+      <img
+        src={artFor("couch")}
+        alt=""
+        className="pointer-events-none absolute left-[4%] top-[40%] w-[42%] select-none drop-shadow-[0_8px_8px_rgba(0,0,0,0.10)]"
+      />
+      <img
+        src={artFor("lamp")}
+        alt=""
+        className="pointer-events-none absolute right-[8%] top-[42%] w-[13%] select-none"
+      />
+
 
       {/* Shared plant */}
       <button
