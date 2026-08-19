@@ -59,10 +59,12 @@ export const ROOM_CATALOG: RoomItem[] = [
   { key: "window", label: "Extra window", glyph: "🪟", category: "wall", cost: 120, size: 64, wall: true },
   { key: "lantern", label: "Hanging lantern", glyph: "🏮", category: "wall", cost: 90, size: 46, wall: true },
   // Floor
-  { key: "rug", label: "Soft rug", glyph: "🟫", category: "floor", cost: 50, size: 80 },
-  { key: "lamp", label: "Warm lamp", glyph: "🪔", category: "floor", cost: 45, size: 48 },
+  { key: "rug", label: "Soft rug", glyph: "🟫", category: "floor", cost: 50, size: 96 },
+  { key: "lamp", label: "Warm lamp", glyph: "🪔", category: "floor", cost: 45, size: 56 },
   { key: "beanbag", label: "Bean bag", glyph: "🟣", category: "floor", cost: 65, size: 60 },
+  { key: "book-stack", label: "Book stack", glyph: "📚", category: "floor", cost: 40, size: 44 },
   { key: "guitar", label: "Guitar", glyph: "🎸", category: "floor", cost: 100, size: 56 },
+
   // Mascot items
   { key: "penguin-plushie", label: "Penguin plushie", glyph: "🐧", category: "mascot", cost: 100, size: 48 },
   { key: "seal-plushie", label: "Seal plushie", glyph: "🦭", category: "mascot", cost: 100, size: 48 },
