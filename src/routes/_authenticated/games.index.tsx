@@ -16,7 +16,9 @@ import {
   useRoomUnlocks,
   type RoomCategory,
 } from "@/lib/room";
+import { artFor } from "@/lib/room-art";
 import { playChirp } from "@/hooks/use-sound";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/games/")({
