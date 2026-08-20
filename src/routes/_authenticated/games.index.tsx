@@ -6,7 +6,6 @@ import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/compo
 import { RoomStage } from "@/components/room/RoomStage";
 import { useBadges } from "@/lib/badges";
 import {
-  ITEM_BY_KEY,
   ROOM_CATALOG,
   ROOM_THEMES,
   THEME_LABELS,

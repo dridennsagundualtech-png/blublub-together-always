@@ -126,13 +126,12 @@ export function useRoomActions() {
 
   const place = useMutation({
     mutationFn: async (v: { itemKey: string; x?: number; y?: number }) => {
-      const item = ITEM_BY_KEY.get(v.itemKey);
       const { error } = await supabase.from("room_items").insert({
         couple_id: coupleId!,
         created_by: user!.id,
         item_key: v.itemKey,
         x: v.x ?? 50,
-        y: v.y ?? (item?.wall ? 28 : 70),
+        y: v.y ?? 70,
       });
       if (error) throw error;
     },
