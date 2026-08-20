@@ -6,17 +6,16 @@ import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/compo
 import { RoomStage } from "@/components/room/RoomStage";
 import { useBadges } from "@/lib/badges";
 import {
-  CATEGORY_LABELS,
-  ITEM_BY_KEY,
   ROOM_CATALOG,
+  ROOM_THEMES,
+  THEME_LABELS,
   plantStage,
   useRoom,
   useRoomActions,
   useRoomItems,
   useRoomUnlocks,
-  type RoomCategory,
+  type RoomTheme,
 } from "@/lib/room";
-import { artFor } from "@/lib/room-art";
 import { playChirp } from "@/hooks/use-sound";
 
 import { cn } from "@/lib/utils";
@@ -41,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/games/")({
   component: RoomPage,
 });
 
-const CATEGORIES: RoomCategory[] = ["furniture", "plants", "wall", "floor", "mascot", "special"];
+const CATEGORIES = ROOM_THEMES;
 
 function RoomPage() {
   const { data: badges } = useBadges();
@@ -53,7 +52,7 @@ function RoomPage() {
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [category, setCategory] = useState<RoomCategory>("furniture");
+  const [category, setCategory] = useState<RoomTheme>(ROOM_THEMES[0]!);
   const [note, setNote] = useState<string | null>(null);
 
   const unlocked = useMemo(() => new Set(unlocks ?? []), [unlocks]);
@@ -207,13 +206,13 @@ function RoomPage() {
                     category === c ? "bg-primary text-primary-foreground" : "bg-card",
                   )}
                 >
-                  {CATEGORY_LABELS[c]}
+                  {THEME_LABELS[c]}
                 </button>
               ))}
             </div>
 
             <ul className="grid grid-cols-3 gap-2">
-              {ROOM_CATALOG.filter((i) => i.category === category).map((item) => {
+              {ROOM_CATALOG.filter((i) => i.theme === category).map((item) => {
                 const owned = item.cost === 0 || unlocked.has(item.key);
                 const affordable = points >= item.cost;
                 return (
@@ -248,15 +247,12 @@ function RoomPage() {
                         !owned && !affordable && "opacity-60",
                       )}
                     >
-                      {artFor(item.key) ? (
-                        <img
-                          src={artFor(item.key)}
-                          alt={item.label}
-                          className="h-12 w-auto max-w-full object-contain"
-                        />
-                      ) : (
-                        <span className="text-2xl">{item.glyph}</span>
-                      )}
+                      <img
+                        src={item.url}
+                        alt={item.label}
+                        loading="lazy"
+                        className="h-12 w-auto max-w-full object-contain"
+                      />
 
                       <span className="text-[11px] font-bold leading-tight">{item.label}</span>
                       <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
@@ -283,8 +279,7 @@ function RoomPage() {
 
       {placed.length > 0 ? (
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          {placed.length} item{placed.length === 1 ? "" : "s"} placed ·{" "}
-          {placed.filter((p) => ITEM_BY_KEY.get(p.item_key)?.wall).length} on the wall
+          {placed.length} item{placed.length === 1 ? "" : "s"} placed
         </p>
       ) : null}
     </AppLayout>
