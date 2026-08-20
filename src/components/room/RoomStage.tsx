@@ -2,7 +2,6 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
 import { RotateCw, Trash2 } from "lucide-react";
 import { Doodle, type Critter } from "@/components/Doodles";
 import { ITEM_BY_KEY, plantStage, type RoomItemRow } from "@/lib/room";
-import { artFor } from "@/lib/room-art";
 
 import { cn } from "@/lib/utils";
 
@@ -92,40 +91,12 @@ export function RoomStage({
       {/* Back wall */}
       <div className="absolute inset-x-0 top-0 h-[62%] bg-[linear-gradient(180deg,color-mix(in_oklab,var(--lavender)_28%,white)_0%,color-mix(in_oklab,var(--blush,var(--lavender))_16%,white)_100%)]">
         <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(90deg,transparent_0_38px,color-mix(in_oklab,var(--lavender)_22%,transparent)_38px_41px)]" />
-        <img
-          src={artFor("window")}
-          alt=""
-          className="pointer-events-none absolute left-[6%] top-[8%] w-[30%] select-none"
-        />
-        <img
-          src={artFor("bookshelf")}
-          alt=""
-          className="pointer-events-none absolute right-[6%] top-[28%] w-[28%] select-none"
-        />
       </div>
 
       {/* Floor */}
       <div className="absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(180deg,color-mix(in_oklab,var(--honey,var(--peach))_26%,white)_0%,color-mix(in_oklab,var(--peach)_34%,white)_100%)]">
         <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(115deg,transparent_0_40px,color-mix(in_oklab,var(--honey,var(--peach))_26%,transparent)_40px_43px)]" />
       </div>
-
-      {/* Built-in cosy furniture */}
-      <img
-        src={artFor("rug")}
-        alt=""
-        className="pointer-events-none absolute bottom-[8%] left-1/2 w-[56%] -translate-x-1/2 select-none"
-      />
-      <img
-        src={artFor("couch")}
-        alt=""
-        className="pointer-events-none absolute left-[4%] top-[40%] w-[42%] select-none drop-shadow-[0_8px_8px_rgba(0,0,0,0.10)]"
-      />
-      <img
-        src={artFor("lamp")}
-        alt=""
-        className="pointer-events-none absolute right-[8%] top-[42%] w-[13%] select-none"
-      />
-
 
       {/* Shared plant */}
       <button
@@ -167,7 +138,7 @@ export function RoomStage({
         if (!meta) return null;
         const live = drag && drag.id === it.id ? drag : null;
         const selected = selectedId === it.id;
-        const art = artFor(it.item_key);
+        const art = meta.url;
         const px = meta.size * Number(it.scale) * 1.5;
         return (
           <button
@@ -177,12 +148,11 @@ export function RoomStage({
             onClick={(e) => {
               e.stopPropagation();
               if (editing) onSelect(it.id);
-              else say(Number(it.x), Number(it.y), `${meta.glyph} ${meta.label}`);
+              else say(Number(it.x), Number(it.y), meta.label);
             }}
             style={{
               left: `${live ? live.x : Number(it.x)}%`,
               top: `${live ? live.y : Number(it.y)}%`,
-              fontSize: art ? undefined : meta.size * Number(it.scale) * 0.6,
               transform: `translate(-50%,-50%) rotate(${it.rotation}deg)`,
             }}
             className={cn(
@@ -192,17 +162,13 @@ export function RoomStage({
               live && "scale-105",
             )}
           >
-            {art ? (
-              <img
+            <img
                 src={art}
                 alt={meta.label}
                 draggable={false}
                 style={{ width: px }}
                 className="pointer-events-none max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.12)]"
               />
-            ) : (
-              <span className="drop-shadow">{meta.glyph}</span>
-            )}
           </button>
         );
       })}
