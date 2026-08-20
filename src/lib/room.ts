@@ -7,80 +7,16 @@ import { useAuthUser, useCoupleId } from "@/lib/session";
 export type RoomRow = Tables<"rooms">;
 export type RoomItemRow = Tables<"room_items">;
 
-export type RoomCategory =
-  | "furniture"
-  | "plants"
-  | "wall"
-  | "floor"
-  | "mascot"
-  | "special";
+export {
+  ROOM_CATALOG,
+  ITEM_BY_KEY,
+  THEME_LABELS,
+  ROOM_THEMES,
+  type RoomItem,
+  type RoomTheme,
+} from "@/lib/room-catalog";
+import { ITEM_BY_KEY } from "@/lib/room-catalog";
 
-export type RoomItem = {
-  key: string;
-  label: string;
-  glyph: string;
-  category: RoomCategory;
-  cost: number;
-  size: number;
-  /** Items that hang on the wall default to the upper half of the room. */
-  wall?: boolean;
-};
-
-export const CATEGORY_LABELS: Record<RoomCategory, string> = {
-  furniture: "Furniture",
-  plants: "Plants",
-  wall: "Wall decor",
-  floor: "Floor decor",
-  mascot: "Mascot items",
-  special: "Couple items",
-};
-
-export const ROOM_CATALOG: RoomItem[] = [
-  // Furniture
-  { key: "bed", label: "Cosy bed", glyph: "🛏️", category: "furniture", cost: 0, size: 88 },
-  { key: "star-bed", label: "Starry bed", glyph: "🛏️", category: "furniture", cost: 120, size: 88 },
-  { key: "couch", label: "Cosy couch", glyph: "🛋️", category: "furniture", cost: 50, size: 84 },
-  { key: "chair", label: "Little chair", glyph: "🪑", category: "furniture", cost: 30, size: 60 },
-  { key: "table", label: "Small table", glyph: "🪵", category: "furniture", cost: 40, size: 64 },
-  { key: "coffee-table", label: "Coffee table", glyph: "🍰", category: "furniture", cost: 70, size: 70 },
-  { key: "bookshelf", label: "Bookshelf", glyph: "📚", category: "furniture", cost: 80, size: 68 },
-  { key: "cabinet", label: "Cabinet", glyph: "🗄️", category: "furniture", cost: 90, size: 66 },
-  { key: "desk", label: "TV stand", glyph: "🖥️", category: "furniture", cost: 110, size: 74 },
-
-  // Plants
-  { key: "starter-plant", label: "Starter plant", glyph: "🌱", category: "plants", cost: 0, size: 44 },
-  { key: "potted-plant", label: "Potted plant", glyph: "🪴", category: "plants", cost: 60, size: 52 },
-  { key: "flower-pot", label: "Flower pot", glyph: "🌷", category: "plants", cost: 150, size: 48 },
-  { key: "cactus", label: "Tiny cactus", glyph: "🌵", category: "plants", cost: 70, size: 44 },
-  // Wall
-  { key: "painting", label: "Painting", glyph: "🖼️", category: "wall", cost: 60, size: 56, wall: true },
-  { key: "poster", label: "Poster", glyph: "🪧", category: "wall", cost: 40, size: 52, wall: true },
-  { key: "clock", label: "Wall clock", glyph: "🕰️", category: "wall", cost: 70, size: 48, wall: true },
-  { key: "window", label: "Extra window", glyph: "🪟", category: "wall", cost: 120, size: 64, wall: true },
-  { key: "lantern", label: "Hanging lantern", glyph: "🏮", category: "wall", cost: 90, size: 46, wall: true },
-  // Floor
-  { key: "rug", label: "Soft rug", glyph: "🟫", category: "floor", cost: 50, size: 96 },
-  { key: "lamp", label: "Warm lamp", glyph: "🪔", category: "floor", cost: 45, size: 56 },
-  { key: "beanbag", label: "Bean bag", glyph: "🟣", category: "floor", cost: 65, size: 60 },
-  { key: "book-stack", label: "Book stack", glyph: "📚", category: "floor", cost: 40, size: 44 },
-  { key: "guitar", label: "Guitar", glyph: "🎸", category: "floor", cost: 100, size: 56 },
-
-  // Mascot items
-  { key: "penguin-plushie", label: "Penguin plushie", glyph: "🐧", category: "mascot", cost: 100, size: 48 },
-  { key: "seal-plushie", label: "Seal plushie", glyph: "🦭", category: "mascot", cost: 100, size: 48 },
-  { key: "cat-bed", label: "Cat bed", glyph: "🧺", category: "mascot", cost: 250, size: 54 },
-  { key: "food-bowl", label: "Snack bowl", glyph: "🍥", category: "mascot", cost: 35, size: 40 },
-  { key: "teddy", label: "Stuffed bear", glyph: "🧸", category: "mascot", cost: 80, size: 46 },
-  // Couple items
-  { key: "photo-frame", label: "Couple photo frame", glyph: "🖼️", category: "special", cost: 200, size: 52, wall: true },
-  { key: "love-letter", label: "Love letter", glyph: "💌", category: "special", cost: 120, size: 42 },
-  { key: "anniversary", label: "Anniversary banner", glyph: "🎉", category: "special", cost: 180, size: 56, wall: true },
-  { key: "gift-box", label: "Gift box", glyph: "🎁", category: "special", cost: 90, size: 46 },
-  { key: "trophy", label: "Couple trophy", glyph: "🏆", category: "special", cost: 300, size: 46 },
-  { key: "memory-board", label: "Memory board", glyph: "📌", category: "special", cost: 220, size: 54, wall: true },
-];
-
-export const ITEM_BY_KEY = new Map(ROOM_CATALOG.map((i) => [i.key, i]));
 
 export const PLANT_STAGES = [
   { glyph: "🌱", label: "Seed" },
