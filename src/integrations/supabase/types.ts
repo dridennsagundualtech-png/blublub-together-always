@@ -944,27 +944,36 @@ export type Database = {
       }
       rooms: {
         Row: {
+          background_key: string | null
           couple_id: string
           created_at: string
           love_points: number
           plant_growth: number
           plant_watered_on: string | null
+          seed_character: string | null
+          seed_color: string | null
           updated_at: string
         }
         Insert: {
+          background_key?: string | null
           couple_id: string
           created_at?: string
           love_points?: number
           plant_growth?: number
           plant_watered_on?: string | null
+          seed_character?: string | null
+          seed_color?: string | null
           updated_at?: string
         }
         Update: {
+          background_key?: string | null
           couple_id?: string
           created_at?: string
           love_points?: number
           plant_growth?: number
           plant_watered_on?: string | null
+          seed_character?: string | null
+          seed_color?: string | null
           updated_at?: string
         }
         Relationships: [
