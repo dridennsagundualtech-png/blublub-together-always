@@ -413,6 +413,100 @@ function RoomPage() {
         </div>
       ) : null}
 
+      {/* Background picker sheet */}
+      {bgOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-end" role="dialog" aria-label="Room backgrounds">
+          <button
+            type="button"
+            aria-label="Close backgrounds"
+            onClick={() => setBgOpen(false)}
+            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
+          />
+          <div className="card-soft relative max-h-[76vh] w-full overflow-y-auto rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="font-display text-lg font-extrabold">Rooms & scenery</p>
+              <span className="streak-chip">
+                <Sparkles className="size-3" /> {points} pts
+              </span>
+            </div>
+
+            <div className="mb-3 flex gap-2">
+              {(["indoor", "outdoor"] as BgCategory[]).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setBgCategory(c)}
+                  className={cn(
+                    "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                    bgCategory === c ? "bg-primary text-primary-foreground" : "bg-card",
+                  )}
+                >
+                  {c === "indoor" ? "Indoor" : "Outdoor"}
+                </button>
+              ))}
+            </div>
+
+            <ul className="grid grid-cols-2 gap-2">
+              {ROOM_BACKGROUNDS.filter((b) => b.category === bgCategory).map((bg) => {
+                const owned = bg.cost === 0 || unlocked.has(bg.key);
+                const active = (room?.background_key ?? DEFAULT_BACKGROUND_KEY) === bg.key;
+                return (
+                  <li key={bg.key}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playChirp("tap");
+                        if (!owned && points < bg.cost) {
+                          toast(`${bg.label} needs ${bg.cost} Love Points`);
+                          return;
+                        }
+                        actions.setBackground.mutate(bg.key, {
+                          onSuccess: () => {
+                            setBgOpen(false);
+                            toast(`Moved into ${bg.label} ✨`);
+                          },
+                          onError: (e) => toast((e as Error).message),
+                        });
+                      }}
+                      className={cn(
+                        "press card-soft w-full overflow-hidden p-0 text-left",
+                        active && "ring-2 ring-primary",
+                        !owned && points < bg.cost && "opacity-60",
+                      )}
+                    >
+                      <img
+                        src={bg.url}
+                        alt={bg.label}
+                        loading="lazy"
+                        className="aspect-[4/3] w-full object-cover"
+                        style={{ imageRendering: "pixelated" }}
+                      />
+                      <span className="flex items-center justify-between gap-1 px-2 py-1.5">
+                        <span className="truncate text-[11px] font-bold">{bg.label}</span>
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
+                          {owned ? (active ? "Active" : "Free") : (
+                            <>
+                              <Lock className="size-3" /> {bg.cost}
+                            </>
+                          )}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="mt-4">
+              <PrimaryButton onClick={() => setBgOpen(false)}>Close</PrimaryButton>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+
+
       {placed.length > 0 ? (
         <p className="mt-3 text-center text-xs text-muted-foreground">
           {placed.length} item{placed.length === 1 ? "" : "s"} placed
