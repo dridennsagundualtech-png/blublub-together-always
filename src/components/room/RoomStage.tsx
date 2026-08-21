@@ -18,6 +18,9 @@ export function RoomStage({
   growth,
   editing,
   selectedId,
+  backgroundUrl,
+  seedUrl,
+  seedLabel,
   onSelect,
   onMove,
   onRotate,
@@ -28,6 +31,9 @@ export function RoomStage({
   growth: number;
   editing: boolean;
   selectedId: string | null;
+  backgroundUrl?: string | undefined;
+  seedUrl?: string | undefined;
+  seedLabel?: string | undefined;
   onSelect: (id: string | null) => void;
   onMove: (id: string, x: number, y: number) => void;
   onRotate: (id: string) => void;
@@ -88,32 +94,46 @@ export function RoomStage({
       className="card-soft relative aspect-[4/5] w-full touch-none select-none overflow-hidden p-0"
       style={{ touchAction: "none" }}
     >
-      {/* Back wall */}
-      <div className="absolute inset-x-0 top-0 h-[62%] bg-[linear-gradient(180deg,color-mix(in_oklab,var(--lavender)_28%,white)_0%,color-mix(in_oklab,var(--blush,var(--lavender))_16%,white)_100%)]">
-        <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(90deg,transparent_0_38px,color-mix(in_oklab,var(--lavender)_22%,transparent)_38px_41px)]" />
-      </div>
+      {/* Room background */}
+      {backgroundUrl ? (
+        <img
+          src={backgroundUrl}
+          alt=""
+          draggable={false}
+          className="pointer-events-none absolute inset-0 size-full select-none object-cover"
+          style={{ imageRendering: "pixelated" }}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--lavender)_28%,white)_0%,color-mix(in_oklab,var(--peach)_30%,white)_100%)]" />
+      )}
 
-      {/* Floor */}
-      <div className="absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(180deg,color-mix(in_oklab,var(--honey,var(--peach))_26%,white)_0%,color-mix(in_oklab,var(--peach)_34%,white)_100%)]">
-        <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(115deg,transparent_0_40px,color-mix(in_oklab,var(--honey,var(--peach))_26%,transparent)_40px_43px)]" />
-      </div>
-
-      {/* Shared plant */}
+      {/* Shared seed companion */}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           onWater();
-          say(12, 62, `${stage.glyph} Our little plant is growing!`);
+          say(12, 62, `Our little one is growing! (${seedLabel ?? stage.label})`);
         }}
-        className="press absolute left-[10%] top-[64%] grid -translate-x-1/2 place-items-center"
-        aria-label="Shared plant"
+        className="press absolute left-[12%] top-[62%] grid -translate-x-1/2 place-items-center"
+        aria-label="Shared seed companion"
       >
-        <span className="room-sway block text-4xl drop-shadow">{stage.glyph}</span>
+        {seedUrl ? (
+          <img
+            src={seedUrl}
+            alt={seedLabel ?? stage.label}
+            draggable={false}
+            className="room-float pointer-events-none h-16 w-auto max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.15)]"
+            style={{ imageRendering: "pixelated" }}
+          />
+        ) : (
+          <span className="room-sway block text-4xl drop-shadow">🌱</span>
+        )}
         <span className="mt-0.5 rounded-full bg-card/85 px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
-          {stage.label}
+          {seedLabel ?? stage.label}
         </span>
       </button>
+
 
       {/* Mascots */}
       {MASCOTS.map((m, i) => (

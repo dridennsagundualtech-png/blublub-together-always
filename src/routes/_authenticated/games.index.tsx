@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Check, ChevronRight, Gamepad2, Lock, Pencil, Plus, Sparkles } from "lucide-react";
+import { Check, ChevronRight, Gamepad2, Image as ImageIcon, Lock, Pencil, Plus, Sparkles } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/components/ui-kit";
 import { RoomStage } from "@/components/room/RoomStage";
@@ -8,14 +8,23 @@ import { useBadges } from "@/lib/badges";
 import {
   ROOM_CATALOG,
   ROOM_THEMES,
+  ROOM_BACKGROUNDS,
+  BG_BY_KEY,
+  DEFAULT_BACKGROUND_KEY,
+  SEED_COLORS,
+  SEED_CHARACTERS,
   THEME_LABELS,
-  plantStage,
+  seedArt,
+  seedStep,
+  seedThumb,
   useRoom,
   useRoomActions,
   useRoomItems,
   useRoomUnlocks,
   type RoomTheme,
+  type BgCategory,
 } from "@/lib/room";
+
 import { playChirp } from "@/hooks/use-sound";
 
 import { cn } from "@/lib/utils";
@@ -52,13 +61,22 @@ function RoomPage() {
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [bgOpen, setBgOpen] = useState(false);
+  const [bgCategory, setBgCategory] = useState<BgCategory>("indoor");
   const [category, setCategory] = useState<RoomTheme>(ROOM_THEMES[0]!);
   const [note, setNote] = useState<string | null>(null);
 
   const unlocked = useMemo(() => new Set(unlocks ?? []), [unlocks]);
   const points = room?.love_points ?? 0;
-  const stage = plantStage(room?.plant_growth ?? 0);
+  const growth = room?.plant_growth ?? 0;
+  const stage = seedStep(growth);
   const placed = items ?? [];
+  const hour = new Date().getHours();
+  const sleeping = hour >= 22 || hour < 6;
+  const seedColor = room?.seed_color ?? "pink";
+  const seedCharacter = room?.seed_character ?? null;
+  const seedUrl = seedArt(growth, seedColor, seedCharacter, sleeping);
+  const bgUrl = BG_BY_KEY.get(room?.background_key ?? DEFAULT_BACKGROUND_KEY)?.url;
 
   function toast(text: string) {
     setNote(text);
@@ -74,14 +92,23 @@ function RoomPage() {
           </p>
           <p className="font-display text-3xl font-extrabold text-primary">{points}</p>
         </div>
-        <div className="text-right">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-            Our plant
-          </p>
-          <p className="text-sm font-bold">
-            <span className="mr-1 text-lg">{stage.glyph}</span>
-            {stage.label}
-          </p>
+        <div className="flex items-center gap-2 text-right">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Our seed
+            </p>
+            <p className="text-sm font-bold">
+              Step {stage.step} · {stage.label}
+            </p>
+          </div>
+          {seedUrl ? (
+            <img
+              src={seedUrl}
+              alt={stage.label}
+              className="h-10 w-auto"
+              style={{ imageRendering: "pixelated" }}
+            />
+          ) : null}
         </div>
       </StatHero>
 
@@ -90,10 +117,14 @@ function RoomPage() {
       ) : (
         <RoomStage
           items={placed}
-          growth={room?.plant_growth ?? 0}
+          growth={growth}
           editing={editing}
           selectedId={selectedId}
+          backgroundUrl={bgUrl}
+          seedUrl={seedUrl}
+          seedLabel={stage.label}
           onSelect={setSelectedId}
+
           onMove={(id, x, y) => actions.move.mutate({ id, x, y })}
           onRotate={(id) => {
             const it = placed.find((p) => p.id === id);
@@ -122,7 +153,7 @@ function RoomPage() {
         </p>
       ) : null}
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-3 gap-2">
         <button
           type="button"
           onClick={() => {
@@ -131,12 +162,12 @@ function RoomPage() {
             setSelectedId(null);
           }}
           className={cn(
-            "press card-soft flex items-center justify-center gap-2 p-3 text-sm font-bold",
+            "press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold",
             editing && "bg-primary text-primary-foreground",
           )}
         >
           {editing ? <Check className="size-4" /> : <Pencil className="size-4" />}
-          {editing ? "Done editing" : "Edit room"}
+          {editing ? "Done" : "Edit"}
         </button>
         <button
           type="button"
@@ -144,11 +175,116 @@ function RoomPage() {
             playChirp("tap");
             setSheetOpen(true);
           }}
-          className="press card-soft flex items-center justify-center gap-2 p-3 text-sm font-bold"
+          className="press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold"
         >
-          <Plus className="size-4" /> Decorations
+          <Plus className="size-4" /> Decor
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            playChirp("tap");
+            setBgOpen(true);
+          }}
+          className="press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold"
+        >
+          <ImageIcon className="size-4" /> Rooms
         </button>
       </div>
+
+      {/* Seed companion */}
+      <SectionTitle>Our seed</SectionTitle>
+      <Card className="space-y-3">
+        <div className="flex items-center gap-3">
+          {seedUrl ? (
+            <img
+              src={seedUrl}
+              alt={stage.label}
+              className="h-16 w-auto"
+              style={{ imageRendering: "pixelated" }}
+            />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold">
+              Step {stage.step} of 6 · {stage.label}
+            </p>
+            <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${Math.min(100, growth)}%` }}
+              />
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Water it once a day to help it evolve.
+            </p>
+          </div>
+        </div>
+
+        {stage.step >= 4 ? (
+          <div>
+            <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Colour
+            </p>
+            <div className="flex gap-2">
+              {SEED_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    playChirp("tap");
+                    actions.setSeedVariant.mutate(
+                      { color: c, character: null },
+                      { onSuccess: () => toast(`Our seed is now ${c} 💗`) },
+                    );
+                  }}
+                  className={cn(
+                    "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                    seedColor === c ? "bg-primary text-primary-foreground" : "bg-card",
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {stage.step >= 5 ? (
+          <div>
+            <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Who they grow into
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {(SEED_CHARACTERS[seedColor as keyof typeof SEED_CHARACTERS] ?? []).map((ch) => (
+                <button
+                  key={ch.key}
+                  type="button"
+                  onClick={() => {
+                    playChirp("tap");
+                    actions.setSeedVariant.mutate(
+                      { character: ch.key },
+                      { onSuccess: () => toast(`${ch.label} it is! 🌷`) },
+                    );
+                  }}
+                  className={cn(
+                    "press card-soft flex flex-col items-center gap-1 p-2",
+                    (seedCharacter ?? "") === ch.key && "ring-2 ring-primary",
+                  )}
+                >
+                  <img
+                    src={seedThumb(seedColor, ch.key)}
+                    alt={ch.label}
+                    loading="lazy"
+                    className="h-10 w-auto"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                  <span className="text-[11px] font-bold">{ch.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </Card>
+
 
       <SectionTitle>More to do</SectionTitle>
       <ul className="space-y-2">
@@ -276,6 +412,100 @@ function RoomPage() {
           </div>
         </div>
       ) : null}
+
+      {/* Background picker sheet */}
+      {bgOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-end" role="dialog" aria-label="Room backgrounds">
+          <button
+            type="button"
+            aria-label="Close backgrounds"
+            onClick={() => setBgOpen(false)}
+            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
+          />
+          <div className="card-soft relative max-h-[76vh] w-full overflow-y-auto rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="font-display text-lg font-extrabold">Rooms & scenery</p>
+              <span className="streak-chip">
+                <Sparkles className="size-3" /> {points} pts
+              </span>
+            </div>
+
+            <div className="mb-3 flex gap-2">
+              {(["indoor", "outdoor"] as BgCategory[]).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setBgCategory(c)}
+                  className={cn(
+                    "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                    bgCategory === c ? "bg-primary text-primary-foreground" : "bg-card",
+                  )}
+                >
+                  {c === "indoor" ? "Indoor" : "Outdoor"}
+                </button>
+              ))}
+            </div>
+
+            <ul className="grid grid-cols-2 gap-2">
+              {ROOM_BACKGROUNDS.filter((b) => b.category === bgCategory).map((bg) => {
+                const owned = bg.cost === 0 || unlocked.has(bg.key);
+                const active = (room?.background_key ?? DEFAULT_BACKGROUND_KEY) === bg.key;
+                return (
+                  <li key={bg.key}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playChirp("tap");
+                        if (!owned && points < bg.cost) {
+                          toast(`${bg.label} needs ${bg.cost} Love Points`);
+                          return;
+                        }
+                        actions.setBackground.mutate(bg.key, {
+                          onSuccess: () => {
+                            setBgOpen(false);
+                            toast(`Moved into ${bg.label} ✨`);
+                          },
+                          onError: (e) => toast((e as Error).message),
+                        });
+                      }}
+                      className={cn(
+                        "press card-soft w-full overflow-hidden p-0 text-left",
+                        active && "ring-2 ring-primary",
+                        !owned && points < bg.cost && "opacity-60",
+                      )}
+                    >
+                      <img
+                        src={bg.url}
+                        alt={bg.label}
+                        loading="lazy"
+                        className="aspect-[4/3] w-full object-cover"
+                        style={{ imageRendering: "pixelated" }}
+                      />
+                      <span className="flex items-center justify-between gap-1 px-2 py-1.5">
+                        <span className="truncate text-[11px] font-bold">{bg.label}</span>
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
+                          {owned ? (active ? "Active" : "Free") : (
+                            <>
+                              <Lock className="size-3" /> {bg.cost}
+                            </>
+                          )}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="mt-4">
+              <PrimaryButton onClick={() => setBgOpen(false)}>Close</PrimaryButton>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+
 
       {placed.length > 0 ? (
         <p className="mt-3 text-center text-xs text-muted-foreground">

@@ -15,21 +15,31 @@ export {
   type RoomItem,
   type RoomTheme,
 } from "@/lib/room-catalog";
+export {
+  ROOM_BACKGROUNDS,
+  BG_BY_KEY,
+  DEFAULT_BACKGROUND_KEY,
+  type RoomBackground,
+  type BgCategory,
+} from "@/lib/room-backgrounds";
+export {
+  SEED_STAGES,
+  SEED_COLORS,
+  SEED_CHARACTERS,
+  seedStep,
+  seedArt,
+  seedThumb,
+  type SeedColor,
+} from "@/lib/room-seed";
 import { ITEM_BY_KEY } from "@/lib/room-catalog";
-
-
-export const PLANT_STAGES = [
-  { glyph: "🌱", label: "Seed" },
-  { glyph: "🌿", label: "Small sprout" },
-  { glyph: "🪴", label: "Growing plant" },
-  { glyph: "🌷", label: "Flowering plant" },
-  { glyph: "🌳", label: "Fully grown" },
-] as const;
+import { BG_BY_KEY } from "@/lib/room-backgrounds";
+import { seedStep } from "@/lib/room-seed";
 
 export function plantStage(growth: number) {
-  const idx = Math.min(PLANT_STAGES.length - 1, Math.floor(growth / 25));
-  return { index: idx, ...PLANT_STAGES[idx]! };
+  const s = seedStep(growth);
+  return { index: s.step - 1, glyph: "🌱", label: s.label };
 }
+
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -208,5 +218,66 @@ export function useRoomActions() {
     onSuccess: () => void refreshRoom(),
   });
 
-  return { place, move, transform, remove, unlock, water, wateredToday: room?.plant_watered_on === today() };
+  /** Buy (if needed) and apply a room background. */
+  const setBackground = useMutation({
+    mutationFn: async (key: string) => {
+      const bg = BG_BY_KEY.get(key);
+      if (!bg || !room) throw new Error("Unknown background");
+      if (bg.cost > 0) {
+        const owned = await supabase
+          .from("room_unlocks")
+          .select("item_key")
+          .eq("couple_id", coupleId!)
+          .eq("item_key", key)
+          .maybeSingle();
+        if (owned.error) throw owned.error;
+        if (!owned.data) {
+          if (room.love_points < bg.cost) throw new Error("Not enough Love Points yet");
+          const ins = await supabase
+            .from("room_unlocks")
+            .insert({ couple_id: coupleId!, item_key: key });
+          if (ins.error) throw ins.error;
+          const spent = await supabase
+            .from("rooms")
+            .update({ love_points: room.love_points - bg.cost })
+            .eq("couple_id", coupleId!);
+          if (spent.error) throw spent.error;
+        }
+      }
+      const { error } = await supabase
+        .from("rooms")
+        .update({ background_key: key })
+        .eq("couple_id", coupleId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["room-unlocks", coupleId] });
+      void refreshRoom();
+    },
+  });
+
+  /** Choose the seed companion's colour / character variant. */
+  const setSeedVariant = useMutation({
+    mutationFn: async (v: { color?: string; character?: string | null }) => {
+      const patch: { seed_color?: string; seed_character?: string | null } = {};
+      if (v.color !== undefined) patch.seed_color = v.color;
+      if (v.character !== undefined) patch.seed_character = v.character;
+      const { error } = await supabase.from("rooms").update(patch).eq("couple_id", coupleId!);
+      if (error) throw error;
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
+  return {
+    place,
+    move,
+    transform,
+    remove,
+    unlock,
+    water,
+    setBackground,
+    setSeedVariant,
+    wateredToday: room?.plant_watered_on === today(),
+  };
+
 }
