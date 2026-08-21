@@ -83,17 +83,24 @@ export function seedStep(growth: number) {
   return SEED_STAGES[idx]!;
 }
 
+function pick(name: string): string {
+  return (A as Record<string, string>)[name] ?? "";
+}
+
 export function seedArt(growth: number, color: string | null, character: string | null, sleeping = false) {
   const { step } = seedStep(growth);
   const s = sleeping ? "_sleep" : "";
   const c = (color ?? "pink") as SeedColor;
-  if (step <= 3) return A[`seed_assets_character_step${step}_step_0${step}_001${s}` as keyof typeof A];
-  if (step === 4) return A[`seed_assets_character_step4_step_04_${c}${s}` as keyof typeof A];
-  const ch = character ?? SEED_CHARACTERS[c][0]!.key;
-  return A[`seed_assets_character_step${step}_step_0${step}_${c}_${ch}${s}` as keyof typeof A];
+  if (step <= 3) return pick(`assets_character_step${step}_step_0${step}_001${s}.gif`);
+  if (step === 4) return pick(`assets_character_step4_step_04_${c}${s}.gif`);
+  const ch = character ?? SEED_CHARACTERS[c]![0]!.key;
+  return pick(`assets_character_step${step}_step_0${step}_${c}_${ch}${s}.gif`);
 }
 
 export function seedThumb(color: string, character: string, smile = false) {
-  return A[`seed_assets_character_thumbs_step_06_${color}_${character}_${smile ? "smile" : "default"}` as keyof typeof A];
+  return pick(
+    `assets_character_thumbs_step_06_${color}_${character}_${smile ? "smile" : "default"}.png`,
+  );
 }
+
 
