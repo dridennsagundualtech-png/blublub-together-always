@@ -15,21 +15,31 @@ export {
   type RoomItem,
   type RoomTheme,
 } from "@/lib/room-catalog";
+export {
+  ROOM_BACKGROUNDS,
+  BG_BY_KEY,
+  DEFAULT_BACKGROUND_KEY,
+  type RoomBackground,
+  type BgCategory,
+} from "@/lib/room-backgrounds";
+export {
+  SEED_STAGES,
+  SEED_COLORS,
+  SEED_CHARACTERS,
+  seedStep,
+  seedArt,
+  seedThumb,
+  type SeedColor,
+} from "@/lib/room-seed";
 import { ITEM_BY_KEY } from "@/lib/room-catalog";
-
-
-export const PLANT_STAGES = [
-  { glyph: "🌱", label: "Seed" },
-  { glyph: "🌿", label: "Small sprout" },
-  { glyph: "🪴", label: "Growing plant" },
-  { glyph: "🌷", label: "Flowering plant" },
-  { glyph: "🌳", label: "Fully grown" },
-] as const;
+import { BG_BY_KEY } from "@/lib/room-backgrounds";
+import { seedStep } from "@/lib/room-seed";
 
 export function plantStage(growth: number) {
-  const idx = Math.min(PLANT_STAGES.length - 1, Math.floor(growth / 25));
-  return { index: idx, ...PLANT_STAGES[idx]! };
+  const s = seedStep(growth);
+  return { index: s.step - 1, glyph: "🌱", label: s.label };
 }
+
 
 function today() {
   return new Date().toISOString().slice(0, 10);
