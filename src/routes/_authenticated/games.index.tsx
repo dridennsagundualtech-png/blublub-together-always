@@ -61,13 +61,22 @@ function RoomPage() {
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [bgOpen, setBgOpen] = useState(false);
+  const [bgCategory, setBgCategory] = useState<BgCategory>("indoor");
   const [category, setCategory] = useState<RoomTheme>(ROOM_THEMES[0]!);
   const [note, setNote] = useState<string | null>(null);
 
   const unlocked = useMemo(() => new Set(unlocks ?? []), [unlocks]);
   const points = room?.love_points ?? 0;
-  const stage = plantStage(room?.plant_growth ?? 0);
+  const growth = room?.plant_growth ?? 0;
+  const stage = seedStep(growth);
   const placed = items ?? [];
+  const hour = new Date().getHours();
+  const sleeping = hour >= 22 || hour < 6;
+  const seedColor = room?.seed_color ?? "pink";
+  const seedCharacter = room?.seed_character ?? null;
+  const seedUrl = seedArt(growth, seedColor, seedCharacter, sleeping);
+  const bgUrl = BG_BY_KEY.get(room?.background_key ?? DEFAULT_BACKGROUND_KEY)?.url;
 
   function toast(text: string) {
     setNote(text);
@@ -83,14 +92,23 @@ function RoomPage() {
           </p>
           <p className="font-display text-3xl font-extrabold text-primary">{points}</p>
         </div>
-        <div className="text-right">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-            Our plant
-          </p>
-          <p className="text-sm font-bold">
-            <span className="mr-1 text-lg">{stage.glyph}</span>
-            {stage.label}
-          </p>
+        <div className="flex items-center gap-2 text-right">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Our seed
+            </p>
+            <p className="text-sm font-bold">
+              Step {stage.step} · {stage.label}
+            </p>
+          </div>
+          {seedUrl ? (
+            <img
+              src={seedUrl}
+              alt={stage.label}
+              className="h-10 w-auto"
+              style={{ imageRendering: "pixelated" }}
+            />
+          ) : null}
         </div>
       </StatHero>
 
@@ -99,10 +117,14 @@ function RoomPage() {
       ) : (
         <RoomStage
           items={placed}
-          growth={room?.plant_growth ?? 0}
+          growth={growth}
           editing={editing}
           selectedId={selectedId}
+          backgroundUrl={bgUrl}
+          seedUrl={seedUrl}
+          seedLabel={stage.label}
           onSelect={setSelectedId}
+
           onMove={(id, x, y) => actions.move.mutate({ id, x, y })}
           onRotate={(id) => {
             const it = placed.find((p) => p.id === id);
