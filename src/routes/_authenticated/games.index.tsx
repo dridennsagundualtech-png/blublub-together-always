@@ -153,7 +153,7 @@ function RoomPage() {
         </p>
       ) : null}
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-3 gap-2">
         <button
           type="button"
           onClick={() => {
@@ -162,12 +162,12 @@ function RoomPage() {
             setSelectedId(null);
           }}
           className={cn(
-            "press card-soft flex items-center justify-center gap-2 p-3 text-sm font-bold",
+            "press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold",
             editing && "bg-primary text-primary-foreground",
           )}
         >
           {editing ? <Check className="size-4" /> : <Pencil className="size-4" />}
-          {editing ? "Done editing" : "Edit room"}
+          {editing ? "Done" : "Edit"}
         </button>
         <button
           type="button"
@@ -175,11 +175,116 @@ function RoomPage() {
             playChirp("tap");
             setSheetOpen(true);
           }}
-          className="press card-soft flex items-center justify-center gap-2 p-3 text-sm font-bold"
+          className="press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold"
         >
-          <Plus className="size-4" /> Decorations
+          <Plus className="size-4" /> Decor
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            playChirp("tap");
+            setBgOpen(true);
+          }}
+          className="press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold"
+        >
+          <ImageIcon className="size-4" /> Rooms
         </button>
       </div>
+
+      {/* Seed companion */}
+      <SectionTitle>Our seed</SectionTitle>
+      <Card className="space-y-3">
+        <div className="flex items-center gap-3">
+          {seedUrl ? (
+            <img
+              src={seedUrl}
+              alt={stage.label}
+              className="h-16 w-auto"
+              style={{ imageRendering: "pixelated" }}
+            />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold">
+              Step {stage.step} of 6 · {stage.label}
+            </p>
+            <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${Math.min(100, growth)}%` }}
+              />
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Water it once a day to help it evolve.
+            </p>
+          </div>
+        </div>
+
+        {stage.step >= 4 ? (
+          <div>
+            <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Colour
+            </p>
+            <div className="flex gap-2">
+              {SEED_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    playChirp("tap");
+                    actions.setSeedVariant.mutate(
+                      { color: c, character: null },
+                      { onSuccess: () => toast(`Our seed is now ${c} 💗`) },
+                    );
+                  }}
+                  className={cn(
+                    "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                    seedColor === c ? "bg-primary text-primary-foreground" : "bg-card",
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {stage.step >= 5 ? (
+          <div>
+            <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Who they grow into
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {(SEED_CHARACTERS[seedColor as keyof typeof SEED_CHARACTERS] ?? []).map((ch) => (
+                <button
+                  key={ch.key}
+                  type="button"
+                  onClick={() => {
+                    playChirp("tap");
+                    actions.setSeedVariant.mutate(
+                      { character: ch.key },
+                      { onSuccess: () => toast(`${ch.label} it is! 🌷`) },
+                    );
+                  }}
+                  className={cn(
+                    "press card-soft flex flex-col items-center gap-1 p-2",
+                    (seedCharacter ?? "") === ch.key && "ring-2 ring-primary",
+                  )}
+                >
+                  <img
+                    src={seedThumb(seedColor, ch.key)}
+                    alt={ch.label}
+                    loading="lazy"
+                    className="h-10 w-auto"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                  <span className="text-[11px] font-bold">{ch.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </Card>
+
 
       <SectionTitle>More to do</SectionTitle>
       <ul className="space-y-2">
