@@ -8,14 +8,23 @@ import { useBadges } from "@/lib/badges";
 import {
   ROOM_CATALOG,
   ROOM_THEMES,
+  ROOM_BACKGROUNDS,
+  BG_BY_KEY,
+  DEFAULT_BACKGROUND_KEY,
+  SEED_COLORS,
+  SEED_CHARACTERS,
   THEME_LABELS,
-  plantStage,
+  seedArt,
+  seedStep,
+  seedThumb,
   useRoom,
   useRoomActions,
   useRoomItems,
   useRoomUnlocks,
   type RoomTheme,
+  type BgCategory,
 } from "@/lib/room";
+
 import { playChirp } from "@/hooks/use-sound";
 
 import { cn } from "@/lib/utils";
