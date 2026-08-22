@@ -268,6 +268,20 @@ export function useRoomActions() {
     onSuccess: () => void refreshRoom(),
   });
 
+  /** Resize a pet (seed companion or a mascot) — shared with your partner. */
+  const setPetScale = useMutation({
+    mutationFn: async (v: { key: string; scale: number }) => {
+      const current = (room?.pet_scales ?? {}) as Record<string, number>;
+      const next = { ...current, [v.key]: Math.round(v.scale * 100) / 100 };
+      const { error } = await supabase
+        .from("rooms")
+        .update({ pet_scales: next })
+        .eq("couple_id", coupleId!);
+      if (error) throw error;
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
   return {
     place,
     move,
@@ -277,7 +291,9 @@ export function useRoomActions() {
     water,
     setBackground,
     setSeedVariant,
+    setPetScale,
     wateredToday: room?.plant_watered_on === today(),
   };
 
 }
+
