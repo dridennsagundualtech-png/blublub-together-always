@@ -948,6 +948,7 @@ export type Database = {
           couple_id: string
           created_at: string
           love_points: number
+          pet_scales: Json
           plant_growth: number
           plant_watered_on: string | null
           seed_character: string | null
@@ -959,6 +960,7 @@ export type Database = {
           couple_id: string
           created_at?: string
           love_points?: number
+          pet_scales?: Json
           plant_growth?: number
           plant_watered_on?: string | null
           seed_character?: string | null
@@ -970,6 +972,7 @@ export type Database = {
           couple_id?: string
           created_at?: string
           love_points?: number
+          pet_scales?: Json
           plant_growth?: number
           plant_watered_on?: string | null
           seed_character?: string | null

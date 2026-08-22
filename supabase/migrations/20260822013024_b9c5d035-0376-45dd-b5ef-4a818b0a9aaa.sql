@@ -1,0 +1,1 @@
+ALTER TABLE public.rooms ADD COLUMN IF NOT EXISTS pet_scales jsonb NOT NULL DEFAULT '{}'::jsonb;
