@@ -1,5 +1,5 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { RotateCw, Trash2 } from "lucide-react";
+import { Minus, Plus, RotateCw, Trash2 } from "lucide-react";
 import { Doodle, type Critter } from "@/components/Doodles";
 import { ITEM_BY_KEY, plantStage, type RoomItemRow } from "@/lib/room";
 
@@ -21,10 +21,12 @@ export function RoomStage({
   backgroundUrl,
   seedUrl,
   seedLabel,
+  petScales,
   onSelect,
   onMove,
   onRotate,
   onRemove,
+  onScale,
   onWater,
 }: {
   items: RoomItemRow[];
@@ -34,10 +36,12 @@ export function RoomStage({
   backgroundUrl?: string | undefined;
   seedUrl?: string | undefined;
   seedLabel?: string | undefined;
+  petScales?: Record<string, number> | undefined;
   onSelect: (id: string | null) => void;
   onMove: (id: string, x: number, y: number) => void;
   onRotate: (id: string) => void;
   onRemove: (id: string) => void;
+  onScale: (id: string, scale: number) => void;
   onWater: () => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -45,6 +49,18 @@ export function RoomStage({
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const stage = plantStage(growth);
+  const petScale = (key: string) => Number(petScales?.[key] ?? 1);
+  const isPet = !!selectedId?.startsWith("pet:");
+  const currentScale = selectedId
+    ? isPet
+      ? petScale(selectedId.slice(4))
+      : Number(items.find((i) => i.id === selectedId)?.scale ?? 1)
+    : 1;
+  const step = (delta: number) => {
+    if (!selectedId) return;
+    const next = Math.min(3, Math.max(0.4, Math.round((currentScale + delta) * 100) / 100));
+    onScale(selectedId, next);
+  };
 
   function say(x: number, y: number, text: string) {
     const id = Date.now() + Math.random();
@@ -112,10 +128,18 @@ export function RoomStage({
         type="button"
         onClick={(e) => {
           e.stopPropagation();
+          if (editing) {
+            onSelect("pet:seed");
+            return;
+          }
           onWater();
           say(12, 62, `Our little one is growing! (${seedLabel ?? stage.label})`);
         }}
-        className="press absolute left-[12%] top-[62%] grid -translate-x-1/2 place-items-center"
+        style={{ transform: `translateX(-50%) scale(${petScale("seed")})` }}
+        className={cn(
+          "press absolute left-[12%] top-[62%] grid origin-bottom place-items-center rounded-2xl",
+          selectedId === "pet:seed" && "bg-card/70 ring-2 ring-primary",
+        )}
         aria-label="Shared seed companion"
       >
         {seedUrl ? (
@@ -142,13 +166,24 @@ export function RoomStage({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            if (editing) {
+              onSelect(`pet:${m.critter}`);
+              return;
+            }
             say(m.x, m.y, m.line);
           }}
           style={{ left: `${m.x}%`, top: `${m.y}%`, animationDelay: `${i * 0.7}s` }}
-          className="room-float absolute -translate-x-1/2 -translate-y-1/2"
+          className={cn(
+            "room-float absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl",
+            selectedId === `pet:${m.critter}` && "bg-card/70 ring-2 ring-primary",
+          )}
           aria-label={m.critter}
         >
-          <Doodle critter={m.critter} pose={m.critter === "seal" ? "sleep" : "love"} size={m.size} />
+          <Doodle
+            critter={m.critter}
+            pose={m.critter === "seal" ? "sleep" : "love"}
+            size={Math.round(m.size * petScale(m.critter))}
+          />
         </button>
       ))}
 
@@ -200,23 +235,48 @@ export function RoomStage({
           className="absolute inset-x-0 bottom-2 mx-auto flex w-fit items-center gap-2 rounded-full bg-card/95 px-3 py-2 shadow-float"
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="px-1 text-xs font-bold text-muted-foreground">Drag to move</span>
+          <span className="px-1 text-xs font-bold text-muted-foreground">
+            {isPet ? "Resize pet" : "Drag to move"}
+          </span>
           <button
             type="button"
-            onClick={() => onRotate(selectedId)}
+            onClick={() => step(-0.1)}
             className="press grid size-9 place-items-center rounded-full bg-secondary"
-            aria-label="Rotate item"
+            aria-label="Make smaller"
           >
-            <RotateCw className="size-4" />
+            <Minus className="size-4" />
           </button>
+          <span className="w-10 text-center text-xs font-bold tabular-nums">
+            {Math.round(currentScale * 100)}%
+          </span>
           <button
             type="button"
-            onClick={() => onRemove(selectedId)}
-            className="press grid size-9 place-items-center rounded-full bg-destructive/15 text-destructive"
-            aria-label="Remove item"
+            onClick={() => step(0.1)}
+            className="press grid size-9 place-items-center rounded-full bg-secondary"
+            aria-label="Make bigger"
           >
-            <Trash2 className="size-4" />
+            <Plus className="size-4" />
           </button>
+          {!isPet ? (
+            <>
+              <button
+                type="button"
+                onClick={() => onRotate(selectedId)}
+                className="press grid size-9 place-items-center rounded-full bg-secondary"
+                aria-label="Rotate item"
+              >
+                <RotateCw className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onRemove(selectedId)}
+                className="press grid size-9 place-items-center rounded-full bg-destructive/15 text-destructive"
+                aria-label="Remove item"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </>
+          ) : null}
         </div>
       ) : null}
 
