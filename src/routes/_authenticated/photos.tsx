@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ImagePlus, MapPin, MessageCircle, Send, Sparkles, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePremiumAccess } from "@/lib/admin";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
@@ -51,7 +52,7 @@ function PhotosPage() {
   const [takenOn, setTakenOn] = useState(todayISO());
   const [open, setOpen] = useState<PhotoWithUrl | null>(null);
 
-  const isPremium = !!profile?.is_premium;
+  const isPremium = usePremiumAccess();
   const maxBatch = isPremium ? FREE_BATCH + PREMIUM_EXTRA : FREE_BATCH;
 
   const { data: photos } = useQuery({

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
+import { usePremiumAccess } from "@/lib/admin";
 import { PremiumGate } from "@/components/PremiumGate";
 import { DiceRoller, type DieDef } from "@/components/games/DiceRoller";
 import { Card, GhostButton, PrimaryButton } from "@/components/ui-kit";
@@ -73,6 +74,7 @@ const CLOTHING_DICE: DieDef[] = [
 function SpicyPage() {
   const { data: user } = useAuthUser();
   const { data: profile } = useProfile();
+  const premium = usePremiumAccess();
   const refresh = useRefreshSession();
 
   return (
@@ -82,7 +84,7 @@ function SpicyPage() {
       </Link>
 
       <PremiumGate
-        unlocked={!!profile?.is_premium}
+        unlocked={premium}
         title="Adults-only section"
         blurb="This section is part of BLUBLUB Premium. Unlock it with a redeem code in Profile & Settings."
       >
