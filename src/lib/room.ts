@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuthUser, useCoupleId } from "@/lib/session";
+import { useIsAdmin } from "@/lib/admin";
 
 export type RoomRow = Tables<"rooms">;
 export type RoomItemRow = Tables<"room_items">;
@@ -129,6 +130,7 @@ export function useRoomActions() {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const { data: room } = useRoom();
+  const { data: isAdmin } = useIsAdmin();
   const qc = useQueryClient();
 
   const refreshItems = () => qc.invalidateQueries({ queryKey: ["room-items", coupleId] });
@@ -183,16 +185,18 @@ export function useRoomActions() {
     mutationFn: async (itemKey: string) => {
       const item = ITEM_BY_KEY.get(itemKey);
       if (!item || !room) throw new Error("Unknown item");
-      if (room.love_points < item.cost) throw new Error("Not enough Love Points yet");
+      if (!isAdmin && room.love_points < item.cost) throw new Error("Not enough Love Points yet");
       const { error } = await supabase
         .from("room_unlocks")
         .insert({ couple_id: coupleId!, item_key: itemKey });
       if (error) throw error;
-      const spent = await supabase
-        .from("rooms")
-        .update({ love_points: room.love_points - item.cost })
-        .eq("couple_id", coupleId!);
-      if (spent.error) throw spent.error;
+      if (!isAdmin) {
+        const spent = await supabase
+          .from("rooms")
+          .update({ love_points: room.love_points - item.cost })
+          .eq("couple_id", coupleId!);
+        if (spent.error) throw spent.error;
+      }
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["room-unlocks", coupleId] });
@@ -223,7 +227,7 @@ export function useRoomActions() {
     mutationFn: async (key: string) => {
       const bg = BG_BY_KEY.get(key);
       if (!bg || !room) throw new Error("Unknown background");
-      if (bg.cost > 0) {
+      if (bg.cost > 0 && !isAdmin) {
         const owned = await supabase
           .from("room_unlocks")
           .select("item_key")
