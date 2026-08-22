@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
+import { usePremiumAccess } from "@/lib/admin";
 import { PremiumGate } from "@/components/PremiumGate";
 import {
   Card,
@@ -65,11 +66,11 @@ function monthKey(iso: string) {
 
 function BudgetPage() {
   useMarkSeen("budget");
-  const { data: profile } = useProfile();
+  const premium = usePremiumAccess();
 
   return (
     <AppLayout title="Budget" subtitle="Money, together" critter="cat">
-      <PremiumGate unlocked={!!profile?.is_premium} title="Budget Tracker is Premium">
+      <PremiumGate unlocked={premium} title="Budget Tracker is Premium">
         <BudgetContent />
       </PremiumGate>
     </AppLayout>

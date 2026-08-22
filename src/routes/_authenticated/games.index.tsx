@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/components/ui-kit";
 import { RoomStage } from "@/components/room/RoomStage";
 import { useBadges } from "@/lib/badges";
+import { useIsAdmin } from "@/lib/admin";
 import {
   ROOM_CATALOG,
   ROOM_THEMES,
@@ -57,6 +58,7 @@ function RoomPage() {
   const { data: items } = useRoomItems();
   const { data: unlocks } = useRoomUnlocks();
   const actions = useRoomActions();
+  const { data: isAdmin } = useIsAdmin();
 
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -123,12 +125,20 @@ function RoomPage() {
           backgroundUrl={bgUrl}
           seedUrl={seedUrl}
           seedLabel={stage.label}
+          petScales={(room?.pet_scales ?? {}) as Record<string, number>}
           onSelect={setSelectedId}
 
           onMove={(id, x, y) => actions.move.mutate({ id, x, y })}
           onRotate={(id) => {
             const it = placed.find((p) => p.id === id);
             actions.transform.mutate({ id, rotation: (((it?.rotation ?? 0) + 15) % 360) });
+          }}
+          onScale={(id, scale) => {
+            if (id.startsWith("pet:")) {
+              actions.setPetScale.mutate({ key: id.slice(4), scale });
+              return;
+            }
+            actions.transform.mutate({ id, scale });
           }}
           onRemove={(id) => {
             actions.remove.mutate(id);
@@ -349,7 +359,7 @@ function RoomPage() {
 
             <ul className="grid grid-cols-3 gap-2">
               {ROOM_CATALOG.filter((i) => i.theme === category).map((item) => {
-                const owned = item.cost === 0 || unlocked.has(item.key);
+                const owned = isAdmin || item.cost === 0 || unlocked.has(item.key);
                 const affordable = points >= item.cost;
                 return (
                   <li key={item.key}>
@@ -449,7 +459,7 @@ function RoomPage() {
 
             <ul className="grid grid-cols-2 gap-2">
               {ROOM_BACKGROUNDS.filter((b) => b.category === bgCategory).map((bg) => {
-                const owned = bg.cost === 0 || unlocked.has(bg.key);
+                const owned = isAdmin || bg.cost === 0 || unlocked.has(bg.key);
                 const active = (room?.background_key ?? DEFAULT_BACKGROUND_KEY) === bg.key;
                 return (
                   <li key={bg.key}>
@@ -457,7 +467,7 @@ function RoomPage() {
                       type="button"
                       onClick={() => {
                         playChirp("tap");
-                        if (!owned && points < bg.cost) {
+                        if (!owned && points < bg.cost && !isAdmin) {
                           toast(`${bg.label} needs ${bg.cost} Love Points`);
                           return;
                         }
