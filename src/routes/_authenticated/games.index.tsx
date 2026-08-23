@@ -371,7 +371,7 @@ function RoomPage() {
 
       {/* Inventory bottom sheet */}
       {sheetOpen ? (
-        <div className="fixed inset-0 z-[60] flex items-end" role="dialog" aria-label="Decorations">
+        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Decorations">
           <button
             type="button"
             aria-label="Close decorations"
@@ -471,7 +471,7 @@ function RoomPage() {
 
       {/* Background picker sheet */}
       {bgOpen ? (
-        <div className="fixed inset-0 z-[60] flex items-end" role="dialog" aria-label="Room backgrounds">
+        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Room backgrounds">
           <button
             type="button"
             aria-label="Close backgrounds"
