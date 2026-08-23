@@ -469,6 +469,26 @@ function RoomPage() {
         </div>
       ) : null}
 
+      {/* Seed sheet */}
+      {seedOpen ? (
+        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Our seed">
+          <button
+            type="button"
+            aria-label="Close seed panel"
+            onClick={() => setSeedOpen(false)}
+            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
+          />
+          <div className="relative max-h-[80vh] w-full overflow-y-auto rounded-t-3xl bg-card p-4 shadow-float">
+            <p className="mb-3 font-display text-lg font-extrabold">Our seed</p>
+            {seedPanel}
+            <div className="mt-4">
+              <PrimaryButton onClick={() => setSeedOpen(false)}>Close</PrimaryButton>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+
       {/* Background picker sheet */}
       {bgOpen ? (
         <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Room backgrounds">
