@@ -102,14 +102,44 @@ function QuestionsPage() {
   return (
     <AppLayout title="Daily question" subtitle="One a day, just for you two" critter="cat">
       <Card className="text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Today</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          {today === todayStr ? "Today" : "Catching up"}
+        </p>
         {streak ? (
           <div className="mt-2">
             <StreakChip days={streak} />
           </div>
         ) : null}
         <p className="mt-2 text-lg font-extrabold">{question?.prompt ?? "Loading…"}</p>
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <input
+            type="date"
+            value={today}
+            max={todayStr}
+            onChange={(e) => {
+              setToday(e.target.value || todayStr);
+              setDraft("");
+            }}
+            className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
+          />
+          {today !== todayStr ? (
+            <button
+              type="button"
+              onClick={() => {
+                setToday(todayStr);
+                setDraft("");
+              }}
+              className="press rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
+            >
+              Back to today
+            </button>
+          ) : null}
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Missed a day? Pick a date to answer it late.
+        </p>
       </Card>
+
 
       {!mine ? (
         <Card className="mt-4">
