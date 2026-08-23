@@ -37,6 +37,7 @@ export function RoomStage({
   onRotate,
   onRemove,
   onScale,
+  onLayer,
   onWater,
 }: {
   items: RoomItemRow[];
