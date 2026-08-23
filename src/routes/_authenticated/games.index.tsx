@@ -87,6 +87,215 @@ function RoomPage() {
     window.setTimeout(() => setNote((n) => (n === text ? null : n)), 2200);
   }
 
+  const controls = (
+    <div className="grid grid-cols-5 gap-1.5">
+      <button
+        type="button"
+        onClick={() => {
+          playChirp("tap");
+          setEditing((v) => !v);
+          setSelectedId(null);
+        }}
+        className={cn(
+          "press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold",
+          editing && "bg-primary text-primary-foreground",
+        )}
+      >
+        {editing ? <Check className="size-4" /> : <Pencil className="size-4" />}
+        {editing ? "Done" : "Edit"}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          playChirp("tap");
+          setSheetOpen(true);
+        }}
+        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
+      >
+        <Plus className="size-4" /> Decor
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          playChirp("tap");
+          setBgOpen(true);
+        }}
+        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
+      >
+        <ImageIcon className="size-4" /> Rooms
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          playChirp("tap");
+          setSeedOpen(true);
+        }}
+        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
+      >
+        <Sprout className="size-4" /> Seed
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          playChirp("tap");
+          setFullscreen((v) => !v);
+          setSelectedId(null);
+        }}
+        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
+      >
+        {fullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+        {fullscreen ? "Exit" : "Full"}
+      </button>
+    </div>
+  );
+
+  const stageEl = (
+    <RoomStage
+      items={placed}
+      growth={growth}
+      editing={editing}
+      selectedId={selectedId}
+      backgroundUrl={bgUrl}
+      seedUrl={seedUrl}
+      seedLabel={stage.label}
+      petScales={(room?.pet_scales ?? {}) as Record<string, number>}
+      petPositions={(room?.pet_positions ?? {}) as Record<string, { x: number; y: number }>}
+      fullscreen={fullscreen}
+      toolbar={
+        <div className="space-y-2">
+          {note ? (
+            <p className="rounded-2xl bg-card/95 px-4 py-2 text-center text-xs font-bold shadow-float">
+              {note}
+            </p>
+          ) : null}
+          {controls}
+        </div>
+      }
+      onSelect={setSelectedId}
+      onMove={(id, x, y) => actions.move.mutate({ id, x, y })}
+      onMovePet={(key, x, y) => actions.setPetPosition.mutate({ key, x, y })}
+      onRotate={(id) => {
+        const it = placed.find((p) => p.id === id);
+        actions.transform.mutate({ id, rotation: (((it?.rotation ?? 0) + 15) % 360) });
+      }}
+      onScale={(id, scale) => {
+        if (id.startsWith("pet:")) {
+          actions.setPetScale.mutate({ key: id.slice(4), scale });
+          return;
+        }
+        actions.transform.mutate({ id, scale });
+      }}
+      onRemove={(id) => {
+        actions.remove.mutate(id);
+        setSelectedId(null);
+      }}
+      onWater={() => {
+        if (actions.wateredToday) {
+          toast("Already watered today 💧 come back tomorrow");
+          return;
+        }
+        playChirp("tap");
+        actions.water.mutate(undefined, {
+          onSuccess: () => toast("+15 Love Points · the plant grew a little 🌿"),
+        });
+      }}
+    />
+  );
+
+  const seedPanel = (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        {seedUrl ? (
+          <img
+            src={seedUrl}
+            alt={stage.label}
+            className="h-16 w-auto"
+            style={{ imageRendering: "pixelated" }}
+          />
+        ) : null}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold">
+            Step {stage.step} of 6 · {stage.label}
+          </p>
+          <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full bg-primary"
+              style={{ width: `${Math.min(100, growth)}%` }}
+            />
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Water it once a day to help it evolve.
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Colour
+        </p>
+        <div className="flex gap-2">
+          {SEED_COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => {
+                playChirp("tap");
+                actions.setSeedVariant.mutate(
+                  { color: c, character: null },
+                  { onSuccess: () => toast(`Our seed is now ${c} 💗`) },
+                );
+              }}
+              className={cn(
+                "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                seedColor === c ? "bg-primary text-primary-foreground" : "bg-card",
+              )}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Who they grow into
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {(SEED_CHARACTERS[seedColor as keyof typeof SEED_CHARACTERS] ?? []).map((ch) => (
+            <button
+              key={ch.key}
+              type="button"
+              onClick={() => {
+                playChirp("tap");
+                actions.setSeedVariant.mutate(
+                  { character: ch.key },
+                  { onSuccess: () => toast(`${ch.label} it is! 🌷`) },
+                );
+              }}
+              className={cn(
+                "press card-soft flex flex-col items-center gap-1 p-2",
+                (seedCharacter ?? "") === ch.key && "ring-2 ring-primary",
+              )}
+            >
+              <img
+                src={seedThumb(seedColor, ch.key)}
+                alt={ch.label}
+                loading="lazy"
+                className="h-10 w-auto"
+                style={{ imageRendering: "pixelated" }}
+              />
+              <span className="text-[11px] font-bold">{ch.label}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Your seed only shows its grown-up form from step 5 — but you can pick who they'll become
+          any time.
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <AppLayout title="Our Room" subtitle="A little world you build together" critter="seal" critterPose="love">
       <StatHero className="mb-3 flex items-center justify-between gap-3 p-4">
@@ -116,92 +325,16 @@ function RoomPage() {
         </div>
       </StatHero>
 
-      {isLoading ? (
-        <Card>Loading your room…</Card>
-      ) : (
-        <RoomStage
-          items={placed}
-          growth={growth}
-          editing={editing}
-          selectedId={selectedId}
-          backgroundUrl={bgUrl}
-          seedUrl={seedUrl}
-          seedLabel={stage.label}
-          petScales={(room?.pet_scales ?? {}) as Record<string, number>}
-          onSelect={setSelectedId}
+      {isLoading ? <Card>Loading your room…</Card> : stageEl}
 
-          onMove={(id, x, y) => actions.move.mutate({ id, x, y })}
-          onRotate={(id) => {
-            const it = placed.find((p) => p.id === id);
-            actions.transform.mutate({ id, rotation: (((it?.rotation ?? 0) + 15) % 360) });
-          }}
-          onScale={(id, scale) => {
-            if (id.startsWith("pet:")) {
-              actions.setPetScale.mutate({ key: id.slice(4), scale });
-              return;
-            }
-            actions.transform.mutate({ id, scale });
-          }}
-          onRemove={(id) => {
-            actions.remove.mutate(id);
-            setSelectedId(null);
-          }}
-          onWater={() => {
-            if (actions.wateredToday) {
-              toast("Already watered today 💧 come back tomorrow");
-              return;
-            }
-            playChirp("tap");
-            actions.water.mutate(undefined, {
-              onSuccess: () => toast("+15 Love Points · the plant grew a little 🌿"),
-            });
-          }}
-        />
-      )}
-
-      {note ? (
+      {note && !fullscreen ? (
         <p className="mt-2 rounded-2xl bg-secondary px-4 py-2 text-center text-xs font-bold">
           {note}
         </p>
       ) : null}
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            playChirp("tap");
-            setEditing((v) => !v);
-            setSelectedId(null);
-          }}
-          className={cn(
-            "press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold",
-            editing && "bg-primary text-primary-foreground",
-          )}
-        >
-          {editing ? <Check className="size-4" /> : <Pencil className="size-4" />}
-          {editing ? "Done" : "Edit"}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            playChirp("tap");
-            setSheetOpen(true);
-          }}
-          className="press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold"
-        >
-          <Plus className="size-4" /> Decor
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            playChirp("tap");
-            setBgOpen(true);
-          }}
-          className="press card-soft flex items-center justify-center gap-2 p-3 text-xs font-bold"
-        >
-          <ImageIcon className="size-4" /> Rooms
-        </button>
-      </div>
+      <div className="mt-3">{!fullscreen ? controls : null}</div>
+
 
       {/* Seed companion */}
       <SectionTitle>Our seed</SectionTitle>
