@@ -38,6 +38,7 @@ import {
   type BgCategory,
 } from "@/lib/room";
 
+import roomCover from "@/assets/our-room-cover.jpg.asset.json";
 import { playChirp } from "@/hooks/use-sound";
 
 import { cn } from "@/lib/utils";
@@ -77,7 +78,7 @@ function RoomPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [bgOpen, setBgOpen] = useState(false);
   const [seedOpen, setSeedOpen] = useState(false);
-  const [fullscreen, setFullscreen] = useState(false);
+  const [fullscreen, setFullscreen] = useState(true);
   const [bgCategory, setBgCategory] = useState<BgCategory>("indoor");
   const [category, setCategory] = useState<RoomTheme>(ROOM_THEMES[0]!);
   const [note, setNote] = useState<string | null>(null);
@@ -342,7 +343,30 @@ function RoomPage() {
         </div>
       </StatHero>
 
-      {isLoading ? <Card>Loading your room…</Card> : stageEl}
+      {isLoading ? (
+        <Card>Loading your room…</Card>
+      ) : fullscreen ? (
+        stageEl
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            playChirp("tap");
+            setFullscreen(true);
+          }}
+          className="press card-soft relative block w-full overflow-hidden p-0"
+        >
+          <img
+            src={roomCover.url}
+            alt="Our Room"
+            className="aspect-[9/16] max-h-[52vh] w-full object-cover"
+            style={{ imageRendering: "pixelated" }}
+          />
+          <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-foreground/45 px-4 py-3 text-sm font-extrabold text-background">
+            <Maximize2 className="size-4" /> Open our room
+          </span>
+        </button>
+      )}
 
       {note && !fullscreen ? (
         <p className="mt-2 rounded-2xl bg-secondary px-4 py-2 text-center text-xs font-bold">
