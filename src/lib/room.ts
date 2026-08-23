@@ -286,6 +286,20 @@ export function useRoomActions() {
     onSuccess: () => void refreshRoom(),
   });
 
+  /** Move a pet around the room — shared with your partner. */
+  const setPetPosition = useMutation({
+    mutationFn: async (v: { key: string; x: number; y: number }) => {
+      const current = (room?.pet_positions ?? {}) as Record<string, { x: number; y: number }>;
+      const next = { ...current, [v.key]: { x: Math.round(v.x * 10) / 10, y: Math.round(v.y * 10) / 10 } };
+      const { error } = await supabase
+        .from("rooms")
+        .update({ pet_positions: next })
+        .eq("couple_id", coupleId!);
+      if (error) throw error;
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
   return {
     place,
     move,
@@ -296,8 +310,10 @@ export function useRoomActions() {
     setBackground,
     setSeedVariant,
     setPetScale,
+    setPetPosition,
     wateredToday: room?.plant_watered_on === today(),
   };
 
 }
+
 
