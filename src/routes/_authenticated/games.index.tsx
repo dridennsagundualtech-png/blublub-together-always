@@ -173,6 +173,7 @@ function RoomPage() {
       seedLabel={stage.label}
       petScales={(room?.pet_scales ?? {}) as Record<string, number>}
       petPositions={(room?.pet_positions ?? {}) as Record<string, { x: number; y: number }>}
+      petZ={(room?.pet_z ?? {}) as Record<string, number>}
       fullscreen={fullscreen}
       toolbar={
         <div className="space-y-2">
@@ -197,6 +198,13 @@ function RoomPage() {
           return;
         }
         actions.transform.mutate({ id, scale });
+      }}
+      onLayer={(id, z) => {
+        if (id.startsWith("pet:")) {
+          actions.setPetZ.mutate({ key: id.slice(4), z });
+          return;
+        }
+        actions.transform.mutate({ id, z });
       }}
       onRemove={(id) => {
         actions.remove.mutate(id);
