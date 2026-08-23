@@ -38,6 +38,7 @@ import {
   type BgCategory,
 } from "@/lib/room";
 
+import roomCover from "@/assets/our-room-cover.jpg.asset.json";
 import { playChirp } from "@/hooks/use-sound";
 
 import { cn } from "@/lib/utils";

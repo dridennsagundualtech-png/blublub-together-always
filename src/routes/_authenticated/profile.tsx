@@ -210,36 +210,6 @@ function ProfilePage() {
         </div>
       </Card>
 
-      <SectionTitle>Our song</SectionTitle>
-      <Card>
-        <div className="flex items-start gap-3">
-          <span className="mt-1 grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
-            <Music4 className="size-5" />
-          </span>
-          <div className="min-w-0 flex-1 space-y-3">
-            <Field label="Song title">
-              <TextInput
-                value={songTitle}
-                onChange={(e) => setSongTitle(e.target.value)}
-                placeholder="Iris"
-                maxLength={120}
-              />
-            </Field>
-            <Field label="Artist">
-              <TextInput
-                value={songArtist}
-                onChange={(e) => setSongArtist(e.target.value)}
-                placeholder="Goo Goo Dolls"
-                maxLength={120}
-              />
-            </Field>
-            <PrimaryButton disabled={saveSong.isPending} onClick={() => saveSong.mutate()}>
-              Save our song
-            </PrimaryButton>
-          </div>
-        </div>
-      </Card>
-
       <SectionTitle>Privacy</SectionTitle>
       <Card>
         <div className="flex items-center gap-3">

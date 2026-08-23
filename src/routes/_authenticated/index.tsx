@@ -43,8 +43,6 @@ function HomePage() {
   const untilAnniversary = daysUntilAnniversary(anniversary);
   useAnniversaryReminder();
 
-  const song = members?.find((m) => m.song_title)?.song_title ?? profile?.song_title ?? null;
-  const songArtist = members?.find((m) => m.song_title)?.song_artist ?? profile?.song_artist ?? null;
 
   const { data: upcoming } = useQuery({
     queryKey: ["upcoming-events", coupleId],
@@ -144,21 +142,6 @@ function HomePage() {
           </p>
         </StatCard>
       </div>
-
-      <SectionTitle>Our song</SectionTitle>
-      <Link to="/profile" className="card-soft press flex items-center gap-3 p-4">
-        <span className="tile-lilac grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
-          <Music4 className="size-5" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-bold">{song ?? "Pick your song"}</span>
-          <span className="block truncate text-xs text-muted-foreground">
-            {song ? (songArtist ?? "Your song 🩷") : "Save it in Profile & Settings"}
-          </span>
-        </span>
-        <Sparkles className="size-4 text-muted-foreground" />
-      </Link>
-
 
       <SectionTitle>Coming up</SectionTitle>
       {upcoming && upcoming.length > 0 ? (
