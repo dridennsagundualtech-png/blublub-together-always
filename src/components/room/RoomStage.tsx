@@ -4,6 +4,8 @@ import { Doodle, type Critter } from "@/components/Doodles";
 import { ITEM_BY_KEY, plantStage, type RoomItemRow } from "@/lib/room";
 
 import { cn } from "@/lib/utils";
+import layerUp from "@/assets/layer-up.png.asset.json";
+import layerDown from "@/assets/layer-down.png.asset.json";
 
 type Bubble = { id: number; x: number; y: number; text: string };
 type Pos = { x: number; y: number };
@@ -26,6 +28,7 @@ export function RoomStage({
   seedLabel,
   petScales,
   petPositions,
+  petZ,
   fullscreen,
   toolbar,
   onSelect,
@@ -45,6 +48,7 @@ export function RoomStage({
   seedLabel?: string | undefined;
   petScales?: Record<string, number> | undefined;
   petPositions?: Record<string, Pos> | undefined;
+  petZ?: Record<string, number> | undefined;
   fullscreen?: boolean | undefined;
   toolbar?: ReactNode | undefined;
   onSelect: (id: string | null) => void;
@@ -53,6 +57,7 @@ export function RoomStage({
   onRotate: (id: string) => void;
   onRemove: (id: string) => void;
   onScale: (id: string, scale: number) => void;
+  onLayer: (id: string, z: number) => void;
   onWater: () => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -62,12 +67,22 @@ export function RoomStage({
   const stage = plantStage(growth);
   const petScale = (key: string) => Number(petScales?.[key] ?? 1);
   const petPos = (key: string, fallback: Pos) => petPositions?.[key] ?? fallback;
+  const petLayer = (key: string) => Number(petZ?.[key] ?? 0);
   const isPet = !!selectedId?.startsWith("pet:");
   const currentScale = selectedId
     ? isPet
       ? petScale(selectedId.slice(4))
       : Number(items.find((i) => i.id === selectedId)?.scale ?? 1)
     : 1;
+  const currentZ = selectedId
+    ? isPet
+      ? petLayer(selectedId.slice(4))
+      : Number(items.find((i) => i.id === selectedId)?.z ?? 0)
+    : 0;
+  const nudgeLayer = (delta: number) => {
+    if (!selectedId) return;
+    onLayer(selectedId, Math.min(99, Math.max(-99, currentZ + delta)));
+  };
   const step = (delta: number) => {
     if (!selectedId) return;
     const next = Math.min(3, Math.max(0.4, Math.round((currentScale + delta) * 100) / 100));
@@ -167,6 +182,7 @@ export function RoomStage({
           left: `${seedPos.x}%`,
           top: `${seedPos.y}%`,
           transform: `translate(-50%,-50%) scale(${petScale("seed")})`,
+          zIndex: 20 + petLayer("seed"),
         }}
         className={cn(
           "press absolute grid place-items-center rounded-2xl",
@@ -207,7 +223,12 @@ export function RoomStage({
               }
               say(pos.x, pos.y, m.line);
             }}
-            style={{ left: `${pos.x}%`, top: `${pos.y}%`, animationDelay: `${i * 0.7}s` }}
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              animationDelay: `${i * 0.7}s`,
+              zIndex: 20 + petLayer(m.critter),
+            }}
             className={cn(
               "room-float absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl",
               selectedId === `pet:${m.critter}` && "bg-card/70 ring-2 ring-primary",
@@ -245,6 +266,7 @@ export function RoomStage({
               left: `${live ? live.x : Number(it.x)}%`,
               top: `${live ? live.y : Number(it.y)}%`,
               transform: `translate(-50%,-50%) rotate(${it.rotation}deg)`,
+              zIndex: 20 + Number(it.z ?? 0),
             }}
             className={cn(
               "absolute grid place-items-center rounded-2xl p-1 leading-none transition-[box-shadow,background-color] duration-200",
@@ -271,6 +293,7 @@ export function RoomStage({
             "absolute inset-x-0 mx-auto flex w-fit max-w-[95%] flex-wrap items-center justify-center gap-2 rounded-full bg-card/95 px-3 py-2 shadow-float",
             fullscreen ? "bottom-[calc(env(safe-area-inset-bottom)+5.5rem)]" : "bottom-2",
           )}
+          style={{ zIndex: 200 }}
           onClick={(e) => e.stopPropagation()}
         >
           <span className="px-1 text-xs font-bold text-muted-foreground">Drag to move</span>
@@ -292,6 +315,23 @@ export function RoomStage({
             aria-label="Make bigger"
           >
             <Plus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => nudgeLayer(-1)}
+            className="press grid size-9 place-items-center rounded-full bg-secondary"
+            aria-label="Send backward a layer"
+          >
+            <img src={layerDown.url} alt="" className="size-5" />
+          </button>
+          <span className="w-8 text-center text-xs font-bold tabular-nums">{currentZ}</span>
+          <button
+            type="button"
+            onClick={() => nudgeLayer(1)}
+            className="press grid size-9 place-items-center rounded-full bg-secondary"
+            aria-label="Bring forward a layer"
+          >
+            <img src={layerUp.url} alt="" className="size-5" />
           </button>
           {!isPet ? (
             <>
