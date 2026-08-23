@@ -30,7 +30,8 @@ function QuestionsPage() {
   const { data: members } = useMembers();
   const qc = useQueryClient();
   const [draft, setDraft] = useState("");
-  const today = todayISO();
+  const todayStr = todayISO();
+  const [today, setToday] = useState(todayStr);
   const { data: streak } = useAnswerStreak();
 
   const { data: question } = useQuery({
@@ -45,7 +46,7 @@ function QuestionsPage() {
   });
 
   const { data: answers } = useQuery({
-    queryKey: ["answers", coupleId, question?.id],
+    queryKey: ["answers", coupleId, question?.id, today],
     enabled: !!coupleId && !!question?.id,
     refetchInterval: 15_000,
     queryFn: async () => {
@@ -55,6 +56,7 @@ function QuestionsPage() {
         .eq("couple_id", coupleId!)
         .eq("question_id", question!.id)
         .eq("answer_date", today);
+
       if (error) throw error;
       // Mark partner answers as seen now that we're looking at this screen.
       const unseen = (data ?? []).filter((a) => a.created_by !== user?.id && !a.seen_by_partner);
