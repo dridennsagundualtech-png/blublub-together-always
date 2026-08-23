@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Minus, Plus, RotateCw, Trash2 } from "lucide-react";
 import { Doodle, type Critter } from "@/components/Doodles";
 import { ITEM_BY_KEY, plantStage, type RoomItemRow } from "@/lib/room";
@@ -6,12 +6,15 @@ import { ITEM_BY_KEY, plantStage, type RoomItemRow } from "@/lib/room";
 import { cn } from "@/lib/utils";
 
 type Bubble = { id: number; x: number; y: number; text: string };
+type Pos = { x: number; y: number };
 
 const MASCOTS: { critter: Critter; x: number; y: number; line: string; size: number }[] = [
   { critter: "penguin", x: 26, y: 62, line: "🐧 Penguin is happy you're here!", size: 56 },
   { critter: "seal", x: 55, y: 84, line: "🦭 The seal is taking a cozy nap.", size: 52 },
   { critter: "cat", x: 79, y: 55, line: "🐱 Mrrp! The cat wants attention.", size: 48 },
 ];
+
+const SEED_HOME: Pos = { x: 12, y: 62 };
 
 export function RoomStage({
   items,
@@ -22,8 +25,12 @@ export function RoomStage({
   seedUrl,
   seedLabel,
   petScales,
+  petPositions,
+  fullscreen,
+  toolbar,
   onSelect,
   onMove,
+  onMovePet,
   onRotate,
   onRemove,
   onScale,
@@ -37,19 +44,24 @@ export function RoomStage({
   seedUrl?: string | undefined;
   seedLabel?: string | undefined;
   petScales?: Record<string, number> | undefined;
+  petPositions?: Record<string, Pos> | undefined;
+  fullscreen?: boolean | undefined;
+  toolbar?: ReactNode | undefined;
   onSelect: (id: string | null) => void;
   onMove: (id: string, x: number, y: number) => void;
+  onMovePet: (key: string, x: number, y: number) => void;
   onRotate: (id: string) => void;
   onRemove: (id: string) => void;
   onScale: (id: string, scale: number) => void;
   onWater: () => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ id: string } | null>(null);
+  const dragRef = useRef<{ id: string; moved: boolean } | null>(null);
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const stage = plantStage(growth);
   const petScale = (key: string) => Number(petScales?.[key] ?? 1);
+  const petPos = (key: string, fallback: Pos) => petPositions?.[key] ?? fallback;
   const isPet = !!selectedId?.startsWith("pet:");
   const currentScale = selectedId
     ? isPet
@@ -82,23 +94,33 @@ export function RoomStage({
     e.preventDefault();
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-    dragRef.current = { id };
+    dragRef.current = { id, moved: false };
     onSelect(id);
   }
 
   function onPointerMove(e: ReactPointerEvent) {
     if (!dragRef.current) return;
     const p = pointFromEvent(e);
-    if (p) setDrag({ id: dragRef.current.id, ...p });
+    if (p) {
+      dragRef.current.moved = true;
+      setDrag({ id: dragRef.current.id, ...p });
+    }
   }
 
   function endDrag() {
-    if (dragRef.current && drag && drag.id === dragRef.current.id) {
-      onMove(drag.id, Math.round(drag.x * 10) / 10, Math.round(drag.y * 10) / 10);
+    const current = dragRef.current;
+    if (current && drag && drag.id === current.id && current.moved) {
+      const x = Math.round(drag.x * 10) / 10;
+      const y = Math.round(drag.y * 10) / 10;
+      if (current.id.startsWith("pet:")) onMovePet(current.id.slice(4), x, y);
+      else onMove(current.id, x, y);
     }
     dragRef.current = null;
     setDrag(null);
   }
+
+  const seedLive = drag && drag.id === "pet:seed" ? drag : null;
+  const seedPos = seedLive ?? petPos("seed", SEED_HOME);
 
   return (
     <div
@@ -107,7 +129,12 @@ export function RoomStage({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onClick={() => editing && onSelect(null)}
-      className="card-soft relative aspect-[4/5] w-full touch-none select-none overflow-hidden p-0"
+      className={cn(
+        "relative touch-none select-none overflow-hidden",
+        fullscreen
+          ? "fixed inset-0 z-[70] h-[100dvh] w-full bg-black"
+          : "card-soft aspect-[4/5] w-full p-0",
+      )}
       style={{ touchAction: "none" }}
     >
       {/* Room background */}
@@ -126,6 +153,7 @@ export function RoomStage({
       {/* Shared seed companion */}
       <button
         type="button"
+        onPointerDown={(e) => startDrag(e, "pet:seed")}
         onClick={(e) => {
           e.stopPropagation();
           if (editing) {
@@ -133,11 +161,15 @@ export function RoomStage({
             return;
           }
           onWater();
-          say(12, 62, `Our little one is growing! (${seedLabel ?? stage.label})`);
+          say(seedPos.x, seedPos.y, `Our little one is growing! (${seedLabel ?? stage.label})`);
         }}
-        style={{ transform: `translateX(-50%) scale(${petScale("seed")})` }}
+        style={{
+          left: `${seedPos.x}%`,
+          top: `${seedPos.y}%`,
+          transform: `translate(-50%,-50%) scale(${petScale("seed")})`,
+        }}
         className={cn(
-          "press absolute left-[12%] top-[62%] grid origin-bottom place-items-center rounded-2xl",
+          "press absolute grid place-items-center rounded-2xl",
           selectedId === "pet:seed" && "bg-card/70 ring-2 ring-primary",
         )}
         aria-label="Shared seed companion"
@@ -158,34 +190,38 @@ export function RoomStage({
         </span>
       </button>
 
-
       {/* Mascots */}
-      {MASCOTS.map((m, i) => (
-        <button
-          key={m.critter}
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (editing) {
-              onSelect(`pet:${m.critter}`);
-              return;
-            }
-            say(m.x, m.y, m.line);
-          }}
-          style={{ left: `${m.x}%`, top: `${m.y}%`, animationDelay: `${i * 0.7}s` }}
-          className={cn(
-            "room-float absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl",
-            selectedId === `pet:${m.critter}` && "bg-card/70 ring-2 ring-primary",
-          )}
-          aria-label={m.critter}
-        >
-          <Doodle
-            critter={m.critter}
-            pose={m.critter === "seal" ? "sleep" : "love"}
-            size={Math.round(m.size * petScale(m.critter))}
-          />
-        </button>
-      ))}
+      {MASCOTS.map((m, i) => {
+        const live = drag && drag.id === `pet:${m.critter}` ? drag : null;
+        const pos = live ?? petPos(m.critter, { x: m.x, y: m.y });
+        return (
+          <button
+            key={m.critter}
+            type="button"
+            onPointerDown={(e) => startDrag(e, `pet:${m.critter}`)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (editing) {
+                onSelect(`pet:${m.critter}`);
+                return;
+              }
+              say(pos.x, pos.y, m.line);
+            }}
+            style={{ left: `${pos.x}%`, top: `${pos.y}%`, animationDelay: `${i * 0.7}s` }}
+            className={cn(
+              "room-float absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl",
+              selectedId === `pet:${m.critter}` && "bg-card/70 ring-2 ring-primary",
+            )}
+            aria-label={m.critter}
+          >
+            <Doodle
+              critter={m.critter}
+              pose={m.critter === "seal" ? "sleep" : "love"}
+              size={Math.round(m.size * petScale(m.critter))}
+            />
+          </button>
+        );
+      })}
 
       {/* Placed items */}
       {items.map((it) => {
@@ -218,26 +254,26 @@ export function RoomStage({
             )}
           >
             <img
-                src={art}
-                alt={meta.label}
-                draggable={false}
-                style={{ width: px }}
-                className="pointer-events-none max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.12)]"
-              />
+              src={art}
+              alt={meta.label}
+              draggable={false}
+              style={{ width: px }}
+              className="pointer-events-none max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.12)]"
+            />
           </button>
         );
       })}
 
-
       {/* Selected item controls */}
       {editing && selectedId ? (
         <div
-          className="absolute inset-x-0 bottom-2 mx-auto flex w-fit items-center gap-2 rounded-full bg-card/95 px-3 py-2 shadow-float"
+          className={cn(
+            "absolute inset-x-0 mx-auto flex w-fit max-w-[95%] flex-wrap items-center justify-center gap-2 rounded-full bg-card/95 px-3 py-2 shadow-float",
+            fullscreen ? "bottom-[calc(env(safe-area-inset-bottom)+5.5rem)]" : "bottom-2",
+          )}
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="px-1 text-xs font-bold text-muted-foreground">
-            {isPet ? "Resize pet" : "Drag to move"}
-          </span>
+          <span className="px-1 text-xs font-bold text-muted-foreground">Drag to move</span>
           <button
             type="button"
             onClick={() => step(-0.1)}
@@ -290,6 +326,16 @@ export function RoomStage({
           {b.text}
         </span>
       ))}
+
+      {/* Fullscreen toolbar */}
+      {fullscreen && toolbar ? (
+        <div
+          className="absolute inset-x-0 bottom-0 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {toolbar}
+        </div>
+      ) : null}
     </div>
   );
 }

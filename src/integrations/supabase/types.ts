@@ -669,6 +669,7 @@ export type Database = {
       }
       photos: {
         Row: {
+          album: string | null
           caption: string | null
           couple_id: string
           created_at: string
@@ -680,6 +681,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          album?: string | null
           caption?: string | null
           couple_id: string
           created_at?: string
@@ -691,6 +693,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          album?: string | null
           caption?: string | null
           couple_id?: string
           created_at?: string
@@ -948,6 +951,7 @@ export type Database = {
           couple_id: string
           created_at: string
           love_points: number
+          pet_positions: Json
           pet_scales: Json
           plant_growth: number
           plant_watered_on: string | null
@@ -960,6 +964,7 @@ export type Database = {
           couple_id: string
           created_at?: string
           love_points?: number
+          pet_positions?: Json
           pet_scales?: Json
           plant_growth?: number
           plant_watered_on?: string | null
@@ -972,6 +977,7 @@ export type Database = {
           couple_id?: string
           created_at?: string
           love_points?: number
+          pet_positions?: Json
           pet_scales?: Json
           plant_growth?: number
           plant_watered_on?: string | null
