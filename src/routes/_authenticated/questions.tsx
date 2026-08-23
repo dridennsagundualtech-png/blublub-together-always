@@ -140,7 +140,6 @@ function QuestionsPage() {
         </p>
       </Card>
 
-
       {!mine ? (
         <Card className="mt-4">
           <TextArea
@@ -265,4 +264,3 @@ function QuestionArchive({ today }: { today: string }) {
     </>
   );
 }
-
