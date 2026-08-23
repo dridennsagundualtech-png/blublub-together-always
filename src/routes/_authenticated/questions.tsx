@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
@@ -23,6 +23,28 @@ export const Route = createFileRoute("/_authenticated/questions")({
   component: QuestionsPage,
 });
 
+type QuestionRow = { id: string; prompt: string; day_index?: number | null };
+
+function dayNumberFor(date: string) {
+  return Math.floor(Date.parse(`${date}T00:00:00Z`) / 86_400_000);
+}
+
+function useQuestionBank() {
+  return useQuery({
+    queryKey: ["question-bank"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("questions").select("*").order("day_index");
+      if (error) throw error;
+      return (data ?? []) as QuestionRow[];
+    },
+  });
+}
+
+function questionFor(bank: QuestionRow[] | undefined, date: string) {
+  if (!bank || bank.length === 0) return null;
+  return bank[dayNumberFor(date) % bank.length]!;
+}
+
 function QuestionsPage() {
   useMarkSeen("questions");
   const coupleId = useCoupleId();
@@ -30,20 +52,10 @@ function QuestionsPage() {
   const { data: members } = useMembers();
   const qc = useQueryClient();
   const [draft, setDraft] = useState("");
-  const todayStr = todayISO();
-  const [today, setToday] = useState(todayStr);
+  const today = todayISO();
   const { data: streak } = useAnswerStreak();
-
-  const { data: question } = useQuery({
-    queryKey: ["daily-question", today],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("questions").select("*").order("day_index");
-      if (error) throw error;
-      if (!data || data.length === 0) return null;
-      const dayNumber = Math.floor(Date.parse(`${today}T00:00:00Z`) / 86_400_000);
-      return data[dayNumber % data.length]!;
-    },
-  });
+  const { data: bank } = useQuestionBank();
+  const question = questionFor(bank, today);
 
   const { data: answers } = useQuery({
     queryKey: ["answers", coupleId, question?.id, today],
@@ -58,7 +70,6 @@ function QuestionsPage() {
         .eq("answer_date", today);
 
       if (error) throw error;
-      // Mark partner answers as seen now that we're looking at this screen.
       const unseen = (data ?? []).filter((a) => a.created_by !== user?.id && !a.seen_by_partner);
       if (unseen.length > 0) {
         await supabase
@@ -92,6 +103,7 @@ function QuestionsPage() {
     onSuccess: () => {
       setDraft("");
       void qc.invalidateQueries({ queryKey: ["answers"] });
+      void qc.invalidateQueries({ queryKey: ["question-archive"] });
       void qc.invalidateQueries({ queryKey: ["badges"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -102,42 +114,13 @@ function QuestionsPage() {
   return (
     <AppLayout title="Daily question" subtitle="One a day, just for you two" critter="cat">
       <Card className="text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          {today === todayStr ? "Today" : "Catching up"}
-        </p>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Today</p>
         {streak ? (
           <div className="mt-2">
             <StreakChip days={streak} />
           </div>
         ) : null}
         <p className="mt-2 text-lg font-extrabold">{question?.prompt ?? "Loading…"}</p>
-        <div className="mt-3 flex items-center justify-center gap-2">
-          <input
-            type="date"
-            value={today}
-            max={todayStr}
-            onChange={(e) => {
-              setToday(e.target.value || todayStr);
-              setDraft("");
-            }}
-            className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
-          />
-          {today !== todayStr ? (
-            <button
-              type="button"
-              onClick={() => {
-                setToday(todayStr);
-                setDraft("");
-              }}
-              className="press rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
-            >
-              Back to today
-            </button>
-          ) : null}
-        </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          Missed a day? Pick a date to answer it late.
-        </p>
       </Card>
 
       {!mine ? (
@@ -182,12 +165,17 @@ function QuestionsPage() {
   );
 }
 
-/** Everything you two have answered before, newest first. */
+const ARCHIVE_DAYS = 30;
+
+/** Past days, split into ones you answered and ones you still can catch up on. */
 function QuestionArchive({ today }: { today: string }) {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const { data: members } = useMembers();
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"answered" | "missed">("answered");
+  const { data: bank } = useQuestionBank();
 
   const { data: rows } = useQuery({
     queryKey: ["question-archive", coupleId],
@@ -203,15 +191,56 @@ function QuestionArchive({ today }: { today: string }) {
     },
   });
 
-  const days = (rows ?? [])
-    .filter((r) => r.answer_date !== today)
-    .reduce<Record<string, typeof rows>>((acc, r) => {
-      (acc[r.answer_date] ??= [] as never)!.push(r as never);
-      return acc;
-    }, {});
+  const pastDates = useMemo(() => {
+    const out: string[] = [];
+    const base = Date.parse(`${today}T00:00:00Z`);
+    for (let i = 1; i <= ARCHIVE_DAYS; i++) {
+      out.push(new Date(base - i * 86_400_000).toISOString().slice(0, 10));
+    }
+    return out;
+  }, [today]);
+
+  const byDate = useMemo(() => {
+    const map: Record<string, NonNullable<typeof rows>> = {};
+    for (const r of rows ?? []) (map[r.answer_date] ??= [] as never).push(r as never);
+    return map;
+  }, [rows]);
+
+  const answeredDates = pastDates.filter((d) =>
+    (byDate[d] ?? []).some((a) => a.created_by === user?.id),
+  );
+  const missedDates = pastDates.filter(
+    (d) => !(byDate[d] ?? []).some((a) => a.created_by === user?.id),
+  );
 
   const nameOf = (id: string) =>
     id === user?.id ? "You" : (members?.find((m) => m.id === id)?.display_name ?? "Partner");
+
+  const fmt = (date: string) =>
+    new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+  const answerLate = useMutation({
+    mutationFn: async (v: { date: string; questionId: string; body: string }) => {
+      const { error } = await supabase.from("question_answers").insert({
+        couple_id: coupleId!,
+        created_by: user!.id,
+        question_id: v.questionId,
+        answer_date: v.date,
+        body: v.body.trim(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["question-archive"] });
+      void qc.invalidateQueries({ queryKey: ["badges"] });
+      toast.success("Caught up 💗");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   return (
     <>
@@ -228,39 +257,135 @@ function QuestionArchive({ today }: { today: string }) {
       >
         Archive
       </SectionTitle>
+
       {open ? (
-        Object.keys(days).length === 0 ? (
-          <Card className="text-sm text-muted-foreground">
-            Nothing archived yet — answers appear here the day after.
-          </Card>
-        ) : (
-          <ul className="space-y-3">
-            {Object.entries(days).map(([date, entries]) => (
-              <li key={date} className="card-soft p-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  {new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-                <p className="mt-1 text-sm font-extrabold">
-                  {(entries?.[0] as { questions?: { prompt?: string } })?.questions?.prompt ??
-                    "Daily question"}
-                </p>
-                <ul className="mt-2 space-y-2">
-                  {(entries ?? []).map((a) => (
-                    <li key={a.id} className="rounded-2xl bg-muted/60 px-3 py-2">
-                      <p className="text-xs font-bold text-primary">{nameOf(a.created_by)}</p>
-                      <p className="whitespace-pre-wrap text-sm">{a.body}</p>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+        <>
+          <div className="mb-3 flex gap-2">
+            {(["answered", "missed"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={
+                  "press rounded-full border border-border px-3 py-1.5 text-xs font-bold " +
+                  (tab === t ? "bg-primary text-primary-foreground" : "bg-card")
+                }
+              >
+                {t === "answered"
+                  ? `Answered (${answeredDates.length})`
+                  : `Not answered (${missedDates.length})`}
+              </button>
             ))}
-          </ul>
-        )
+          </div>
+
+          {tab === "answered" ? (
+            answeredDates.length === 0 ? (
+              <Card className="text-sm text-muted-foreground">
+                Nothing archived yet — answers appear here the day after.
+              </Card>
+            ) : (
+              <ul className="space-y-3">
+                {answeredDates.map((date) => (
+                  <li key={date} className="card-soft p-4">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      {fmt(date)}
+                    </p>
+                    <p className="mt-1 text-sm font-extrabold">
+                      {(byDate[date]?.[0] as { questions?: { prompt?: string } } | undefined)
+                        ?.questions?.prompt ??
+                        questionFor(bank, date)?.prompt ??
+                        "Daily question"}
+                    </p>
+                    <ul className="mt-2 space-y-2">
+                      {(byDate[date] ?? []).map((a) => (
+                        <li key={a.id} className="rounded-2xl bg-muted/60 px-3 py-2">
+                          <p className="text-xs font-bold text-primary">{nameOf(a.created_by)}</p>
+                          <p className="whitespace-pre-wrap text-sm">{a.body}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )
+          ) : missedDates.length === 0 ? (
+            <Card className="text-sm text-muted-foreground">
+              You&apos;re all caught up — no missed questions 🎉
+            </Card>
+          ) : (
+            <ul className="space-y-3">
+              {missedDates.map((date) => (
+                <MissedDay
+                  key={date}
+                  date={date}
+                  label={fmt(date)}
+                  prompt={questionFor(bank, date)?.prompt ?? "Daily question"}
+                  questionId={questionFor(bank, date)?.id ?? null}
+                  partnerAnswered={(byDate[date] ?? []).length > 0}
+                  pending={answerLate.isPending}
+                  onSubmit={(body, questionId) => answerLate.mutate({ date, questionId, body })}
+                />
+              ))}
+            </ul>
+          )}
+        </>
       ) : null}
     </>
+  );
+}
+
+function MissedDay({
+  label,
+  prompt,
+  questionId,
+  partnerAnswered,
+  pending,
+  onSubmit,
+}: {
+  date: string;
+  label: string;
+  prompt: string;
+  questionId: string | null;
+  partnerAnswered: boolean;
+  pending: boolean;
+  onSubmit: (body: string, questionId: string) => void;
+}) {
+  const [body, setBody] = useState("");
+  const [open, setOpen] = useState(false);
+
+  return (
+    <li className="card-soft p-4">
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm font-extrabold">{prompt}</p>
+      {partnerAnswered ? (
+        <p className="mt-1 text-xs text-primary">Your partner already answered this one 💌</p>
+      ) : null}
+      {open ? (
+        <div className="mt-2">
+          <TextArea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            maxLength={1000}
+            placeholder="Answer it now…"
+          />
+          <div className="mt-2">
+            <PrimaryButton
+              disabled={!body.trim() || !questionId || pending}
+              onClick={() => questionId && onSubmit(body, questionId)}
+            >
+              Save answer
+            </PrimaryButton>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="press mt-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
+        >
+          Answer late
+        </button>
+      )}
+    </li>
   );
 }
