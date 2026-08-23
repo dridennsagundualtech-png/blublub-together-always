@@ -300,6 +300,20 @@ export function useRoomActions() {
     onSuccess: () => void refreshRoom(),
   });
 
+  /** Change a pet's layer (front / back) — shared with your partner. */
+  const setPetZ = useMutation({
+    mutationFn: async (v: { key: string; z: number }) => {
+      const current = (room?.pet_z ?? {}) as Record<string, number>;
+      const next = { ...current, [v.key]: Math.round(v.z) };
+      const { error } = await supabase
+        .from("rooms")
+        .update({ pet_z: next })
+        .eq("couple_id", coupleId!);
+      if (error) throw error;
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
   return {
     place,
     move,
@@ -311,6 +325,7 @@ export function useRoomActions() {
     setSeedVariant,
     setPetScale,
     setPetPosition,
+    setPetZ,
     wateredToday: room?.plant_watered_on === today(),
   };
 }
