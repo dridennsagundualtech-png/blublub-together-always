@@ -1,0 +1,2 @@
+ALTER TABLE public.room_items ADD COLUMN IF NOT EXISTS z integer NOT NULL DEFAULT 0;
+ALTER TABLE public.rooms ADD COLUMN IF NOT EXISTS pet_z jsonb NOT NULL DEFAULT '{}'::jsonb;

@@ -158,10 +158,11 @@ export function useRoomActions() {
   });
 
   const transform = useMutation({
-    mutationFn: async (v: { id: string; rotation?: number; scale?: number }) => {
-      const patch: { rotation?: number; scale?: number } = {};
+    mutationFn: async (v: { id: string; rotation?: number; scale?: number; z?: number }) => {
+      const patch: { rotation?: number; scale?: number; z?: number } = {};
       if (v.rotation !== undefined) patch.rotation = v.rotation;
       if (v.scale !== undefined) patch.scale = v.scale;
+      if (v.z !== undefined) patch.z = v.z;
       const { error } = await supabase.from("room_items").update(patch).eq("id", v.id);
 
       if (error) throw error;
@@ -299,6 +300,20 @@ export function useRoomActions() {
     onSuccess: () => void refreshRoom(),
   });
 
+  /** Change a pet's layer (front / back) — shared with your partner. */
+  const setPetZ = useMutation({
+    mutationFn: async (v: { key: string; z: number }) => {
+      const current = (room?.pet_z ?? {}) as Record<string, number>;
+      const next = { ...current, [v.key]: Math.round(v.z) };
+      const { error } = await supabase
+        .from("rooms")
+        .update({ pet_z: next })
+        .eq("couple_id", coupleId!);
+      if (error) throw error;
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
   return {
     place,
     move,
@@ -310,6 +325,7 @@ export function useRoomActions() {
     setSeedVariant,
     setPetScale,
     setPetPosition,
+    setPetZ,
     wateredToday: room?.plant_watered_on === today(),
   };
 }
