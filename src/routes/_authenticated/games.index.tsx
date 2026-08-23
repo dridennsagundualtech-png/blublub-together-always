@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Check, ChevronRight, Gamepad2, Image as ImageIcon, Lock, Pencil, Plus, Sparkles } from "lucide-react";
+import { Check, ChevronRight, Gamepad2, Image as ImageIcon, Lock, Maximize2, Minimize2, Pencil, Plus, Sparkles, Sprout } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/components/ui-kit";
 import { RoomStage } from "@/components/room/RoomStage";
