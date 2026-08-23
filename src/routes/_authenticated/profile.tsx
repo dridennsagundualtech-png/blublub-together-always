@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Bell, MapPin, Music4 } from "lucide-react";
+import { Bell, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
@@ -45,8 +45,6 @@ function ProfilePage() {
   const [anniversary, setAnniversary] = useState(profile?.anniversary_date ?? "");
   const [code, setCode] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [songTitle, setSongTitle] = useState(profile?.song_title ?? "");
-  const [songArtist, setSongArtist] = useState(profile?.song_artist ?? "");
 
   // Sync local edit state once the profile loads.
   if (profile && name === "" && profile.display_name) setName(profile.display_name);
@@ -62,21 +60,6 @@ function ProfilePage() {
     onSuccess: () => {
       refresh();
       toast.success("Saved");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const saveSong = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ song_title: songTitle.trim() || null, song_artist: songArtist.trim() || null })
-        .eq("id", user!.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      refresh();
-      toast.success("Our song saved 🎵");
     },
     onError: (e: Error) => toast.error(e.message),
   });
