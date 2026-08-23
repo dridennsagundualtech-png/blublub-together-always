@@ -878,6 +878,7 @@ export type Database = {
           updated_at: string
           x: number
           y: number
+          z: number
         }
         Insert: {
           couple_id: string
@@ -890,6 +891,7 @@ export type Database = {
           updated_at?: string
           x?: number
           y?: number
+          z?: number
         }
         Update: {
           couple_id?: string
@@ -902,6 +904,7 @@ export type Database = {
           updated_at?: string
           x?: number
           y?: number
+          z?: number
         }
         Relationships: [
           {
@@ -953,6 +956,7 @@ export type Database = {
           love_points: number
           pet_positions: Json
           pet_scales: Json
+          pet_z: Json
           plant_growth: number
           plant_watered_on: string | null
           seed_character: string | null
@@ -966,6 +970,7 @@ export type Database = {
           love_points?: number
           pet_positions?: Json
           pet_scales?: Json
+          pet_z?: Json
           plant_growth?: number
           plant_watered_on?: string | null
           seed_character?: string | null
@@ -979,6 +984,7 @@ export type Database = {
           love_points?: number
           pet_positions?: Json
           pet_scales?: Json
+          pet_z?: Json
           plant_growth?: number
           plant_watered_on?: string | null
           seed_character?: string | null
