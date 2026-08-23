@@ -64,6 +64,8 @@ function RoomPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [bgOpen, setBgOpen] = useState(false);
+  const [seedOpen, setSeedOpen] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const [bgCategory, setBgCategory] = useState<BgCategory>("indoor");
   const [category, setCategory] = useState<RoomTheme>(ROOM_THEMES[0]!);
   const [note, setNote] = useState<string | null>(null);
