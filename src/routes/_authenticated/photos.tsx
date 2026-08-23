@@ -19,7 +19,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { usePremiumAccess } from "@/lib/admin";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
+import { Card, Field, PrimaryButton, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -585,7 +585,6 @@ function PhotoDetail({
   );
 }
 
-
 function PhotoComments({ photoId }: { photoId: string }) {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
@@ -642,7 +641,9 @@ function PhotoComments({ photoId }: { photoId: string }) {
     <div className="mt-3 border-t border-border pt-3">
       <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         <MessageCircle className="size-3.5" />
-        {comments?.length ? `${comments.length} comment${comments.length > 1 ? "s" : ""}` : "Comments"}
+        {comments?.length
+          ? `${comments.length} comment${comments.length > 1 ? "s" : ""}`
+          : "Comments"}
       </p>
 
       {comments && comments.length > 0 ? (

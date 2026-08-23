@@ -1,6 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Check, ChevronRight, Gamepad2, Image as ImageIcon, Lock, Maximize2, Minimize2, Pencil, Plus, Sparkles, Sprout } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  Gamepad2,
+  Image as ImageIcon,
+  Lock,
+  Maximize2,
+  Minimize2,
+  Pencil,
+  Plus,
+  Sparkles,
+  Sprout,
+} from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/components/ui-kit";
 import { RoomStage } from "@/components/room/RoomStage";
@@ -176,7 +188,7 @@ function RoomPage() {
       onMovePet={(key, x, y) => actions.setPetPosition.mutate({ key, x, y })}
       onRotate={(id) => {
         const it = placed.find((p) => p.id === id);
-        actions.transform.mutate({ id, rotation: (((it?.rotation ?? 0) + 15) % 360) });
+        actions.transform.mutate({ id, rotation: ((it?.rotation ?? 0) + 15) % 360 });
       }}
       onScale={(id, scale) => {
         if (id.startsWith("pet:")) {
@@ -297,7 +309,12 @@ function RoomPage() {
   );
 
   return (
-    <AppLayout title="Our Room" subtitle="A little world you build together" critter="seal" critterPose="love">
+    <AppLayout
+      title="Our Room"
+      subtitle="A little world you build together"
+      critter="seal"
+      critterPose="love"
+    >
       <StatHero className="mb-3 flex items-center justify-between gap-3 p-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -335,12 +352,9 @@ function RoomPage() {
 
       <div className="mt-3">{!fullscreen ? controls : null}</div>
 
-
       {/* Seed companion */}
       <SectionTitle>Our seed</SectionTitle>
       <Card>{seedPanel}</Card>
-
-
 
       <SectionTitle>More to do</SectionTitle>
       <ul className="space-y-2">
@@ -488,10 +502,13 @@ function RoomPage() {
         </div>
       ) : null}
 
-
       {/* Background picker sheet */}
       {bgOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Room backgrounds">
+        <div
+          className="fixed inset-0 z-[80] flex items-end"
+          role="dialog"
+          aria-label="Room backgrounds"
+        >
           <button
             type="button"
             aria-label="Close backgrounds"
@@ -561,7 +578,13 @@ function RoomPage() {
                       <span className="flex items-center justify-between gap-1 px-2 py-1.5">
                         <span className="truncate text-[11px] font-bold">{bg.label}</span>
                         <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
-                          {owned ? (active ? "Active" : "Free") : (
+                          {owned ? (
+                            active ? (
+                              "Active"
+                            ) : (
+                              "Free"
+                            )
+                          ) : (
                             <>
                               <Lock className="size-3" /> {bg.cost}
                             </>
@@ -580,8 +603,6 @@ function RoomPage() {
           </div>
         </div>
       ) : null}
-
-
 
       {placed.length > 0 ? (
         <p className="mt-3 text-center text-xs text-muted-foreground">

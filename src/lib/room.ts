@@ -41,7 +41,6 @@ export function plantStage(growth: number) {
   return { index: s.step - 1, glyph: "🌱", label: s.label };
 }
 
-
 function today() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -152,10 +151,7 @@ export function useRoomActions() {
 
   const move = useMutation({
     mutationFn: async (v: { id: string; x: number; y: number }) => {
-      const { error } = await supabase
-        .from("room_items")
-        .update({ x: v.x, y: v.y })
-        .eq("id", v.id);
+      const { error } = await supabase.from("room_items").update({ x: v.x, y: v.y }).eq("id", v.id);
       if (error) throw error;
     },
     onSuccess: () => void refreshItems(),
@@ -290,7 +286,10 @@ export function useRoomActions() {
   const setPetPosition = useMutation({
     mutationFn: async (v: { key: string; x: number; y: number }) => {
       const current = (room?.pet_positions ?? {}) as Record<string, { x: number; y: number }>;
-      const next = { ...current, [v.key]: { x: Math.round(v.x * 10) / 10, y: Math.round(v.y * 10) / 10 } };
+      const next = {
+        ...current,
+        [v.key]: { x: Math.round(v.x * 10) / 10, y: Math.round(v.y * 10) / 10 },
+      };
       const { error } = await supabase
         .from("rooms")
         .update({ pet_positions: next })
@@ -313,7 +312,4 @@ export function useRoomActions() {
     setPetPosition,
     wateredToday: room?.plant_watered_on === today(),
   };
-
 }
-
-
