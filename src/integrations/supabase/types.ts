@@ -719,6 +719,7 @@ export type Database = {
           adult_confirmed: boolean
           anniversary_date: string | null
           avatar_url: string | null
+          birthday: string | null
           couple_id: string | null
           created_at: string
           display_name: string
@@ -734,6 +735,7 @@ export type Database = {
           adult_confirmed?: boolean
           anniversary_date?: string | null
           avatar_url?: string | null
+          birthday?: string | null
           couple_id?: string | null
           created_at?: string
           display_name?: string
@@ -749,6 +751,7 @@ export type Database = {
           adult_confirmed?: boolean
           anniversary_date?: string | null
           avatar_url?: string | null
+          birthday?: string | null
           couple_id?: string | null
           created_at?: string
           display_name?: string
@@ -825,16 +828,19 @@ export type Database = {
         Row: {
           day_index: number
           id: string
+          occasion: string | null
           prompt: string
         }
         Insert: {
           day_index: number
           id?: string
+          occasion?: string | null
           prompt: string
         }
         Update: {
           day_index?: number
           id?: string
+          occasion?: string | null
           prompt?: string
         }
         Relationships: []
