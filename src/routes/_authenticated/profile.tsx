@@ -43,6 +43,7 @@ function ProfilePage() {
 
   const [name, setName] = useState(profile?.display_name ?? "");
   const [anniversary, setAnniversary] = useState(profile?.anniversary_date ?? "");
+  const [birthday, setBirthday] = useState(profile?.birthday ?? "");
   const [code, setCode] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -53,7 +54,11 @@ function ProfilePage() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: name.trim(), anniversary_date: anniversary || null })
+        .update({
+          display_name: name.trim(),
+          anniversary_date: anniversary || null,
+          birthday: birthday || null,
+        })
         .eq("id", user!.id);
       if (error) throw error;
     },
@@ -187,6 +192,14 @@ function ProfilePage() {
               onChange={(e) => setAnniversary(e.target.value)}
             />
           </Field>
+          <Field label="Your birthday">
+            <TextInput
+              type="date"
+              value={birthday}
+              onChange={(e) => setBirthday(e.target.value)}
+            />
+          </Field>
+
           <PrimaryButton disabled={save.isPending} onClick={() => save.mutate()}>
             Save
           </PrimaryButton>

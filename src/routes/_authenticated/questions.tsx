@@ -23,11 +23,25 @@ export const Route = createFileRoute("/_authenticated/questions")({
   component: QuestionsPage,
 });
 
-type QuestionRow = { id: string; prompt: string; day_index?: number | null };
+type QuestionRow = {
+  id: string;
+  prompt: string;
+  day_index?: number | null;
+  occasion?: string | null;
+};
+
+/** Who the day is special for — anniversary / birthdays. */
+type OccasionCtx = {
+  anniversary?: string | null;
+  myBirthday?: string | null;
+  partnerBirthday?: string | null;
+};
 
 function dayNumberFor(date: string) {
   return Math.floor(Date.parse(`${date}T00:00:00Z`) / 86_400_000);
 }
+
+const mmdd = (iso?: string | null) => (iso ? iso.slice(5, 10) : null);
 
 function useQuestionBank() {
   return useQuery({
@@ -40,9 +54,27 @@ function useQuestionBank() {
   });
 }
 
-function questionFor(bank: QuestionRow[] | undefined, date: string) {
+/** Keys of the special buckets that apply to this date, most specific first. */
+function occasionKeysFor(date: string, ctx?: OccasionCtx) {
+  const keys: string[] = [];
+  const d = mmdd(date);
+  if (ctx?.myBirthday && mmdd(ctx.myBirthday) === d) keys.push("birthday");
+  if (ctx?.partnerBirthday && mmdd(ctx.partnerBirthday) === d) keys.push("partner-birthday");
+  if (ctx?.anniversary && mmdd(ctx.anniversary) === d) keys.push("anniversary");
+  if (d) keys.push(d);
+  return keys;
+}
+
+function questionFor(bank: QuestionRow[] | undefined, date: string, ctx?: OccasionCtx) {
   if (!bank || bank.length === 0) return null;
-  return bank[dayNumberFor(date) % bank.length]!;
+  const n = dayNumberFor(date);
+  for (const key of occasionKeysFor(date, ctx)) {
+    const pool = bank.filter((q) => q.occasion === key);
+    if (pool.length > 0) return pool[Math.abs(Math.floor(n / 365)) % pool.length]!;
+  }
+  const general = bank.filter((q) => !q.occasion);
+  const pool = general.length > 0 ? general : bank;
+  return pool[((n % pool.length) + pool.length) % pool.length]!;
 }
 
 function QuestionsPage() {
@@ -55,7 +87,15 @@ function QuestionsPage() {
   const today = todayISO();
   const { data: streak } = useAnswerStreak();
   const { data: bank } = useQuestionBank();
-  const question = questionFor(bank, today);
+  const me = members?.find((m) => m.id === user?.id);
+  const partner = members?.find((m) => m.id !== user?.id);
+  const occasionCtx: OccasionCtx = {
+    anniversary: me?.anniversary_date ?? partner?.anniversary_date ?? null,
+    myBirthday: me?.birthday ?? null,
+    partnerBirthday: partner?.birthday ?? null,
+  };
+  const question = questionFor(bank, today, occasionCtx);
+
 
   const { data: answers } = useQuery({
     queryKey: ["answers", coupleId, question?.id, today],
@@ -176,6 +216,11 @@ function QuestionArchive({ today }: { today: string }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"answered" | "missed">("answered");
   const { data: bank } = useQuestionBank();
+  const occasionCtx: OccasionCtx = {
+    anniversary: members?.find((m) => m.anniversary_date)?.anniversary_date ?? null,
+    myBirthday: members?.find((m) => m.id === user?.id)?.birthday ?? null,
+    partnerBirthday: members?.find((m) => m.id !== user?.id)?.birthday ?? null,
+  };
 
   const { data: rows } = useQuery({
     queryKey: ["question-archive", coupleId],
@@ -293,7 +338,7 @@ function QuestionArchive({ today }: { today: string }) {
                     <p className="mt-1 text-sm font-extrabold">
                       {(byDate[date]?.[0] as { questions?: { prompt?: string } } | undefined)
                         ?.questions?.prompt ??
-                        questionFor(bank, date)?.prompt ??
+                        questionFor(bank, date, occasionCtx)?.prompt ??
                         "Daily question"}
                     </p>
                     <ul className="mt-2 space-y-2">
@@ -319,8 +364,8 @@ function QuestionArchive({ today }: { today: string }) {
                   key={date}
                   date={date}
                   label={fmt(date)}
-                  prompt={questionFor(bank, date)?.prompt ?? "Daily question"}
-                  questionId={questionFor(bank, date)?.id ?? null}
+                  prompt={questionFor(bank, date, occasionCtx)?.prompt ?? "Daily question"}
+                  questionId={questionFor(bank, date, occasionCtx)?.id ?? null}
                   partnerAnswered={(byDate[date] ?? []).length > 0}
                   pending={answerLate.isPending}
                   onSubmit={(body, questionId) => answerLate.mutate({ date, questionId, body })}
