@@ -223,7 +223,9 @@ function CooldownPage() {
         <EmptyState text="Nothing here — hopefully it stays that way 🩷" />
       ) : (
         <ul className="space-y-2 pb-4">
-          {(entries ?? []).map((c) => (
+          {(entries ?? []).map((c) => {
+            const decoded = decodeFeeling(c.feeling ?? "");
+            return (
             <li key={c.id}>
               <Card>
                 <div className="flex items-center justify-between gap-2">
@@ -233,10 +235,32 @@ function CooldownPage() {
                     {c.shared ? "" : " · private"}
                   </p>
                 </div>
-                {c.feeling ? (
+                {decoded.keys.length ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {decoded.keys.map((k) => {
+                      const f = FEELING_BY_KEY.get(k);
+                      if (!f) return null;
+                      return (
+                        <span
+                          key={k}
+                          className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1 text-[11px] font-bold"
+                        >
+                          <img
+                            src={f.url}
+                            alt=""
+                            className="size-6 object-contain"
+                            style={{ imageRendering: "pixelated" }}
+                          />
+                          {f.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ) : null}
+                {decoded.text ? (
                   <p className="mt-2 text-xs">
                     <span className="font-bold">Feeling: </span>
-                    {c.feeling}
+                    {decoded.text}
                   </p>
                 ) : null}
                 {c.need ? (
@@ -263,7 +287,8 @@ function CooldownPage() {
                 ) : null}
               </Card>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </AppLayout>
