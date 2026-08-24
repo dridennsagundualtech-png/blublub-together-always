@@ -42,12 +42,14 @@ const WHEEL_COLORS = [
   "hsl(45 90% 90%)",
 ];
 
+export type WheelOption = { label: string; url?: string };
+
 function Wheel({
   options,
   angle,
   spinning,
 }: {
-  options: readonly string[];
+  options: readonly WheelOption[];
   angle: number;
   spinning: boolean;
 }) {
@@ -77,27 +79,39 @@ function Wheel({
           const [x2, y2] = toXY(end, R);
           const mid = start + slice / 2;
           return (
-            <g key={o}>
+            <g key={o.label}>
               <path
                 d={`M160 160 L${x1} ${y1} A${R} ${R} 0 ${slice > 180 ? 1 : 0} 1 ${x2} ${y2} Z`}
                 fill={WHEEL_COLORS[i % WHEEL_COLORS.length]}
                 stroke="var(--color-card)"
                 strokeWidth={2}
               />
-              <text
-                x={160}
-                y={160}
-                transform={`rotate(${mid} 160 160) translate(0 -${R - 14})`}
-                textAnchor="middle"
-                dominantBaseline="hanging"
-                className="font-display"
-                fontSize={n > 5 ? 13 : 15}
-                fontWeight={800}
-                fill="oklch(0.32 0.05 15)"
-                style={{ letterSpacing: "-0.01em" }}
-              >
-                {o}
-              </text>
+              {o.url ? (
+                <image
+                  href={o.url}
+                  width={40}
+                  height={40}
+                  x={-20}
+                  y={-20}
+                  transform={`rotate(${mid} 160 160) translate(160 ${160 - (R - 34)})`}
+                  style={{ imageRendering: "pixelated" }}
+                />
+              ) : (
+                <text
+                  x={160}
+                  y={160}
+                  transform={`rotate(${mid} 160 160) translate(0 -${R - 14})`}
+                  textAnchor="middle"
+                  dominantBaseline="hanging"
+                  className="font-display"
+                  fontSize={n > 5 ? 13 : 15}
+                  fontWeight={800}
+                  fill="oklch(0.32 0.05 15)"
+                  style={{ letterSpacing: "-0.01em" }}
+                >
+                  {o.label}
+                </text>
+              )}
             </g>
           );
         })}
@@ -199,7 +213,7 @@ function ClassicRoulette() {
             <p className="mb-3 text-center text-sm font-bold">
               Stage {stage + 1} of 3 · {current.label}
             </p>
-            <Wheel options={current.options} angle={angle} spinning={spinning} />
+            <Wheel options={current.options.map((o) => ({ label: o }))} angle={angle} spinning={spinning} />
           </>
         )}
 
