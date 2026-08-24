@@ -36,6 +36,25 @@ function HomePage() {
   const { data: members } = useMembers();
   const partner = usePartner();
   const { data: badges } = useBadges();
+  const { data: user } = useAuthUser();
+
+  const { data: feelings } = useQuery({
+    queryKey: ["home-feelings", coupleId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cooldowns")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const myFeel = feelings?.find((c) => c.created_by === user?.id);
+  const theirFeel = feelings?.find((c) => c.created_by !== user?.id && c.shared);
+
 
   const anniversary =
     members?.map((m) => m.anniversary_date).filter(Boolean).sort()[0] ??
