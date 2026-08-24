@@ -24,3 +24,16 @@ export const FEELINGS: FeelingOption[] = [
 ];
 
 export const FEELING_BY_KEY = new Map(FEELINGS.map((f) => [f.key, f]));
+
+/** Feelings are stored inline in a cool-down note so a picked mood survives a round trip. */
+const FEEL_RE = /^\[feel:([a-z0-9,-]+)\]\s*/i;
+
+export function encodeFeeling(keys: string[], text: string) {
+  return keys.length ? `[feel:${keys.join(",")}] ${text}`.trim() : text;
+}
+
+export function decodeFeeling(raw: string) {
+  const m = FEEL_RE.exec(raw ?? "");
+  if (!m) return { keys: [] as string[], text: raw ?? "" };
+  return { keys: m[1]!.split(",").filter(Boolean), text: (raw ?? "").replace(FEEL_RE, "") };
+}

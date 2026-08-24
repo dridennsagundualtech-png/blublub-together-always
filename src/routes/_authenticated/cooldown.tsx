@@ -8,14 +8,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, Field, PrimaryButton, SectionTitle, TextArea } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
-import { FEELINGS, FEELING_BY_KEY } from "@/lib/feelings";
-
-/** Feelings are stored inline in the note text so a picked mood survives a round trip. */
-const FEEL_RE = /^\[feel:([a-z0-9,-]+)\]\s*/i;
-
-function encodeFeeling(keys: string[], text: string) {
-  return keys.length ? `[feel:${keys.join(",")}] ${text}`.trim() : text;
-}
+import { FEELINGS, FEELING_BY_KEY, decodeFeeling, encodeFeeling } from "@/lib/feelings";
 
 function decodeFeeling(raw: string) {
   const m = FEEL_RE.exec(raw ?? "");
