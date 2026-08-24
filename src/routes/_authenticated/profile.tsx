@@ -54,7 +54,11 @@ function ProfilePage() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: name.trim(), anniversary_date: anniversary || null })
+        .update({
+          display_name: name.trim(),
+          anniversary_date: anniversary || null,
+          birthday: birthday || null,
+        })
         .eq("id", user!.id);
       if (error) throw error;
     },
