@@ -2,12 +2,26 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { HeartHandshake, Share2 } from "lucide-react";
+import { ChevronDown, HeartHandshake, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, Field, PrimaryButton, SectionTitle, TextArea } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
+import { FEELINGS, FEELING_BY_KEY } from "@/lib/feelings";
+
+/** Feelings are stored inline in the note text so a picked mood survives a round trip. */
+const FEEL_RE = /^\[feel:([a-z0-9,-]+)\]\s*/i;
+
+function encodeFeeling(keys: string[], text: string) {
+  return keys.length ? `[feel:${keys.join(",")}] ${text}`.trim() : text;
+}
+
+function decodeFeeling(raw: string) {
+  const m = FEEL_RE.exec(raw ?? "");
+  if (!m) return { keys: [] as string[], text: raw ?? "" };
+  return { keys: m[1]!.split(",").filter(Boolean), text: (raw ?? "").replace(FEEL_RE, "") };
+}
 
 export const Route = createFileRoute("/_authenticated/cooldown")({
   head: () => ({
@@ -36,6 +50,8 @@ function CooldownPage() {
   const qc = useQueryClient();
 
   const [feeling, setFeeling] = useState("");
+  const [moods, setMoods] = useState<string[]>([]);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [need, setNeed] = useState("");
   const [responsibility, setResponsibility] = useState("");
 
@@ -58,7 +74,7 @@ function CooldownPage() {
       const { error } = await supabase.from("cooldowns").insert({
         couple_id: coupleId!,
         created_by: user!.id,
-        feeling: feeling.trim(),
+        feeling: encodeFeeling(moods, feeling.trim()),
         need: need.trim(),
         responsibility: responsibility.trim(),
         shared: share,
@@ -67,6 +83,7 @@ function CooldownPage() {
     },
     onSuccess: (_d, share) => {
       setFeeling("");
+      setMoods([]);
       setNeed("");
       setResponsibility("");
       void qc.invalidateQueries({ queryKey: ["cooldowns"] });
@@ -86,7 +103,7 @@ function CooldownPage() {
   const nameOf = (id: string) =>
     id === user?.id ? "You" : (members?.find((m) => m.id === id)?.display_name ?? "Partner");
 
-  const filled = feeling.trim() || need.trim() || responsibility.trim();
+  const filled = moods.length > 0 || feeling.trim() || need.trim() || responsibility.trim();
 
   return (
     <AppLayout title="Cool-down" subtitle="Fill it in alone, then share" critter="cat" critterPose="curious">
