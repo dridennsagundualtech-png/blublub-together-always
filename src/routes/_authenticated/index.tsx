@@ -7,7 +7,9 @@ import { Doodle } from "@/components/Doodles";
 import { Card, Money, ProgressBar, SectionTitle, StatCard, StatHero } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
-import { daysTogether, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
+import { daysTogether, useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
+import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
+import { timeAgo } from "@/lib/location";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
