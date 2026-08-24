@@ -118,54 +118,105 @@ function CooldownPage() {
       </Card>
 
       <Card className="mt-4">
-        <div className="space-y-3">
-          <Field label="What I'm feeling">
-            <TextArea
-              rows={3}
-              value={feeling}
-              onChange={(e) => setFeeling(e.target.value)}
-              maxLength={1000}
-              placeholder="I felt hurt when…"
-            />
-          </Field>
-          <Field label="What I need right now">
-            <TextArea
-              rows={3}
-              value={need}
-              onChange={(e) => setNeed(e.target.value)}
-              maxLength={1000}
-              placeholder="A hug, some quiet time, to be heard…"
-            />
-          </Field>
-          <Field label="My part in it">
-            <TextArea
-              rows={3}
-              value={responsibility}
-              onChange={(e) => setResponsibility(e.target.value)}
-              maxLength={1000}
-              placeholder="Something I could have done differently…"
-            />
-          </Field>
-          <div className="flex gap-2">
-            <PrimaryButton
-              disabled={!filled || save.isPending}
-              onClick={() => {
-                playChirp("success");
-                save.mutate(true);
-              }}
-            >
-              Save &amp; share
-            </PrimaryButton>
-            <PrimaryButton
-              className="w-auto whitespace-nowrap bg-secondary px-4 text-secondary-foreground"
-              disabled={!filled || save.isPending}
-              onClick={() => save.mutate(false)}
-            >
-              Keep private
-            </PrimaryButton>
+        <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+          My feelings
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Tap whatever fits right now — pick as many as you like.
+        </p>
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {FEELINGS.map((f) => {
+            const on = moods.includes(f.key);
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => {
+                  playChirp("tap");
+                  setMoods((m) => (on ? m.filter((k) => k !== f.key) : [...m, f.key]));
+                }}
+                className={`press flex flex-col items-center gap-1 rounded-2xl p-2 ${
+                  on ? "bg-accent ring-2 ring-primary" : "bg-secondary/60"
+                }`}
+                aria-pressed={on}
+              >
+                <img
+                  src={f.url}
+                  alt=""
+                  loading="lazy"
+                  className="size-12 object-contain"
+                  style={{ imageRendering: "pixelated" }}
+                />
+                <span className="text-[10px] font-bold leading-tight">{f.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            playChirp("tap");
+            setDetailOpen((v) => !v);
+          }}
+          className="press mt-4 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
+        >
+          {detailOpen ? "Hide the guided questions" : "Want to say more? Open the guided questions"}
+          <ChevronDown className={`size-4 transition-transform ${detailOpen ? "rotate-180" : ""}`} />
+        </button>
+
+        {detailOpen ? (
+          <div className="mt-3 space-y-3">
+            <Field label="What I'm feeling">
+              <TextArea
+                rows={3}
+                value={feeling}
+                onChange={(e) => setFeeling(e.target.value)}
+                maxLength={1000}
+                placeholder="I felt hurt when…"
+              />
+            </Field>
+            <Field label="What I need right now">
+              <TextArea
+                rows={3}
+                value={need}
+                onChange={(e) => setNeed(e.target.value)}
+                maxLength={1000}
+                placeholder="A hug, some quiet time, to be heard…"
+              />
+            </Field>
+            <Field label="My part in it">
+              <TextArea
+                rows={3}
+                value={responsibility}
+                onChange={(e) => setResponsibility(e.target.value)}
+                maxLength={1000}
+                placeholder="Something I could have done differently…"
+              />
+            </Field>
           </div>
+        ) : null}
+
+        <div className="mt-4 flex gap-2">
+          <PrimaryButton
+            disabled={!filled || save.isPending}
+            onClick={() => {
+              playChirp("success");
+              save.mutate(true);
+            }}
+          >
+            Save &amp; share
+          </PrimaryButton>
+          <PrimaryButton
+            className="w-auto whitespace-nowrap bg-secondary px-4 text-secondary-foreground"
+            disabled={!filled || save.isPending}
+            onClick={() => save.mutate(false)}
+          >
+            Keep private
+          </PrimaryButton>
         </div>
       </Card>
+
 
       <SectionTitle>Past reflections</SectionTitle>
       {(entries ?? []).length === 0 ? (
