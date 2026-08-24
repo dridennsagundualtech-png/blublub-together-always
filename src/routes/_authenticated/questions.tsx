@@ -216,6 +216,11 @@ function QuestionArchive({ today }: { today: string }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"answered" | "missed">("answered");
   const { data: bank } = useQuestionBank();
+  const occasionCtx: OccasionCtx = {
+    anniversary: members?.find((m) => m.anniversary_date)?.anniversary_date ?? null,
+    myBirthday: members?.find((m) => m.id === user?.id)?.birthday ?? null,
+    partnerBirthday: members?.find((m) => m.id !== user?.id)?.birthday ?? null,
+  };
 
   const { data: rows } = useQuery({
     queryKey: ["question-archive", coupleId],
