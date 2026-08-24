@@ -43,6 +43,7 @@ function ProfilePage() {
 
   const [name, setName] = useState(profile?.display_name ?? "");
   const [anniversary, setAnniversary] = useState(profile?.anniversary_date ?? "");
+  const [birthday, setBirthday] = useState(profile?.birthday ?? "");
   const [code, setCode] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
