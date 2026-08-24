@@ -164,6 +164,12 @@ function HomePage() {
         </StatCard>
       </div>
 
+      <SectionTitle>How we feel</SectionTitle>
+      <div className="grid grid-cols-2 gap-3">
+        <FeelingTile who="You" row={myFeel} />
+        <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel} />
+      </div>
+
       <SectionTitle>Coming up</SectionTitle>
       {upcoming && upcoming.length > 0 ? (
         <ul className="space-y-2">
