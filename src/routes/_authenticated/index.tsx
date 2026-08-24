@@ -166,8 +166,8 @@ function HomePage() {
 
       <SectionTitle>How we feel</SectionTitle>
       <div className="grid grid-cols-2 gap-3">
-        <FeelingTile who="You" row={myFeel} />
-        <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel} />
+        <FeelingTile who="You" row={myFeel ?? null} />
+        <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} />
       </div>
 
       <SectionTitle>Coming up</SectionTitle>
@@ -233,7 +233,7 @@ function FeelingTile({
   row,
 }: {
   who: string;
-  row?: { feeling: string | null; created_at: string } | null;
+  row?: { feeling: string | null; created_at: string } | null | undefined;
 }) {
   const decoded = decodeFeeling(row?.feeling ?? "");
   const picks = decoded.keys.map((k) => FEELING_BY_KEY.get(k)).filter(Boolean);
