@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, RotateCcw, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Image as ImageIcon, Plus, RotateCcw, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { playChirp } from "@/hooks/use-sound";
+import { FOOD_ART, FOOD_ART_BY_KEY } from "@/lib/food-art";
 
 export const Route = createFileRoute("/_authenticated/food")({
   head: () => ({
@@ -42,7 +43,7 @@ const WHEEL_COLORS = [
   "hsl(45 90% 90%)",
 ];
 
-export type WheelOption = { label: string; url?: string };
+export type WheelOption = { key: string; label: string; url?: string };
 
 function Wheel({
   options,
@@ -79,7 +80,7 @@ function Wheel({
           const [x2, y2] = toXY(end, R);
           const mid = start + slice / 2;
           return (
-            <g key={o.label}>
+            <g key={o.key}>
               <path
                 d={`M160 160 L${x1} ${y1} A${R} ${R} 0 ${slice > 180 ? 1 : 0} 1 ${x2} ${y2} Z`}
                 fill={WHEEL_COLORS[i % WHEEL_COLORS.length]}
@@ -213,7 +214,7 @@ function ClassicRoulette() {
             <p className="mb-3 text-center text-sm font-bold">
               Stage {stage + 1} of 3 · {current.label}
             </p>
-            <Wheel options={current.options.map((o) => ({ label: o }))} angle={angle} spinning={spinning} />
+            <Wheel options={current.options.map((o) => ({ key: o, label: o }))} angle={angle} spinning={spinning} />
           </>
         )}
 
@@ -343,7 +344,7 @@ function CustomRoulette() {
   }
 
   const wheelOptions: WheelOption[] = options.map((o, i) =>
-    o.art ? { label: `${o.label}#${i}`, url: o.art } : { label: `${o.label}#${i}` },
+    o.art ? { key: `${o.label}-${i}`, label: o.label, url: o.art } : { key: `${o.label}-${i}`, label: o.label },
   );
 
   return (
