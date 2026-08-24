@@ -7,7 +7,9 @@ import { Doodle } from "@/components/Doodles";
 import { Card, Money, ProgressBar, SectionTitle, StatCard, StatHero } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
-import { daysTogether, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
+import { daysTogether, useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
+import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
+import { timeAgo } from "@/lib/location";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -34,6 +36,25 @@ function HomePage() {
   const { data: members } = useMembers();
   const partner = usePartner();
   const { data: badges } = useBadges();
+  const { data: user } = useAuthUser();
+
+  const { data: feelings } = useQuery({
+    queryKey: ["home-feelings", coupleId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cooldowns")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const myFeel = feelings?.find((c) => c.created_by === user?.id);
+  const theirFeel = feelings?.find((c) => c.created_by !== user?.id && c.shared);
+
 
   const anniversary =
     members?.map((m) => m.anniversary_date).filter(Boolean).sort()[0] ??
@@ -143,6 +164,12 @@ function HomePage() {
         </StatCard>
       </div>
 
+      <SectionTitle>How we feel</SectionTitle>
+      <div className="grid grid-cols-2 gap-3">
+        <FeelingTile who="You" row={myFeel ?? null} />
+        <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} />
+      </div>
+
       <SectionTitle>Coming up</SectionTitle>
       {upcoming && upcoming.length > 0 ? (
         <ul className="space-y-2">
@@ -198,5 +225,50 @@ function HomePage() {
         </>
       ) : null}
     </AppLayout>
+  );
+}
+
+function FeelingTile({
+  who,
+  row,
+}: {
+  who: string;
+  row?: { feeling: string | null; created_at: string } | null | undefined;
+}) {
+  const decoded = decodeFeeling(row?.feeling ?? "");
+  const picks = decoded.keys.map((k) => FEELING_BY_KEY.get(k)).filter(Boolean);
+
+  return (
+    <Link to="/cooldown" className="card-soft press flex flex-col items-center gap-2 p-4 text-center">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {who}
+      </span>
+      {picks.length > 0 ? (
+        <span className="flex flex-wrap items-center justify-center gap-1">
+          {picks.slice(0, 3).map((f) => (
+            <img
+              key={f!.key}
+              src={f!.url}
+              alt={f!.label}
+              className="size-10 object-contain"
+              style={{ imageRendering: "pixelated" }}
+              loading="lazy"
+            />
+          ))}
+        </span>
+      ) : (
+        <span className="grid h-10 place-items-center text-2xl">🫧</span>
+      )}
+      <span className="text-sm font-bold leading-snug">
+        {picks.length > 0
+          ? picks.map((f) => f!.label).join(", ")
+          : row
+            ? decoded.text.slice(0, 40) || "Shared a note"
+            : "Nothing shared yet"}
+      </span>
+      {row ? (
+        <span className="text-[11px] text-muted-foreground">{timeAgo(row.created_at)}</span>
+      ) : null}
+    </Link>
   );
 }
