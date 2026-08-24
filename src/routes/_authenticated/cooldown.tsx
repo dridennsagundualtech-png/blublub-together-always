@@ -10,11 +10,6 @@ import { playChirp } from "@/hooks/use-sound";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 import { FEELINGS, FEELING_BY_KEY, decodeFeeling, encodeFeeling } from "@/lib/feelings";
 
-function decodeFeeling(raw: string) {
-  const m = FEEL_RE.exec(raw ?? "");
-  if (!m) return { keys: [] as string[], text: raw ?? "" };
-  return { keys: m[1]!.split(",").filter(Boolean), text: (raw ?? "").replace(FEEL_RE, "") };
-}
 
 export const Route = createFileRoute("/_authenticated/cooldown")({
   head: () => ({
