@@ -7,13 +7,12 @@ import { cn } from "@/lib/utils";
 import layerUp from "@/assets/layer-up.png.asset.json";
 import layerDown from "@/assets/layer-down.png.asset.json";
 
-type Bubble = { id: number; x: number; y: number; text: string };
 type Pos = { x: number; y: number };
 
-const MASCOTS: { critter: Critter; x: number; y: number; line: string; size: number }[] = [
-  { critter: "penguin", x: 26, y: 62, line: "🐧 Penguin is happy you're here!", size: 56 },
-  { critter: "seal", x: 55, y: 84, line: "🦭 The seal is taking a cozy nap.", size: 52 },
-  { critter: "cat", x: 79, y: 55, line: "🐱 Mrrp! The cat wants attention.", size: 48 },
+const MASCOTS: { critter: Critter; x: number; y: number; size: number }[] = [
+  { critter: "penguin", x: 26, y: 62, size: 56 },
+  { critter: "seal", x: 55, y: 84, size: 52 },
+  { critter: "cat", x: 79, y: 55, size: 48 },
 ];
 
 const SEED_HOME: Pos = { x: 12, y: 62 };
@@ -64,7 +63,6 @@ export function RoomStage({
   const stageRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ id: string; moved: boolean } | null>(null);
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
-  const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const stage = plantStage(growth);
   const petScale = (key: string) => Number(petScales?.[key] ?? 1);
   const petPos = (key: string, fallback: Pos) => petPositions?.[key] ?? fallback;
@@ -89,12 +87,6 @@ export function RoomStage({
     const next = Math.min(3, Math.max(0.4, Math.round((currentScale + delta) * 100) / 100));
     onScale(selectedId, next);
   };
-
-  function say(x: number, y: number, text: string) {
-    const id = Date.now() + Math.random();
-    setBubbles((b) => [...b, { id, x, y, text }]);
-    window.setTimeout(() => setBubbles((b) => b.filter((n) => n.id !== id)), 2200);
-  }
 
   function pointFromEvent(e: { clientX: number; clientY: number }) {
     const rect = stageRef.current?.getBoundingClientRect();
@@ -177,7 +169,6 @@ export function RoomStage({
             return;
           }
           onWater();
-          say(seedPos.x, seedPos.y, `Our little one is growing! (${seedLabel ?? stage.label})`);
         }}
         style={{
           left: `${seedPos.x}%`,
@@ -218,11 +209,7 @@ export function RoomStage({
             onPointerDown={(e) => startDrag(e, `pet:${m.critter}`)}
             onClick={(e) => {
               e.stopPropagation();
-              if (editing) {
-                onSelect(`pet:${m.critter}`);
-                return;
-              }
-              say(pos.x, pos.y, m.line);
+              if (editing) onSelect(`pet:${m.critter}`);
             }}
             style={{
               left: `${pos.x}%`,
@@ -261,7 +248,6 @@ export function RoomStage({
             onClick={(e) => {
               e.stopPropagation();
               if (editing) onSelect(it.id);
-              else say(Number(it.x), Number(it.y), meta.label);
             }}
             style={{
               left: `${live ? live.x : Number(it.x)}%`,
@@ -356,17 +342,6 @@ export function RoomStage({
           ) : null}
         </div>
       ) : null}
-
-      {/* Speech bubbles */}
-      {bubbles.map((b) => (
-        <span
-          key={b.id}
-          style={{ left: `${b.x}%`, top: `${b.y - 12}%` }}
-          className="room-pop pointer-events-none absolute -translate-x-1/2 whitespace-nowrap rounded-full bg-card px-3 py-1.5 text-xs font-bold shadow-float"
-        >
-          {b.text}
-        </span>
-      ))}
 
       {/* Fullscreen toolbar */}
       {fullscreen && toolbar ? (

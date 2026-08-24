@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthUser, useCoupleId, usePartner, useProfile } from "@/lib/session";
 import { useLocations, timeAgo } from "@/lib/location";
 import { todayISO } from "@/lib/badges";
+import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
 
 
 export const Route = createFileRoute("/_authenticated/wellbeing")({
@@ -151,8 +152,16 @@ function WellbeingPage() {
 
   // Cool-down summary — the most recent note I'm allowed to see.
   const latestCool = cooldowns?.find((c) => c.created_by === user?.id || c.shared);
+  const coolDecoded = decodeFeeling(latestCool?.feeling ?? "");
+  const coolMoods = coolDecoded.keys
+    .map((k) => FEELING_BY_KEY.get(k)?.label)
+    .filter(Boolean)
+    .join(", ");
+  const coolWho = latestCool?.created_by === user?.id ? "You feel" : `${partner?.display_name ?? "Partner"} feels`;
   const coolValue = latestCool
-    ? `${latestCool.created_by === user?.id ? "You feel" : `${partner?.display_name ?? "Partner"} feels`} “${latestCool.feeling.slice(0, 60)}”`
+    ? coolMoods
+      ? `${coolWho} ${coolMoods.toLowerCase()}`
+      : `${coolWho} “${coolDecoded.text.slice(0, 60)}”`
     : "No feelings logged yet";
   const coolDetail = latestCool
     ? `Needs: ${latestCool.need.slice(0, 50) || "—"} · ${timeAgo(latestCool.created_at)}`

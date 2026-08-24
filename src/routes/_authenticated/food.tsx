@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, RotateCcw, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Image as ImageIcon, Plus, RotateCcw, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { playChirp } from "@/hooks/use-sound";
+import { FOOD_ART, FOOD_ART_BY_KEY } from "@/lib/food-art";
 
 export const Route = createFileRoute("/_authenticated/food")({
   head: () => ({
@@ -42,12 +43,14 @@ const WHEEL_COLORS = [
   "hsl(45 90% 90%)",
 ];
 
+export type WheelOption = { key: string; label: string; url?: string };
+
 function Wheel({
   options,
   angle,
   spinning,
 }: {
-  options: readonly string[];
+  options: readonly WheelOption[];
   angle: number;
   spinning: boolean;
 }) {
@@ -77,27 +80,39 @@ function Wheel({
           const [x2, y2] = toXY(end, R);
           const mid = start + slice / 2;
           return (
-            <g key={o}>
+            <g key={o.key}>
               <path
                 d={`M160 160 L${x1} ${y1} A${R} ${R} 0 ${slice > 180 ? 1 : 0} 1 ${x2} ${y2} Z`}
                 fill={WHEEL_COLORS[i % WHEEL_COLORS.length]}
                 stroke="var(--color-card)"
                 strokeWidth={2}
               />
-              <text
-                x={160}
-                y={160}
-                transform={`rotate(${mid} 160 160) translate(0 -${R - 14})`}
-                textAnchor="middle"
-                dominantBaseline="hanging"
-                className="font-display"
-                fontSize={n > 5 ? 13 : 15}
-                fontWeight={800}
-                fill="oklch(0.32 0.05 15)"
-                style={{ letterSpacing: "-0.01em" }}
-              >
-                {o}
-              </text>
+              {o.url ? (
+                <image
+                  href={o.url}
+                  width={40}
+                  height={40}
+                  x={-20}
+                  y={-20}
+                  transform={`rotate(${mid} 160 160) translate(160 ${160 - (R - 34)})`}
+                  style={{ imageRendering: "pixelated" }}
+                />
+              ) : (
+                <text
+                  x={160}
+                  y={160}
+                  transform={`rotate(${mid} 160 160) translate(0 -${R - 14})`}
+                  textAnchor="middle"
+                  dominantBaseline="hanging"
+                  className="font-display"
+                  fontSize={n > 5 ? 13 : 15}
+                  fontWeight={800}
+                  fill="oklch(0.32 0.05 15)"
+                  style={{ letterSpacing: "-0.01em" }}
+                >
+                  {o.label}
+                </text>
+              )}
             </g>
           );
         })}
@@ -199,7 +214,7 @@ function ClassicRoulette() {
             <p className="mb-3 text-center text-sm font-bold">
               Stage {stage + 1} of 3 · {current.label}
             </p>
-            <Wheel options={current.options} angle={angle} spinning={spinning} />
+            <Wheel options={current.options.map((o) => ({ key: o, label: o }))} angle={angle} spinning={spinning} />
           </>
         )}
 
@@ -240,15 +255,19 @@ function ClassicRoulette() {
   );
 }
 
-const STORAGE_KEY = "blublub.food.custom-options";
+const STORAGE_KEY = "blublub.food.custom-options-v2";
 const MAX_OPTIONS = 12;
 
+type CustomOption = { label: string; art?: string };
+
 function CustomRoulette() {
-  const [options, setOptions] = useState<string[]>([]);
+  const [options, setOptions] = useState<CustomOption[]>([]);
   const [draft, setDraft] = useState("");
+  const [pickedArt, setPickedArt] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [angle, setAngle] = useState(0);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<CustomOption | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   // Keep the list on the device so the spots around you stick between visits.
@@ -257,7 +276,19 @@ function CustomRoulette() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed: unknown = JSON.parse(raw);
-        if (Array.isArray(parsed)) setOptions(parsed.filter((v): v is string => typeof v === "string"));
+        if (Array.isArray(parsed)) {
+          setOptions(
+            parsed
+              .map((v): CustomOption | null =>
+                typeof v === "string"
+                  ? { label: v }
+                  : v && typeof v === "object" && typeof (v as CustomOption).label === "string"
+                    ? (v as CustomOption)
+                    : null,
+              )
+              .filter((v): v is CustomOption => !!v),
+          );
+        }
       }
     } catch {
       // ignore unreadable storage
@@ -276,19 +307,23 @@ function CustomRoulette() {
 
   function add() {
     const value = draft.trim();
-    if (!value || options.length >= MAX_OPTIONS) return;
-    if (options.some((o) => o.toLowerCase() === value.toLowerCase())) {
+    const art = pickedArt ? (FOOD_ART_BY_KEY.get(pickedArt)?.url ?? undefined) : undefined;
+    const label = value || (pickedArt ? (FOOD_ART_BY_KEY.get(pickedArt)?.label ?? "Dish") : "");
+    if (!label || options.length >= MAX_OPTIONS) return;
+    if (options.some((o) => o.label.toLowerCase() === label.toLowerCase() && o.art === art)) {
       setDraft("");
+      setPickedArt(null);
       return;
     }
     playChirp("tap");
-    setOptions((o) => [...o, value]);
+    setOptions((o) => [...o, art ? { label, art } : { label }]);
     setDraft("");
+    setPickedArt(null);
     setResult(null);
   }
 
-  function remove(name: string) {
-    setOptions((o) => o.filter((v) => v !== name));
+  function remove(index: number) {
+    setOptions((o) => o.filter((_v, i) => i !== index));
     setResult(null);
   }
 
@@ -308,6 +343,10 @@ function CustomRoulette() {
     }, 4100);
   }
 
+  const wheelOptions: WheelOption[] = options.map((o, i) =>
+    o.art ? { key: `${o.label}-${i}`, label: o.label, url: o.art } : { key: `${o.label}-${i}`, label: o.label },
+  );
+
   return (
     <>
       <Card>
@@ -315,7 +354,7 @@ function CustomRoulette() {
           {options.length < 2 ? "Add at least 2 places or dishes" : "Your wheel"}
         </p>
         {options.length >= 2 ? (
-          <Wheel options={options} angle={angle} spinning={spinning} />
+          <Wheel options={wheelOptions} angle={angle} spinning={spinning} />
         ) : (
           <div className="grid place-items-center py-8">
             <Doodle critter="cat" pose="curious" size={64} />
@@ -323,9 +362,19 @@ function CustomRoulette() {
         )}
 
         {result ? (
-          <div className="mt-4 rounded-2xl bg-accent px-4 py-3 text-center text-accent-foreground">
-            <p className="text-xs font-bold uppercase tracking-wide opacity-70">Tonight it's</p>
-            <p className="mt-1 text-xl font-extrabold">{result}</p>
+          <div className="mt-4 flex items-center justify-center gap-3 rounded-2xl bg-accent px-4 py-3 text-center text-accent-foreground">
+            {result.art ? (
+              <img
+                src={result.art}
+                alt=""
+                className="size-12 object-contain"
+                style={{ imageRendering: "pixelated" }}
+              />
+            ) : null}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide opacity-70">Tonight it's</p>
+              <p className="mt-1 text-xl font-extrabold">{result.label}</p>
+            </div>
           </div>
         ) : null}
 
@@ -355,7 +404,7 @@ function CustomRoulette() {
           <button
             type="button"
             onClick={add}
-            disabled={!draft.trim() || options.length >= MAX_OPTIONS}
+            disabled={(!draft.trim() && !pickedArt) || options.length >= MAX_OPTIONS}
             className="press grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground disabled:opacity-40"
             aria-label="Add option"
           >
@@ -363,19 +412,70 @@ function CustomRoulette() {
           </button>
         </div>
 
+        <button
+          type="button"
+          onClick={() => {
+            playChirp("tap");
+            setPickerOpen((v) => !v);
+          }}
+          className="press mt-3 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
+        >
+          <span className="inline-flex items-center gap-2">
+            <ImageIcon className="size-4" />
+            {pickedArt
+              ? `Picture: ${FOOD_ART_BY_KEY.get(pickedArt)?.label ?? "chosen"}`
+              : "Add a picture instead (optional)"}
+          </span>
+          <ChevronDown className={`size-4 transition-transform ${pickerOpen ? "rotate-180" : ""}`} />
+        </button>
+
+        {pickerOpen ? (
+          <div className="mt-2 max-h-56 overflow-y-auto rounded-2xl bg-muted/40 p-2">
+            <div className="grid grid-cols-5 gap-1.5">
+              {FOOD_ART.map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setPickedArt(pickedArt === f.key ? null : f.key)}
+                  className={`press grid aspect-square place-items-center rounded-xl bg-card p-1 ${
+                    pickedArt === f.key ? "ring-2 ring-primary" : ""
+                  }`}
+                  aria-label={f.label}
+                >
+                  <img
+                    src={f.url}
+                    alt=""
+                    loading="lazy"
+                    className="size-full object-contain"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {options.length ? (
           <ul className="mt-3 flex flex-wrap gap-2">
-            {options.map((o) => (
+            {options.map((o, i) => (
               <li
-                key={o}
-                className="flex items-center gap-1 rounded-full bg-secondary px-3 py-1.5 text-sm font-bold text-secondary-foreground"
+                key={`${o.label}-${i}`}
+                className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm font-bold text-secondary-foreground"
               >
-                {o}
+                {o.art ? (
+                  <img
+                    src={o.art}
+                    alt=""
+                    className="size-6 object-contain"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                ) : null}
+                {o.label}
                 <button
                   type="button"
-                  onClick={() => remove(o)}
+                  onClick={() => remove(i)}
                   className="press opacity-60"
-                  aria-label={`Remove ${o}`}
+                  aria-label={`Remove ${o.label}`}
                 >
                   <X className="size-3.5" />
                 </button>
@@ -384,7 +484,8 @@ function CustomRoulette() {
           </ul>
         ) : (
           <p className="mt-3 text-xs text-muted-foreground">
-            Add the spots and dishes actually around you — the list is saved on this device.
+            Add the spots and dishes actually around you — with a name, a picture, or both. The list
+            is saved on this device.
           </p>
         )}
 
@@ -403,4 +504,5 @@ function CustomRoulette() {
     </>
   );
 }
+
 
