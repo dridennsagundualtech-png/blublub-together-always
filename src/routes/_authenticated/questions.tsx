@@ -338,7 +338,7 @@ function QuestionArchive({ today }: { today: string }) {
                     <p className="mt-1 text-sm font-extrabold">
                       {(byDate[date]?.[0] as { questions?: { prompt?: string } } | undefined)
                         ?.questions?.prompt ??
-                        questionFor(bank, date)?.prompt ??
+                        questionFor(bank, date, occasionCtx)?.prompt ??
                         "Daily question"}
                     </p>
                     <ul className="mt-2 space-y-2">
@@ -364,8 +364,8 @@ function QuestionArchive({ today }: { today: string }) {
                   key={date}
                   date={date}
                   label={fmt(date)}
-                  prompt={questionFor(bank, date)?.prompt ?? "Daily question"}
-                  questionId={questionFor(bank, date)?.id ?? null}
+                  prompt={questionFor(bank, date, occasionCtx)?.prompt ?? "Daily question"}
+                  questionId={questionFor(bank, date, occasionCtx)?.id ?? null}
                   partnerAnswered={(byDate[date] ?? []).length > 0}
                   pending={answerLate.isPending}
                   onSubmit={(body, questionId) => answerLate.mutate({ date, questionId, body })}
