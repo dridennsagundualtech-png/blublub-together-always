@@ -187,6 +187,14 @@ function ProfilePage() {
               onChange={(e) => setAnniversary(e.target.value)}
             />
           </Field>
+          <Field label="Your birthday">
+            <TextInput
+              type="date"
+              value={birthday}
+              onChange={(e) => setBirthday(e.target.value)}
+            />
+          </Field>
+
           <PrimaryButton disabled={save.isPending} onClick={() => save.mutate()}>
             Save
           </PrimaryButton>
