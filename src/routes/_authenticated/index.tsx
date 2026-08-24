@@ -227,3 +227,48 @@ function HomePage() {
     </AppLayout>
   );
 }
+
+function FeelingTile({
+  who,
+  row,
+}: {
+  who: string;
+  row?: { feeling: string | null; created_at: string } | null;
+}) {
+  const decoded = decodeFeeling(row?.feeling ?? "");
+  const picks = decoded.keys.map((k) => FEELING_BY_KEY.get(k)).filter(Boolean);
+
+  return (
+    <Link to="/cooldown" className="card-soft press flex flex-col items-center gap-2 p-4 text-center">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {who}
+      </span>
+      {picks.length > 0 ? (
+        <span className="flex flex-wrap items-center justify-center gap-1">
+          {picks.slice(0, 3).map((f) => (
+            <img
+              key={f!.key}
+              src={f!.url}
+              alt={f!.label}
+              className="size-10 object-contain"
+              style={{ imageRendering: "pixelated" }}
+              loading="lazy"
+            />
+          ))}
+        </span>
+      ) : (
+        <span className="grid h-10 place-items-center text-2xl">🫧</span>
+      )}
+      <span className="text-sm font-bold leading-snug">
+        {picks.length > 0
+          ? picks.map((f) => f!.label).join(", ")
+          : row
+            ? decoded.text.slice(0, 40) || "Shared a note"
+            : "Nothing shared yet"}
+      </span>
+      {row ? (
+        <span className="text-[11px] text-muted-foreground">{timeAgo(row.created_at)}</span>
+      ) : null}
+    </Link>
+  );
+}
