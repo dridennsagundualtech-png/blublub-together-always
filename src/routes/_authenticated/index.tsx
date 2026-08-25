@@ -245,19 +245,19 @@ function FeelingTile({
       </span>
       {picks.length > 0 ? (
         <span className="flex flex-wrap items-center justify-center gap-2">
-          {picks.slice(0, 3).map((f) => (
+          {picks.slice(0, 2).map((f) => (
             <img
               key={f!.key}
               src={f!.url}
               alt={f!.label}
-              className="size-14 object-contain"
+              className="w-[45%] max-w-28 object-contain"
               style={{ imageRendering: "pixelated" }}
               loading="lazy"
             />
           ))}
         </span>
       ) : (
-        <span className="grid h-14 place-items-center text-3xl">🫧</span>
+        <span className="grid h-20 place-items-center text-4xl">🫧</span>
       )}
       <span className="text-sm font-bold leading-snug">
         {picks.length > 0
