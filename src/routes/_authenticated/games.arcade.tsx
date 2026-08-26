@@ -40,6 +40,7 @@ function ArcadePage() {
   const history = useGameHistory();
   const { nameOf, me } = useSeats(null);
   const [showHistory, setShowHistory] = useState(false);
+  const spicy = useSpicyAccess();
 
   const tally = history.reduce(
     (acc, g) => {
