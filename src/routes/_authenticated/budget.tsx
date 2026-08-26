@@ -20,6 +20,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { usePremiumAccess } from "@/lib/admin";
 import { PremiumGate } from "@/components/PremiumGate";
 import {
+  AddPanel,
   Card,
   StatCard,
   Field,
@@ -245,8 +246,9 @@ function BudgetContent() {
         </p>
       </Card>
 
-      <SectionTitle>Log an expense</SectionTitle>
-      <Card>
+      <SectionTitle>Expenses</SectionTitle>
+      <AddPanel label="Log an expense">
+        {(close) => (
         <div className="space-y-3">
           <Field label="What for?">
             <TextInput
@@ -299,12 +301,13 @@ function BudgetContent() {
           </div>
           <PrimaryButton
             disabled={!description.trim() || !amount || addExpense.isPending}
-            onClick={() => addExpense.mutate()}
+            onClick={() => addExpense.mutate(undefined, { onSuccess: close })}
           >
             Add expense
           </PrimaryButton>
         </div>
-      </Card>
+        )}
+      </AddPanel>
 
       <SectionTitle>This month</SectionTitle>
       <StatCard>
@@ -434,7 +437,8 @@ function BudgetGoals({
 
   return (
     <>
-      <Card>
+      <AddPanel label="Set a category budget">
+        {(close) => (
         <div className="flex gap-2">
           <SelectInput
             value={category}
@@ -454,11 +458,12 @@ function BudgetGoals({
             value={limit}
             onChange={(e) => setLimit(e.target.value)}
           />
-          <PrimaryButton className="w-auto px-5" disabled={!limit} onClick={() => save.mutate()}>
+          <PrimaryButton className="w-auto px-5" disabled={!limit} onClick={() => save.mutate(undefined, { onSuccess: close })}>
             Set
           </PrimaryButton>
         </div>
-      </Card>
+        )}
+      </AddPanel>
       <ul className="mt-3 space-y-2">
         {goals.map((g) => {
           const spent = spentByCategory[g.category] ?? 0;
@@ -556,7 +561,8 @@ function SavingsGoals({
 
   return (
     <>
-      <Card>
+      <AddPanel label="New savings goal">
+        {(close) => (
         <div className="flex gap-2">
           <TextInput
             value={title}
@@ -574,12 +580,13 @@ function SavingsGoals({
           <PrimaryButton
             className="w-auto px-5"
             disabled={!title.trim() || !target}
-            onClick={() => addGoal.mutate()}
+            onClick={() => addGoal.mutate(undefined, { onSuccess: close })}
           >
             Add
           </PrimaryButton>
         </div>
-      </Card>
+        )}
+      </AddPanel>
       <ul className="mt-3 space-y-3">
         {goals.map((g) => (
           <li key={g.id} className="card-soft p-4">
@@ -691,7 +698,9 @@ function Bills({ coupleId, bills }: { coupleId: string | null; bills: BillRow[] 
 
   return (
     <>
-      <Card>
+      <AddPanel label="Add a recurring bill">
+        {(close) => (
+          <>
         <div className="flex gap-2">
           <TextInput
             value={title}
@@ -717,13 +726,15 @@ function Bills({ coupleId, bills }: { coupleId: string | null; bills: BillRow[] 
           <PrimaryButton
             className="w-auto px-4"
             disabled={!title.trim() || !amount}
-            onClick={() => add.mutate()}
+            onClick={() => add.mutate(undefined, { onSuccess: close })}
           >
             Add
           </PrimaryButton>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Last field is the day of the month.</p>
-      </Card>
+          </>
+        )}
+      </AddPanel>
       <ul className="mt-3 space-y-2">
         {bills.map((b) => {
           const due = b.next_due_on ?? rollForward(b.due_day, new Date(Date.now() - 86_400_000));
