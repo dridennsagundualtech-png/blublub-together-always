@@ -155,11 +155,11 @@ function HomePage() {
             Next date night
           </p>
           <p className="mt-1 text-2xl font-extrabold text-primary">
-            {upcoming && upcoming.length > 0
+            {nextDate
               ? Math.max(
                   0,
                   Math.round(
-                    (new Date(`${upcoming[0]!.event_date}T00:00:00`).getTime() -
+                    (new Date(`${nextDate.date}T00:00:00`).getTime() -
                       new Date(`${todayISO()}T00:00:00`).getTime()) /
                       86_400_000,
                   ),
@@ -167,7 +167,7 @@ function HomePage() {
               : "—"}
           </p>
           <p className="truncate text-xs text-muted-foreground">
-            {upcoming && upcoming.length > 0 ? `days · ${upcoming[0]!.title}` : "nothing planned"}
+            {nextDate ? `days · ${nextDate.title}` : "nothing planned"}
           </p>
         </StatCard>
         <StatCard className="text-center">
