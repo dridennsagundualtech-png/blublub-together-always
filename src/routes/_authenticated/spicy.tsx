@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
-import { usePremiumAccess } from "@/lib/admin";
+import { usePremiumAccess, useSpicyAccess } from "@/lib/admin";
 import { PremiumGate } from "@/components/PremiumGate";
 import { DiceRoller, type DieDef } from "@/components/games/DiceRoller";
 import { Card, GhostButton, PrimaryButton } from "@/components/ui-kit";
@@ -75,6 +75,7 @@ function SpicyPage() {
   const { data: user } = useAuthUser();
   const { data: profile } = useProfile();
   const premium = usePremiumAccess();
+  const spicy = useSpicyAccess();
   const refresh = useRefreshSession();
 
   return (
@@ -84,9 +85,13 @@ function SpicyPage() {
       </Link>
 
       <PremiumGate
-        unlocked={premium}
+        unlocked={spicy}
         title="Adults-only section"
-        blurb="This section is part of BLUBLUB Premium. Unlock it with a redeem code in Profile & Settings."
+        blurb={
+          premium
+            ? "This section is switched off for your account. Ask the BLUBLUB owner to enable the 18+ dice for you."
+            : "This section is part of BLUBLUB Premium. Unlock it with a redeem code in Profile & Settings."
+        }
       >
         {profile?.adult_confirmed ? (
           <DiceGame />

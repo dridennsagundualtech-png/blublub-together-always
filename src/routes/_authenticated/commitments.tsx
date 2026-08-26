@@ -5,6 +5,8 @@ import { Check, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
+import { PremiumGate } from "@/components/PremiumGate";
+import { usePremiumAccess } from "@/lib/admin";
 import {
   Card,
   Field,
@@ -57,6 +59,7 @@ function CommitmentsPage() {
   const { data: user } = useAuthUser();
   const partner = usePartner();
   const qc = useQueryClient();
+  const premium = usePremiumAccess();
   const { data: commitments } = useCommitments();
   const { data: logs } = useCommitmentLogs();
 
@@ -146,6 +149,11 @@ function CommitmentsPage() {
 
   return (
     <AppLayout title="Commitments" subtitle="Promises you keep, together" critter="penguin">
+      <PremiumGate
+        unlocked={premium}
+        title="Commitments is premium"
+        blurb="Gentle streaks, custom reminders and partner encouragement live in BLUBLUB Premium. Unlock it with a redeem code in Profile & Settings."
+      >
       <Card>
         <div className="space-y-3">
           <Field label="What are you committing to?">
@@ -340,6 +348,7 @@ function CommitmentsPage() {
           })}
         </ul>
       )}
+      </PremiumGate>
     </AppLayout>
   );
 }

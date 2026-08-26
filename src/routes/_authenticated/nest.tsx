@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { BookHeart, ListChecks, Plus, Sparkles, Wallet } from "lucide-react";
+import { BookHeart, ChevronRight, ListChecks, Plus, Sparkles, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import {
@@ -10,9 +10,9 @@ import {
   Field,
   Money,
   PrimaryButton,
+  SectionTitle,
   SelectInput,
   Sheet,
-  StreakChip,
   TextArea,
   TextInput,
 } from "@/components/ui-kit";
@@ -115,37 +115,36 @@ function NestPage() {
 
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      <ul className="grid grid-cols-2 gap-3">
-        <Tile
-          to="/diary"
-          icon={<BookHeart className="size-5" />}
+      <SectionTitle>Right now</SectionTitle>
+      <div className="grid gap-3">
+        <SummaryTile
           tint="tile-lilac"
+          icon={<BookHeart className="size-3.5 text-primary" />}
           label="Diary"
-          value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 48) : "No entries yet"}
-          extra={diaryStreak > 0 ? <StreakChip days={diaryStreak} /> : null}
+          value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
+          detail={diaryStreak > 0 ? `${diaryStreak}-day streak 🔥` : "Write something small today"}
         />
-        <Tile
-          to="/todos"
-          icon={<ListChecks className="size-5" />}
-          tint="tile-pink"
-          label="To-Dos"
-          value={openTodos === 0 ? "All done 🩷" : `${openTodos} left to do`}
-        />
-        <Tile
-          to="/bucket"
-          icon={<Sparkles className="size-5" />}
-          tint="tile-peach"
-          label="Bucket List"
-          value={`${bucketTotal} item${bucketTotal === 1 ? "" : "s"} · ${bucketDone} done`}
-        />
-        <Tile
-          to="/budget"
-          icon={<Wallet className="size-5" />}
+        <div className="grid grid-cols-2 gap-3">
+          <SummaryTile
+            tint="tile-pink"
+            icon={<ListChecks className="size-3.5 text-primary" />}
+            label="To-Dos"
+            value={openTodos === 0 ? "All done 🩷" : `${openTodos} left to do`}
+          />
+          <SummaryTile
+            tint="tile-peach"
+            icon={<Sparkles className="size-3.5 text-primary" />}
+            label="Bucket List"
+            value={`${bucketDone}/${bucketTotal} done`}
+          />
+        </div>
+        <SummaryTile
           tint="tile-sky"
+          icon={<Wallet className="size-3.5 text-primary" />}
           label="Budget"
           value={
             !premium ? (
-              "Premium"
+              "Premium space"
             ) : Math.abs(balance) < 0.01 ? (
               "All square 🩷"
             ) : (
@@ -155,7 +154,16 @@ function NestPage() {
             )
           }
         />
+      </div>
+
+      <SectionTitle>Nest tools</SectionTitle>
+      <ul className="space-y-3">
+        <ToolRow to="/diary" tint="tile-lilac" icon={<BookHeart className="size-5" />} label="Diary" hint="Dated entries with a mood" />
+        <ToolRow to="/todos" tint="tile-pink" icon={<ListChecks className="size-5" />} label="To-Dos" hint="Our shared checklist" />
+        <ToolRow to="/bucket" tint="tile-peach" icon={<Sparkles className="size-5" />} label="Bucket List" hint="Dreams to tick off together" />
+        <ToolRow to="/budget" tint="tile-sky" icon={<Wallet className="size-5" />} label="Budget" hint="Expenses, goals and savings" />
       </ul>
+
 
       <button
         type="button"
@@ -185,30 +193,55 @@ function NestPage() {
   );
 }
 
-function Tile({
-  to,
+function SummaryTile({
   icon,
   tint,
   label,
   value,
-  extra,
+  detail,
+}: {
+  icon: React.ReactNode;
+  tint: string;
+  label: string;
+  value: React.ReactNode;
+  detail?: string;
+}) {
+  return (
+    <div className={`card-soft p-4 ${tint}`}>
+      <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </span>
+      <span className="mt-1.5 block text-sm font-bold leading-snug">{value}</span>
+      {detail ? <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span> : null}
+    </div>
+  );
+}
+
+function ToolRow({
+  to,
+  icon,
+  tint,
+  label,
+  hint,
 }: {
   to: string;
   icon: React.ReactNode;
   tint: string;
   label: string;
-  value: React.ReactNode;
-  extra?: React.ReactNode;
+  hint: string;
 }) {
   return (
     <li>
-      <Link to={to} className="card-soft press flex h-full flex-col gap-2 p-4">
-        <span className={`grid size-11 place-items-center rounded-2xl ${tint} text-primary`}>
+      <Link to={to} className="card-soft press flex items-center gap-3 p-4">
+        <span className={`grid size-11 shrink-0 place-items-center rounded-2xl ${tint} text-primary`}>
           {icon}
         </span>
-        <span className="text-sm font-extrabold">{label}</span>
-        <span className="line-clamp-2 text-xs text-muted-foreground">{value}</span>
-        {extra}
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold">{label}</span>
+          <span className="block truncate text-xs text-muted-foreground">{hint}</span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
       </Link>
     </li>
   );

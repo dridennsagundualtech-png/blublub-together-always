@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS spicy_enabled boolean NOT NULL DEFAULT false;
