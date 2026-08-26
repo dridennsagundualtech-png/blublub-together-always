@@ -1,10 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
-import { usePremiumAccess, useSpicyAccess } from "@/lib/admin";
-import { PremiumGate } from "@/components/PremiumGate";
+import { useIsAdmin, useSpicyAccess } from "@/lib/admin";
 import { DiceRoller, type DieDef } from "@/components/games/DiceRoller";
 import { Card, GhostButton, PrimaryButton } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
