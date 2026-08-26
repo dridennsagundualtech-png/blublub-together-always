@@ -26,3 +26,11 @@ export function usePremiumAccess() {
   const { data: isAdmin } = useIsAdmin();
   return !!profile?.is_premium || !!isAdmin;
 }
+
+/** 18+ dice access: admin always, otherwise premium AND switched on by the owner. */
+export function useSpicyAccess() {
+  const { data: profile } = useProfile();
+  const { data: isAdmin } = useIsAdmin();
+  const premium = usePremiumAccess();
+  return !!isAdmin || (premium && !!profile?.spicy_enabled);
+}
