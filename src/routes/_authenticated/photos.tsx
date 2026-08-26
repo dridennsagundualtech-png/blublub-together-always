@@ -815,3 +815,72 @@ function PhotoComments({ photoId }: { photoId: string }) {
     </div>
   );
 }
+
+const REACTIONS = [
+  { kind: "heart", emoji: "💗", label: "Heart" },
+  { kind: "laugh", emoji: "😆", label: "Laugh" },
+  { kind: "hug", emoji: "🤗", label: "Hug" },
+] as const;
+
+function ReactionBar({ postId }: { postId: string }) {
+  const coupleId = useCoupleId();
+  const { data: user } = useAuthUser();
+  const qc = useQueryClient();
+
+  const { data: rows } = useQuery({
+    queryKey: ["photo-reactions", postId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("photo_reactions")
+        .select("*")
+        .eq("photo_id", postId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const toggle = useMutation({
+    mutationFn: async (kind: string) => {
+      const mine = (rows ?? []).find((r) => r.user_id === user?.id && r.kind === kind);
+      if (mine) {
+        const { error } = await supabase.from("photo_reactions").delete().eq("id", mine.id);
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabase.from("photo_reactions").insert({
+        photo_id: postId,
+        couple_id: coupleId!,
+        user_id: user!.id,
+        kind,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["photo-reactions", postId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {REACTIONS.map((r) => {
+        const list = (rows ?? []).filter((x) => x.kind === r.kind);
+        const mine = list.some((x) => x.user_id === user?.id);
+        return (
+          <button
+            key={r.kind}
+            type="button"
+            aria-label={r.label}
+            onClick={() => toggle.mutate(r.kind)}
+            className={cn(
+              "press flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm",
+              mine ? "border-primary bg-primary/10 font-bold text-primary" : "border-border",
+            )}
+          >
+            <span>{r.emoji}</span>
+            {list.length > 0 ? <span className="text-xs">{list.length}</span> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
