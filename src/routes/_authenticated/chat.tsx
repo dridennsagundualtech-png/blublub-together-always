@@ -227,6 +227,18 @@ function ChatPage() {
                   <p className="whitespace-pre-wrap">{m.body}</p>
                 )}
               </div>
+              {!m.audio_path && m.body?.trim() ? (
+                <button
+                  type="button"
+                  aria-label="Share to Memories"
+                  title="Share to Memories"
+                  disabled={share.isPending}
+                  onClick={() => share.mutate(m.body)}
+                  className="press grid size-7 shrink-0 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-soft disabled:opacity-50"
+                >
+                  <Share2 className="size-3.5" />
+                </button>
+              ) : null}
             </div>
           );
         })}
