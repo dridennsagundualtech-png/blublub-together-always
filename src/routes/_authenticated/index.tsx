@@ -81,6 +81,23 @@ function HomePage() {
     },
   });
 
+  const { data: derived } = useDerivedDates();
+
+  // Everything with a date — calendar events plus planned date nights, bills,
+  // bucket-list targets — merged into one "coming up" list.
+  const comingUp = [
+    ...(upcoming ?? []).map((e) => ({ id: e.id, date: e.event_date, title: e.title, emoji: "📅" })),
+    ...(derived ?? [])
+      .filter((d) => d.date >= todayISO())
+      .map((d) => ({ id: d.id, date: d.date, title: d.title, emoji: DERIVED_META[d.kind].emoji })),
+  ]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 4);
+
+  const nextDate = (derived ?? [])
+    .filter((d) => d.kind === "date" && d.date >= todayISO())
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
   const { data: savings } = useQuery({
     queryKey: ["home-savings", coupleId],
     enabled: !!coupleId,
