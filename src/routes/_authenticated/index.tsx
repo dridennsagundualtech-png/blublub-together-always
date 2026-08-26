@@ -10,6 +10,7 @@ import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import { daysTogether, useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
 import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
 import { timeAgo } from "@/lib/location";
+import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
