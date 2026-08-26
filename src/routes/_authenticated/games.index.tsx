@@ -401,7 +401,7 @@ function RoomPage() {
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-bold">Game corner</span>
               <span className="block truncate text-xs text-muted-foreground">
-                Five two-player games, food roulette, 18+ dice
+                Five two-player games and food roulette
               </span>
             </span>
             <ChevronRight className="size-4 text-muted-foreground" />

@@ -1,10 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
-import { usePremiumAccess, useSpicyAccess } from "@/lib/admin";
-import { PremiumGate } from "@/components/PremiumGate";
+import { useIsAdmin, useSpicyAccess } from "@/lib/admin";
 import { DiceRoller, type DieDef } from "@/components/games/DiceRoller";
 import { Card, GhostButton, PrimaryButton } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
@@ -15,13 +14,10 @@ import { useAuthUser, useProfile, useRefreshSession } from "@/lib/session";
 export const Route = createFileRoute("/_authenticated/spicy")({
   head: () => ({
     meta: [
-      { title: "18+ Dice — BLUBLUB" },
-      { name: "description", content: "A premium, adults-only dice roll for paired partners." },
-      { property: "og:title", content: "18+ Dice — BLUBLUB" },
-      {
-        property: "og:description",
-        content: "A premium, adults-only dice roll for paired partners.",
-      },
+      { title: "Game corner — BLUBLUB" },
+      { name: "description", content: "Cosy two-player games for paired partners." },
+      { property: "og:title", content: "Game corner — BLUBLUB" },
+      { property: "og:description", content: "Cosy two-player games for paired partners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -72,11 +68,20 @@ const CLOTHING_DICE: DieDef[] = [
 ];
 
 function SpicyPage() {
+  const navigate = useNavigate();
   const { data: user } = useAuthUser();
-  const { data: profile } = useProfile();
-  const premium = usePremiumAccess();
+  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { isLoading: adminLoading } = useIsAdmin();
   const spicy = useSpicyAccess();
   const refresh = useRefreshSession();
+
+  const resolving = profileLoading || adminLoading;
+
+  useEffect(() => {
+    if (!resolving && !spicy) void navigate({ to: "/games/arcade", replace: true });
+  }, [resolving, spicy, navigate]);
+
+  if (resolving || !spicy) return null;
 
   return (
     <AppLayout title="18+ Dice" subtitle="Premium · adults only" critter="seal" critterPose="peek">
@@ -84,15 +89,7 @@ function SpicyPage() {
         <ArrowLeft className="size-3.5" /> Back to games
       </Link>
 
-      <PremiumGate
-        unlocked={spicy}
-        title="Adults-only section"
-        blurb={
-          premium
-            ? "This section is switched off for your account. Ask the BLUBLUB owner to enable the 18+ dice for you."
-            : "This section is part of BLUBLUB Premium. Unlock it with a redeem code in Profile & Settings."
-        }
-      >
+      <>
         {profile?.adult_confirmed ? (
           <DiceGame />
         ) : (
@@ -123,7 +120,7 @@ function SpicyPage() {
             </div>
           </Card>
         )}
-      </PremiumGate>
+      </>
     </AppLayout>
   );
 }
