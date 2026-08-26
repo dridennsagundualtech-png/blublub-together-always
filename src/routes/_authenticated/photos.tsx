@@ -710,7 +710,10 @@ function PhotoDetail({
               </div>
             ) : (
               <>
-                <p className="text-sm font-bold">{photo.caption ?? "Untitled"}</p>
+                <p className="text-sm font-bold">{photo.caption ?? (photo.body ? "" : "Untitled")}</p>
+                {photo.body ? (
+                  <p className="whitespace-pre-wrap break-words text-sm">{photo.body}</p>
+                ) : null}
                 <p className="text-xs text-muted-foreground">{photo.taken_on}</p>
                 {photo.album ? (
                   <p className="mt-1 text-xs font-semibold text-muted-foreground">
