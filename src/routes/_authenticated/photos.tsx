@@ -575,20 +575,20 @@ function PhotoDetail({
   albumNames: string[];
   onClose: () => void;
 }) {
-  const { data: user } = useAuthUser();
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [caption, setCaption] = useState(photo.caption ?? "");
+  const [text, setText] = useState(photo.body ?? "");
   const [place, setPlace] = useState(photo.location ?? "");
   const [album, setAlbum] = useState(photo.album ?? "");
   const [takenOn, setTakenOn] = useState(photo.taken_on);
-  const mine = photo.created_by === user?.id;
 
   const save = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
         .from("photos")
         .update({
+          body: text.trim() || null,
           caption: caption.trim() || null,
           location: place.trim() || null,
           album: album.trim() || null,
