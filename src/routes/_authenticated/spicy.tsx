@@ -69,11 +69,20 @@ const CLOTHING_DICE: DieDef[] = [
 ];
 
 function SpicyPage() {
+  const navigate = useNavigate();
   const { data: user } = useAuthUser();
-  const { data: profile } = useProfile();
-  const premium = usePremiumAccess();
+  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { isLoading: adminLoading } = useIsAdmin();
   const spicy = useSpicyAccess();
   const refresh = useRefreshSession();
+
+  const resolving = profileLoading || adminLoading;
+
+  useEffect(() => {
+    if (!resolving && !spicy) void navigate({ to: "/games/arcade", replace: true });
+  }, [resolving, spicy, navigate]);
+
+  if (resolving || !spicy) return null;
 
   return (
     <AppLayout title="18+ Dice" subtitle="Premium · adults only" critter="seal" critterPose="peek">
@@ -81,15 +90,7 @@ function SpicyPage() {
         <ArrowLeft className="size-3.5" /> Back to games
       </Link>
 
-      <PremiumGate
-        unlocked={spicy}
-        title="Adults-only section"
-        blurb={
-          premium
-            ? "This section is switched off for your account. Ask the BLUBLUB owner to enable the 18+ dice for you."
-            : "This section is part of BLUBLUB Premium. Unlock it with a redeem code in Profile & Settings."
-        }
-      >
+      <>
         {profile?.adult_confirmed ? (
           <DiceGame />
         ) : (
