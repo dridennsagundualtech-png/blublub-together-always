@@ -586,7 +586,7 @@ function PhotoDetail({
       await supabase.from("photo_comments").delete().eq("photo_id", photo.id);
       const { error } = await supabase.from("photos").delete().eq("id", photo.id);
       if (error) throw error;
-      await supabase.storage.from("photos").remove([photo.storage_path]);
+      if (photo.storage_path) await supabase.storage.from("photos").remove([photo.storage_path]);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["photos"] });
