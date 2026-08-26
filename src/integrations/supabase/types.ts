@@ -143,6 +143,104 @@ export type Database = {
           },
         ]
       }
+      commitment_logs: {
+        Row: {
+          commitment_id: string
+          couple_id: string
+          created_at: string
+          id: string
+          log_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          commitment_id: string
+          couple_id: string
+          created_at?: string
+          id?: string
+          log_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          commitment_id?: string
+          couple_id?: string
+          created_at?: string
+          id?: string
+          log_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commitment_logs_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commitment_logs_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commitments: {
+        Row: {
+          active: boolean
+          couple_id: string
+          created_at: string
+          id: string
+          reminder_time: string
+          schedule_type: string
+          shared: boolean
+          title: string
+          updated_at: string
+          user_id: string
+          weekday: number | null
+          weekly_target: number | null
+        }
+        Insert: {
+          active?: boolean
+          couple_id: string
+          created_at?: string
+          id?: string
+          reminder_time?: string
+          schedule_type?: string
+          shared?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+          weekday?: number | null
+          weekly_target?: number | null
+        }
+        Update: {
+          active?: boolean
+          couple_id?: string
+          created_at?: string
+          id?: string
+          reminder_time?: string
+          schedule_type?: string
+          shared?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+          weekday?: number | null
+          weekly_target?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commitments_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cooldowns: {
         Row: {
           couple_id: string
