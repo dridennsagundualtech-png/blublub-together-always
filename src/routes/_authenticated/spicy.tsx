@@ -15,13 +15,10 @@ import { useAuthUser, useProfile, useRefreshSession } from "@/lib/session";
 export const Route = createFileRoute("/_authenticated/spicy")({
   head: () => ({
     meta: [
-      { title: "18+ Dice — BLUBLUB" },
-      { name: "description", content: "A premium, adults-only dice roll for paired partners." },
-      { property: "og:title", content: "18+ Dice — BLUBLUB" },
-      {
-        property: "og:description",
-        content: "A premium, adults-only dice roll for paired partners.",
-      },
+      { title: "Game corner — BLUBLUB" },
+      { name: "description", content: "Cosy two-player games for paired partners." },
+      { property: "og:title", content: "Game corner — BLUBLUB" },
+      { property: "og:description", content: "Cosy two-player games for paired partners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
