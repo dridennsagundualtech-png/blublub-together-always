@@ -49,9 +49,11 @@ export const Route = createFileRoute("/_authenticated/photos")({
 type PhotoWithUrl = {
   id: string;
   caption: string | null;
+  body: string | null;
   location: string | null;
   album: string | null;
-  storage_path: string;
+  storage_path: string | null;
+  is_pinned: boolean;
   taken_on: string;
   created_by: string;
   url: string | null;
@@ -86,13 +88,18 @@ function PhotosPage() {
         .order("taken_on", { ascending: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
-      const paths = (data ?? []).map((p) => p.storage_path);
+      const paths = (data ?? []).map((p) => p.storage_path).filter((x): x is string => !!x);
       const signed = paths.length
         ? ((await supabase.storage.from("photos").createSignedUrls(paths, 3600)).data ?? [])
         : [];
-      return (data ?? []).map((p, i) => ({
+      const urlByPath = new Map<string, string>();
+      paths.forEach((path, i) => {
+        const u = signed[i]?.signedUrl;
+        if (u) urlByPath.set(path, u);
+      });
+      return (data ?? []).map((p) => ({
         ...p,
-        url: signed[i]?.signedUrl ?? null,
+        url: p.storage_path ? (urlByPath.get(p.storage_path) ?? null) : null,
       })) as PhotoWithUrl[];
     },
   });
