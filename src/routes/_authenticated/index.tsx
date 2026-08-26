@@ -188,16 +188,16 @@ function HomePage() {
       </div>
 
       <SectionTitle>Coming up</SectionTitle>
-      {upcoming && upcoming.length > 0 ? (
+      {comingUp.length > 0 ? (
         <ul className="space-y-2">
-          {upcoming.map((e) => (
+          {comingUp.map((e) => (
             <li key={e.id} className="card-soft flex items-center gap-3 p-4">
-              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
-                <CalendarDays className="size-5" />
+              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-lg text-primary">
+                {e.emoji === "📅" ? <CalendarDays className="size-5" /> : e.emoji}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">{e.title}</p>
-                <p className="text-xs text-muted-foreground">{e.event_date}</p>
+                <p className="text-xs text-muted-foreground">{e.date}</p>
               </div>
             </li>
           ))}
