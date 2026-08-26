@@ -669,6 +669,14 @@ function PhotoDetail({
                     maxLength={200}
                   />
                 </Field>
+                <Field label="Text">
+                  <TextArea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    rows={4}
+                    maxLength={2000}
+                  />
+                </Field>
                 <Field label="Where was this?">
                   <TextInput
                     value={place}
