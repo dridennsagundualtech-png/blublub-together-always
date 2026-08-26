@@ -59,9 +59,10 @@ function AdminUsersPage() {
   const fetchUsers = useServerFn(listAppUsers);
   const updateAccess = useServerFn(setUserAccess);
 
-  const { data: users, isFetching } = useQuery({
+  const { data: users, isFetching, error } = useQuery({
     queryKey: ["admin-users"],
     enabled: !!isAdmin,
+    retry: false,
     queryFn: () => fetchUsers(),
   });
 
