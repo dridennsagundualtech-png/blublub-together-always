@@ -15,7 +15,7 @@ const ITEMS = [
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/wellbeing", label: "Wellbeing", icon: HeartPulse },
   { to: "/games", label: "Games", icon: Gamepad2 },
-  { to: "/budget", label: "Budget", icon: Wallet },
+  { to: "/nest", label: "Our Nest", icon: Wallet },
   { to: "/chat", label: "Chat", icon: MessageCircle },
   { to: "/more", label: "More", icon: Menu },
 ] as const;

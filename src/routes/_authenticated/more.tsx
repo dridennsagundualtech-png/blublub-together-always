@@ -1,14 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  CalendarHeart,
-  HelpCircle,
-  Images,
-  ListChecks,
-  UserCog,
-  ChevronRight,
-  Sparkles,
-  BookHeart,
-} from "lucide-react";
+import { HelpCircle, Images, UserCog, ChevronRight, BookHeart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useSoundSetting } from "@/hooks/use-sound";
 import { useBadges } from "@/lib/badges";
@@ -19,12 +10,12 @@ export const Route = createFileRoute("/_authenticated/more")({
       { title: "More — BLUBLUB" },
       {
         name: "description",
-        content: "Goals, to-dos, date planner, map, bucket list, cool-down and settings.",
+        content: "Memories, daily questions, memory book and settings.",
       },
       { property: "og:title", content: "More — BLUBLUB" },
       {
         property: "og:description",
-        content: "Goals, to-dos, date planner, map, bucket list, cool-down and settings.",
+        content: "Memories, daily questions, memory book and settings.",
       },
     ],
   }),
@@ -32,10 +23,6 @@ export const Route = createFileRoute("/_authenticated/more")({
 });
 
 const SECTIONS = [
-  { to: "/diary", label: "Couple Diary", icon: BookHeart, tint: "tile-lilac" },
-  { to: "/todos", label: "To-dos & Goals", icon: ListChecks, tint: "tile-pink" },
-  { to: "/bucket", label: "Bucket List", icon: Sparkles, tint: "tile-lilac" },
-  { to: "/dates", label: "Date Night Planner", icon: CalendarHeart, tint: "tile-peach" },
   { to: "/photos", label: "Memories", icon: Images, tint: "tile-sky" },
   { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question", tint: "tile-lilac" },
   { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart, tint: "tile-pink" },

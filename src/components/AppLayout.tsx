@@ -78,7 +78,7 @@ export function AppLayout({
         badges={{
           "/chat": badges?.unreadChat,
           "/calendar": badges?.calendar,
-          "/budget": badges?.budget,
+          "/nest": badges?.budget,
           "/games": badges?.games,
           "/more": badges?.question,
         }}
