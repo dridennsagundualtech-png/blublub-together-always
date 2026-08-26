@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, Droplets, HeartHandshake, MapPin } from "lucide-react";
+import { ChevronRight, Droplets, HeartHandshake, MapPin, Target } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionTitle } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +44,13 @@ const SECTIONS = [
     hint: "Phase & next predicted date",
     icon: Droplets,
     tint: "tile-peach",
+  },
+  {
+    to: "/commitments",
+    label: "Commitments",
+    hint: "Gentle streaks, shared only if you want",
+    icon: Target,
+    tint: "tile-sky",
   },
   {
     to: "/map",

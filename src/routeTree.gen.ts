@@ -17,6 +17,7 @@ import { Route as AuthenticatedBucketRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedCommitmentsRouteImport } from './routes/_authenticated/commitments'
 import { Route as AuthenticatedCooldownRouteImport } from './routes/_authenticated/cooldown'
 import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
@@ -74,6 +75,12 @@ const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCommitmentsRoute =
+  AuthenticatedCommitmentsRouteImport.update({
+    id: '/commitments',
+    path: '/commitments',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCooldownRoute = AuthenticatedCooldownRouteImport.update({
   id: '/cooldown',
   path: '/cooldown',
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/commitments': typeof AuthenticatedCommitmentsRoute
   '/cooldown': typeof AuthenticatedCooldownRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
@@ -194,6 +202,7 @@ export interface FileRoutesByTo {
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/commitments': typeof AuthenticatedCommitmentsRoute
   '/cooldown': typeof AuthenticatedCooldownRoute
   '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
@@ -222,6 +231,7 @@ export interface FileRoutesById {
   '/_authenticated/budget': typeof AuthenticatedBudgetRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/commitments': typeof AuthenticatedCommitmentsRoute
   '/_authenticated/cooldown': typeof AuthenticatedCooldownRoute
   '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/budget'
     | '/calendar'
     | '/chat'
+    | '/commitments'
     | '/cooldown'
     | '/dates'
     | '/diary'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/budget'
     | '/calendar'
     | '/chat'
+    | '/commitments'
     | '/cooldown'
     | '/dates'
     | '/diary'
@@ -303,6 +315,7 @@ export interface FileRouteTypes {
     | '/_authenticated/budget'
     | '/_authenticated/calendar'
     | '/_authenticated/chat'
+    | '/_authenticated/commitments'
     | '/_authenticated/cooldown'
     | '/_authenticated/dates'
     | '/_authenticated/diary'
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof AuthenticatedChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/commitments': {
+      id: '/_authenticated/commitments'
+      path: '/commitments'
+      fullPath: '/commitments'
+      preLoaderRoute: typeof AuthenticatedCommitmentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cooldown': {
@@ -514,6 +534,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedCommitmentsRoute: typeof AuthenticatedCommitmentsRoute
   AuthenticatedCooldownRoute: typeof AuthenticatedCooldownRoute
   AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
@@ -540,6 +561,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedCommitmentsRoute: AuthenticatedCommitmentsRoute,
   AuthenticatedCooldownRoute: AuthenticatedCooldownRoute,
   AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
