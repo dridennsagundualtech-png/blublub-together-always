@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Mic, Send, Square } from "lucide-react";
+import { Mic, Send, Share2, Square } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
@@ -180,6 +180,24 @@ function ChatPage() {
 
   const nameOf = (id: string) => members?.find((m) => m.id === id)?.display_name ?? "Partner";
 
+  const share = useMutation({
+    mutationFn: async (body: string) => {
+      const { error } = await supabase.from("photos").insert({
+        couple_id: coupleId!,
+        created_by: user!.id,
+        storage_path: null,
+        body,
+        taken_on: new Date().toISOString().slice(0, 10),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Shared to your Memories feed");
+      void qc.invalidateQueries({ queryKey: ["photos"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <AppLayout title="Chat" subtitle="Just the two of you" critter="penguin">
       <div className="flex flex-col gap-2 pb-32">
@@ -209,6 +227,18 @@ function ChatPage() {
                   <p className="whitespace-pre-wrap">{m.body}</p>
                 )}
               </div>
+              {!m.audio_path && m.body?.trim() ? (
+                <button
+                  type="button"
+                  aria-label="Share to Memories"
+                  title="Share to Memories"
+                  disabled={share.isPending}
+                  onClick={() => share.mutate(m.body)}
+                  className="press grid size-7 shrink-0 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-soft disabled:opacity-50"
+                >
+                  <Share2 className="size-3.5" />
+                </button>
+              ) : null}
             </div>
           );
         })}

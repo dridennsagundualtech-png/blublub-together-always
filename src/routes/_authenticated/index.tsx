@@ -10,6 +10,7 @@ import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import { daysTogether, useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
 import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
 import { timeAgo } from "@/lib/location";
+import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -81,6 +82,23 @@ function HomePage() {
     },
   });
 
+  const { data: derived } = useDerivedDates();
+
+  // Everything with a date — calendar events plus planned date nights, bills,
+  // bucket-list targets — merged into one "coming up" list.
+  const comingUp = [
+    ...(upcoming ?? []).map((e) => ({ id: e.id, date: e.event_date, title: e.title, emoji: "📅" })),
+    ...(derived ?? [])
+      .filter((d) => d.date >= todayISO())
+      .map((d) => ({ id: d.id, date: d.date, title: d.title, emoji: DERIVED_META[d.kind].emoji })),
+  ]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 4);
+
+  const nextDate = (derived ?? [])
+    .filter((d) => d.kind === "date" && d.date >= todayISO())
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
   const { data: savings } = useQuery({
     queryKey: ["home-savings", coupleId],
     enabled: !!coupleId,
@@ -138,11 +156,11 @@ function HomePage() {
             Next date night
           </p>
           <p className="mt-1 text-2xl font-extrabold text-primary">
-            {upcoming && upcoming.length > 0
+            {nextDate
               ? Math.max(
                   0,
                   Math.round(
-                    (new Date(`${upcoming[0]!.event_date}T00:00:00`).getTime() -
+                    (new Date(`${nextDate.date}T00:00:00`).getTime() -
                       new Date(`${todayISO()}T00:00:00`).getTime()) /
                       86_400_000,
                   ),
@@ -150,7 +168,7 @@ function HomePage() {
               : "—"}
           </p>
           <p className="truncate text-xs text-muted-foreground">
-            {upcoming && upcoming.length > 0 ? `days · ${upcoming[0]!.title}` : "nothing planned"}
+            {nextDate ? `days · ${nextDate.title}` : "nothing planned"}
           </p>
         </StatCard>
         <StatCard className="text-center">
@@ -171,16 +189,16 @@ function HomePage() {
       </div>
 
       <SectionTitle>Coming up</SectionTitle>
-      {upcoming && upcoming.length > 0 ? (
+      {comingUp.length > 0 ? (
         <ul className="space-y-2">
-          {upcoming.map((e) => (
+          {comingUp.map((e) => (
             <li key={e.id} className="card-soft flex items-center gap-3 p-4">
-              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
-                <CalendarDays className="size-5" />
+              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-lg text-primary">
+                {e.emoji === "📅" ? <CalendarDays className="size-5" /> : e.emoji}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">{e.title}</p>
-                <p className="text-xs text-muted-foreground">{e.event_date}</p>
+                <p className="text-xs text-muted-foreground">{e.date}</p>
               </div>
             </li>
           ))}
