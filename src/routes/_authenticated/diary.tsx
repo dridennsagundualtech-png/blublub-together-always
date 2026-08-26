@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, SectionTitle, StreakChip, TextArea, TextInput } from "@/components/ui-kit";
+import { AddPanel, Card, Field, PrimaryButton, SectionTitle, StreakChip, TextArea, TextInput } from "@/components/ui-kit";
 import { streakFromDates, todayISO, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
