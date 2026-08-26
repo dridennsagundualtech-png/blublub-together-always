@@ -624,28 +624,24 @@ function PhotoDetail({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-sm">
       <div className="mx-auto max-w-lg px-4 py-4">
         <div className="flex justify-end gap-2">
-          {true ? (
-            <>
-              <button
-                type="button"
-                aria-label="Edit memory"
-                onClick={() => setEditing((v) => !v)}
-                className="press grid size-10 place-items-center rounded-full bg-card shadow-soft"
-              >
-                <Pencil className="size-4" />
-              </button>
-              <button
-                type="button"
-                aria-label="Delete memory"
-                onClick={() => {
-                  if (window.confirm("Delete this memory for both of you?")) remove.mutate();
-                }}
-                className="press grid size-10 place-items-center rounded-full bg-destructive/15 text-destructive shadow-soft"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </>
-          ) : null}
+          <button
+            type="button"
+            aria-label="Edit memory"
+            onClick={() => setEditing((v) => !v)}
+            className="press grid size-10 place-items-center rounded-full bg-card shadow-soft"
+          >
+            <Pencil className="size-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Delete memory"
+            onClick={() => {
+              if (window.confirm("Delete this memory for both of you?")) remove.mutate();
+            }}
+            className="press grid size-10 place-items-center rounded-full bg-destructive/15 text-destructive shadow-soft"
+          >
+            <Trash2 className="size-4" />
+          </button>
           <button
             type="button"
             aria-label="Close"
