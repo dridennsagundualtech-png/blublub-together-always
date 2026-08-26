@@ -62,9 +62,9 @@ export const setUserAccess = createServerFn({ method: "POST" })
     await assertAdmin(context as never);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const patch: Record<string, boolean> = {};
-    if (typeof data.isPremium === "boolean") patch['is_premium'] = data.isPremium;
-    if (typeof data.spicyEnabled === "boolean") patch['spicy_enabled'] = data.spicyEnabled;
+    const patch: { is_premium?: boolean; spicy_enabled?: boolean } = {};
+    if (typeof data.isPremium === "boolean") patch.is_premium = data.isPremium;
+    if (typeof data.spicyEnabled === "boolean") patch.spicy_enabled = data.spicyEnabled;
     if (Object.keys(patch).length === 0) return { ok: true };
 
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.userId);
