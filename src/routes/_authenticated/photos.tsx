@@ -624,7 +624,7 @@ function PhotoDetail({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-sm">
       <div className="mx-auto max-w-lg px-4 py-4">
         <div className="flex justify-end gap-2">
-          {mine ? (
+          {true ? (
             <>
               <button
                 type="button"
