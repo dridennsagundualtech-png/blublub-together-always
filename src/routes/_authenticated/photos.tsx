@@ -161,6 +161,21 @@ function PhotosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const removePost = useMutation({
+    mutationFn: async (post: PhotoWithUrl) => {
+      await supabase.from("photo_comments").delete().eq("photo_id", post.id);
+      await supabase.from("photo_reactions").delete().eq("photo_id", post.id);
+      const { error } = await supabase.from("photos").delete().eq("id", post.id);
+      if (error) throw error;
+      if (post.storage_path) await supabase.storage.from("photos").remove([post.storage_path]);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["photos"] });
+      toast.success("Post deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const addTextPost = useMutation({
     mutationFn: async () => {
       const text = postBody.trim();
@@ -274,16 +289,25 @@ function PhotosPage() {
                     >
                       <Pin className="size-4" />
                     </button>
-                    {p.storage_path ? (
-                      <button
-                        type="button"
-                        aria-label="Open photo"
-                        onClick={() => setOpen(p)}
-                        className="press rounded-full border border-border px-3 py-1.5 text-xs font-bold"
-                      >
-                        Open
-                      </button>
-                    ) : null}
+                    <button
+                      type="button"
+                      aria-label="Edit post"
+                      onClick={() => setOpen(p)}
+                      className="press grid size-9 place-items-center rounded-full border border-border text-muted-foreground"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Delete post"
+                      disabled={removePost.isPending}
+                      onClick={() => {
+                        if (window.confirm("Delete this post for both of you?")) removePost.mutate(p);
+                      }}
+                      className="press grid size-9 place-items-center rounded-full border border-border text-destructive disabled:opacity-50"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
                   </div>
                 </div>
                 {p.location ? (
@@ -551,20 +575,20 @@ function PhotoDetail({
   albumNames: string[];
   onClose: () => void;
 }) {
-  const { data: user } = useAuthUser();
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [caption, setCaption] = useState(photo.caption ?? "");
+  const [text, setText] = useState(photo.body ?? "");
   const [place, setPlace] = useState(photo.location ?? "");
   const [album, setAlbum] = useState(photo.album ?? "");
   const [takenOn, setTakenOn] = useState(photo.taken_on);
-  const mine = photo.created_by === user?.id;
 
   const save = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
         .from("photos")
         .update({
+          body: text.trim() || null,
           caption: caption.trim() || null,
           location: place.trim() || null,
           album: album.trim() || null,
@@ -600,28 +624,24 @@ function PhotoDetail({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background/95 backdrop-blur-sm">
       <div className="mx-auto max-w-lg px-4 py-4">
         <div className="flex justify-end gap-2">
-          {mine ? (
-            <>
-              <button
-                type="button"
-                aria-label="Edit memory"
-                onClick={() => setEditing((v) => !v)}
-                className="press grid size-10 place-items-center rounded-full bg-card shadow-soft"
-              >
-                <Pencil className="size-4" />
-              </button>
-              <button
-                type="button"
-                aria-label="Delete memory"
-                onClick={() => {
-                  if (window.confirm("Delete this memory for both of you?")) remove.mutate();
-                }}
-                className="press grid size-10 place-items-center rounded-full bg-destructive/15 text-destructive shadow-soft"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </>
-          ) : null}
+          <button
+            type="button"
+            aria-label="Edit memory"
+            onClick={() => setEditing((v) => !v)}
+            className="press grid size-10 place-items-center rounded-full bg-card shadow-soft"
+          >
+            <Pencil className="size-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Delete memory"
+            onClick={() => {
+              if (window.confirm("Delete this memory for both of you?")) remove.mutate();
+            }}
+            className="press grid size-10 place-items-center rounded-full bg-destructive/15 text-destructive shadow-soft"
+          >
+            <Trash2 className="size-4" />
+          </button>
           <button
             type="button"
             aria-label="Close"
@@ -647,6 +667,14 @@ function PhotoDetail({
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     maxLength={200}
+                  />
+                </Field>
+                <Field label="Text">
+                  <TextArea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    rows={4}
+                    maxLength={2000}
                   />
                 </Field>
                 <Field label="Where was this?">
@@ -682,7 +710,10 @@ function PhotoDetail({
               </div>
             ) : (
               <>
-                <p className="text-sm font-bold">{photo.caption ?? "Untitled"}</p>
+                <p className="text-sm font-bold">{photo.caption ?? (photo.body ? "" : "Untitled")}</p>
+                {photo.body ? (
+                  <p className="whitespace-pre-wrap break-words text-sm">{photo.body}</p>
+                ) : null}
                 <p className="text-xs text-muted-foreground">{photo.taken_on}</p>
                 {photo.album ? (
                   <p className="mt-1 text-xs font-semibold text-muted-foreground">

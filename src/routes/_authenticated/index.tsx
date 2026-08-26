@@ -89,7 +89,7 @@ function HomePage() {
   const comingUp = [
     ...(upcoming ?? []).map((e) => ({ id: e.id, date: e.event_date, title: e.title, emoji: "📅" })),
     ...(derived ?? [])
-      .filter((d) => d.date >= todayISO())
+      .filter((d) => d.kind !== "cycle" && d.date >= todayISO())
       .map((d) => ({ id: d.id, date: d.date, title: d.title, emoji: DERIVED_META[d.kind].emoji })),
   ]
     .sort((a, b) => a.date.localeCompare(b.date))

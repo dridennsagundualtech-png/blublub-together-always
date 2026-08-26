@@ -59,9 +59,10 @@ function AdminUsersPage() {
   const fetchUsers = useServerFn(listAppUsers);
   const updateAccess = useServerFn(setUserAccess);
 
-  const { data: users, isFetching } = useQuery({
+  const { data: users, isFetching, error } = useQuery({
     queryKey: ["admin-users"],
     enabled: !!isAdmin,
+    retry: false,
     queryFn: () => fetchUsers(),
   });
 
@@ -106,7 +107,11 @@ function AdminUsersPage() {
             </span>
           </SectionTitle>
 
-          {isFetching && !users ? (
+          {error ? (
+            <Card className="text-sm text-destructive">
+              Couldn&apos;t load accounts: {(error as Error).message}
+            </Card>
+          ) : isFetching && !users ? (
             <Card className="text-sm text-muted-foreground">Loading members…</Card>
           ) : rows.length === 0 ? (
             <Card className="text-sm text-muted-foreground">No accounts match that search.</Card>
