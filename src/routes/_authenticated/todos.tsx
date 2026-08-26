@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import {
+  AddPanel,
   Card,
   Field,
   PrimaryButton,
@@ -123,8 +124,8 @@ function TodosPage() {
 
   return (
     <AppLayout title="To-dos & Goals" subtitle="Little things, big things" critter="penguin">
-      <Card>
-        <Field label="New to-do">
+      <AddPanel label="New to-do">
+        {(close) => (
           <div className="flex gap-2">
             <TextInput
               value={todoTitle}
@@ -135,13 +136,13 @@ function TodosPage() {
             <PrimaryButton
               className="w-auto px-5"
               disabled={!todoTitle.trim() || addTodo.isPending}
-              onClick={() => addTodo.mutate()}
+              onClick={() => addTodo.mutate(undefined, { onSuccess: close })}
             >
               Add
             </PrimaryButton>
           </div>
-        </Field>
-      </Card>
+        )}
+      </AddPanel>
 
       <SectionTitle>Checklist</SectionTitle>
       {!todos || todos.length === 0 ? (
@@ -175,23 +176,26 @@ function TodosPage() {
       )}
 
       <SectionTitle>Relationship goals</SectionTitle>
-      <Card>
-        <div className="flex gap-2">
-          <TextInput
-            value={goalTitle}
-            onChange={(e) => setGoalTitle(e.target.value)}
-            maxLength={140}
-            placeholder="Visit Kyoto together"
-          />
-          <PrimaryButton
-            className="w-auto px-5"
-            disabled={!goalTitle.trim() || addGoal.isPending}
-            onClick={() => addGoal.mutate()}
-          >
-            Add
-          </PrimaryButton>
-        </div>
-      </Card>
+      <AddPanel label="New goal">
+        {(close) => (
+          <div className="flex gap-2">
+            <TextInput
+              value={goalTitle}
+              onChange={(e) => setGoalTitle(e.target.value)}
+              maxLength={140}
+              placeholder="Visit Kyoto together"
+            />
+            <PrimaryButton
+              className="w-auto px-5"
+              disabled={!goalTitle.trim() || addGoal.isPending}
+              onClick={() => addGoal.mutate(undefined, { onSuccess: close })}
+            >
+              Add
+            </PrimaryButton>
+          </div>
+        )}
+      </AddPanel>
+
 
       <ul className="mt-3 space-y-3">
         {(goals ?? []).map((g) => (

@@ -19,12 +19,12 @@ import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedCommitmentsRouteImport } from './routes/_authenticated/commitments'
 import { Route as AuthenticatedCooldownRouteImport } from './routes/_authenticated/cooldown'
-import { Route as AuthenticatedDatesRouteImport } from './routes/_authenticated/dates'
 import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/diary'
 import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/food'
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
 import { Route as AuthenticatedMemoryBookRouteImport } from './routes/_authenticated/memory-book'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
+import { Route as AuthenticatedNestRouteImport } from './routes/_authenticated/nest'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -86,11 +86,6 @@ const AuthenticatedCooldownRoute = AuthenticatedCooldownRouteImport.update({
   path: '/cooldown',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDatesRoute = AuthenticatedDatesRouteImport.update({
-  id: '/dates',
-  path: '/dates',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedDiaryRoute = AuthenticatedDiaryRouteImport.update({
   id: '/diary',
   path: '/diary',
@@ -114,6 +109,11 @@ const AuthenticatedMemoryBookRoute = AuthenticatedMemoryBookRouteImport.update({
 const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   id: '/more',
   path: '/more',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNestRoute = AuthenticatedNestRouteImport.update({
+  id: '/nest',
+  path: '/nest',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPeriodRoute = AuthenticatedPeriodRouteImport.update({
@@ -178,12 +178,12 @@ export interface FileRoutesByFullPath {
   '/chat': typeof AuthenticatedChatRoute
   '/commitments': typeof AuthenticatedCommitmentsRoute
   '/cooldown': typeof AuthenticatedCooldownRoute
-  '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
   '/map': typeof AuthenticatedMapRoute
   '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
+  '/nest': typeof AuthenticatedNestRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -204,12 +204,12 @@ export interface FileRoutesByTo {
   '/chat': typeof AuthenticatedChatRoute
   '/commitments': typeof AuthenticatedCommitmentsRoute
   '/cooldown': typeof AuthenticatedCooldownRoute
-  '/dates': typeof AuthenticatedDatesRoute
   '/diary': typeof AuthenticatedDiaryRoute
   '/food': typeof AuthenticatedFoodRoute
   '/map': typeof AuthenticatedMapRoute
   '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
+  '/nest': typeof AuthenticatedNestRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -233,12 +233,12 @@ export interface FileRoutesById {
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/commitments': typeof AuthenticatedCommitmentsRoute
   '/_authenticated/cooldown': typeof AuthenticatedCooldownRoute
-  '/_authenticated/dates': typeof AuthenticatedDatesRoute
   '/_authenticated/diary': typeof AuthenticatedDiaryRoute
   '/_authenticated/food': typeof AuthenticatedFoodRoute
   '/_authenticated/map': typeof AuthenticatedMapRoute
   '/_authenticated/memory-book': typeof AuthenticatedMemoryBookRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
+  '/_authenticated/nest': typeof AuthenticatedNestRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -263,12 +263,12 @@ export interface FileRouteTypes {
     | '/chat'
     | '/commitments'
     | '/cooldown'
-    | '/dates'
     | '/diary'
     | '/food'
     | '/map'
     | '/memory-book'
     | '/more'
+    | '/nest'
     | '/period'
     | '/photos'
     | '/profile'
@@ -289,12 +289,12 @@ export interface FileRouteTypes {
     | '/chat'
     | '/commitments'
     | '/cooldown'
-    | '/dates'
     | '/diary'
     | '/food'
     | '/map'
     | '/memory-book'
     | '/more'
+    | '/nest'
     | '/period'
     | '/photos'
     | '/profile'
@@ -317,12 +317,12 @@ export interface FileRouteTypes {
     | '/_authenticated/chat'
     | '/_authenticated/commitments'
     | '/_authenticated/cooldown'
-    | '/_authenticated/dates'
     | '/_authenticated/diary'
     | '/_authenticated/food'
     | '/_authenticated/map'
     | '/_authenticated/memory-book'
     | '/_authenticated/more'
+    | '/_authenticated/nest'
     | '/_authenticated/period'
     | '/_authenticated/photos'
     | '/_authenticated/profile'
@@ -413,13 +413,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCooldownRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dates': {
-      id: '/_authenticated/dates'
-      path: '/dates'
-      fullPath: '/dates'
-      preLoaderRoute: typeof AuthenticatedDatesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/diary': {
       id: '/_authenticated/diary'
       path: '/diary'
@@ -453,6 +446,13 @@ declare module '@tanstack/react-router' {
       path: '/more'
       fullPath: '/more'
       preLoaderRoute: typeof AuthenticatedMoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/nest': {
+      id: '/_authenticated/nest'
+      path: '/nest'
+      fullPath: '/nest'
+      preLoaderRoute: typeof AuthenticatedNestRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/period': {
@@ -536,12 +536,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedCommitmentsRoute: typeof AuthenticatedCommitmentsRoute
   AuthenticatedCooldownRoute: typeof AuthenticatedCooldownRoute
-  AuthenticatedDatesRoute: typeof AuthenticatedDatesRoute
   AuthenticatedDiaryRoute: typeof AuthenticatedDiaryRoute
   AuthenticatedFoodRoute: typeof AuthenticatedFoodRoute
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
   AuthenticatedMemoryBookRoute: typeof AuthenticatedMemoryBookRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
+  AuthenticatedNestRoute: typeof AuthenticatedNestRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -563,12 +563,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedCommitmentsRoute: AuthenticatedCommitmentsRoute,
   AuthenticatedCooldownRoute: AuthenticatedCooldownRoute,
-  AuthenticatedDatesRoute: AuthenticatedDatesRoute,
   AuthenticatedDiaryRoute: AuthenticatedDiaryRoute,
   AuthenticatedFoodRoute: AuthenticatedFoodRoute,
   AuthenticatedMapRoute: AuthenticatedMapRoute,
   AuthenticatedMemoryBookRoute: AuthenticatedMemoryBookRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
+  AuthenticatedNestRoute: AuthenticatedNestRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,

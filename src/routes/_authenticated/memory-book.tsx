@@ -154,6 +154,7 @@ function MemoryBookPage() {
         doc.text("Photos", M, y);
         y += 26;
         for (const p of photos) {
+          if (!p.storage_path) continue;
           const { data: signed } = await supabase.storage
             .from("photos")
             .createSignedUrl(p.storage_path, 600);

@@ -9,6 +9,7 @@ import {
   MapPin,
   MessageCircle,
   Pencil,
+  Pin,
   Plus,
   Rows3,
   Send,
@@ -19,7 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { usePremiumAccess } from "@/lib/admin";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, TextInput } from "@/components/ui-kit";
+import { Card, Field, PrimaryButton, TextArea, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -49,9 +50,11 @@ export const Route = createFileRoute("/_authenticated/photos")({
 type PhotoWithUrl = {
   id: string;
   caption: string | null;
+  body: string | null;
   location: string | null;
   album: string | null;
-  storage_path: string;
+  storage_path: string | null;
+  is_pinned: boolean;
   taken_on: string;
   created_by: string;
   url: string | null;
@@ -69,6 +72,8 @@ function PhotosPage() {
   const [takenOn, setTakenOn] = useState(todayISO());
   const [open, setOpen] = useState<PhotoWithUrl | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [addKind, setAddKind] = useState<"photo" | "text">("photo");
+  const [postBody, setPostBody] = useState("");
   const [tab, setTab] = useState<"albums" | "feed">("albums");
   const [openAlbum, setOpenAlbum] = useState<string | null>(null);
 
@@ -86,13 +91,18 @@ function PhotosPage() {
         .order("taken_on", { ascending: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
-      const paths = (data ?? []).map((p) => p.storage_path);
+      const paths = (data ?? []).map((p) => p.storage_path).filter((x): x is string => !!x);
       const signed = paths.length
         ? ((await supabase.storage.from("photos").createSignedUrls(paths, 3600)).data ?? [])
         : [];
-      return (data ?? []).map((p, i) => ({
+      const urlByPath = new Map<string, string>();
+      paths.forEach((path, i) => {
+        const u = signed[i]?.signedUrl;
+        if (u) urlByPath.set(path, u);
+      });
+      return (data ?? []).map((p) => ({
         ...p,
-        url: signed[i]?.signedUrl ?? null,
+        url: p.storage_path ? (urlByPath.get(p.storage_path) ?? null) : null,
       })) as PhotoWithUrl[];
     },
   });
@@ -131,11 +141,60 @@ function PhotosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const pin = useMutation({
+    mutationFn: async (post: PhotoWithUrl) => {
+      if (!post.is_pinned) {
+        const { error: clearErr } = await supabase
+          .from("photos")
+          .update({ is_pinned: false })
+          .eq("couple_id", coupleId!)
+          .eq("is_pinned", true);
+        if (clearErr) throw clearErr;
+      }
+      const { error } = await supabase
+        .from("photos")
+        .update({ is_pinned: !post.is_pinned })
+        .eq("id", post.id);
+      if (error) throw error;
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["photos"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const addTextPost = useMutation({
+    mutationFn: async () => {
+      const text = postBody.trim();
+      if (!text) throw new Error("Write something first");
+      const { error } = await supabase.from("photos").insert({
+        couple_id: coupleId!,
+        created_by: user!.id,
+        storage_path: null,
+        body: text,
+        caption: caption.trim() || null,
+        location: place.trim() || null,
+        taken_on: takenOn,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setPostBody("");
+      setCaption("");
+      setPlace("");
+      void qc.invalidateQueries({ queryKey: ["photos"] });
+      setUploadOpen(false);
+      toast.success("Posted to your feed");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const all = photos ?? [];
-  const albums = all.reduce<Record<string, PhotoWithUrl[]>>((acc, p) => {
+  const albums = all
+    .filter((p) => p.storage_path)
+    .reduce<Record<string, PhotoWithUrl[]>>((acc, p) => {
     (acc[p.album?.trim() || UNSORTED] ??= []).push(p);
     return acc;
   }, {});
+  const feed = [...all].sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned));
   const albumNames = Object.keys(albums).sort((a, b) =>
     a === UNSORTED ? 1 : b === UNSORTED ? -1 : a.localeCompare(b),
   );
@@ -175,11 +234,11 @@ function PhotosPage() {
 
       {all.length === 0 ? (
         <Card className="text-sm text-muted-foreground">
-          No memories yet — tap + to add your first photo.
+          No memories yet — tap + to add a photo or write a post.
         </Card>
       ) : tab === "feed" ? (
         <ul className="space-y-4">
-          {all.map((p) => (
+          {feed.map((p) => (
             <li key={p.id} className="card-soft overflow-hidden p-0">
               {p.url ? (
                 <img
@@ -190,19 +249,42 @@ function PhotosPage() {
                 />
               ) : null}
               <div className="p-4">
+                {p.is_pinned ? (
+                  <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-foreground">
+                    <Pin className="size-3" /> Pinned
+                  </p>
+                ) : null}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-bold">{p.caption ?? "Untitled"}</p>
-                    <p className="text-xs text-muted-foreground">{p.taken_on}</p>
+                    <p className="text-sm font-bold">{p.caption ?? (p.body ? "" : "Untitled")}</p>
+                    {p.body ? (
+                      <p className="whitespace-pre-wrap break-words text-sm">{p.body}</p>
+                    ) : null}
+                    <p className="mt-1 text-xs text-muted-foreground">{p.taken_on}</p>
                   </div>
-                  <button
-                    type="button"
-                    aria-label="Open photo"
-                    onClick={() => setOpen(p)}
-                    className="press shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-bold"
-                  >
-                    Open
-                  </button>
+                  <div className="flex shrink-0 gap-1">
+                    <button
+                      type="button"
+                      aria-label={p.is_pinned ? "Unpin post" : "Pin post"}
+                      onClick={() => pin.mutate(p)}
+                      className={cn(
+                        "press grid size-9 place-items-center rounded-full border border-border",
+                        p.is_pinned ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                      )}
+                    >
+                      <Pin className="size-4" />
+                    </button>
+                    {p.storage_path ? (
+                      <button
+                        type="button"
+                        aria-label="Open photo"
+                        onClick={() => setOpen(p)}
+                        className="press rounded-full border border-border px-3 py-1.5 text-xs font-bold"
+                      >
+                        Open
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
                 {p.location ? (
                   <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
@@ -210,6 +292,7 @@ function PhotosPage() {
                     {p.location}
                   </p>
                 ) : null}
+                <ReactionBar postId={p.id} />
                 <PhotoComments photoId={p.id} />
               </div>
             </li>
@@ -287,8 +370,34 @@ function PhotosPage() {
               </button>
             </div>
             <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
+                {(["photo", "text"] as const).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setAddKind(k)}
+                    className={cn(
+                      "press rounded-xl py-2 text-xs font-bold",
+                      addKind === k ? "bg-card shadow-soft" : "text-muted-foreground",
+                    )}
+                  >
+                    {k === "photo" ? "Photo" : "Text post"}
+                  </button>
+                ))}
+              </div>
+              {addKind === "text" ? (
+                <Field label="What's on your mind?">
+                  <TextArea
+                    value={postBody}
+                    onChange={(e) => setPostBody(e.target.value)}
+                    maxLength={2000}
+                    placeholder="Just thinking about you today…"
+                  />
+                </Field>
+              ) : null}
               <button
                 type="button"
+                hidden={addKind === "text"}
                 onClick={() => fileRef.current?.click()}
                 className="press flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-background py-6 text-sm font-bold text-muted-foreground"
               >
@@ -333,6 +442,7 @@ function PhotosPage() {
                   placeholder="Kyoto, the little ramen place"
                 />
               </Field>
+              {addKind === "text" ? null : (
               <Field label="Album (optional)">
                 <TextInput
                   value={album}
@@ -349,6 +459,7 @@ function PhotosPage() {
                     ))}
                 </datalist>
               </Field>
+              )}
               <Field label="Date">
                 <TextInput
                   type="date"
@@ -356,12 +467,21 @@ function PhotosPage() {
                   onChange={(e) => setTakenOn(e.target.value)}
                 />
               </Field>
-              <PrimaryButton
-                disabled={files.length === 0 || upload.isPending}
-                onClick={() => upload.mutate()}
-              >
-                {upload.isPending ? "Uploading…" : "Add to memories"}
-              </PrimaryButton>
+              {addKind === "text" ? (
+                <PrimaryButton
+                  disabled={!postBody.trim() || addTextPost.isPending}
+                  onClick={() => addTextPost.mutate()}
+                >
+                  {addTextPost.isPending ? "Posting…" : "Post to feed"}
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton
+                  disabled={files.length === 0 || upload.isPending}
+                  onClick={() => upload.mutate()}
+                >
+                  {upload.isPending ? "Uploading…" : "Add to memories"}
+                </PrimaryButton>
+              )}
               {!isPremium ? (
                 <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
                   <Sparkles className="size-3.5" />
@@ -466,7 +586,7 @@ function PhotoDetail({
       await supabase.from("photo_comments").delete().eq("photo_id", photo.id);
       const { error } = await supabase.from("photos").delete().eq("id", photo.id);
       if (error) throw error;
-      await supabase.storage.from("photos").remove([photo.storage_path]);
+      if (photo.storage_path) await supabase.storage.from("photos").remove([photo.storage_path]);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["photos"] });
@@ -692,6 +812,75 @@ function PhotoComments({ photoId }: { photoId: string }) {
           <Send className="size-4" />
         </button>
       </form>
+    </div>
+  );
+}
+
+const REACTIONS = [
+  { kind: "heart", emoji: "💗", label: "Heart" },
+  { kind: "laugh", emoji: "😆", label: "Laugh" },
+  { kind: "hug", emoji: "🤗", label: "Hug" },
+] as const;
+
+function ReactionBar({ postId }: { postId: string }) {
+  const coupleId = useCoupleId();
+  const { data: user } = useAuthUser();
+  const qc = useQueryClient();
+
+  const { data: rows } = useQuery({
+    queryKey: ["photo-reactions", postId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("photo_reactions")
+        .select("*")
+        .eq("photo_id", postId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const toggle = useMutation({
+    mutationFn: async (kind: string) => {
+      const mine = (rows ?? []).find((r) => r.user_id === user?.id && r.kind === kind);
+      if (mine) {
+        const { error } = await supabase.from("photo_reactions").delete().eq("id", mine.id);
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabase.from("photo_reactions").insert({
+        photo_id: postId,
+        couple_id: coupleId!,
+        user_id: user!.id,
+        kind,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["photo-reactions", postId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {REACTIONS.map((r) => {
+        const list = (rows ?? []).filter((x) => x.kind === r.kind);
+        const mine = list.some((x) => x.user_id === user?.id);
+        return (
+          <button
+            key={r.kind}
+            type="button"
+            aria-label={r.label}
+            onClick={() => toggle.mutate(r.kind)}
+            className={cn(
+              "press flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm",
+              mine ? "border-primary bg-primary/10 font-bold text-primary" : "border-border",
+            )}
+          >
+            <span>{r.emoji}</span>
+            {list.length > 0 ? <span className="text-xs">{list.length}</span> : null}
+          </button>
+        );
+      })}
     </div>
   );
 }

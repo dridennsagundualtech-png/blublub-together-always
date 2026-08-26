@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
-import { Flame } from "lucide-react";
+import { useState } from "react";
+import { Flame, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playChirp } from "@/hooks/use-sound";
 
@@ -148,5 +149,90 @@ export function StreakChip({ days, label = "day streak" }: { days: number; label
       <Flame className="size-3.5" aria-hidden="true" />
       {days} {label}
     </span>
+  );
+}
+
+/** Bottom sheet used for hidden add-flows across the app. */
+export function Sheet({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end" role="dialog" aria-label={title}>
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
+      />
+      <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-card p-4 shadow-float">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="font-display text-lg font-extrabold">{title}</p>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="press grid size-9 place-items-center rounded-full bg-muted"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Collapsed add-form: nothing but a "+" pill until the user asks for it.
+ * Keeps every page's landing view clean.
+ */
+export function AddPanel({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: ReactNode | ((close: () => void) => ReactNode);
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+  return (
+    <div className={className}>
+      {open ? (
+        <Card>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm font-extrabold">{label}</p>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={close}
+              className="press grid size-8 place-items-center rounded-full bg-muted"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+          {typeof children === "function" ? children(close) : children}
+        </Card>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            playChirp("pop");
+            setOpen(true);
+          }}
+          className="press flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed border-border bg-card/60 py-3 text-sm font-bold text-muted-foreground"
+        >
+          <Plus className="size-4" />
+          {label}
+        </button>
+      )}
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import { Check, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import {
+  AddPanel,
   Card,
   EmptyState,
   Field,
@@ -99,24 +100,29 @@ function BucketPage() {
 
   return (
     <AppLayout title="Bucket list" subtitle="Someday, together" critter="seal" critterPose="peek">
-      <Card>
-        <div className="space-y-3">
-          <Field label="Something to do together">
-            <TextInput
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="See the northern lights"
-              maxLength={140}
-            />
-          </Field>
-          <Field label="Target date (optional)">
-            <TextInput type="date" value={target} onChange={(e) => setTarget(e.target.value)} />
-          </Field>
-          <PrimaryButton disabled={!title.trim() || add.isPending} onClick={() => add.mutate()}>
-            Add to the list
-          </PrimaryButton>
-        </div>
-      </Card>
+      <AddPanel label="Add to the list">
+        {(close) => (
+          <div className="space-y-3">
+            <Field label="Something to do together">
+              <TextInput
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="See the northern lights"
+                maxLength={140}
+              />
+            </Field>
+            <Field label="Target date (optional)">
+              <TextInput type="date" value={target} onChange={(e) => setTarget(e.target.value)} />
+            </Field>
+            <PrimaryButton
+              disabled={!title.trim() || add.isPending}
+              onClick={() => add.mutate(undefined, { onSuccess: close })}
+            >
+              Add to the list
+            </PrimaryButton>
+          </div>
+        )}
+      </AddPanel>
 
       {rows.length > 0 ? (
         <Card className="mt-4">
