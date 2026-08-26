@@ -6,6 +6,7 @@ import { PairingScreen } from "@/components/CoupleGate";
 import { useBadges } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
+import { useCommitmentReminders } from "@/lib/commitments";
 
 
 export function AppLayout({
