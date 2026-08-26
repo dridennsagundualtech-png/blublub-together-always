@@ -289,16 +289,25 @@ function PhotosPage() {
                     >
                       <Pin className="size-4" />
                     </button>
-                    {p.storage_path ? (
-                      <button
-                        type="button"
-                        aria-label="Open photo"
-                        onClick={() => setOpen(p)}
-                        className="press rounded-full border border-border px-3 py-1.5 text-xs font-bold"
-                      >
-                        Open
-                      </button>
-                    ) : null}
+                    <button
+                      type="button"
+                      aria-label="Edit post"
+                      onClick={() => setOpen(p)}
+                      className="press grid size-9 place-items-center rounded-full border border-border text-muted-foreground"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Delete post"
+                      disabled={removePost.isPending}
+                      onClick={() => {
+                        if (window.confirm("Delete this post for both of you?")) removePost.mutate(p);
+                      }}
+                      className="press grid size-9 place-items-center rounded-full border border-border text-destructive disabled:opacity-50"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
                   </div>
                 </div>
                 {p.location ? (
