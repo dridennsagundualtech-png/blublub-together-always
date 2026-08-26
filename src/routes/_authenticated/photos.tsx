@@ -161,6 +161,21 @@ function PhotosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const removePost = useMutation({
+    mutationFn: async (post: PhotoWithUrl) => {
+      await supabase.from("photo_comments").delete().eq("photo_id", post.id);
+      await supabase.from("photo_reactions").delete().eq("photo_id", post.id);
+      const { error } = await supabase.from("photos").delete().eq("id", post.id);
+      if (error) throw error;
+      if (post.storage_path) await supabase.storage.from("photos").remove([post.storage_path]);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["photos"] });
+      toast.success("Post deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const addTextPost = useMutation({
     mutationFn: async () => {
       const text = postBody.trim();
