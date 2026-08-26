@@ -875,6 +875,7 @@ export type Database = {
           share_location: boolean
           song_artist: string | null
           song_title: string | null
+          spicy_enabled: boolean
           updated_at: string
         }
         Insert: {
@@ -891,6 +892,7 @@ export type Database = {
           share_location?: boolean
           song_artist?: string | null
           song_title?: string | null
+          spicy_enabled?: boolean
           updated_at?: string
         }
         Update: {
@@ -907,6 +909,7 @@ export type Database = {
           share_location?: boolean
           song_artist?: string | null
           song_title?: string | null
+          spicy_enabled?: boolean
           updated_at?: string
         }
         Relationships: [
