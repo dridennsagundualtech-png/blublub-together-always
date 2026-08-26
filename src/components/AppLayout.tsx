@@ -29,6 +29,7 @@ export function AppLayout({
   const coupleId = useCoupleId();
   const { data: badges } = useBadges();
   useLocationPublisher();
+  useCommitmentReminders();
 
   return (
     <div className="page-wash min-h-screen bg-background pb-28">
