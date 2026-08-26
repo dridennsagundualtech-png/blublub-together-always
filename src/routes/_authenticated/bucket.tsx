@@ -6,6 +6,7 @@ import { Check, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import {
+  AddPanel,
   Card,
   EmptyState,
   Field,
