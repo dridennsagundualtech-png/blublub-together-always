@@ -20,7 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { usePremiumAccess } from "@/lib/admin";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, TextInput } from "@/components/ui-kit";
+import { Card, Field, PrimaryButton, TextArea, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -442,7 +442,8 @@ function PhotosPage() {
                   placeholder="Kyoto, the little ramen place"
                 />
               </Field>
-              <Field label="Album (optional)" hidden={addKind === "text"}>
+              {addKind === "text" ? null : (
+              <Field label="Album (optional)">
                 <TextInput
                   value={album}
                   onChange={(e) => setAlbum(e.target.value)}
@@ -458,6 +459,7 @@ function PhotosPage() {
                     ))}
                 </datalist>
               </Field>
+              )}
               <Field label="Date">
                 <TextInput
                   type="date"
