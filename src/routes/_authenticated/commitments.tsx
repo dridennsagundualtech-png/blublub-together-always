@@ -146,6 +146,11 @@ function CommitmentsPage() {
 
   return (
     <AppLayout title="Commitments" subtitle="Promises you keep, together" critter="penguin">
+      <PremiumGate
+        unlocked={premium}
+        title="Commitments is premium"
+        blurb="Gentle streaks, custom reminders and partner encouragement live in BLUBLUB Premium. Unlock it with a redeem code in Profile & Settings."
+      >
       <Card>
         <div className="space-y-3">
           <Field label="What are you committing to?">
