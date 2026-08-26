@@ -133,20 +133,22 @@ function ArcadePage() {
             <ChevronRight className="size-4 text-muted-foreground" />
           </Link>
         </li>
-        <li>
-          <Link to="/spicy" className="press card-soft flex items-center gap-3 p-4">
-            <span className="grid size-10 place-items-center rounded-full bg-primary/15 text-primary">
-              <Heart className="size-5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-bold">18+ Dice</span>
-              <span className="block truncate text-xs text-muted-foreground">
-                Premium · adults only
+        {spicy ? (
+          <li>
+            <Link to="/spicy" className="press card-soft flex items-center gap-3 p-4">
+              <span className="grid size-10 place-items-center rounded-full bg-primary/15 text-primary">
+                <Heart className="size-5" />
               </span>
-            </span>
-            <ChevronRight className="size-4 text-muted-foreground" />
-          </Link>
-        </li>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold">18+ Dice</span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  Premium · adults only
+                </span>
+              </span>
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </Link>
+          </li>
+        ) : null}
       </ul>
 
       <SectionTitle
