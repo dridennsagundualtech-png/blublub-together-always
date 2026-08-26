@@ -9,6 +9,7 @@ import {
   MapPin,
   MessageCircle,
   Pencil,
+  Pin,
   Plus,
   Rows3,
   Send,
@@ -71,6 +72,8 @@ function PhotosPage() {
   const [takenOn, setTakenOn] = useState(todayISO());
   const [open, setOpen] = useState<PhotoWithUrl | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [addKind, setAddKind] = useState<"photo" | "text">("photo");
+  const [postBody, setPostBody] = useState("");
   const [tab, setTab] = useState<"albums" | "feed">("albums");
   const [openAlbum, setOpenAlbum] = useState<string | null>(null);
 
@@ -138,11 +141,60 @@ function PhotosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const pin = useMutation({
+    mutationFn: async (post: PhotoWithUrl) => {
+      if (!post.is_pinned) {
+        const { error: clearErr } = await supabase
+          .from("photos")
+          .update({ is_pinned: false })
+          .eq("couple_id", coupleId!)
+          .eq("is_pinned", true);
+        if (clearErr) throw clearErr;
+      }
+      const { error } = await supabase
+        .from("photos")
+        .update({ is_pinned: !post.is_pinned })
+        .eq("id", post.id);
+      if (error) throw error;
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["photos"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const addTextPost = useMutation({
+    mutationFn: async () => {
+      const text = postBody.trim();
+      if (!text) throw new Error("Write something first");
+      const { error } = await supabase.from("photos").insert({
+        couple_id: coupleId!,
+        created_by: user!.id,
+        storage_path: null,
+        body: text,
+        caption: caption.trim() || null,
+        location: place.trim() || null,
+        taken_on: takenOn,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setPostBody("");
+      setCaption("");
+      setPlace("");
+      void qc.invalidateQueries({ queryKey: ["photos"] });
+      setUploadOpen(false);
+      toast.success("Posted to your feed");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const all = photos ?? [];
-  const albums = all.reduce<Record<string, PhotoWithUrl[]>>((acc, p) => {
+  const albums = all
+    .filter((p) => p.storage_path)
+    .reduce<Record<string, PhotoWithUrl[]>>((acc, p) => {
     (acc[p.album?.trim() || UNSORTED] ??= []).push(p);
     return acc;
   }, {});
+  const feed = [...all].sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned));
   const albumNames = Object.keys(albums).sort((a, b) =>
     a === UNSORTED ? 1 : b === UNSORTED ? -1 : a.localeCompare(b),
   );
@@ -182,11 +234,11 @@ function PhotosPage() {
 
       {all.length === 0 ? (
         <Card className="text-sm text-muted-foreground">
-          No memories yet — tap + to add your first photo.
+          No memories yet — tap + to add a photo or write a post.
         </Card>
       ) : tab === "feed" ? (
         <ul className="space-y-4">
-          {all.map((p) => (
+          {feed.map((p) => (
             <li key={p.id} className="card-soft overflow-hidden p-0">
               {p.url ? (
                 <img
@@ -197,19 +249,42 @@ function PhotosPage() {
                 />
               ) : null}
               <div className="p-4">
+                {p.is_pinned ? (
+                  <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-foreground">
+                    <Pin className="size-3" /> Pinned
+                  </p>
+                ) : null}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-bold">{p.caption ?? "Untitled"}</p>
-                    <p className="text-xs text-muted-foreground">{p.taken_on}</p>
+                    <p className="text-sm font-bold">{p.caption ?? (p.body ? "" : "Untitled")}</p>
+                    {p.body ? (
+                      <p className="whitespace-pre-wrap break-words text-sm">{p.body}</p>
+                    ) : null}
+                    <p className="mt-1 text-xs text-muted-foreground">{p.taken_on}</p>
                   </div>
-                  <button
-                    type="button"
-                    aria-label="Open photo"
-                    onClick={() => setOpen(p)}
-                    className="press shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-bold"
-                  >
-                    Open
-                  </button>
+                  <div className="flex shrink-0 gap-1">
+                    <button
+                      type="button"
+                      aria-label={p.is_pinned ? "Unpin post" : "Pin post"}
+                      onClick={() => pin.mutate(p)}
+                      className={cn(
+                        "press grid size-9 place-items-center rounded-full border border-border",
+                        p.is_pinned ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                      )}
+                    >
+                      <Pin className="size-4" />
+                    </button>
+                    {p.storage_path ? (
+                      <button
+                        type="button"
+                        aria-label="Open photo"
+                        onClick={() => setOpen(p)}
+                        className="press rounded-full border border-border px-3 py-1.5 text-xs font-bold"
+                      >
+                        Open
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
                 {p.location ? (
                   <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
@@ -217,6 +292,7 @@ function PhotosPage() {
                     {p.location}
                   </p>
                 ) : null}
+                <ReactionBar postId={p.id} />
                 <PhotoComments photoId={p.id} />
               </div>
             </li>
