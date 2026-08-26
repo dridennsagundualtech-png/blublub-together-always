@@ -370,8 +370,34 @@ function PhotosPage() {
               </button>
             </div>
             <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
+                {(["photo", "text"] as const).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setAddKind(k)}
+                    className={cn(
+                      "press rounded-xl py-2 text-xs font-bold",
+                      addKind === k ? "bg-card shadow-soft" : "text-muted-foreground",
+                    )}
+                  >
+                    {k === "photo" ? "Photo" : "Text post"}
+                  </button>
+                ))}
+              </div>
+              {addKind === "text" ? (
+                <Field label="What's on your mind?">
+                  <TextArea
+                    value={postBody}
+                    onChange={(e) => setPostBody(e.target.value)}
+                    maxLength={2000}
+                    placeholder="Just thinking about you today…"
+                  />
+                </Field>
+              ) : null}
               <button
                 type="button"
+                hidden={addKind === "text"}
                 onClick={() => fileRef.current?.click()}
                 className="press flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-background py-6 text-sm font-bold text-muted-foreground"
               >
@@ -416,7 +442,7 @@ function PhotosPage() {
                   placeholder="Kyoto, the little ramen place"
                 />
               </Field>
-              <Field label="Album (optional)">
+              <Field label="Album (optional)" hidden={addKind === "text"}>
                 <TextInput
                   value={album}
                   onChange={(e) => setAlbum(e.target.value)}
@@ -439,12 +465,21 @@ function PhotosPage() {
                   onChange={(e) => setTakenOn(e.target.value)}
                 />
               </Field>
-              <PrimaryButton
-                disabled={files.length === 0 || upload.isPending}
-                onClick={() => upload.mutate()}
-              >
-                {upload.isPending ? "Uploading…" : "Add to memories"}
-              </PrimaryButton>
+              {addKind === "text" ? (
+                <PrimaryButton
+                  disabled={!postBody.trim() || addTextPost.isPending}
+                  onClick={() => addTextPost.mutate()}
+                >
+                  {addTextPost.isPending ? "Posting…" : "Post to feed"}
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton
+                  disabled={files.length === 0 || upload.isPending}
+                  onClick={() => upload.mutate()}
+                >
+                  {upload.isPending ? "Uploading…" : "Add to memories"}
+                </PrimaryButton>
+              )}
               {!isPremium ? (
                 <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
                   <Sparkles className="size-3.5" />
