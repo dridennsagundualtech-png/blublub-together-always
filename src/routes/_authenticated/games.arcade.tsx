@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui-kit";
 import { useBadges, useMarkSeen } from "@/lib/badges";
 import { GAME_META, useGameHistory, useSeats, type GameKind } from "@/lib/games";
+import { useSpicyAccess } from "@/lib/admin";
 
 export const Route = createFileRoute("/_authenticated/games/arcade")({
   head: () => ({
