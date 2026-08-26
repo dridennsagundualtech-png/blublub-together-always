@@ -121,7 +121,7 @@ function SpicyPage() {
             </div>
           </Card>
         )}
-      </PremiumGate>
+      </>
     </AppLayout>
   );
 }
