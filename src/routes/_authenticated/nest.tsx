@@ -193,30 +193,55 @@ function NestPage() {
   );
 }
 
-function Tile({
-  to,
+function SummaryTile({
   icon,
   tint,
   label,
   value,
-  extra,
+  detail,
+}: {
+  icon: React.ReactNode;
+  tint: string;
+  label: string;
+  value: React.ReactNode;
+  detail?: string;
+}) {
+  return (
+    <div className={`card-soft p-4 ${tint}`}>
+      <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </span>
+      <span className="mt-1.5 block text-sm font-bold leading-snug">{value}</span>
+      {detail ? <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span> : null}
+    </div>
+  );
+}
+
+function ToolRow({
+  to,
+  icon,
+  tint,
+  label,
+  hint,
 }: {
   to: string;
   icon: React.ReactNode;
   tint: string;
   label: string;
-  value: React.ReactNode;
-  extra?: React.ReactNode;
+  hint: string;
 }) {
   return (
     <li>
-      <Link to={to} className="card-soft press flex h-full flex-col gap-2 p-4">
-        <span className={`grid size-11 place-items-center rounded-2xl ${tint} text-primary`}>
+      <Link to={to} className="card-soft press flex items-center gap-3 p-4">
+        <span className={`grid size-11 shrink-0 place-items-center rounded-2xl ${tint} text-primary`}>
           {icon}
         </span>
-        <span className="text-sm font-extrabold">{label}</span>
-        <span className="line-clamp-2 text-xs text-muted-foreground">{value}</span>
-        {extra}
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold">{label}</span>
+          <span className="block truncate text-xs text-muted-foreground">{hint}</span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
       </Link>
     </li>
   );
