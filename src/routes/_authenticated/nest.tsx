@@ -115,37 +115,36 @@ function NestPage() {
 
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      <ul className="grid grid-cols-2 gap-3">
-        <Tile
-          to="/diary"
-          icon={<BookHeart className="size-5" />}
+      <SectionTitle>Right now</SectionTitle>
+      <div className="grid gap-3">
+        <SummaryTile
           tint="tile-lilac"
+          icon={<BookHeart className="size-3.5 text-primary" />}
           label="Diary"
-          value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 48) : "No entries yet"}
-          extra={diaryStreak > 0 ? <StreakChip days={diaryStreak} /> : null}
+          value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
+          detail={diaryStreak > 0 ? `${diaryStreak}-day streak 🔥` : "Write something small today"}
         />
-        <Tile
-          to="/todos"
-          icon={<ListChecks className="size-5" />}
-          tint="tile-pink"
-          label="To-Dos"
-          value={openTodos === 0 ? "All done 🩷" : `${openTodos} left to do`}
-        />
-        <Tile
-          to="/bucket"
-          icon={<Sparkles className="size-5" />}
-          tint="tile-peach"
-          label="Bucket List"
-          value={`${bucketTotal} item${bucketTotal === 1 ? "" : "s"} · ${bucketDone} done`}
-        />
-        <Tile
-          to="/budget"
-          icon={<Wallet className="size-5" />}
+        <div className="grid grid-cols-2 gap-3">
+          <SummaryTile
+            tint="tile-pink"
+            icon={<ListChecks className="size-3.5 text-primary" />}
+            label="To-Dos"
+            value={openTodos === 0 ? "All done 🩷" : `${openTodos} left to do`}
+          />
+          <SummaryTile
+            tint="tile-peach"
+            icon={<Sparkles className="size-3.5 text-primary" />}
+            label="Bucket List"
+            value={`${bucketDone}/${bucketTotal} done`}
+          />
+        </div>
+        <SummaryTile
           tint="tile-sky"
+          icon={<Wallet className="size-3.5 text-primary" />}
           label="Budget"
           value={
             !premium ? (
-              "Premium"
+              "Premium space"
             ) : Math.abs(balance) < 0.01 ? (
               "All square 🩷"
             ) : (
@@ -155,7 +154,16 @@ function NestPage() {
             )
           }
         />
+      </div>
+
+      <SectionTitle>Nest tools</SectionTitle>
+      <ul className="space-y-3">
+        <ToolRow to="/diary" tint="tile-lilac" icon={<BookHeart className="size-5" />} label="Diary" hint="Dated entries with a mood" />
+        <ToolRow to="/todos" tint="tile-pink" icon={<ListChecks className="size-5" />} label="To-Dos" hint="Our shared checklist" />
+        <ToolRow to="/bucket" tint="tile-peach" icon={<Sparkles className="size-5" />} label="Bucket List" hint="Dreams to tick off together" />
+        <ToolRow to="/budget" tint="tile-sky" icon={<Wallet className="size-5" />} label="Budget" hint="Expenses, goals and savings" />
       </ul>
+
 
       <button
         type="button"
