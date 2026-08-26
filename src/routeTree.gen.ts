@@ -25,6 +25,7 @@ import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/f
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
 import { Route as AuthenticatedMemoryBookRouteImport } from './routes/_authenticated/memory-book'
 import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
+import { Route as AuthenticatedNestRouteImport } from './routes/_authenticated/nest'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -116,6 +117,11 @@ const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
   path: '/more',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNestRoute = AuthenticatedNestRouteImport.update({
+  id: '/nest',
+  path: '/nest',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPeriodRoute = AuthenticatedPeriodRouteImport.update({
   id: '/period',
   path: '/period',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/map': typeof AuthenticatedMapRoute
   '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
+  '/nest': typeof AuthenticatedNestRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/map': typeof AuthenticatedMapRoute
   '/memory-book': typeof AuthenticatedMemoryBookRoute
   '/more': typeof AuthenticatedMoreRoute
+  '/nest': typeof AuthenticatedNestRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/_authenticated/map': typeof AuthenticatedMapRoute
   '/_authenticated/memory-book': typeof AuthenticatedMemoryBookRoute
   '/_authenticated/more': typeof AuthenticatedMoreRoute
+  '/_authenticated/nest': typeof AuthenticatedNestRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/memory-book'
     | '/more'
+    | '/nest'
     | '/period'
     | '/photos'
     | '/profile'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/memory-book'
     | '/more'
+    | '/nest'
     | '/period'
     | '/photos'
     | '/profile'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/_authenticated/map'
     | '/_authenticated/memory-book'
     | '/_authenticated/more'
+    | '/_authenticated/nest'
     | '/_authenticated/period'
     | '/_authenticated/photos'
     | '/_authenticated/profile'
@@ -455,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMoreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/nest': {
+      id: '/_authenticated/nest'
+      path: '/nest'
+      fullPath: '/nest'
+      preLoaderRoute: typeof AuthenticatedNestRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/period': {
       id: '/_authenticated/period'
       path: '/period'
@@ -542,6 +561,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
   AuthenticatedMemoryBookRoute: typeof AuthenticatedMemoryBookRoute
   AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
+  AuthenticatedNestRoute: typeof AuthenticatedNestRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -569,6 +589,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMapRoute: AuthenticatedMapRoute,
   AuthenticatedMemoryBookRoute: AuthenticatedMemoryBookRoute,
   AuthenticatedMoreRoute: AuthenticatedMoreRoute,
+  AuthenticatedNestRoute: AuthenticatedNestRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
