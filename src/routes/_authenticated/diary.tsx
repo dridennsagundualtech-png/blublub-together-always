@@ -74,41 +74,47 @@ function DiaryPage() {
 
   return (
     <AppLayout title="Diary" subtitle="Your shared journal" critter="seal">
-      <Card>
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {MOODS.map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMood(m)}
-                className={`press grid size-10 place-items-center rounded-2xl text-lg ${
-                  mood === m ? "bg-primary text-primary-foreground" : "bg-muted"
-                }`}
-              >
-                {m}
-              </button>
-            ))}
+      <AddPanel label="New entry">
+        {(close) => (
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {MOODS.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMood(m)}
+                  className={`press grid size-10 place-items-center rounded-2xl text-lg ${
+                    mood === m ? "bg-primary text-primary-foreground" : "bg-muted"
+                  }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            <Field label="Title (optional)">
+              <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+            </Field>
+            <Field label="Entry">
+              <TextArea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                maxLength={4000}
+                placeholder="Today felt like…"
+              />
+            </Field>
+            <Field label="Date">
+              <TextInput type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </Field>
+            <PrimaryButton
+              disabled={!body.trim() || add.isPending}
+              onClick={() => add.mutate(undefined, { onSuccess: close })}
+            >
+              Save entry
+            </PrimaryButton>
           </div>
-          <Field label="Title (optional)">
-            <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-          </Field>
-          <Field label="Entry">
-            <TextArea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              maxLength={4000}
-              placeholder="Today felt like…"
-            />
-          </Field>
-          <Field label="Date">
-            <TextInput type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </Field>
-          <PrimaryButton disabled={!body.trim() || add.isPending} onClick={() => add.mutate()}>
-            Save entry
-          </PrimaryButton>
-        </div>
-      </Card>
+        )}
+      </AddPanel>
+
 
       <SectionTitle action={streak ? <StreakChip days={streak} /> : undefined}>Entries</SectionTitle>
       {!entries || entries.length === 0 ? (
