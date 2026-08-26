@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { BookHeart, ListChecks, Plus, Sparkles, Wallet } from "lucide-react";
+import { BookHeart, ChevronRight, ListChecks, Plus, Sparkles, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import {
@@ -10,9 +10,9 @@ import {
   Field,
   Money,
   PrimaryButton,
+  SectionTitle,
   SelectInput,
   Sheet,
-  StreakChip,
   TextArea,
   TextInput,
 } from "@/components/ui-kit";
