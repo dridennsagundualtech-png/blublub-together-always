@@ -765,40 +765,88 @@ export type Database = {
           },
         ]
       }
+      photo_reactions: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          kind: string
+          photo_id: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          photo_id: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          photo_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_reactions_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_reactions_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           album: string | null
+          body: string | null
           caption: string | null
           couple_id: string
           created_at: string
           created_by: string
           id: string
+          is_pinned: boolean
           location: string | null
-          storage_path: string
+          storage_path: string | null
           taken_on: string
           updated_at: string
         }
         Insert: {
           album?: string | null
+          body?: string | null
           caption?: string | null
           couple_id: string
           created_at?: string
           created_by: string
           id?: string
+          is_pinned?: boolean
           location?: string | null
-          storage_path: string
+          storage_path?: string | null
           taken_on?: string
           updated_at?: string
         }
         Update: {
           album?: string | null
+          body?: string | null
           caption?: string | null
           couple_id?: string
           created_at?: string
           created_by?: string
           id?: string
+          is_pinned?: boolean
           location?: string | null
-          storage_path?: string
+          storage_path?: string | null
           taken_on?: string
           updated_at?: string
         }
