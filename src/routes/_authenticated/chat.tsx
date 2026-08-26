@@ -180,6 +180,24 @@ function ChatPage() {
 
   const nameOf = (id: string) => members?.find((m) => m.id === id)?.display_name ?? "Partner";
 
+  const share = useMutation({
+    mutationFn: async (body: string) => {
+      const { error } = await supabase.from("photos").insert({
+        couple_id: coupleId!,
+        created_by: user!.id,
+        storage_path: null,
+        body,
+        taken_on: new Date().toISOString().slice(0, 10),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Shared to your Memories feed");
+      void qc.invalidateQueries({ queryKey: ["photos"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <AppLayout title="Chat" subtitle="Just the two of you" critter="penguin">
       <div className="flex flex-col gap-2 pb-32">
