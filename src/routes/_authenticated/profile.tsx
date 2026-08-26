@@ -303,9 +303,12 @@ function ProfilePage() {
       </Card>
 
       {isAdmin ? (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center gap-4">
           <Link to="/admin-codes" className="press text-xs font-semibold text-muted-foreground underline">
             Code generator
+          </Link>
+          <Link to="/admin-users" className="press text-xs font-semibold text-muted-foreground underline">
+            Member access
           </Link>
         </div>
       ) : null}

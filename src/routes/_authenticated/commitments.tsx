@@ -5,6 +5,8 @@ import { Check, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
+import { PremiumGate } from "@/components/PremiumGate";
+import { usePremiumAccess } from "@/lib/admin";
 import {
   Card,
   Field,
@@ -57,6 +59,7 @@ function CommitmentsPage() {
   const { data: user } = useAuthUser();
   const partner = usePartner();
   const qc = useQueryClient();
+  const premium = usePremiumAccess();
   const { data: commitments } = useCommitments();
   const { data: logs } = useCommitmentLogs();
 
@@ -345,6 +348,7 @@ function CommitmentsPage() {
           })}
         </ul>
       )}
+      </PremiumGate>
     </AppLayout>
   );
 }
