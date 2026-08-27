@@ -3,11 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Search, Users } from "lucide-react";
+import { Gift, Heart, Search, Users } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, SectionTitle, TextInput } from "@/components/ui-kit";
 import { useIsAdmin } from "@/lib/admin";
-import { listAppUsers, setUserAccess } from "@/lib/admin.functions";
+import { grantLovePoints, listAppUsers, setUserAccess } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin-users")({
   head: () => ({
@@ -51,6 +51,63 @@ function Toggle({
   );
 }
 
+function GrantRow({
+  busy,
+  onDays,
+  onPoints,
+}: {
+  busy: boolean;
+  onDays: (days: number) => void;
+  onPoints: (amount: number) => void;
+}) {
+  const [days, setDays] = useState("30");
+  const [pts, setPts] = useState("50");
+
+  return (
+    <div className="mt-3 space-y-2 border-t border-border pt-3">
+      <div className="flex items-center gap-2">
+        <Gift className="size-4 shrink-0 text-muted-foreground" />
+        <input
+          type="number"
+          min={1}
+          value={days}
+          onChange={(e) => setDays(e.target.value)}
+          className="w-20 rounded-xl border border-border bg-card px-2 py-1.5 text-sm"
+          aria-label="Premium days"
+        />
+        <span className="text-xs text-muted-foreground">days</span>
+        <button
+          type="button"
+          disabled={busy || !Number(days)}
+          onClick={() => onDays(Number(days))}
+          className="press ml-auto rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-foreground disabled:opacity-50"
+        >
+          Give premium
+        </button>
+      </div>
+      <div className="flex items-center gap-2">
+        <Heart className="size-4 shrink-0 text-muted-foreground" />
+        <input
+          type="number"
+          value={pts}
+          onChange={(e) => setPts(e.target.value)}
+          className="w-20 rounded-xl border border-border bg-card px-2 py-1.5 text-sm"
+          aria-label="Love Points"
+        />
+        <span className="text-xs text-muted-foreground">points</span>
+        <button
+          type="button"
+          disabled={busy || !Number(pts)}
+          onClick={() => onPoints(Number(pts))}
+          className="press ml-auto rounded-full bg-secondary px-3 py-1.5 text-xs font-extrabold disabled:opacity-50"
+        >
+          Send points
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AdminUsersPage() {
   const { data: isAdmin, isLoading } = useIsAdmin();
   const qc = useQueryClient();
@@ -58,6 +115,7 @@ function AdminUsersPage() {
 
   const fetchUsers = useServerFn(listAppUsers);
   const updateAccess = useServerFn(setUserAccess);
+  const addPoints = useServerFn(grantLovePoints);
 
   const { data: users, isFetching, error } = useQuery({
     queryKey: ["admin-users"],
@@ -73,6 +131,13 @@ function AdminUsersPage() {
       void qc.invalidateQueries({ queryKey: ["admin-users"] });
       toast.success("Access updated");
     },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const points = useMutation({
+    mutationFn: (vars: { userId: string; amount: number }) => addPoints({ data: vars }),
+    onSuccess: (r: { love_points?: number }) =>
+      toast.success(`Love Points updated${r?.love_points != null ? ` — now ${r.love_points}` : ""}`),
     onError: (e: Error) => toast.error(e.message),
   });
 
