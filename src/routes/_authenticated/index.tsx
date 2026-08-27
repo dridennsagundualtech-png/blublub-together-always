@@ -182,11 +182,8 @@ function HomePage() {
         </StatCard>
       </div>
 
-      <SectionTitle>How we feel</SectionTitle>
-      <div className="grid grid-cols-2 gap-3">
-        <FeelingTile who="You" row={myFeel ?? null} />
-        <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} />
-      </div>
+      <SectionTitle>How they feel</SectionTitle>
+      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} />
 
       <SectionTitle>Coming up</SectionTitle>
       {comingUp.length > 0 ? (
