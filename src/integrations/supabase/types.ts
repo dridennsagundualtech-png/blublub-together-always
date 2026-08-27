@@ -871,6 +871,7 @@ export type Database = {
           display_name: string
           id: string
           is_premium: boolean
+          premium_until: string | null
           share_cycle: boolean
           share_location: boolean
           song_artist: string | null
@@ -888,6 +889,7 @@ export type Database = {
           display_name?: string
           id: string
           is_premium?: boolean
+          premium_until?: string | null
           share_cycle?: boolean
           share_location?: boolean
           song_artist?: string | null
@@ -905,6 +907,7 @@ export type Database = {
           display_name?: string
           id?: string
           is_premium?: boolean
+          premium_until?: string | null
           share_cycle?: boolean
           share_location?: boolean
           song_artist?: string | null
