@@ -145,6 +145,9 @@ function QuestionsPage() {
       void qc.invalidateQueries({ queryKey: ["answers"] });
       void qc.invalidateQueries({ queryKey: ["question-archive"] });
       void qc.invalidateQueries({ queryKey: ["badges"] });
+      void awardPoint("question").then((won) => {
+        if (won) toast.success("+1 Love Point 💗");
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
