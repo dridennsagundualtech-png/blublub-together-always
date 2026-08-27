@@ -125,7 +125,12 @@ function AdminUsersPage() {
   });
 
   const save = useMutation({
-    mutationFn: (vars: { userId: string; isPremium?: boolean; spicyEnabled?: boolean }) =>
+    mutationFn: (vars: {
+      userId: string;
+      isPremium?: boolean;
+      spicyEnabled?: boolean;
+      premiumDays?: number;
+    }) =>
       updateAccess({ data: vars }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["admin-users"] });
