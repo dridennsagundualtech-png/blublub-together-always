@@ -8,8 +8,7 @@ import { Card, Money, ProgressBar, SectionTitle, StatCard, StatHero } from "@/co
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import { daysTogether, useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
-import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
-import { timeAgo } from "@/lib/location";
+import { FeelingTile } from "@/components/FeelingTile";
 import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -182,7 +181,7 @@ function HomePage() {
       </div>
 
       <SectionTitle>How they feel</SectionTitle>
-      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} />
+      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} linkTo="/cooldown" />
 
       <SectionTitle>Coming up</SectionTitle>
       {comingUp.length > 0 ? (
@@ -239,50 +238,5 @@ function HomePage() {
         </>
       ) : null}
     </AppLayout>
-  );
-}
-
-function FeelingTile({
-  who,
-  row,
-}: {
-  who: string;
-  row?: { feeling: string | null; created_at: string } | null | undefined;
-}) {
-  const decoded = decodeFeeling(row?.feeling ?? "");
-  const picks = decoded.keys.map((k) => FEELING_BY_KEY.get(k)).filter(Boolean);
-
-  return (
-    <Link to="/cooldown" className="card-soft press flex flex-col items-center gap-2 p-4 text-center">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        {who}
-      </span>
-      {picks.length > 0 ? (
-        <span className="flex flex-wrap items-center justify-center gap-2">
-          {picks.slice(0, 2).map((f) => (
-            <img
-              key={f!.key}
-              src={f!.url}
-              alt={f!.label}
-              className="w-[46%] min-w-40 max-w-none object-contain"
-              style={{ imageRendering: "pixelated" }}
-              loading="lazy"
-            />
-          ))}
-        </span>
-      ) : (
-        <span className="grid h-40 place-items-center text-7xl">🫧</span>
-      )}
-      <span className="text-sm font-bold leading-snug">
-        {picks.length > 0
-          ? picks.map((f) => f!.label).join(", ")
-          : row
-            ? decoded.text.slice(0, 40) || "Shared a note"
-            : "Nothing shared yet"}
-      </span>
-      {row ? (
-        <span className="text-[11px] text-muted-foreground">{timeAgo(row.created_at)}</span>
-      ) : null}
-    </Link>
   );
 }

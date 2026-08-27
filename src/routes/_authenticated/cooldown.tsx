@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, Field, PrimaryButton, SectionTitle, TextArea } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
-import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
+import { useAuthUser, useCoupleId, useMembers, usePartner } from "@/lib/session";
 import { useDailyLovePoint } from "@/lib/love-points";
 import { FEELINGS, FEELING_BY_KEY, decodeFeeling, encodeFeeling } from "@/lib/feelings";
+import { FeelingTile } from "@/components/FeelingTile";
 
 
 export const Route = createFileRoute("/_authenticated/cooldown")({
@@ -36,11 +37,13 @@ function CooldownPage() {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const { data: members } = useMembers();
+  const partner = usePartner();
   const qc = useQueryClient();
 
   const [feeling, setFeeling] = useState("");
   const [moods, setMoods] = useState<string[]>([]);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [need, setNeed] = useState("");
   const [responsibility, setResponsibility] = useState("");
 
@@ -57,6 +60,9 @@ function CooldownPage() {
       return data;
     },
   });
+
+  const myFeel = entries?.find((c) => c.created_by === user?.id);
+  const theirFeel = entries?.find((c) => c.created_by !== user?.id && c.shared);
 
   const awardPoint = useDailyLovePoint();
 
@@ -110,6 +116,12 @@ function CooldownPage() {
           </p>
         </div>
       </Card>
+
+      <SectionTitle>How we feel</SectionTitle>
+      <div className="grid grid-cols-2 gap-2">
+        <FeelingTile who="You" row={myFeel ?? null} compact />
+        <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} compact />
+      </div>
 
       <Card className="mt-4">
         <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
@@ -212,8 +224,19 @@ function CooldownPage() {
       </Card>
 
 
-      <SectionTitle>Past reflections</SectionTitle>
-      {(entries ?? []).length === 0 ? (
+      <button
+        type="button"
+        onClick={() => {
+          playChirp("tap");
+          setArchiveOpen((v) => !v);
+        }}
+        className="press mt-6 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
+      >
+        {archiveOpen ? "Hide past reflections" : `Past reflections (${(entries ?? []).length})`}
+        <ChevronDown className={`size-4 transition-transform ${archiveOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {!archiveOpen ? null : (entries ?? []).length === 0 ? (
         <EmptyState text="Nothing here — hopefully it stays that way 🩷" />
       ) : (
         <ul className="space-y-2 pb-4">
