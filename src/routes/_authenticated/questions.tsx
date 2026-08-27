@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useDailyLovePoint } from "@/lib/love-points";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, PrimaryButton, SectionTitle, StreakChip, TextArea } from "@/components/ui-kit";
 import { todayISO, useAnswerStreak, useMarkSeen } from "@/lib/badges";
@@ -129,6 +130,8 @@ function QuestionsPage() {
   const theirs = answers?.find((a) => a.created_by !== user?.id) ?? null;
   const revealed = !!mine && !!theirs;
 
+  const awardPoint = useDailyLovePoint();
+
   const submit = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("question_answers").insert({
@@ -145,6 +148,9 @@ function QuestionsPage() {
       void qc.invalidateQueries({ queryKey: ["answers"] });
       void qc.invalidateQueries({ queryKey: ["question-archive"] });
       void qc.invalidateQueries({ queryKey: ["badges"] });
+      void awardPoint("question").then((won) => {
+        if (won) toast.success("+1 Love Point 💗");
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });

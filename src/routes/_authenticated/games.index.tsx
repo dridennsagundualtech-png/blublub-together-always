@@ -185,6 +185,11 @@ function RoomPage() {
           {controls}
         </div>
       }
+      onDoneEditing={() => {
+        playChirp("tap");
+        setEditing(false);
+        setSelectedId(null);
+      }}
       onSelect={setSelectedId}
       onMove={(id, x, y) => actions.move.mutate({ id, x, y })}
       onMovePet={(key, x, y) => actions.setPetPosition.mutate({ key, x, y })}

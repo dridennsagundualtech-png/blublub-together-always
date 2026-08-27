@@ -1,5 +1,5 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import { Minus, Plus, RotateCw, Trash2 } from "lucide-react";
+import { Check, Minus, Plus, RotateCw, Trash2 } from "lucide-react";
 import { Doodle, type Critter } from "@/components/Doodles";
 import { ITEM_BY_KEY, plantStage, type RoomItemRow } from "@/lib/room";
 
@@ -38,6 +38,7 @@ export function RoomStage({
   onScale,
   onLayer,
   onWater,
+  onDoneEditing,
 }: {
   items: RoomItemRow[];
   growth: number;
@@ -59,6 +60,7 @@ export function RoomStage({
   onScale: (id: string, scale: number) => void;
   onLayer: (id: string, z: number) => void;
   onWater: () => void;
+  onDoneEditing?: (() => void) | undefined;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ id: string; moved: boolean } | null>(null);
@@ -278,9 +280,9 @@ export function RoomStage({
         <div
           className={cn(
             "absolute inset-x-0 mx-auto flex w-fit max-w-[95%] flex-wrap items-center justify-center gap-2 rounded-full bg-card/95 px-3 py-2 shadow-float",
-            fullscreen ? "bottom-[calc(env(safe-area-inset-bottom)+5.5rem)]" : "bottom-2",
+            fullscreen ? "bottom-[calc(env(safe-area-inset-bottom)+1rem)]" : "bottom-2",
           )}
-          style={{ zIndex: 200 }}
+          style={{ zIndex: 310 }}
           onClick={(e) => e.stopPropagation()}
         >
           <span className="px-1 text-xs font-bold text-muted-foreground">Drag to move</span>
@@ -343,14 +345,31 @@ export function RoomStage({
         </div>
       ) : null}
 
-      {/* Fullscreen toolbar */}
-      {fullscreen && toolbar ? (
+      {/* Fullscreen toolbar — hidden while decorating so nothing covers the room */}
+      {fullscreen && toolbar && !editing ? (
         <div
           className="absolute inset-x-0 bottom-0 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3"
+          style={{ zIndex: 300 }}
           onClick={(e) => e.stopPropagation()}
         >
           {toolbar}
         </div>
+      ) : null}
+
+      {/* Corner "done" tap target while decorating */}
+      {editing && onDoneEditing ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDoneEditing();
+          }}
+          style={{ zIndex: 320 }}
+          className="press absolute right-3 top-[calc(env(safe-area-inset-top)+0.75rem)] inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-extrabold text-primary-foreground shadow-float"
+          aria-label="Finish decorating"
+        >
+          <Check className="size-4" /> Done
+        </button>
       ) : null}
     </div>
   );
