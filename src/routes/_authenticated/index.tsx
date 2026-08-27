@@ -53,7 +53,6 @@ function HomePage() {
     },
   });
 
-  const myFeel = feelings?.find((c) => c.created_by === user?.id);
   const theirFeel = feelings?.find((c) => c.created_by !== user?.id && c.shared);
 
 
@@ -265,14 +264,14 @@ function FeelingTile({
               key={f!.key}
               src={f!.url}
               alt={f!.label}
-              className="w-[45%] max-w-28 object-contain"
+              className="w-[46%] min-w-40 max-w-none object-contain"
               style={{ imageRendering: "pixelated" }}
               loading="lazy"
             />
           ))}
         </span>
       ) : (
-        <span className="grid h-20 place-items-center text-4xl">🫧</span>
+        <span className="grid h-40 place-items-center text-7xl">🫧</span>
       )}
       <span className="text-sm font-bold leading-snug">
         {picks.length > 0
