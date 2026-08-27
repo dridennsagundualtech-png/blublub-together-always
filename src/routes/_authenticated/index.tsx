@@ -182,7 +182,7 @@ function HomePage() {
       </div>
 
       <SectionTitle>How they feel</SectionTitle>
-      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} />
+      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} linkTo="/cooldown" />
 
       <SectionTitle>Coming up</SectionTitle>
       {comingUp.length > 0 ? (
