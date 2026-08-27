@@ -129,6 +129,8 @@ function QuestionsPage() {
   const theirs = answers?.find((a) => a.created_by !== user?.id) ?? null;
   const revealed = !!mine && !!theirs;
 
+  const awardPoint = useDailyLovePoint();
+
   const submit = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("question_answers").insert({
