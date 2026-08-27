@@ -20,11 +20,13 @@ export function useIsAdmin() {
   });
 }
 
-/** Premium access: paid/redeemed premium, or the admin account (unlocks everything). */
+/** Premium access: unexpired premium, or the admin account (unlocks everything). */
 export function usePremiumAccess() {
   const { data: profile } = useProfile();
   const { data: isAdmin } = useIsAdmin();
-  return !!profile?.is_premium || !!isAdmin;
+  const until = profile?.premium_until ? new Date(profile.premium_until).getTime() : null;
+  const active = !!profile?.is_premium && (until === null || until > Date.now());
+  return active || !!isAdmin;
 }
 
 /** 18+ dice access: admin always, otherwise premium AND switched on by the owner. */
