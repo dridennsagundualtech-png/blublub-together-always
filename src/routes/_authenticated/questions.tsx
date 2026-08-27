@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useDailyLovePoint } from "@/lib/love-points";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, PrimaryButton, SectionTitle, StreakChip, TextArea } from "@/components/ui-kit";
 import { todayISO, useAnswerStreak, useMarkSeen } from "@/lib/badges";
