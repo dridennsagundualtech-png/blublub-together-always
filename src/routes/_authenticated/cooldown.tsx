@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, Field, PrimaryButton, SectionTitle, TextArea } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
+import { useDailyLovePoint } from "@/lib/love-points";
 import { FEELINGS, FEELING_BY_KEY, decodeFeeling, encodeFeeling } from "@/lib/feelings";
 
 
@@ -57,6 +58,8 @@ function CooldownPage() {
     },
   });
 
+  const awardPoint = useDailyLovePoint();
+
   const save = useMutation({
     mutationFn: async (share: boolean) => {
       const { error } = await supabase.from("cooldowns").insert({
@@ -76,6 +79,9 @@ function CooldownPage() {
       setResponsibility("");
       void qc.invalidateQueries({ queryKey: ["cooldowns"] });
       toast.success(share ? "Shared with your partner 🩷" : "Saved just for you");
+      void awardPoint("feelings").then((won) => {
+        if (won) toast.success("+1 Love Point 💗");
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
