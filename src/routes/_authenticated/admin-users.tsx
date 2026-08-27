@@ -122,6 +122,11 @@ function AdminUsersPage() {
                   <Card>
                     <p className="truncate text-sm font-bold">{u.display_name}</p>
                     <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+                    {u.premium_until ? (
+                      <p className="mt-1 text-[11px] font-bold text-primary">
+                        Premium until {new Date(u.premium_until).toLocaleDateString()}
+                      </p>
+                    ) : null}
                     <div className="mt-3 flex flex-wrap gap-2">
                       <Toggle
                         on={u.is_premium}
@@ -140,6 +145,11 @@ function AdminUsersPage() {
                         }
                       />
                     </div>
+                    <GrantRow
+                      busy={save.isPending || points.isPending}
+                      onDays={(days) => save.mutate({ userId: u.id, premiumDays: days })}
+                      onPoints={(amount) => points.mutate({ userId: u.id, amount })}
+                    />
                   </Card>
                 </li>
               ))}
