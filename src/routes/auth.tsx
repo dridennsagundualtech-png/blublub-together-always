@@ -170,31 +170,58 @@ function AuthPage() {
             />
           </label>
 
-          <label className="block">
-            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              Password
-            </span>
-            <input
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="go"
-              className={inputClass}
-            />
-          </label>
+          {mode !== "forgot" ? (
+            <label className="block">
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Password
+              </span>
+              <input
+                name="password"
+                type="password"
+                required
+                minLength={6}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="go"
+                className={inputClass}
+              />
+            </label>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Enter your account email and we'll send you a link to set a new password.
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={busy}
             className="press w-full rounded-full bg-primary px-5 py-3.5 text-base font-bold text-primary-foreground shadow-soft disabled:opacity-60"
           >
-            {busy ? "One moment…" : mode === "signup" ? "Create account" : "Sign in"}
+            {busy
+              ? "One moment…"
+              : mode === "signup"
+                ? "Create account"
+                : mode === "forgot"
+                  ? "Send reset link"
+                  : "Sign in"}
           </button>
+
+          {mode === "signin" ? (
+            <p className="text-center">
+              <button
+                type="button"
+                className="text-xs font-bold text-primary"
+                onClick={() => {
+                  formRef.current?.reset();
+                  setMode("forgot");
+                }}
+              >
+                Forgot password?
+              </button>
+            </p>
+          ) : null}
         </form>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
