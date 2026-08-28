@@ -357,3 +357,9 @@
 @media (prefers-reduced-motion: reduce) {
   .room-float, .room-sway { animation: none; }
 }
+
+/* Hide the Edit with Lovable badge on published deployments */
+#lovable-badge {
+  display: none !important;
+}
+
