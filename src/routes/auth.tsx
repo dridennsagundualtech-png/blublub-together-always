@@ -19,9 +19,10 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [busy, setBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [resetSentTo, setResetSentTo] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const refresh = useRefreshSession();
@@ -37,6 +38,15 @@ function AuthPage() {
 
     setBusy(true);
     try {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        playChirp("success");
+        setResetSentTo(email);
+        return;
+      }
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -78,6 +88,29 @@ function AuthPage() {
             className="press mt-5 text-sm font-bold text-primary"
             onClick={() => {
               setSentTo(null);
+              setMode("signin");
+            }}
+          >
+            Back to sign in
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (resetSentTo) {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
+        <div className="card-soft max-w-sm p-7 text-center">
+          <Doodle critter="seal" pose="sleep" size={72} className="mx-auto" />
+          <h1 className="mt-3 text-2xl font-extrabold">Reset link sent</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We sent a password reset link to {resetSentTo}. Tap it to choose a new password.
+          </p>
+          <button
+            className="press mt-5 text-sm font-bold text-primary"
+            onClick={() => {
+              setResetSentTo(null);
               setMode("signin");
             }}
           >
@@ -137,44 +170,75 @@ function AuthPage() {
             />
           </label>
 
-          <label className="block">
-            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              Password
-            </span>
-            <input
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="go"
-              className={inputClass}
-            />
-          </label>
+          {mode !== "forgot" ? (
+            <label className="block">
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Password
+              </span>
+              <input
+                name="password"
+                type="password"
+                required
+                minLength={6}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="go"
+                className={inputClass}
+              />
+            </label>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Enter your account email and we'll send you a link to set a new password.
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={busy}
             className="press w-full rounded-full bg-primary px-5 py-3.5 text-base font-bold text-primary-foreground shadow-soft disabled:opacity-60"
           >
-            {busy ? "One moment…" : mode === "signup" ? "Create account" : "Sign in"}
+            {busy
+              ? "One moment…"
+              : mode === "signup"
+                ? "Create account"
+                : mode === "forgot"
+                  ? "Send reset link"
+                  : "Sign in"}
           </button>
+
+          {mode === "signin" ? (
+            <p className="text-center">
+              <button
+                type="button"
+                className="text-xs font-bold text-primary"
+                onClick={() => {
+                  formRef.current?.reset();
+                  setMode("forgot");
+                }}
+              >
+                Forgot password?
+              </button>
+            </p>
+          ) : null}
         </form>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          {mode === "signup" ? "Already have an account?" : "New here?"}{" "}
+          {mode === "forgot"
+            ? "Remembered it?"
+            : mode === "signup"
+              ? "Already have an account?"
+              : "New here?"}{" "}
           <button
             type="button"
             className="font-bold text-primary"
             onClick={() => {
               formRef.current?.reset();
-              setMode(mode === "signup" ? "signin" : "signup");
+              setMode(mode === "signin" ? "signup" : "signin");
             }}
           >
-            {mode === "signup" ? "Sign in" : "Create one"}
+            {mode === "signin" ? "Create one" : "Sign in"}
           </button>
         </p>
       </div>
