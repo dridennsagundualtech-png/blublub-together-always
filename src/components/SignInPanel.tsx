@@ -133,40 +133,70 @@ export function SignInPanel() {
           />
         </label>
 
-        <label className="block">
-          <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-            Password
-          </span>
-          <input
-            type="password"
-            required
-            minLength={6}
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring"
-          />
-        </label>
+        {mode === "forgot" ? null : (
+          <label className="block">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Password
+            </span>
+            <input
+              type="password"
+              required
+              minLength={6}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring"
+            />
+          </label>
+        )}
 
         <button
           type="submit"
           disabled={busy}
           className="press w-full rounded-full bg-primary px-5 py-3.5 text-base font-bold text-primary-foreground shadow-soft disabled:opacity-60"
         >
-          {busy ? "One moment…" : mode === "signup" ? "Create account" : "Sign in"}
+          {busy
+            ? "One moment…"
+            : mode === "signup"
+              ? "Create account"
+              : mode === "forgot"
+                ? "Send reset link"
+                : "Sign in"}
         </button>
+
+        {mode === "signin" ? (
+          <button
+            type="button"
+            onClick={() => setMode("forgot")}
+            className="press w-full text-center text-sm font-bold text-primary"
+          >
+            Forgot password?
+          </button>
+        ) : null}
+        {mode === "forgot" ? (
+          <button
+            type="button"
+            onClick={() => setMode("signin")}
+            className="press w-full text-center text-sm font-bold text-primary"
+          >
+            Back to sign in
+          </button>
+        ) : null}
       </form>
 
-      <p className="mt-3 text-center text-sm text-muted-foreground">
-        {mode === "signup" ? "Already have an account?" : "New here?"}{" "}
-        <button
-          type="button"
-          className="font-bold text-primary"
-          onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-        >
-          {mode === "signup" ? "Sign in" : "Create one"}
-        </button>
-      </p>
+      {mode === "forgot" ? null : (
+        <p className="mt-3 text-center text-sm text-muted-foreground">
+          {mode === "signup" ? "Already have an account?" : "New here?"}{" "}
+          <button
+            type="button"
+            className="font-bold text-primary"
+            onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+          >
+            {mode === "signup" ? "Sign in" : "Create one"}
+          </button>
+        </p>
+      )}
+
     </div>
   );
 }
