@@ -58,7 +58,29 @@ export function SignInPanel() {
     }
   }
 
+  if (resetSent) {
+    return (
+      <div className="card-soft p-6 text-center">
+        <Doodle critter="cat" pose="wave" size={64} className="mx-auto" />
+        <h2 className="mt-3 text-xl font-extrabold">Reset link sent</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          We emailed a password reset link to {email}. Tap it to set a new password.
+        </p>
+        <button
+          className="press mt-4 text-sm font-bold text-primary"
+          onClick={() => {
+            setResetSent(false);
+            setMode("signin");
+          }}
+        >
+          Back to sign in
+        </button>
+      </div>
+    );
+  }
+
   if (sent) {
+
     return (
       <div className="card-soft p-6 text-center">
         <Doodle critter="penguin" pose="sleep" size={64} className="mx-auto" />
