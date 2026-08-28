@@ -225,16 +225,20 @@ function AuthPage() {
         </form>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          {mode === "signup" ? "Already have an account?" : "New here?"}{" "}
+          {mode === "forgot"
+            ? "Remembered it?"
+            : mode === "signup"
+              ? "Already have an account?"
+              : "New here?"}{" "}
           <button
             type="button"
             className="font-bold text-primary"
             onClick={() => {
               formRef.current?.reset();
-              setMode(mode === "signup" ? "signin" : "signup");
+              setMode(mode === "signin" ? "signup" : "signin");
             }}
           >
-            {mode === "signup" ? "Sign in" : "Create one"}
+            {mode === "signin" ? "Create one" : "Sign in"}
           </button>
         </p>
       </div>
