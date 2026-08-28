@@ -98,6 +98,29 @@ function AuthPage() {
     );
   }
 
+  if (resetSentTo) {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5">
+        <div className="card-soft max-w-sm p-7 text-center">
+          <Doodle critter="seal" pose="sleep" size={72} className="mx-auto" />
+          <h1 className="mt-3 text-2xl font-extrabold">Reset link sent</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We sent a password reset link to {resetSentTo}. Tap it to choose a new password.
+          </p>
+          <button
+            className="press mt-5 text-sm font-bold text-primary"
+            onClick={() => {
+              setResetSentTo(null);
+              setMode("signin");
+            }}
+          >
+            Back to sign in
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   const inputClass =
     "mt-1 w-full rounded-2xl border border-border bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring";
 
