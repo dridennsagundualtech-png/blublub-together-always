@@ -7,13 +7,15 @@ import { useRefreshSession } from "@/lib/session";
 
 /** Inline sign in / sign up form, used inside Profile & Settings. */
 export function SignInPanel() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const refresh = useRefreshSession();
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
