@@ -38,6 +38,15 @@ function AuthPage() {
 
     setBusy(true);
     try {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        playChirp("success");
+        setResetSentTo(email);
+        return;
+      }
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
