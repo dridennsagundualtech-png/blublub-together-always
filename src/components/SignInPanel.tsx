@@ -21,8 +21,17 @@ export function SignInPanel() {
     e.preventDefault();
     setBusy(true);
     try {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setResetSent(true);
+        return;
+      }
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
+
           email,
           password,
           options: {
