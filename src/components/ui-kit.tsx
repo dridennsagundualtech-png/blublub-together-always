@@ -8,11 +8,30 @@ export function Card({ className, children }: { className?: string; children: Re
   return <div className={cn("card-soft p-4", className)}>{children}</div>;
 }
 
-export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+export function SectionTitle({
+  children,
+  action,
+  actionLabel = "See All",
+  onAction,
+}: {
+  children: ReactNode;
+  action?: ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
   return (
-    <div className="mb-2 mt-5 flex items-center justify-between gap-2">
-      <h2 className="text-base font-extrabold">{children}</h2>
-      {action}
+    <div className="mb-2.5 mt-6 flex items-center justify-between gap-2">
+      <h2 className="text-[17px] font-extrabold tracking-tight">{children}</h2>
+      {action ??
+        (onAction ? (
+          <button
+            type="button"
+            onClick={onAction}
+            className="press text-xs font-bold text-primary"
+          >
+            {actionLabel}
+          </button>
+        ) : null)}
     </div>
   );
 }
@@ -73,7 +92,7 @@ export function PrimaryButton({
         onClick?.();
       }}
       className={cn(
-        "press w-full rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-soft disabled:opacity-60",
+        "press w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground shadow-float disabled:opacity-60",
         className,
       )}
     >
@@ -108,19 +127,46 @@ export function GhostButton({
   );
 }
 
-export function EmptyState({ text }: { text: string }) {
-  return <p className="card-soft p-5 text-center text-sm text-muted-foreground">{text}</p>;
+export function EmptyState({
+  text,
+  title,
+  action,
+}: {
+  text: string;
+  title?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="card-soft flex flex-col items-center gap-2 px-5 py-8 text-center">
+      <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-2xl">🩷</div>
+      {title ? <p className="font-display text-base font-extrabold">{title}</p> : null}
+      <p className="max-w-xs text-sm text-muted-foreground">{text}</p>
+      {action}
+    </div>
+  );
 }
 
 export function Money({ value }: { value: number }) {
   return <>{new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(value)}</>;
 }
 
-export function ProgressBar({ value }: { value: number }) {
+export function ProgressBar({
+  value,
+  tone = "pink",
+}: {
+  value: number;
+  tone?: "pink" | "lilac" | "mint" | "peach";
+}) {
+  const tones: Record<string, string> = {
+    pink: "bg-primary",
+    lilac: "bg-lavender",
+    mint: "bg-mint",
+    peach: "bg-honey",
+  };
   return (
-    <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+    <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted/80">
       <div
-        className="h-full rounded-full bg-primary transition-all"
+        className={`h-full rounded-full transition-all duration-500 ${tones[tone] ?? tones.pink}`}
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
@@ -149,6 +195,58 @@ export function StreakChip({ days, label = "day streak" }: { days: number; label
       <Flame className="size-3.5" aria-hidden="true" />
       {days} {label}
     </span>
+  );
+}
+
+/** Soft list row — mockup-style task / growth item. */
+export function ListRow({
+  icon,
+  title,
+  subtitle,
+  onClick,
+  trailing,
+  tint = "pink",
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle?: string;
+  onClick?: () => void;
+  trailing?: ReactNode;
+  tint?: "pink" | "lilac" | "peach" | "sky" | "mint";
+}) {
+  const tints: Record<string, string> = {
+    pink: "tile-pink",
+    lilac: "tile-lilac",
+    peach: "tile-peach",
+    sky: "tile-sky",
+    mint: "bg-mint/40",
+  };
+  const Comp = onClick ? "button" : "div";
+  return (
+    <Comp
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        "card-soft flex w-full items-center gap-3 p-3.5 text-left",
+        onClick && "press",
+      )}
+    >
+      <span
+        className={cn(
+          "grid size-11 shrink-0 place-items-center rounded-2xl text-primary",
+          tints[tint] ?? tints.pink,
+        )}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-bold">{title}</span>
+        {subtitle ? (
+          <span className="block truncate text-xs text-muted-foreground">{subtitle}</span>
+        ) : null}
+      </span>
+      {trailing}
+    </Comp>
   );
 }
 
