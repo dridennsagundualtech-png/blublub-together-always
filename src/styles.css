@@ -190,17 +190,19 @@
   border-radius: var(--radius-2xl);
   background-color: var(--color-card);
   box-shadow: var(--shadow-soft);
-  border: 1px solid var(--color-border);
+  border: 1px solid color-mix(in oklab, var(--color-border) 85%, transparent);
 }
 
 @utility press {
   transition:
-    transform 120ms ease,
-    box-shadow 120ms ease;
+    transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .press:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 /* --- Polish pass: gradient stat surfaces, lilac accents, soft tiles --- */
@@ -363,3 +365,62 @@
   display: none !important;
 }
 
+
+/* --- Instagram-inspired global polish (keeps BLUBLUB pink/cozy tokens) --- */
+
+/* Feed-style post card used across lists */
+@utility post-card {
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid color-mix(in oklab, var(--color-border) 80%, transparent);
+  overflow: hidden;
+}
+
+/* Section label like IG "Suggested" / app section headers */
+@utility section-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+/* Soft pill chip for filters / tags */
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: color-mix(in oklab, var(--primary) 12%, var(--card));
+  color: var(--color-primary);
+  border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+/* Skeleton pulse used in AppLayout loading */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.animate-pulse {
+  animation: soft-pulse 1.4s ease-in-out infinite;
+}
+
+/* Smoother list spacing for feed-like screens */
+@utility feed-gap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Full-bleed media inside rounded cards */
+@utility media-bleed {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: var(--color-muted);
+}
