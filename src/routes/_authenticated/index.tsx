@@ -1,26 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, HelpCircle, Images, PiggyBank } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  HelpCircle,
+  Images,
+  MessageCircle,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
-import { Card, Money, ProgressBar, SectionTitle, StatCard } from "@/components/ui-kit";
+import { Card, ProgressBar, SectionTitle } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
-import { daysTogether, useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
+import {
+  daysTogether,
+  useAuthUser,
+  useCoupleId,
+  useMembers,
+  usePartner,
+  useProfile,
+} from "@/lib/session";
 import { FeelingTile } from "@/components/FeelingTile";
 import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
-      { title: "BLUBLUB — Your private couples space" },
+      { title: "Today — BLUBLUB" },
       {
         name: "description",
-        content:
-          "BLUBLUB is a cozy private app for two: shared calendar, photo timeline, diary, budget and chat.",
+        content: "Your private couples space for today: question, mood, memories.",
       },
-      { property: "og:title", content: "BLUBLUB — Your private couples space" },
+      { property: "og:title", content: "Today — BLUBLUB" },
       {
         property: "og:description",
         content: "A cozy private app for two: calendar, memories, diary, budget and chat.",
@@ -37,6 +51,7 @@ function HomePage() {
   const partner = usePartner();
   const { data: badges } = useBadges();
   const { data: user } = useAuthUser();
+  const today = todayISO();
 
   const { data: feelings } = useQuery({
     queryKey: ["home-feelings", coupleId],
@@ -54,7 +69,6 @@ function HomePage() {
 
   const theirFeel = feelings?.find((c) => c.created_by !== user?.id && c.shared);
 
-
   const anniversary =
     members?.map((m) => m.anniversary_date).filter(Boolean).sort()[0] ??
     profile?.anniversary_date ??
@@ -63,6 +77,79 @@ function HomePage() {
   const untilAnniversary = daysUntilAnniversary(anniversary);
   useAnniversaryReminder();
 
+  // Today's question status (Paired-style)
+  const { data: todayAnswers } = useQuery({
+    queryKey: ["home-answers", coupleId, today],
+    enabled: !!coupleId && !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("question_answers")
+        .select("created_by")
+        .eq("couple_id", coupleId!)
+        .eq("answer_date", today);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const iAnswered = (todayAnswers ?? []).some((r) => r.created_by === user?.id);
+  const partnerAnswered = (todayAnswers ?? []).some((r) => r.created_by !== user?.id);
+  const bothAnswered = iAnswered && partnerAnswered;
+
+  let questionStatus: "answer" | "waiting" | "reveal" | "done" = "answer";
+  if (bothAnswered) questionStatus = "done";
+  else if (iAnswered && !partnerAnswered) questionStatus = "waiting";
+  else if (!iAnswered && partnerAnswered) questionStatus = "reveal";
+  else questionStatus = "answer";
+
+  const questionCopy = {
+    answer: {
+      title: "Today's question",
+      subtitle: "Answer privately — reveal when you both reply",
+      cta: "Answer now",
+    },
+    waiting: {
+      title: "You answered",
+      subtitle: `Waiting for ${partner?.display_name ?? "your partner"}…`,
+      cta: "View question",
+    },
+    reveal: {
+      title: "Partner answered",
+      subtitle: "Your answer unlocks the reveal",
+      cta: "Answer & reveal",
+    },
+    done: {
+      title: "Both answered today",
+      subtitle: "See what you each wrote",
+      cta: "Open answers",
+    },
+  }[questionStatus];
+
+  // Latest shared photo memory
+  const { data: latestPhoto } = useQuery({
+    queryKey: ["home-latest-photo", coupleId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("photos")
+        .select("*")
+        .eq("couple_id", coupleId!)
+        .not("storage_path", "is", null)
+        .order("taken_on", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data?.storage_path) return null;
+      const signed = await supabase.storage
+        .from("photos")
+        .createSignedUrl(data.storage_path, 3600);
+      return {
+        ...data,
+        url: signed.data?.signedUrl ?? null,
+      };
+    },
+  });
 
   const { data: upcoming } = useQuery({
     queryKey: ["upcoming-events", coupleId],
@@ -72,7 +159,7 @@ function HomePage() {
         .from("events")
         .select("*")
         .eq("couple_id", coupleId!)
-        .gte("event_date", todayISO())
+        .gte("event_date", today)
         .order("event_date")
         .limit(3);
       if (error) throw error;
@@ -82,75 +169,72 @@ function HomePage() {
 
   const { data: derived } = useDerivedDates();
 
-  // Everything with a date — calendar events plus planned date nights, bills,
-  // bucket-list targets — merged into one "coming up" list.
   const comingUp = [
-    ...(upcoming ?? []).map((e) => ({ id: e.id, date: e.event_date, title: e.title, emoji: "📅" })),
+    ...(upcoming ?? []).map((e) => ({
+      id: e.id,
+      date: e.event_date,
+      title: e.title,
+      emoji: "📅",
+    })),
     ...(derived ?? [])
-      .filter((d) => d.kind !== "cycle" && d.date >= todayISO())
-      .map((d) => ({ id: d.id, date: d.date, title: d.title, emoji: DERIVED_META[d.kind].emoji })),
+      .filter((d) => d.kind !== "cycle" && d.date >= today)
+      .map((d) => ({
+        id: d.id,
+        date: d.date,
+        title: d.title,
+        emoji: DERIVED_META[d.kind].emoji,
+      })),
   ]
     .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 4);
-
-  const nextDate = (derived ?? [])
-    .filter((d) => d.kind === "date" && d.date >= todayISO())
-    .sort((a, b) => a.date.localeCompare(b.date))[0];
-
-  const { data: savings } = useQuery({
-    queryKey: ["home-savings", coupleId],
-    enabled: !!coupleId,
-    queryFn: async () => {
-      const { data: goals } = await supabase
-        .from("savings_goals")
-        .select("*")
-        .eq("couple_id", coupleId!)
-        .order("created_at")
-        .limit(1);
-      const goal = goals?.[0];
-      if (!goal) return null;
-      const { data: contribs } = await supabase
-        .from("savings_contributions")
-        .select("amount")
-        .eq("goal_id", goal.id);
-      const saved = (contribs ?? []).reduce((s, c) => s + Number(c.amount), 0);
-      return { goal, saved };
-    },
-  });
+    .slice(0, 3);
 
   return (
     <AppLayout title="Today" subtitle="Let's grow together" critter="cat">
-      {/* Hero — days together with ring-style progress */}
-      <section className="card-soft relative overflow-hidden bg-gradient-to-b from-primary/10 via-lavender-soft/40 to-card px-5 pb-6 pt-8 text-center">
-        <Doodle critter="penguin" pose="wave" size={40} className="absolute -left-1 bottom-2 opacity-30" />
-        <Doodle critter="seal" pose="love" size={36} className="absolute right-0 top-3 opacity-30" />
+      {/* 1. Relationship hero */}
+      <section className="card-soft relative overflow-hidden bg-gradient-to-b from-primary/12 via-lavender-soft/50 to-card px-5 pb-5 pt-6 text-center">
+        <Doodle
+          critter="penguin"
+          pose="wave"
+          size={36}
+          className="absolute -left-1 bottom-2 opacity-25"
+        />
+        <Doodle
+          critter="seal"
+          pose="love"
+          size={32}
+          className="absolute right-0 top-2 opacity-25"
+        />
 
-        <div className="relative mx-auto grid size-28 place-items-center">
-          {/* soft ring */}
-          <span
-            className="absolute inset-0 rounded-full border-[3px] border-primary/25"
-            style={{
-              background: `conic-gradient(var(--primary) ${days !== null ? (days % 100) : 0}%, transparent 0)`,
-              mask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
-              WebkitMask:
-                "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
-            }}
-          />
-          <span className="grid size-[5.5rem] place-items-center rounded-full bg-card shadow-soft ring-2 ring-primary/15">
-            <Doodle critter="cat" pose="love" size={52} />
-          </span>
-        </div>
-
-        <p className="mt-4 font-display text-3xl font-extrabold text-primary">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          {partner
+            ? `You & ${partner.display_name}`
+            : profile?.display_name
+              ? `Hi ${profile.display_name}`
+              : "Your space"}
+        </p>
+        <p className="mt-1 font-display text-4xl font-extrabold text-primary">
           {days !== null ? `Day ${days}` : "—"}
         </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {partner
-            ? days !== null
-              ? `You & ${partner.display_name}`
-              : "Add your anniversary in Profile"
-            : "Share your invite code so your partner can join"}
-        </p>
+        {days !== null ? (
+          <div className="mx-auto mt-3 max-w-[12rem]">
+            <ProgressBar value={((days % 100) / 100) * 100} tone="pink" />
+            <p className="mt-1 text-[10px] font-bold text-muted-foreground">
+              {100 - (days % 100)} to day {Math.floor(days / 100) * 100 + 100}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Add your anniversary in Profile to start counting
+          </p>
+        )}
+
+        {untilAnniversary !== null && untilAnniversary <= 30 ? (
+          <p className="mt-3 text-xs font-bold text-primary">
+            {untilAnniversary === 0
+              ? "Anniversary is today 🩷"
+              : `${untilAnniversary} days until your anniversary`}
+          </p>
+        ) : null}
 
         {!partner ? (
           <Link
@@ -159,76 +243,109 @@ function HomePage() {
           >
             Pair with partner
           </Link>
-        ) : untilAnniversary !== null ? (
-          <p className="mt-3 text-xs font-bold text-primary">
-            {untilAnniversary === 0
-              ? "Anniversary is today 🩷"
-              : `${untilAnniversary} days until your anniversary`}
-          </p>
         ) : null}
       </section>
 
-      {/* Growth / daily prompts — list rows like the mockup */}
-      <SectionTitle
-        action={
-          <Link to="/questions" className="text-xs font-bold text-primary">
-            See All
-          </Link>
-        }
+      {/* 2. Today's focus — daily question (Paired-style hero action) */}
+      <p className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        Today&apos;s focus
+      </p>
+      <Link
+        to="/questions"
+        className={cn(
+          "card-soft press relative flex items-center gap-3 overflow-hidden p-4",
+          questionStatus === "done" && "ring-1 ring-primary/30",
+          questionStatus === "reveal" && "ring-1 ring-destructive/40",
+        )}
       >
-        Growth with your partner
-      </SectionTitle>
-      <div className="space-y-2">
-        <Link to="/questions" className="card-soft press flex w-full items-center gap-3 p-3.5 text-left">
-          <span className="tile-sky grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
-            <HelpCircle className="size-5" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Daily
-            </span>
-            <span className="block truncate text-sm font-bold">Today&apos;s connection question</span>
-          </span>
-          {badges?.question ? (
-            <span className="size-2.5 shrink-0 rounded-full bg-destructive" />
-          ) : (
-            <span className="text-muted-foreground">→</span>
+        <span
+          className={cn(
+            "grid size-12 shrink-0 place-items-center rounded-2xl",
+            questionStatus === "done"
+              ? "bg-primary/15 text-primary"
+              : questionStatus === "reveal"
+                ? "bg-destructive/10 text-destructive"
+                : "tile-lilac text-primary",
           )}
-        </Link>
-        <Link to="/photos" className="card-soft press flex w-full items-center gap-3 p-3.5 text-left">
-          <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
-            <Images className="size-5" />
+        >
+          {questionStatus === "done" ? (
+            <Sparkles className="size-6" />
+          ) : (
+            <HelpCircle className="size-6" />
+          )}
+        </span>
+        <span className="min-w-0 flex-1 text-left">
+          <span className="block text-sm font-extrabold">{questionCopy.title}</span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            {questionCopy.subtitle}
           </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Memories
-            </span>
-            <span className="block truncate text-sm font-bold">Add a moment together</span>
+          <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary">
+            {questionCopy.cta}
+            <ChevronRight className="size-3.5" />
           </span>
-          <span className="text-muted-foreground">→</span>
-        </Link>
-        <Link to="/diary" className="card-soft press flex w-full items-center gap-3 p-3.5 text-left">
-          <span className="tile-lilac grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
-            <span className="text-lg">📝</span>
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Diary
-            </span>
-            <span className="block truncate text-sm font-bold">Write in your shared journal</span>
-          </span>
-          <span className="text-muted-foreground">→</span>
+        </span>
+        {badges?.question ? (
+          <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive" />
+        ) : null}
+      </Link>
+
+      {/* 3. Partner mood */}
+      <p className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        How they feel
+      </p>
+      <FeelingTile
+        who={partner?.display_name ?? "Partner"}
+        row={theirFeel ?? null}
+        linkTo="/cooldown"
+      />
+
+      {/* 4. Latest memory (Locket / Between style presence) */}
+      <div className="mb-2 mt-5 flex items-center justify-between gap-2">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          A recent memory
+        </p>
+        <Link to="/photos" className="text-xs font-bold text-primary">
+          All memories
         </Link>
       </div>
+      {latestPhoto?.url ? (
+        <Link to="/photos" className="card-soft press block overflow-hidden p-0">
+          <img
+            src={latestPhoto.url}
+            alt={latestPhoto.caption ?? "Memory"}
+            className="aspect-[4/5] w-full object-cover"
+            loading="lazy"
+          />
+          <div className="flex items-center justify-between gap-2 px-4 py-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold">
+                {latestPhoto.caption || latestPhoto.album || "Shared memory"}
+              </p>
+              <p className="text-xs text-muted-foreground">{latestPhoto.taken_on}</p>
+            </div>
+            <Images className="size-4 shrink-0 text-muted-foreground" />
+          </div>
+        </Link>
+      ) : (
+        <Link
+          to="/photos"
+          className="card-soft press flex flex-col items-center gap-2 px-4 py-8 text-center"
+        >
+          <span className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
+            <Images className="size-6" />
+          </span>
+          <p className="text-sm font-bold">No photos yet</p>
+          <p className="text-xs text-muted-foreground">
+            Add a memory so it shows up here for both of you
+          </p>
+        </Link>
+      )}
 
-      <SectionTitle>How you both feel</SectionTitle>
-      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} linkTo="/cooldown" />
-
-      {/* Coming up */}
+      {/* 5. Coming up — compact */}
       <SectionTitle
         action={
           <Link to="/calendar" className="text-xs font-bold text-primary">
-            See All
+            Calendar
           </Link>
         }
       >
@@ -238,8 +355,8 @@ function HomePage() {
         <ul className="space-y-2">
           {comingUp.map((e) => (
             <li key={e.id} className="card-soft flex items-center gap-3 p-3.5">
-              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-lg text-primary">
-                {e.emoji === "📅" ? <CalendarDays className="size-5" /> : e.emoji}
+              <span className="tile-peach grid size-10 shrink-0 place-items-center rounded-2xl text-base">
+                {e.emoji === "📅" ? <CalendarDays className="size-5 text-primary" /> : e.emoji}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{e.title}</p>
@@ -250,119 +367,40 @@ function HomePage() {
         </ul>
       ) : (
         <Card className="text-sm text-muted-foreground">
-          Nothing planned yet — add a date night!
+          Nothing planned — add a date on the calendar.
         </Card>
       )}
 
-      {/* Quick hops as colorful bento tiles */}
-      <SectionTitle>Explore together</SectionTitle>
-      <div className="grid grid-cols-2 gap-3">
-        <Link
-          to="/games"
-          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-lavender-soft/80 to-card p-4"
-        >
-          <span className="text-2xl">🎮</span>
-          <span>
-            <span className="block text-sm font-bold">Games</span>
-            <span className="text-[11px] text-muted-foreground">Play together</span>
-          </span>
-        </Link>
-        <Link
-          to="/nest"
-          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-peach/50 to-card p-4"
-        >
-          <span className="text-2xl">🪺</span>
-          <span>
-            <span className="block text-sm font-bold">Our Nest</span>
-            <span className="text-[11px] text-muted-foreground">Budget & goals</span>
-          </span>
-        </Link>
+      {/* 6. Quick links — secondary, not competing with Today */}
+      <p className="mb-2 mt-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        Jump to
+      </p>
+      <div className="grid grid-cols-3 gap-2 pb-2">
         <Link
           to="/chat"
-          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-primary/10 to-card p-4"
+          className="card-soft press flex flex-col items-center gap-1.5 p-3 text-center"
         >
-          <span className="text-2xl">💬</span>
-          <span>
-            <span className="block text-sm font-bold">Chat</span>
-            <span className="text-[11px] text-muted-foreground">Private messages</span>
-          </span>
+          <MessageCircle className="size-5 text-primary" />
+          <span className="text-[11px] font-bold">Chat</span>
+          {badges?.unreadChat ? (
+            <span className="size-1.5 rounded-full bg-destructive" />
+          ) : null}
         </Link>
         <Link
-          to="/wellbeing"
-          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-sky/50 to-card p-4"
+          to="/photos"
+          className="card-soft press flex flex-col items-center gap-1.5 p-3 text-center"
         >
-          <span className="text-2xl">🌿</span>
-          <span>
-            <span className="block text-sm font-bold">Wellbeing</span>
-            <span className="text-[11px] text-muted-foreground">Care & cycle</span>
-          </span>
+          <Images className="size-5 text-primary" />
+          <span className="text-[11px] font-bold">Memories</span>
+        </Link>
+        <Link
+          to="/calendar"
+          className="card-soft press flex flex-col items-center gap-1.5 p-3 text-center"
+        >
+          <CalendarDays className="size-5 text-primary" />
+          <span className="text-[11px] font-bold">Calendar</span>
         </Link>
       </div>
-
-      {/* Stats row */}
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <StatCard className="text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Next date night
-          </p>
-          <p className="mt-1 text-2xl font-extrabold text-primary">
-            {nextDate
-              ? Math.max(
-                  0,
-                  Math.round(
-                    (new Date(`${nextDate.date}T00:00:00`).getTime() -
-                      new Date(`${todayISO()}T00:00:00`).getTime()) /
-                      86_400_000,
-                  ),
-                )
-              : "—"}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {nextDate ? "days away" : "none planned"}
-          </p>
-        </StatCard>
-        <StatCard className="text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Anniversary
-          </p>
-          <p className="mt-1 text-2xl font-extrabold text-primary">
-            {untilAnniversary !== null ? untilAnniversary : "—"}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {untilAnniversary !== null ? "days to go" : "set in profile"}
-          </p>
-        </StatCard>
-      </div>
-
-      {savings ? (
-        <>
-          <SectionTitle
-            action={
-              <Link to="/budget" className="text-xs font-bold text-primary">
-                See All
-              </Link>
-            }
-          >
-            Joint savings
-          </SectionTitle>
-          <Card>
-            <div className="mb-2 flex items-center gap-2">
-              <span className="tile-pink grid size-10 place-items-center rounded-2xl">
-                <PiggyBank className="size-5 text-primary" />
-              </span>
-              <p className="text-sm font-bold">{savings.goal.title}</p>
-            </div>
-            <ProgressBar
-              value={(savings.saved / Number(savings.goal.target_amount)) * 100}
-              tone="pink"
-            />
-            <p className="mt-2 text-xs text-muted-foreground">
-              <Money value={savings.saved} /> of <Money value={Number(savings.goal.target_amount)} />
-            </p>
-          </Card>
-        </>
-      ) : null}
     </AppLayout>
   );
 }
-
