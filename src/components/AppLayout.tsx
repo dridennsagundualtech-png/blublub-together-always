@@ -8,7 +8,10 @@ import { useAuthUser, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
 
-
+/**
+ * App shell — Instagram-inspired sticky header + content column.
+ * Soft BLUBLUB branding kept (critter, lilac header, cozy wash).
+ */
 export function AppLayout({
   title,
   subtitle,
@@ -33,24 +36,28 @@ export function AppLayout({
 
   return (
     <div className="page-wash min-h-screen bg-background pb-28">
-      <div className="mx-auto max-w-lg px-4">
-        <header className="card-soft lilac-gradient mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-4">
-          <div className="min-w-0">
-            <h1 className="truncate font-display text-2xl font-extrabold">{title}</h1>
+      {/* Sticky top bar — IG-style clean header that stays while scrolling */}
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate font-display text-xl font-extrabold tracking-tight">
+              {title}
+            </h1>
             {subtitle ? (
-              <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
+              <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
-          <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-card/80 shadow-soft">
+          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 ring-1 ring-border shadow-soft">
             <Doodle
               critter={critter ?? critterFor(title)}
               pose={critterPose ?? poseFor(title)}
-              size={44}
+              size={36}
             />
           </span>
+        </div>
+      </header>
 
-        </header>
-
+      <div className="mx-auto max-w-lg px-4">
         {!user ? (
           <Link
             to="/profile"
@@ -63,9 +70,13 @@ export function AppLayout({
           </Link>
         ) : null}
 
-        <div className="mt-4">
+        <div className="mt-3">
           {isLoading ? (
-            <div className="card-soft p-5 text-sm text-muted-foreground">Loading…</div>
+            <div className="card-soft space-y-3 p-5">
+              <div className="h-4 w-2/3 animate-pulse rounded-full bg-muted" />
+              <div className="h-4 w-full animate-pulse rounded-full bg-muted" />
+              <div className="h-24 w-full animate-pulse rounded-2xl bg-muted" />
+            </div>
           ) : user && requireCouple && !coupleId ? (
             <PairingScreen />
           ) : (
@@ -83,8 +94,6 @@ export function AppLayout({
           "/more": badges?.question,
         }}
       />
-
     </div>
   );
 }
-
