@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Crosshair, ExternalLink, MapPin, MapPinOff, Navigation } from "lucide-react";
+import { Crosshair, ExternalLink, Heart, MapPin, MapPinOff, Navigation } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { MiniMap, type MapPoint } from "@/components/MiniMap";
 import { Card, SectionTitle } from "@/components/ui-kit";
@@ -50,6 +50,48 @@ function openExternalMaps(lat: number, lng: number, label: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
+
+/** 5-heart gauge: fuller when you are closer. */
+function DistanceHearts({ km }: { km: number }) {
+  // 5 hearts ≈ within ~0.2 km; 1 heart ≈ 50+ km
+  let filled = 1;
+  if (km < 0.2) filled = 5;
+  else if (km < 1) filled = 4;
+  else if (km < 5) filled = 3;
+  else if (km < 25) filled = 2;
+  else filled = 1;
+
+  let label: string;
+  if (km < 1) label = `${Math.round(km * 1000)} m apart`;
+  else if (km < 10) label = `${km.toFixed(1)} km apart`;
+  else label = `${Math.round(km)} km apart`;
+
+  return (
+    <div className="card-soft mt-3 flex flex-col items-center gap-2 px-4 py-3">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        Closeness
+      </p>
+      <div className="flex items-center gap-1.5" aria-label={`${filled} of 5 hearts`}>
+        {Array.from({ length: 5 }, (_, i) => {
+          const on = i < filled;
+          return (
+            <Heart
+              key={i}
+              className={
+                on
+                  ? "size-6 fill-primary text-primary"
+                  : "size-6 text-muted-foreground/40"
+              }
+              strokeWidth={on ? 0 : 1.75}
+            />
+          );
+        })}
+      </div>
+      <p className="text-xs font-bold text-primary">{label}</p>
+    </div>
+  );
+}
+
 function MapPage() {
   const { data: user } = useAuthUser();
   const { data: profile } = useProfile();
@@ -77,13 +119,6 @@ function MapPage() {
   const me = points.find((p) => p.mine);
   const them = points.find((p) => !p.mine);
 
-  const distanceLabel = useMemo(() => {
-    if (!me || !them) return null;
-    const km = haversineKm(me, them);
-    if (km < 1) return `${Math.round(km * 1000)} m apart`;
-    if (km < 10) return `${km.toFixed(1)} km apart`;
-    return `${Math.round(km)} km apart`;
-  }, [me, them]);
 
   return (
     <AppLayout
@@ -130,8 +165,8 @@ function MapPage() {
         </div>
       ) : null}
 
-      {distanceLabel ? (
-        <p className="mt-2 text-center text-xs font-bold text-primary">{distanceLabel}</p>
+      {me && them ? (
+        <DistanceHearts km={haversineKm(me, them)} />
       ) : null}
 
       {locationStatus ? (
