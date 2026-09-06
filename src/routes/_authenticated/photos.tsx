@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { toast } from "sonner";
 import {
+  ArrowDownAZ,
+  ArrowUpDown,
+  CalendarDays,
   ChevronLeft,
   ImagePlus,
   Images,
@@ -77,6 +80,9 @@ function PhotosPage() {
   const [postBody, setPostBody] = useState("");
   const [tab, setTab] = useState<"albums" | "feed">("albums");
   const [openAlbum, setOpenAlbum] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [dateFilter, setDateFilter] = useState("");
+  const [sortOpen, setSortOpen] = useState(false);
 
   const isPremium = usePremiumAccess();
   const maxBatch = isPremium ? FREE_BATCH + PREMIUM_EXTRA : FREE_BATCH;
@@ -203,17 +209,39 @@ function PhotosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const all = photos ?? [];
+  const allRaw = photos ?? [];
+  const all = dateFilter
+    ? allRaw.filter((p) => p.taken_on === dateFilter)
+    : allRaw;
+
+  const sortByDate = (a: PhotoWithUrl, b: PhotoWithUrl) => {
+    const cmp = a.taken_on.localeCompare(b.taken_on);
+    return sortOrder === "newest" ? -cmp : cmp;
+  };
+
   const albums = all
     .filter((p) => p.storage_path)
     .reduce<Record<string, PhotoWithUrl[]>>((acc, p) => {
-    (acc[p.album?.trim() || UNSORTED] ??= []).push(p);
-    return acc;
-  }, {});
-  const albumNames = Object.keys(albums).sort((a, b) =>
-    a === UNSORTED ? 1 : b === UNSORTED ? -1 : a.localeCompare(b),
-  );
-  const shown = openAlbum ? (albums[openAlbum] ?? []) : all;
+      (acc[p.album?.trim() || UNSORTED] ??= []).push(p);
+      return acc;
+    }, {});
+
+  // keep each album's photos sorted
+  for (const name of Object.keys(albums)) {
+    albums[name].sort(sortByDate);
+  }
+
+  const albumNames = Object.keys(albums).sort((a, b) => {
+    if (a === UNSORTED) return 1;
+    if (b === UNSORTED) return -1;
+    // sort album list by its newest/oldest photo depending on sortOrder
+    const aDate = albums[a]?.[0]?.taken_on ?? "";
+    const bDate = albums[b]?.[0]?.taken_on ?? "";
+    const cmp = aDate.localeCompare(bDate);
+    return sortOrder === "newest" ? -cmp : cmp;
+  });
+
+  const shown = openAlbum ? (albums[openAlbum] ?? []) : [...all].sort(sortByDate);
 
   return (
     <AppLayout title="Memories" subtitle="Your shared gallery" critter="seal">
@@ -239,6 +267,17 @@ function PhotosPage() {
         </div>
         <button
           type="button"
+          aria-label="Sort and filter"
+          onClick={() => setSortOpen(true)}
+          className={cn(
+            "press grid size-11 shrink-0 place-items-center rounded-full border border-border bg-card shadow-soft",
+            (sortOrder === "oldest" || dateFilter) && "border-primary text-primary",
+          )}
+        >
+          <ArrowUpDown className="size-5" />
+        </button>
+        <button
+          type="button"
           aria-label="Add photos"
           onClick={() => setUploadOpen(true)}
           className="press grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-float"
@@ -247,13 +286,30 @@ function PhotosPage() {
         </button>
       </div>
 
+      {/* Active filter chip */}
+      {dateFilter ? (
+        <div className="mb-3 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
+            <CalendarDays className="size-3.5" />
+            {dateFilter}
+          </span>
+          <button
+            type="button"
+            onClick={() => setDateFilter("")}
+            className="press text-xs font-bold text-muted-foreground underline"
+          >
+            Clear date
+          </button>
+        </div>
+      ) : null}
+
       {all.length === 0 ? (
         <Card className="text-sm text-muted-foreground">
           No memories yet — tap + to add a photo or write a post.
         </Card>
       ) : tab === "feed" ? (
         <ul className="space-y-4">
-          {buildFeedPosts(all).map((post) => (
+          {buildFeedPosts(all, sortOrder).map((post) => (
             <li key={post.key} className="card-soft overflow-hidden p-0">
               {post.kind === "carousel" ? (
                 <AlbumCarousel photos={post.photos} onOpen={setOpen} />
@@ -412,6 +468,100 @@ function PhotosPage() {
           })}
         </ul>
       )}
+
+      {/* Sort & date filter sheet */}
+      {sortOpen ? (
+        <div className="fixed inset-0 z-[70] flex items-end" role="dialog" aria-label="Sort and filter">
+          <button
+            type="button"
+            aria-label="Close sort"
+            onClick={() => setSortOpen(false)}
+            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
+          />
+          <div className="relative w-full rounded-t-3xl bg-card p-4 shadow-float">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-display text-lg font-extrabold">Sort &amp; find</p>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setSortOpen(false)}
+                className="press grid size-9 place-items-center rounded-full bg-muted"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Order
+            </p>
+            <div className="mb-4 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSortOrder("newest");
+                  setSortOpen(false);
+                }}
+                className={cn(
+                  "press flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold",
+                  sortOrder === "newest"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border",
+                )}
+              >
+                <ArrowUpDown className="size-4" />
+                Newest first
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSortOrder("oldest");
+                  setSortOpen(false);
+                }}
+                className={cn(
+                  "press flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold",
+                  sortOrder === "oldest"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border",
+                )}
+              >
+                <ArrowDownAZ className="size-4" />
+                Oldest first
+              </button>
+            </div>
+
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Jump to a date
+            </p>
+            <Field label="Date">
+              <TextInput
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+              />
+            </Field>
+            <div className="mt-3 flex gap-2">
+              <PrimaryButton
+                onClick={() => setSortOpen(false)}
+                className="flex-1"
+              >
+                {dateFilter ? `Show ${dateFilter}` : "Done"}
+              </PrimaryButton>
+              {dateFilter ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDateFilter("");
+                    setSortOpen(false);
+                  }}
+                  className="press rounded-2xl border border-border px-4 text-sm font-bold"
+                >
+                  Clear
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Upload sheet */}
       {uploadOpen ? (
@@ -578,7 +728,10 @@ type FeedPost =
   | { kind: "carousel"; key: string; albumName: string; photos: PhotoWithUrl[] };
 
 /** Group photos that share an album into one Instagram-style carousel post. */
-function buildFeedPosts(photos: PhotoWithUrl[]): FeedPost[] {
+function buildFeedPosts(
+  photos: PhotoWithUrl[],
+  sortOrder: "newest" | "oldest" = "newest",
+): FeedPost[] {
   const byAlbum = new Map<string, PhotoWithUrl[]>();
   const singles: PhotoWithUrl[] = [];
 
@@ -594,11 +747,12 @@ function buildFeedPosts(photos: PhotoWithUrl[]): FeedPost[] {
   }
 
   const posts: FeedPost[] = [];
+  const dir = sortOrder === "newest" ? -1 : 1;
 
   for (const [albumName, list] of byAlbum) {
     list.sort(
       (a, b) =>
-        b.taken_on.localeCompare(a.taken_on) ||
+        dir * a.taken_on.localeCompare(b.taken_on) ||
         Number(b.is_pinned) - Number(a.is_pinned),
     );
     if (list.length === 1) {
@@ -626,7 +780,7 @@ function buildFeedPosts(photos: PhotoWithUrl[]): FeedPost[] {
       a.kind === "carousel" ? a.photos[0]?.taken_on ?? "" : a.photo.taken_on;
     const bDate =
       b.kind === "carousel" ? b.photos[0]?.taken_on ?? "" : b.photo.taken_on;
-    return bDate.localeCompare(aDate);
+    return dir * aDate.localeCompare(bDate);
   });
 
   return posts;
