@@ -304,13 +304,71 @@ function PhotosPage() {
       ) : null}
 
       {all.length === 0 ? (
-        <Card className="text-sm text-muted-foreground">
-          No memories yet — tap + to add a photo or write a post.
+        <Card className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+          <span className="grid size-16 place-items-center rounded-full bg-primary/10 text-primary">
+            <Images className="size-7" />
+          </span>
+          <div>
+            <p className="font-display text-lg font-extrabold">
+              {dateFilter ? "Nothing on this day" : "No memories yet"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {dateFilter
+                ? "Try another date, or clear the filter."
+                : "Tap + to add a photo or write something sweet together."}
+            </p>
+          </div>
+          {dateFilter ? (
+            <button
+              type="button"
+              onClick={() => setDateFilter("")}
+              className="press text-sm font-bold text-primary underline"
+            >
+              Clear date filter
+            </button>
+          ) : (
+            <PrimaryButton onClick={() => setUploadOpen(true)}>
+              Add your first memory
+            </PrimaryButton>
+          )}
         </Card>
       ) : tab === "feed" ? (
         <ul className="space-y-4">
           {buildFeedPosts(all, sortOrder).map((post) => (
             <li key={post.key} className="card-soft overflow-hidden p-0">
+              {/* Instagram-style post header */}
+              <div className="flex items-center gap-3 px-3 py-2.5">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-sm font-extrabold text-primary">
+                  {(post.kind === "carousel"
+                    ? post.albumName
+                    : post.photo.caption || post.photo.body || "M"
+                  )
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase() || "♥"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold leading-tight">
+                    {post.kind === "carousel"
+                      ? post.albumName
+                      : post.photo.caption || (post.photo.body ? "Note" : "Memory")}
+                  </p>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {post.kind === "carousel"
+                      ? `${post.photos[0]?.taken_on ?? ""} · ${post.photos.length} photos`
+                      : post.photo.taken_on}
+                    {post.kind === "single" && post.photo.location
+                      ? ` · ${post.photo.location}`
+                      : ""}
+                  </p>
+                </div>
+                {post.kind === "single" && post.photo.is_pinned ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-foreground">
+                    <Pin className="size-3" />
+                  </span>
+                ) : null}
+              </div>
+
               {post.kind === "carousel" ? (
                 <AlbumCarousel photos={post.photos} onOpen={setOpen} />
               ) : post.photo.url ? (
@@ -318,35 +376,36 @@ function PhotosPage() {
                   src={post.photo.url}
                   alt={post.photo.caption ?? "Shared memory"}
                   loading="lazy"
-                  className="w-full object-cover"
+                  className="aspect-[4/5] w-full object-cover"
                 />
+              ) : post.photo.body ? (
+                <div className="bg-gradient-to-br from-primary/10 via-accent/30 to-peach/40 px-5 py-10">
+                  <p className="whitespace-pre-wrap break-words text-center text-base font-medium leading-relaxed">
+                    {post.photo.body}
+                  </p>
+                </div>
               ) : null}
 
-              <div className="p-4">
-                {post.kind === "single" && post.photo.is_pinned ? (
-                  <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-foreground">
-                    <Pin className="size-3" /> Pinned
-                  </p>
-                ) : null}
-
+              <div className="p-4 pt-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-bold">
-                      {post.kind === "carousel"
-                        ? post.photos[0]?.caption ?? post.albumName
-                        : post.photo.caption ?? (post.photo.body ? "" : "Untitled")}
-                    </p>
-                    {post.kind === "single" && post.photo.body ? (
-                      <p className="whitespace-pre-wrap break-words text-sm">{post.photo.body}</p>
+                    {post.kind === "carousel" && post.photos[0]?.caption ? (
+                      <p className="text-sm">
+                        <span className="font-bold">{post.albumName} </span>
+                        {post.photos[0].caption}
+                      </p>
+                    ) : post.kind === "single" && post.photo.caption && post.photo.url ? (
+                      <p className="text-sm">
+                        <span className="font-bold">Memory </span>
+                        {post.photo.caption}
+                      </p>
                     ) : null}
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {post.kind === "carousel"
-                        ? post.photos[0]?.taken_on
-                        : post.photo.taken_on}
-                    </p>
+                    {post.kind === "single" && post.photo.body && post.photo.url ? (
+                      <p className="mt-1 whitespace-pre-wrap break-words text-sm">{post.photo.body}</p>
+                    ) : null}
                     {post.kind === "carousel" ? (
                       <p className="mt-1 text-xs font-semibold text-muted-foreground">
-                        Album · {post.albumName} · {post.photos.length} photos
+                        Album · {post.photos.length} photos
                       </p>
                     ) : post.photo.album ? (
                       <p className="mt-1 text-xs font-semibold text-muted-foreground">
@@ -421,7 +480,7 @@ function PhotosPage() {
         </ul>
       ) : openAlbum ? (
         <>
-          <div className="mb-2 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2">
             <button
               type="button"
               onClick={() => setOpenAlbum(null)}
@@ -430,15 +489,25 @@ function PhotosPage() {
             >
               <ChevronLeft className="size-4" />
             </button>
-            <p className="font-display text-lg font-extrabold">{openAlbum}</p>
-            <span className="text-xs text-muted-foreground">{shown.length} photos</span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-display text-lg font-extrabold leading-tight">
+                {openAlbum}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {shown.length} photo{shown.length === 1 ? "" : "s"}
+                {sortOrder === "oldest" ? " · oldest first" : " · newest first"}
+              </p>
+            </div>
           </div>
           <PhotoGrid photos={shown} onOpen={setOpen} />
         </>
       ) : (
         <ul className="grid grid-cols-2 gap-3">
           {albumNames.map((name) => {
-            const cover = albums[name]?.[0];
+            const list = albums[name] ?? [];
+            const cover = list[0];
+            const second = list[1];
+            const count = list.length;
             return (
               <li key={name}>
                 <button
@@ -446,7 +515,7 @@ function PhotosPage() {
                   onClick={() => setOpenAlbum(name)}
                   className="press card-soft w-full overflow-hidden p-0 text-left"
                 >
-                  <span className="block aspect-square bg-muted">
+                  <span className="relative block aspect-square bg-muted">
                     {cover?.url ? (
                       <img
                         src={cover.url}
@@ -455,11 +524,27 @@ function PhotosPage() {
                         className="size-full object-cover"
                       />
                     ) : null}
+                    {/* subtle second-photo peek like stacked album covers */}
+                    {second?.url ? (
+                      <span className="pointer-events-none absolute inset-y-2 right-0 w-1/4 overflow-hidden rounded-l-xl opacity-90 shadow-soft">
+                        <img
+                          src={second.url}
+                          alt=""
+                          className="size-full object-cover"
+                        />
+                      </span>
+                    ) : null}
+                    {count > 1 ? (
+                      <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                        <Images className="size-3" />
+                        {count}
+                      </span>
+                    ) : null}
                   </span>
-                  <span className="block px-3 py-2">
+                  <span className="block px-3 py-2.5">
                     <span className="block truncate text-sm font-bold">{name}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {albums[name]?.length} photo{albums[name]?.length === 1 ? "" : "s"}
+                      {count} memory{count === 1 ? "" : "ies"}
                     </span>
                   </span>
                 </button>
@@ -839,13 +924,13 @@ function AlbumCarousel({
       </div>
 
       {photos.length > 1 ? (
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
           {photos.map((_, i) => (
             <span
               key={i}
               className={cn(
-                "size-1.5 rounded-full transition-all",
-                i === index ? "w-3 bg-white" : "bg-white/50",
+                "h-1.5 rounded-full transition-all duration-200",
+                i === index ? "w-4 bg-white shadow-sm" : "w-1.5 bg-white/55",
               )}
             />
           ))}
@@ -853,7 +938,7 @@ function AlbumCarousel({
       ) : null}
 
       {photos.length > 1 ? (
-        <span className="absolute right-3 top-3 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white">
+        <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white backdrop-blur-sm">
           {index + 1}/{photos.length}
         </span>
       ) : null}
