@@ -4,7 +4,7 @@ import { CalendarDays, HelpCircle, Images, PiggyBank } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
-import { Card, Money, ProgressBar, SectionTitle, StatCard, StatHero } from "@/components/ui-kit";
+import { Card, Money, ProgressBar, SectionTitle, StatCard } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import { daysTogether, useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
@@ -119,36 +119,188 @@ function HomePage() {
   });
 
   return (
-    <AppLayout title="BLUBLUB" subtitle={`Hi ${profile?.display_name ?? "you"} 🩷`} critter="cat">
-      <StatHero className="text-center">
-        <Doodle critter="penguin" pose="wave" size={48} className="absolute -left-1 bottom-1 opacity-40" />
-        <Doodle critter="seal" pose="peek" size={40} className="absolute right-1 top-1 opacity-35" />
+    <AppLayout title="Today" subtitle="Let's grow together" critter="cat">
+      {/* Hero — days together with ring-style progress */}
+      <section className="card-soft relative overflow-hidden bg-gradient-to-b from-primary/10 via-lavender-soft/40 to-card px-5 pb-6 pt-8 text-center">
+        <Doodle critter="penguin" pose="wave" size={40} className="absolute -left-1 bottom-2 opacity-30" />
+        <Doodle critter="seal" pose="love" size={36} className="absolute right-0 top-3 opacity-30" />
 
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          Days together
-        </p>
-        <p className="mt-1 font-display text-5xl font-extrabold text-primary">
+        <div className="relative mx-auto grid size-28 place-items-center">
+          {/* soft ring */}
+          <span
+            className="absolute inset-0 rounded-full border-[3px] border-primary/25"
+            style={{
+              background: `conic-gradient(var(--primary) ${days !== null ? (days % 100) : 0}%, transparent 0)`,
+              mask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
+              WebkitMask:
+                "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
+            }}
+          />
+          <span className="grid size-[5.5rem] place-items-center rounded-full bg-card shadow-soft ring-2 ring-primary/15">
+            <Doodle critter="cat" pose="love" size={52} />
+          </span>
+        </div>
+
+        <p className="mt-4 font-display text-3xl font-extrabold text-primary">
           {days !== null ? `Day ${days}` : "—"}
         </p>
-        {days !== null ? (
-          <div className="mx-auto mt-3 max-w-xs">
-            <ProgressBar value={((days % 100) / 100) * 100} />
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              {100 - (days % 100)} days to day {Math.floor(days / 100) * 100 + 100}
-            </p>
-          </div>
-        ) : null}
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           {partner
             ? days !== null
-              ? `You and ${partner.display_name}`
-              : "Add your anniversary in Profile to start counting."
-            : "Share your invite code so your partner can join."}
+              ? `You & ${partner.display_name}`
+              : "Add your anniversary in Profile"
+            : "Share your invite code so your partner can join"}
         </p>
-      </StatHero>
 
+        {!partner ? (
+          <Link
+            to="/profile"
+            className="press mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-float"
+          >
+            Pair with partner
+          </Link>
+        ) : untilAnniversary !== null ? (
+          <p className="mt-3 text-xs font-bold text-primary">
+            {untilAnniversary === 0
+              ? "Anniversary is today 🩷"
+              : `${untilAnniversary} days until your anniversary`}
+          </p>
+        ) : null}
+      </section>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      {/* Growth / daily prompts — list rows like the mockup */}
+      <SectionTitle
+        action={
+          <Link to="/questions" className="text-xs font-bold text-primary">
+            See All
+          </Link>
+        }
+      >
+        Growth with your partner
+      </SectionTitle>
+      <div className="space-y-2">
+        <Link to="/questions" className="card-soft press flex w-full items-center gap-3 p-3.5 text-left">
+          <span className="tile-sky grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
+            <HelpCircle className="size-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Daily
+            </span>
+            <span className="block truncate text-sm font-bold">Today&apos;s connection question</span>
+          </span>
+          {badges?.question ? (
+            <span className="size-2.5 shrink-0 rounded-full bg-destructive" />
+          ) : (
+            <span className="text-muted-foreground">→</span>
+          )}
+        </Link>
+        <Link to="/photos" className="card-soft press flex w-full items-center gap-3 p-3.5 text-left">
+          <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
+            <Images className="size-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Memories
+            </span>
+            <span className="block truncate text-sm font-bold">Add a moment together</span>
+          </span>
+          <span className="text-muted-foreground">→</span>
+        </Link>
+        <Link to="/diary" className="card-soft press flex w-full items-center gap-3 p-3.5 text-left">
+          <span className="tile-lilac grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
+            <span className="text-lg">📝</span>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Diary
+            </span>
+            <span className="block truncate text-sm font-bold">Write in your shared journal</span>
+          </span>
+          <span className="text-muted-foreground">→</span>
+        </Link>
+      </div>
+
+      <SectionTitle>How you both feel</SectionTitle>
+      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} linkTo="/cooldown" />
+
+      {/* Coming up */}
+      <SectionTitle
+        action={
+          <Link to="/calendar" className="text-xs font-bold text-primary">
+            See All
+          </Link>
+        }
+      >
+        Coming up
+      </SectionTitle>
+      {comingUp.length > 0 ? (
+        <ul className="space-y-2">
+          {comingUp.map((e) => (
+            <li key={e.id} className="card-soft flex items-center gap-3 p-3.5">
+              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-lg text-primary">
+                {e.emoji === "📅" ? <CalendarDays className="size-5" /> : e.emoji}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold">{e.title}</p>
+                <p className="text-xs text-muted-foreground">{e.date}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <Card className="text-sm text-muted-foreground">
+          Nothing planned yet — add a date night!
+        </Card>
+      )}
+
+      {/* Quick hops as colorful bento tiles */}
+      <SectionTitle>Explore together</SectionTitle>
+      <div className="grid grid-cols-2 gap-3">
+        <Link
+          to="/games"
+          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-lavender-soft/80 to-card p-4"
+        >
+          <span className="text-2xl">🎮</span>
+          <span>
+            <span className="block text-sm font-bold">Games</span>
+            <span className="text-[11px] text-muted-foreground">Play together</span>
+          </span>
+        </Link>
+        <Link
+          to="/nest"
+          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-peach/50 to-card p-4"
+        >
+          <span className="text-2xl">🪺</span>
+          <span>
+            <span className="block text-sm font-bold">Our Nest</span>
+            <span className="text-[11px] text-muted-foreground">Budget & goals</span>
+          </span>
+        </Link>
+        <Link
+          to="/chat"
+          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-primary/10 to-card p-4"
+        >
+          <span className="text-2xl">💬</span>
+          <span>
+            <span className="block text-sm font-bold">Chat</span>
+            <span className="text-[11px] text-muted-foreground">Private messages</span>
+          </span>
+        </Link>
+        <Link
+          to="/wellbeing"
+          className="card-soft press flex flex-col gap-3 bg-gradient-to-br from-sky/50 to-card p-4"
+        >
+          <span className="text-2xl">🌿</span>
+          <span>
+            <span className="block text-sm font-bold">Wellbeing</span>
+            <span className="text-[11px] text-muted-foreground">Care & cycle</span>
+          </span>
+        </Link>
+      </div>
+
+      {/* Stats row */}
+      <div className="mt-4 grid grid-cols-2 gap-3">
         <StatCard className="text-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Next date night
@@ -165,72 +317,45 @@ function HomePage() {
                 )
               : "—"}
           </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {nextDate ? `days · ${nextDate.title}` : "nothing planned"}
+          <p className="text-xs text-muted-foreground">
+            {nextDate ? "days away" : "none planned"}
           </p>
         </StatCard>
         <StatCard className="text-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Anniversary in
+            Anniversary
           </p>
-          <p className="mt-1 text-2xl font-extrabold text-primary">{untilAnniversary ?? "—"}</p>
+          <p className="mt-1 text-2xl font-extrabold text-primary">
+            {untilAnniversary !== null ? untilAnniversary : "—"}
+          </p>
           <p className="text-xs text-muted-foreground">
-            {untilAnniversary === null ? "add a date" : "days"}
+            {untilAnniversary !== null ? "days to go" : "set in profile"}
           </p>
         </StatCard>
       </div>
 
-      <SectionTitle>How they feel</SectionTitle>
-      <FeelingTile who={partner?.display_name ?? "Partner"} row={theirFeel ?? null} linkTo="/cooldown" />
-
-      <SectionTitle>Coming up</SectionTitle>
-      {comingUp.length > 0 ? (
-        <ul className="space-y-2">
-          {comingUp.map((e) => (
-            <li key={e.id} className="card-soft flex items-center gap-3 p-4">
-              <span className="tile-peach grid size-11 shrink-0 place-items-center rounded-2xl text-lg text-primary">
-                {e.emoji === "📅" ? <CalendarDays className="size-5" /> : e.emoji}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{e.title}</p>
-                <p className="text-xs text-muted-foreground">{e.date}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <Card className="text-sm text-muted-foreground">Nothing planned yet — add a date!</Card>
-      )}
-
-      <SectionTitle>Quick hops</SectionTitle>
-      <div className="grid grid-cols-2 gap-3">
-        <Link to="/questions" className="card-soft press relative flex flex-col gap-3 p-4">
-          <span className="tile-lilac grid size-11 place-items-center rounded-2xl text-primary">
-            <HelpCircle className="size-5" />
-          </span>
-          <span className="text-sm font-bold">Today&apos;s question</span>
-          {badges?.question ? (
-            <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive" />
-          ) : null}
-        </Link>
-        <Link to="/photos" className="card-soft press flex flex-col gap-3 p-4">
-          <span className="tile-sky grid size-11 place-items-center rounded-2xl text-primary">
-            <Images className="size-5" />
-          </span>
-          <span className="text-sm font-bold">Memories</span>
-        </Link>
-      </div>
-
-
       {savings ? (
         <>
-          <SectionTitle>Joint savings</SectionTitle>
+          <SectionTitle
+            action={
+              <Link to="/budget" className="text-xs font-bold text-primary">
+                See All
+              </Link>
+            }
+          >
+            Joint savings
+          </SectionTitle>
           <Card>
             <div className="mb-2 flex items-center gap-2">
-              <PiggyBank className="size-5 text-primary" />
+              <span className="tile-pink grid size-10 place-items-center rounded-2xl">
+                <PiggyBank className="size-5 text-primary" />
+              </span>
               <p className="text-sm font-bold">{savings.goal.title}</p>
             </div>
-            <ProgressBar value={(savings.saved / Number(savings.goal.target_amount)) * 100} />
+            <ProgressBar
+              value={(savings.saved / Number(savings.goal.target_amount)) * 100}
+              tone="pink"
+            />
             <p className="mt-2 text-xs text-muted-foreground">
               <Money value={savings.saved} /> of <Money value={Number(savings.goal.target_amount)} />
             </p>
@@ -240,3 +365,4 @@ function HomePage() {
     </AppLayout>
   );
 }
+
