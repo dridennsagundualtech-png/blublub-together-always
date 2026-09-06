@@ -363,7 +363,7 @@ function PhotosPage() {
             </li>
           ))}
         </ul>
-      ) : openAlbum ? (      ) : openAlbum ? (
+      ) : openAlbum ? (
         <>
           <div className="mb-2 flex items-center gap-2">
             <button
