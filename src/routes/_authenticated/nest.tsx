@@ -183,7 +183,7 @@ function NestPage() {
             className="press relative mt-5 block overflow-hidden p-5"
             style={{
               borderRadius: "1.35rem",
-              background: "linear-gradient(135deg, #CDB4DB 0%, #FFAFCC 100%)",
+              background: "linear-gradient(135deg, var(--grad-featured-from, #CDB4DB), var(--grad-featured-to, #FFAFCC))",
               color: "#3F2A3A",
             }}
           >
