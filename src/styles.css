@@ -160,6 +160,12 @@
   --grad-panel-from: #2A1F3D;
   --grad-panel-to: #1A1528;
   --grad-panel-angle: 180deg;
+
+  /* When 1, soft boxes/cards around the app use gradients */
+  --boxes-use-gradient: 0;
+  --box-grad-from: var(--card);
+  --box-grad-to: color-mix(in oklab, var(--primary) 18%, white);
+  --box-grad-angle: 145deg;
 }
 
 .dark {
@@ -241,6 +247,7 @@
 @utility card-soft {
   border-radius: var(--card-radius);
   background-color: var(--color-card);
+  background-image: none;
   box-shadow: none;
   border: none;
 }
@@ -248,6 +255,7 @@
 @utility card-raised {
   border-radius: var(--card-radius);
   background-color: var(--color-card);
+  background-image: none;
   box-shadow: 0 10px 28px -12px color-mix(in oklab, var(--primary) calc(var(--shadow-strength) * 100%), transparent);
   border: none;
 }
@@ -255,8 +263,22 @@
 @utility card-outline {
   border-radius: var(--card-radius);
   background-color: var(--color-card);
+  background-image: none;
   box-shadow: none;
   border: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
+}
+
+/* Toggle via --boxes-use-gradient: 1 */
+html.boxes-gradient .card-soft,
+html.boxes-gradient .card-raised,
+html.boxes-gradient .card-outline,
+html.boxes-gradient .surface-quiet {
+  background-color: transparent;
+  background-image: linear-gradient(
+    var(--box-grad-angle),
+    var(--box-grad-from),
+    var(--box-grad-to)
+  );
 }
 
 @utility panel-dark {
