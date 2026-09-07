@@ -9,7 +9,6 @@ import {
   Images,
   MapPin,
   MessageCircle,
-  Play,
   Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +24,7 @@ import {
   usePartner,
   useProfile,
 } from "@/lib/session";
+import { FeelingTile } from "@/components/FeelingTile";
 import { useDerivedDates } from "@/lib/calendar-sources";
 import { cn } from "@/lib/utils";
 
@@ -235,23 +235,17 @@ function HomePage() {
         </Link>
       </div>
 
-      {/* Wide featured banner — like Daily Thought */}
-      <Link
-        to="/cooldown"
-        className="press mt-3 flex items-center gap-3 overflow-hidden rounded-[1.25rem] bg-[#3F414E] px-4 py-4 text-white"
-      >
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-base font-bold">How they feel</p>
-          <p className="mt-0.5 truncate text-xs text-white/70">
-            {theirFeel
-              ? `${partner?.display_name ?? "Partner"} shared a feeling`
-              : "Open the cool-down tool"}
-          </p>
-        </div>
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/15">
-          <Play className="size-4 fill-white text-white" />
-        </span>
-      </Link>
+      {/* How they feel — illustrated feeling art (FeelingTile) */}
+      <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-widest text-[#A1A4B2]">
+        How they feel
+      </p>
+      <div className="rounded-[1.25rem] bg-[#F6F1FB]/80 py-2">
+        <FeelingTile
+          who={partner?.display_name ?? "Partner"}
+          row={theirFeel ?? null}
+          linkTo="/cooldown"
+        />
+      </div>
 
       {/* Days / anniversary strip — different shape again */}
       {(days !== null || untilAnniversary !== null) && (
