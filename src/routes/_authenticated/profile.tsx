@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Bell, MapPin, Palette, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { Bell, MapPin, Palette, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
@@ -30,182 +30,114 @@ export const Route = createFileRoute("/_authenticated/profile")({
 });
 
 /* ------------------------------------------------------------------ */
-/*  FULL THEME EDITOR                                                  */
+/*  SIMPLE VISUAL THEME EDITOR                                         */
 /* ------------------------------------------------------------------ */
 
-const PALETTE = [
-  { id: "blush", hex: "#FFAFCC", name: "Blush Pop" },
-  { id: "petal", hex: "#FFC8DD", name: "Pastel Petal" },
-  { id: "orchid", hex: "#CDB4DB", name: "Pink Orchid" },
-  { id: "icy", hex: "#BDE0FE", name: "Icy Blue" },
-  { id: "sky", hex: "#A2D2FF", name: "Sky Blue" },
+const COLORS = [
+  { id: "blush", hex: "#FFAFCC", label: "Blush", emoji: "💗" },
+  { id: "petal", hex: "#FFC8DD", label: "Petal", emoji: "🌸" },
+  { id: "orchid", hex: "#CDB4DB", label: "Orchid", emoji: "💜" },
+  { id: "icy", hex: "#BDE0FE", label: "Icy", emoji: "❄️" },
+  { id: "sky", hex: "#A2D2FF", label: "Sky", emoji: "☁️" },
 ] as const;
 
-type ColorRole =
-  | "primary"
-  | "accent"
-  | "lavender"
-  | "sky"
-  | "petal"
-  | "icy"
-  | "gradHeroFrom"
-  | "gradHeroTo"
-  | "gradFeaturedFrom"
-  | "gradFeaturedTo"
-  | "gradPanelFrom"
-  | "gradPanelTo";
+type Slot = "main" | "soft" | "purple" | "blue";
 
-const COLOR_ROLES: { key: ColorRole; label: string; cssVar: string }[] = [
-  { key: "primary", label: "Primary", cssVar: "--primary" },
-  { key: "accent", label: "Accent", cssVar: "--accent" },
-  { key: "lavender", label: "Lavender", cssVar: "--lavender" },
-  { key: "sky", label: "Sky", cssVar: "--sky" },
-  { key: "petal", label: "Soft Pink", cssVar: "--petal" },
-  { key: "icy", label: "Icy", cssVar: "--icy" },
-  { key: "gradHeroFrom", label: "Hero Grad From", cssVar: "--grad-hero-from" },
-  { key: "gradHeroTo", label: "Hero Grad To", cssVar: "--grad-hero-to" },
-  { key: "gradFeaturedFrom", label: "Featured Grad From", cssVar: "--grad-featured-from" },
-  { key: "gradFeaturedTo", label: "Featured Grad To", cssVar: "--grad-featured-to" },
-  { key: "gradPanelFrom", label: "Panel Grad From", cssVar: "--grad-panel-from" },
-  { key: "gradPanelTo", label: "Panel Grad To", cssVar: "--grad-panel-to" },
+const SLOTS: { id: Slot; title: string; hint: string }[] = [
+  { id: "main", title: "Main color", hint: "Buttons & highlights" },
+  { id: "soft", title: "Soft color", hint: "Gentle cards" },
+  { id: "purple", title: "Purple color", hint: "Accents & tiles" },
+  { id: "blue", title: "Blue color", hint: "Calm tiles & sky" },
 ];
 
-const DEFAULT_COLORS: Record<ColorRole, string> = {
-  primary: "#FFAFCC",
-  accent: "#CDB4DB",
-  lavender: "#CDB4DB",
-  sky: "#A2D2FF",
-  petal: "#FFC8DD",
-  icy: "#BDE0FE",
-  gradHeroFrom: "#FFAFCC",
-  gradHeroTo: "#CDB4DB",
-  gradFeaturedFrom: "#CDB4DB",
-  gradFeaturedTo: "#FFAFCC",
-  gradPanelFrom: "#2A1F3D",
-  gradPanelTo: "#1A1528",
-};
-
-const DEFAULT_BOX = {
-  radius: 1.25,          // rem
-  cardRadius: 1.25,      // rem
-  panelRadius: 1.75,     // rem
-  shadowStrength: 0.28,  // 0–1
-  heroAngle: 140,        // deg
-  featuredAngle: 135,    // deg
-  panelAngle: 180,       // deg
-};
-
-type ThemeState = {
-  colors: Record<ColorRole, string>;
-  box: typeof DEFAULT_BOX;
+const DEFAULTS: Record<Slot, string> = {
+  main: "#FFAFCC",
+  soft: "#FFC8DD",
+  purple: "#CDB4DB",
+  blue: "#A2D2FF",
 };
 
 const STORAGE_KEY = "blublub-theme-v2";
 
-function loadTheme(): ThemeState {
+function applyColors(map: Record<Slot, string>) {
+  const root = document.documentElement;
+  root.style.setProperty("--primary", map.main);
+  root.style.setProperty("--ring", map.main);
+  root.style.setProperty("--sidebar-primary", map.main);
+  root.style.setProperty("--chart-1", map.main);
+
+  root.style.setProperty("--petal", map.soft);
+  root.style.setProperty("--peach", map.soft);
+  root.style.setProperty("--secondary", map.soft);
+  root.style.setProperty("--chart-5", map.soft);
+
+  root.style.setProperty("--accent", map.purple);
+  root.style.setProperty("--lavender", map.purple);
+  root.style.setProperty("--sidebar-accent", map.purple);
+  root.style.setProperty("--chart-2", map.purple);
+  root.style.setProperty("--grad-featured-from", map.purple);
+  root.style.setProperty("--grad-featured-to", map.main);
+  root.style.setProperty("--grad-hero-from", map.main);
+  root.style.setProperty("--grad-hero-to", map.purple);
+
+  root.style.setProperty("--sky", map.blue);
+  root.style.setProperty("--icy", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
+  root.style.setProperty("--chart-3", map.blue);
+  root.style.setProperty("--chart-4", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
+}
+
+function loadColors(): Record<Slot, string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return {
-        colors: { ...DEFAULT_COLORS, ...parsed.colors },
-        box: { ...DEFAULT_BOX, ...parsed.box },
-      };
+      // support both old and new shape
+      if (parsed.colors) {
+        return {
+          main: parsed.colors.primary ?? DEFAULTS.main,
+          soft: parsed.colors.petal ?? DEFAULTS.soft,
+          purple: parsed.colors.lavender ?? DEFAULTS.purple,
+          blue: parsed.colors.sky ?? DEFAULTS.blue,
+        };
+      }
+      if (parsed.main) return { ...DEFAULTS, ...parsed };
     }
   } catch {}
-  return { colors: { ...DEFAULT_COLORS }, box: { ...DEFAULT_BOX } };
+  return { ...DEFAULTS };
 }
 
-function applyTheme(state: ThemeState) {
-  const root = document.documentElement;
-  const { colors, box } = state;
-
-  // Colors
-  root.style.setProperty("--primary", colors.primary);
-  root.style.setProperty("--accent", colors.accent);
-  root.style.setProperty("--lavender", colors.lavender);
-  root.style.setProperty("--sky", colors.sky);
-  root.style.setProperty("--petal", colors.petal);
-  root.style.setProperty("--peach", colors.petal);
-  root.style.setProperty("--icy", colors.icy);
-  root.style.setProperty("--ring", colors.primary);
-  root.style.setProperty("--sidebar-primary", colors.primary);
-  root.style.setProperty("--sidebar-accent", colors.accent);
-  root.style.setProperty("--chart-1", colors.primary);
-  root.style.setProperty("--chart-2", colors.lavender);
-  root.style.setProperty("--chart-3", colors.sky);
-  root.style.setProperty("--chart-4", colors.icy);
-  root.style.setProperty("--chart-5", colors.petal);
-
-  // Gradients
-  root.style.setProperty("--grad-hero-from", colors.gradHeroFrom);
-  root.style.setProperty("--grad-hero-to", colors.gradHeroTo);
-  root.style.setProperty("--grad-featured-from", colors.gradFeaturedFrom);
-  root.style.setProperty("--grad-featured-to", colors.gradFeaturedTo);
-  root.style.setProperty("--grad-panel-from", colors.gradPanelFrom);
-  root.style.setProperty("--grad-panel-to", colors.gradPanelTo);
-  root.style.setProperty("--grad-hero-angle", `${box.heroAngle}deg`);
-  root.style.setProperty("--grad-featured-angle", `${box.featuredAngle}deg`);
-  root.style.setProperty("--grad-panel-angle", `${box.panelAngle}deg`);
-
-  // Boxes / corners / shadows
-  root.style.setProperty("--radius", `${box.radius}rem`);
-  root.style.setProperty("--card-radius", `${box.cardRadius}rem`);
-  root.style.setProperty("--panel-radius", `${box.panelRadius}rem`);
-  root.style.setProperty("--shadow-strength", String(box.shadowStrength));
-}
-
-function ThemeEditor() {
-  const [state, setState] = useState<ThemeState>(loadTheme);
-  const [tab, setTab] = useState<"colors" | "gradients" | "boxes">("colors");
-  const [activeRole, setActiveRole] = useState<ColorRole>("primary");
+function SimpleThemeEditor() {
+  const [map, setMap] = useState<Record<Slot, string>>(loadColors);
+  const [active, setActive] = useState<Slot>("main");
 
   useEffect(() => {
-    applyTheme(state);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
+    applyColors(map);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  }, [map]);
 
   useEffect(() => {
-    applyTheme(loadTheme());
+    applyColors(loadColors());
   }, []);
 
-  function setColor(role: ColorRole, hex: string) {
-    setState((s) => ({
-      ...s,
-      colors: { ...s.colors, [role]: hex },
-    }));
+  function pick(hex: string) {
+    setMap((m) => ({ ...m, [active]: hex }));
   }
 
-  function setBox<K extends keyof typeof DEFAULT_BOX>(key: K, value: number) {
-    setState((s) => ({
-      ...s,
-      box: { ...s.box, [key]: value },
-    }));
+  function reset() {
+    setMap({ ...DEFAULTS });
+    toast.success("Colors reset ✨");
   }
-
-  function resetAll() {
-    const fresh = { colors: { ...DEFAULT_COLORS }, box: { ...DEFAULT_BOX } };
-    setState(fresh);
-    toast.success("Theme reset to defaults");
-  }
-
-  const colorRolesForTab =
-    tab === "colors"
-      ? COLOR_ROLES.filter((r) => !r.key.startsWith("grad"))
-      : tab === "gradients"
-        ? COLOR_ROLES.filter((r) => r.key.startsWith("grad"))
-        : [];
 
   return (
     <Card className="mt-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Palette className="size-5 text-primary" />
-          <p className="text-sm font-bold">Full Theme Editor</p>
+          <p className="text-sm font-bold">App colors</p>
         </div>
         <button
           type="button"
-          onClick={resetAll}
+          onClick={reset}
           className="press flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground"
         >
           <RotateCcw className="size-3" />
@@ -213,236 +145,107 @@ function ThemeEditor() {
         </button>
       </div>
 
-      <p className="mb-4 text-xs text-muted-foreground">
-        Every corner, color, gradient and shadow is editable. Changes apply live and stay on this device.
-      </p>
+      {/* Live mini preview illustration */}
+      <div className="mb-4 overflow-hidden rounded-[1.25rem] border border-border bg-background p-3">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+          Live preview
+        </p>
+        <div className="flex gap-2">
+          {/* mini button */}
+          <div
+            className="flex h-10 flex-1 items-center justify-center rounded-full text-xs font-bold shadow-soft"
+            style={{ backgroundColor: map.main, color: "#3F2A3A" }}
+          >
+            Button
+          </div>
+          {/* mini soft card */}
+          <div
+            className="flex h-10 flex-1 items-center justify-center rounded-2xl text-xs font-bold"
+            style={{ backgroundColor: map.soft, color: "#3F2A3A" }}
+          >
+            Soft card
+          </div>
+        </div>
+        <div className="mt-2 flex gap-2">
+          <div
+            className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
+            style={{ backgroundColor: map.purple, color: "#3F2A3A" }}
+          >
+            <span className="text-[9px] font-bold opacity-70">Tile</span>
+            <span className="text-xs font-bold">Purple</span>
+          </div>
+          <div
+            className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
+            style={{ backgroundColor: map.blue, color: "#3F2A3A" }}
+          >
+            <span className="text-[9px] font-bold opacity-70">Tile</span>
+            <span className="text-xs font-bold">Blue</span>
+          </div>
+        </div>
+        {/* mini featured gradient */}
+        <div
+          className="mt-2 flex h-12 items-center justify-between rounded-2xl px-3"
+          style={{
+            background: `linear-gradient(135deg, ${map.purple}, ${map.main})`,
+            color: "#3F2A3A",
+          }}
+        >
+          <span className="text-xs font-bold">Featured card</span>
+          <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold">
+            Open
+          </span>
+        </div>
+      </div>
 
-      {/* Tabs */}
-      <div className="mb-4 flex gap-1 rounded-full bg-muted p-1">
-        {(
-          [
-            { id: "colors", label: "Colors" },
-            { id: "gradients", label: "Gradients" },
-            { id: "boxes", label: "Boxes & Corners" },
-          ] as const
-        ).map((t) => (
+      {/* Slot picker */}
+      <div className="mb-3 grid grid-cols-2 gap-2">
+        {SLOTS.map((s) => (
           <button
-            key={t.id}
+            key={s.id}
             type="button"
-            onClick={() => setTab(t.id)}
-            className={`press flex-1 rounded-full py-1.5 text-xs font-bold transition-colors ${
-              tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            onClick={() => setActive(s.id)}
+            className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition-colors ${
+              active === s.id ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
             }`}
           >
-            {t.label}
+            <span
+              className="size-8 shrink-0 rounded-xl shadow-soft"
+              style={{ backgroundColor: map[s.id] }}
+            />
+            <span>
+              <span className="block text-xs font-bold">{s.title}</span>
+              <span className="block text-[10px] text-muted-foreground">{s.hint}</span>
+            </span>
           </button>
         ))}
       </div>
 
-      {/* COLORS / GRADIENTS */}
-      {(tab === "colors" || tab === "gradients") && (
-        <>
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {colorRolesForTab.map((r) => (
-              <button
-                key={r.key}
-                type="button"
-                onClick={() => setActiveRole(r.key)}
-                className={`press rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                  activeRole === r.key
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+        Tap a color for “{SLOTS.find((s) => s.id === active)?.title}”
+      </p>
 
-          <div className="mb-3 flex items-center gap-3">
+      {/* Big color swatches */}
+      <div className="grid grid-cols-5 gap-2">
+        {COLORS.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => pick(c.hex)}
+            className="press flex flex-col items-center gap-1"
+          >
             <span
-              className="size-11 shrink-0 rounded-2xl border-2 border-border shadow-soft"
-              style={{ backgroundColor: state.colors[activeRole] }}
-            />
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                {COLOR_ROLES.find((r) => r.key === activeRole)?.label}
-              </p>
-              <p className="font-mono text-sm font-bold">{state.colors[activeRole]}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-5 gap-2">
-            {PALETTE.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setColor(activeRole, c.hex)}
-                className="press flex flex-col items-center gap-1"
-                title={c.name}
-              >
-                <span
-                  className={`size-11 rounded-2xl border-2 shadow-soft transition-transform ${
-                    state.colors[activeRole] === c.hex
-                      ? "scale-110 border-foreground"
-                      : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: c.hex }}
-                />
-                <span className="text-[9px] font-semibold leading-tight text-muted-foreground">
-                  {c.name.split(" ")[0]}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Extra dark tones for panel gradients */}
-          {tab === "gradients" && (
-            <div className="mt-3 grid grid-cols-4 gap-2">
-              {["#2A1F3D", "#1A1528", "#3D2A4A", "#1F2757"].map((hex) => (
-                <button
-                  key={hex}
-                  type="button"
-                  onClick={() => setColor(activeRole, hex)}
-                  className="press flex flex-col items-center gap-1"
-                >
-                  <span
-                    className={`size-10 rounded-xl border-2 ${
-                      state.colors[activeRole] === hex ? "border-foreground scale-110" : "border-transparent"
-                    }`}
-                    style={{ backgroundColor: hex }}
-                  />
-                  <span className="font-mono text-[8px] text-muted-foreground">{hex.slice(1, 5)}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* BOXES & CORNERS */}
-      {tab === "boxes" && (
-        <div className="space-y-4">
-          <SliderRow
-            label="Global radius"
-            value={state.box.radius}
-            min={0.5}
-            max={2.5}
-            step={0.05}
-            unit="rem"
-            onChange={(v) => setBox("radius", v)}
-          />
-          <SliderRow
-            label="Card / tile radius"
-            value={state.box.cardRadius}
-            min={0.5}
-            max={2.5}
-            step={0.05}
-            unit="rem"
-            onChange={(v) => setBox("cardRadius", v)}
-          />
-          <SliderRow
-            label="Big panel radius"
-            value={state.box.panelRadius}
-            min={0.75}
-            max={3}
-            step={0.05}
-            unit="rem"
-            onChange={(v) => setBox("panelRadius", v)}
-          />
-          <SliderRow
-            label="Shadow strength"
-            value={state.box.shadowStrength}
-            min={0}
-            max={0.6}
-            step={0.02}
-            unit=""
-            onChange={(v) => setBox("shadowStrength", v)}
-          />
-          <SliderRow
-            label="Hero gradient angle"
-            value={state.box.heroAngle}
-            min={0}
-            max={360}
-            step={5}
-            unit="°"
-            onChange={(v) => setBox("heroAngle", v)}
-          />
-          <SliderRow
-            label="Featured gradient angle"
-            value={state.box.featuredAngle}
-            min={0}
-            max={360}
-            step={5}
-            unit="°"
-            onChange={(v) => setBox("featuredAngle", v)}
-          />
-          <SliderRow
-            label="Panel gradient angle"
-            value={state.box.panelAngle}
-            min={0}
-            max={360}
-            step={5}
-            unit="°"
-            onChange={(v) => setBox("panelAngle", v)}
-          />
-
-          {/* Live preview boxes */}
-          <div className="mt-2 grid grid-cols-2 gap-3">
-            <div
-              className="h-16 bg-primary/20"
-              style={{ borderRadius: `${state.box.cardRadius}rem` }}
-            />
-            <div
-              className="h-16"
-              style={{
-                borderRadius: `${state.box.panelRadius}rem`,
-                background: `linear-gradient(${state.box.panelAngle}deg, ${state.colors.gradPanelFrom}, ${state.colors.gradPanelTo})`,
-              }}
-            />
-          </div>
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function SliderRow({
-  label,
-  value,
-  min,
-  max,
-  step,
-  unit,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  unit: string;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-xs font-bold text-foreground">{label}</span>
-        <span className="font-mono text-[11px] text-muted-foreground">
-          {value.toFixed(unit === "°" || unit === "" ? 0 : 2)}
-          {unit}
-        </span>
+              className={`grid size-12 place-items-center rounded-2xl text-lg shadow-soft transition-transform ${
+                map[active] === c.hex ? "scale-110 ring-2 ring-foreground ring-offset-2" : ""
+              }`}
+              style={{ backgroundColor: c.hex }}
+            >
+              {c.emoji}
+            </span>
+            <span className="text-[9px] font-semibold text-muted-foreground">{c.label}</span>
+          </button>
+        ))}
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-[var(--primary)]"
-      />
-    </div>
+    </Card>
   );
 }
 
@@ -622,7 +425,7 @@ function ProfilePage() {
       </Card>
 
       <SectionTitle>Appearance</SectionTitle>
-      <ThemeEditor />
+      <SimpleThemeEditor />
 
       <SectionTitle>Privacy</SectionTitle>
       <Card>

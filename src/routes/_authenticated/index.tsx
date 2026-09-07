@@ -2,14 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
-  ChevronRight,
   Gamepad2,
   Heart,
-  HelpCircle,
   Images,
   MapPin,
   MessageCircle,
-  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
@@ -26,7 +23,6 @@ import {
 } from "@/lib/session";
 import { FeelingTile } from "@/components/FeelingTile";
 import { useDerivedDates } from "@/lib/calendar-sources";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -167,35 +163,33 @@ function HomePage() {
 
   return (
     <AppLayout title="BLUBLUB" subtitle={partner ? `With ${partner.display_name}` : "Your space"}>
-      {/* Greeting — Silent Moon style */}
-      <div className="pt-1 pb-4">
-        <p className="font-display text-[1.65rem] font-bold leading-tight tracking-tight text-[#3F414E]">
+      {/* Greeting */}
+      <div className="pb-4 pt-1">
+        <p className="font-display text-[1.65rem] font-bold leading-tight tracking-tight text-foreground">
           {greetingForHour()}, {name}
         </p>
-        <p className="mt-1 text-sm text-[#A1A4B2]">
+        <p className="mt-1 text-sm text-muted-foreground">
           {days !== null
             ? `Day ${days} together — make it count`
             : "We wish you a good day"}
         </p>
       </div>
 
-      {/* 2 unequal feature tiles */}
+      {/* 2 feature tiles – new palette */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Tall-ish purple tile — Daily question */}
         <Link
           to="/questions"
-          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] bg-[#8E97FD] p-4 text-white"
+          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] p-4 text-white"
+          style={{ backgroundColor: "var(--primary, #FFAFCC)", color: "#3F2A3A" }}
         >
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/80">
-              Daily
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Daily</p>
             <p className="mt-1 font-display text-lg font-bold leading-snug">Question</p>
-            <p className="mt-1 text-[11px] text-white/85">{questionHint}</p>
+            <p className="mt-1 text-[11px] opacity-80">{questionHint}</p>
           </div>
           <div className="flex items-center justify-between gap-2">
             <Doodle critter="cat" pose="wave" size={44} className="opacity-90" />
-            <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#3F414E]">
+            <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#3F2A3A]">
               {questionCta}
             </span>
           </div>
@@ -204,17 +198,15 @@ function HomePage() {
           ) : null}
         </Link>
 
-        {/* Warm tile — Memories */}
         <Link
           to="/photos"
-          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] bg-[#FFC97E] p-4 text-[#3F414E]"
+          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] p-4"
+          style={{ backgroundColor: "var(--petal, #FFC8DD)", color: "#3F2A3A" }}
         >
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#3F414E]/70">
-              Album
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Album</p>
             <p className="mt-1 font-display text-lg font-bold leading-snug">Memories</p>
-            <p className="mt-1 text-[11px] text-[#3F414E]/80">
+            <p className="mt-1 text-[11px] opacity-80">
               {latestPhoto ? "See your latest" : "Add a moment"}
             </p>
           </div>
@@ -235,11 +227,14 @@ function HomePage() {
         </Link>
       </div>
 
-      {/* How they feel — illustrated feeling art (FeelingTile) */}
-      <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-widest text-[#A1A4B2]">
+      {/* How they feel */}
+      <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         How they feel
       </p>
-      <div className="rounded-[1.25rem] bg-[#F6F1FB]/80 py-2">
+      <div
+        className="rounded-[1.25rem] py-2"
+        style={{ backgroundColor: "color-mix(in oklab, var(--lavender, #CDB4DB) 25%, white)" }}
+      >
         <FeelingTile
           who={partner?.display_name ?? "Partner"}
           row={theirFeel ?? null}
@@ -247,23 +242,26 @@ function HomePage() {
         />
       </div>
 
-      {/* Days / anniversary strip — different shape again */}
+      {/* Days / anniversary */}
       {(days !== null || untilAnniversary !== null) && (
         <div className="mt-3 flex gap-3">
           {days !== null ? (
-            <div className="flex-1 rounded-[1.25rem] bg-[#F2F2F2] px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#A1A4B2]">
+            <div className="flex-1 rounded-[1.25rem] bg-muted px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Together
               </p>
-              <p className="font-display text-xl font-bold text-[#3F414E]">Day {days}</p>
+              <p className="font-display text-xl font-bold text-foreground">Day {days}</p>
             </div>
           ) : null}
           {untilAnniversary !== null ? (
-            <div className="flex-1 rounded-[1.25rem] bg-[#F6F1FB] px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#A1A4B2]">
+            <div
+              className="flex-1 rounded-[1.25rem] px-4 py-3"
+              style={{ backgroundColor: "color-mix(in oklab, var(--lavender, #CDB4DB) 30%, white)" }}
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Anniversary
               </p>
-              <p className="font-display text-xl font-bold text-[#8E97FD]">
+              <p className="font-display text-xl font-bold" style={{ color: "var(--lavender, #CDB4DB)" }}>
                 {untilAnniversary === 0 ? "Today" : `${untilAnniversary}d`}
               </p>
             </div>
@@ -271,49 +269,51 @@ function HomePage() {
         </div>
       )}
 
-      {/* Recommended — mixed sizes like Silent Moon */}
+      {/* For you both */}
       <div className="mb-2 mt-7 flex items-end justify-between">
-        <h2 className="font-display text-xl font-bold text-[#3F414E]">For you both</h2>
-        <Link to="/more" className="text-xs font-semibold text-[#8E97FD]">
+        <h2 className="font-display text-xl font-bold text-foreground">For you both</h2>
+        <Link to="/more" className="text-xs font-semibold text-primary">
           See all
         </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-3 pb-2">
-        {/* Large-ish tile */}
         <Link
           to="/games"
-          className="press col-span-1 flex min-h-[150px] flex-col justify-between rounded-[1.25rem] bg-[#AFDBC5] p-4"
+          className="press col-span-1 flex min-h-[150px] flex-col justify-between rounded-[1.25rem] p-4"
+          style={{ backgroundColor: "var(--icy, #BDE0FE)", color: "#3F2A3A" }}
         >
-          <Gamepad2 className="size-7 text-[#3F414E]/80" />
+          <Gamepad2 className="size-7 opacity-80" />
           <div>
-            <p className="font-display text-base font-bold text-[#3F414E]">Games</p>
-            <p className="text-[11px] text-[#3F414E]/70">Play together</p>
+            <p className="font-display text-base font-bold">Games</p>
+            <p className="text-[11px] opacity-70">Play together</p>
           </div>
         </Link>
 
         <Link
           to="/chat"
-          className="press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] bg-[#FECFCF] p-4"
+          className="press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] p-4"
+          style={{ backgroundColor: "var(--petal, #FFC8DD)", color: "#3F2A3A" }}
         >
-          <MessageCircle className="size-7 text-[#3F414E]/80" />
+          <MessageCircle className="size-7 opacity-80" />
           <div>
-            <p className="font-display text-base font-bold text-[#3F414E]">Chat</p>
-            <p className="text-[11px] text-[#3F414E]/70">Private messages</p>
+            <p className="font-display text-base font-bold">Chat</p>
+            <p className="text-[11px] opacity-70">Private messages</p>
           </div>
           {badges?.unreadChat ? (
-            <span className="absolute right-3 top-3 size-2 rounded-full bg-[#8E97FD]" />
+            <span className="absolute right-3 top-3 size-2 rounded-full bg-primary" />
           ) : null}
         </Link>
 
         <Link
           to="/calendar"
-          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] bg-[#E0D7FF] p-4"
+          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] p-4"
+          style={{ backgroundColor: "var(--lavender, #CDB4DB)", color: "#3F2A3A" }}
         >
-          <CalendarDays className="size-6 text-[#3F414E]/80" />
+          <CalendarDays className="size-6 opacity-80" />
           <div>
-            <p className="font-display text-base font-bold text-[#3F414E]">Calendar</p>
-            <p className="truncate text-[11px] text-[#3F414E]/70">
+            <p className="font-display text-base font-bold">Calendar</p>
+            <p className="truncate text-[11px] opacity-70">
               {nextSpecial ? nextSpecial.title : "Plans & dates"}
             </p>
           </div>
@@ -321,12 +321,13 @@ function HomePage() {
 
         <Link
           to="/map"
-          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] bg-[#D9E8FF] p-4"
+          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] p-4"
+          style={{ backgroundColor: "var(--sky, #A2D2FF)", color: "#3F2A3A" }}
         >
-          <MapPin className="size-6 text-[#3F414E]/80" />
+          <MapPin className="size-6 opacity-80" />
           <div>
-            <p className="font-display text-base font-bold text-[#3F414E]">Where we are</p>
-            <p className="text-[11px] text-[#3F414E]/70">Shared location</p>
+            <p className="font-display text-base font-bold">Where we are</p>
+            <p className="text-[11px] opacity-70">Shared location</p>
           </div>
         </Link>
       </div>
@@ -334,7 +335,8 @@ function HomePage() {
       {!partner ? (
         <Link
           to="/profile"
-          className="press mt-4 flex items-center justify-center gap-2 rounded-full bg-[#8E97FD] py-3.5 text-sm font-bold text-white"
+          className="press mt-4 flex items-center justify-center gap-2 rounded-full py-3.5 text-sm font-bold"
+          style={{ backgroundColor: "var(--primary, #FFAFCC)", color: "#3F2A3A" }}
         >
           <Heart className="size-4" />
           Pair with partner
