@@ -3,21 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
   ChevronRight,
-  CircleDollarSign,
+  Gamepad2,
   Heart,
   HelpCircle,
   Images,
-  ListTodo,
+  MapPin,
   MessageCircle,
-  Moon,
+  Play,
   Sparkles,
-  Target,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
-import { Card, ProgressBar, SectionTitle } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import {
@@ -28,7 +25,6 @@ import {
   usePartner,
   useProfile,
 } from "@/lib/session";
-import { FeelingTile } from "@/components/FeelingTile";
 import { useDerivedDates } from "@/lib/calendar-sources";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +45,13 @@ export const Route = createFileRoute("/_authenticated/")({
   }),
   component: HomePage,
 });
+
+function greetingForHour() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 function HomePage() {
   const coupleId = useCoupleId();
@@ -83,7 +86,6 @@ function HomePage() {
   const untilAnniversary = daysUntilAnniversary(anniversary);
   useAnniversaryReminder();
 
-  // Today's question status (Paired-style)
   const { data: todayAnswers } = useQuery({
     queryKey: ["home-answers", coupleId, today],
     enabled: !!coupleId && !!user?.id,
@@ -102,36 +104,19 @@ function HomePage() {
   const partnerAnswered = (todayAnswers ?? []).some((r) => r.created_by !== user?.id);
   const bothAnswered = iAnswered && partnerAnswered;
 
-  let questionStatus: "answer" | "waiting" | "reveal" | "done" = "answer";
-  if (bothAnswered) questionStatus = "done";
-  else if (iAnswered && !partnerAnswered) questionStatus = "waiting";
-  else if (!iAnswered && partnerAnswered) questionStatus = "reveal";
-  else questionStatus = "answer";
+  let questionCta = "Start";
+  let questionHint = "Answer together today";
+  if (bothAnswered) {
+    questionCta = "Open";
+    questionHint = "You both answered";
+  } else if (iAnswered) {
+    questionCta = "Waiting";
+    questionHint = `Waiting for ${partner?.display_name ?? "partner"}`;
+  } else if (partnerAnswered) {
+    questionCta = "Reveal";
+    questionHint = "They answered — your turn";
+  }
 
-  const questionCopy = {
-    answer: {
-      title: "Today's question",
-      subtitle: "Answer privately — reveal when you both reply",
-      cta: "Answer now",
-    },
-    waiting: {
-      title: "You answered",
-      subtitle: `Waiting for ${partner?.display_name ?? "your partner"}…`,
-      cta: "View question",
-    },
-    reveal: {
-      title: "Partner answered",
-      subtitle: "Your answer unlocks the reveal",
-      cta: "Answer & reveal",
-    },
-    done: {
-      title: "Both answered today",
-      subtitle: "See what you each wrote",
-      cta: "Open answers",
-    },
-  }[questionStatus];
-
-  // Latest shared photo memory
   const { data: latestPhoto } = useQuery({
     queryKey: ["home-latest-photo", coupleId],
     enabled: !!coupleId,
@@ -150,10 +135,7 @@ function HomePage() {
       const signed = await supabase.storage
         .from("photos")
         .createSignedUrl(data.storage_path, 3600);
-      return {
-        ...data,
-        url: signed.data?.signedUrl ?? null,
-      };
+      return { ...data, url: signed.data?.signedUrl ?? null };
     },
   });
 
@@ -167,258 +149,203 @@ function HomePage() {
         .eq("couple_id", coupleId!)
         .gte("event_date", today)
         .order("event_date")
-        .limit(3);
+        .limit(2);
       if (error) throw error;
       return data;
     },
   });
 
   const { data: derived } = useDerivedDates();
-
-  const KIND_ICON: Record<string, LucideIcon> = {
-    event: CalendarDays,
-    anniversary: Heart,
-    date: Moon,
-    bill: CircleDollarSign,
-    bucket: Target,
-    cycle: Sparkles,
-  };
-
-  const comingUp = [
-    ...(upcoming ?? []).map((e) => ({
-      id: e.id,
-      date: e.event_date,
-      title: e.title,
-      kind: "event" as const,
-    })),
+  const nextSpecial = [
+    ...(upcoming ?? []).map((e) => ({ title: e.title, date: e.event_date })),
     ...(derived ?? [])
       .filter((d) => d.kind !== "cycle" && d.date >= today)
-      .map((d) => ({
-        id: d.id,
-        date: d.date,
-        title: d.title,
-        kind: d.kind,
-      })),
-  ]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 3);
+      .map((d) => ({ title: d.title, date: d.date })),
+  ].sort((a, b) => a.date.localeCompare(b.date))[0];
+
+  const name = profile?.display_name ?? "there";
 
   return (
-    <AppLayout title="Today" subtitle="Let's grow together" critter="cat">
-      {/* 1. Relationship hero */}
-      <section className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-primary/12 via-lavender-soft/40 to-transparent px-5 pb-5 pt-6 text-center">
-        <Doodle
-          critter="penguin"
-          pose="wave"
-          size={36}
-          className="absolute -left-1 bottom-2 opacity-25"
-        />
-        <Doodle
-          critter="seal"
-          pose="love"
-          size={32}
-          className="absolute right-0 top-2 opacity-25"
-        />
-
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-          {partner
-            ? `You & ${partner.display_name}`
-            : profile?.display_name
-              ? `Hi ${profile.display_name}`
-              : "Your space"}
+    <AppLayout title="BLUBLUB" subtitle={partner ? `With ${partner.display_name}` : "Your space"}>
+      {/* Greeting — Silent Moon style */}
+      <div className="pt-1 pb-4">
+        <p className="font-display text-[1.65rem] font-bold leading-tight tracking-tight text-[#3F414E]">
+          {greetingForHour()}, {name}
         </p>
-        <p className="mt-1 font-display text-4xl font-extrabold text-primary">
-          {days !== null ? `Day ${days}` : "—"}
+        <p className="mt-1 text-sm text-[#A1A4B2]">
+          {days !== null
+            ? `Day ${days} together — make it count`
+            : "We wish you a good day"}
         </p>
-        {days !== null ? (
-          <div className="mx-auto mt-3 max-w-[12rem]">
-            <ProgressBar value={((days % 100) / 100) * 100} tone="pink" />
-            <p className="mt-1 text-[10px] font-bold text-muted-foreground">
-              {100 - (days % 100)} to day {Math.floor(days / 100) * 100 + 100}
-            </p>
-          </div>
-        ) : (
-          <p className="mt-2 text-xs text-muted-foreground">
-            Add your anniversary in Profile to start counting
-          </p>
-        )}
-
-        {untilAnniversary !== null && untilAnniversary <= 30 ? (
-          <p className="mt-3 text-xs font-bold text-primary">
-            {untilAnniversary === 0
-              ? "Anniversary is today"
-              : `${untilAnniversary} days until your anniversary`}
-          </p>
-        ) : null}
-
-        {!partner ? (
-          <Link
-            to="/profile"
-            className="press mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-float"
-          >
-            Pair with partner
-          </Link>
-        ) : null}
-      </section>
-
-      {/* 2. Today's focus — daily question (Paired-style hero action) */}
-      <p className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-        Today&apos;s focus
-      </p>
-      <Link
-        to="/questions"
-        className={cn(
-          "card-raised press relative flex items-center gap-3 overflow-hidden p-4",
-          questionStatus === "done" && "ring-1 ring-primary/30",
-          questionStatus === "reveal" && "ring-1 ring-destructive/40",
-        )}
-      >
-        <span
-          className={cn(
-            "grid size-12 shrink-0 place-items-center rounded-2xl",
-            questionStatus === "done"
-              ? "bg-primary/15 text-primary"
-              : questionStatus === "reveal"
-                ? "bg-destructive/10 text-destructive"
-                : "tile-lilac text-primary",
-          )}
-        >
-          {questionStatus === "done" ? (
-            <Sparkles className="size-6" />
-          ) : (
-            <HelpCircle className="size-6" />
-          )}
-        </span>
-        <span className="min-w-0 flex-1 text-left">
-          <span className="block text-sm font-extrabold">{questionCopy.title}</span>
-          <span className="mt-0.5 block text-xs text-muted-foreground">
-            {questionCopy.subtitle}
-          </span>
-          <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary">
-            {questionCopy.cta}
-            <ChevronRight className="size-3.5" />
-          </span>
-        </span>
-        {badges?.question ? (
-          <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive" />
-        ) : null}
-      </Link>
-
-      {/* 3. Partner mood */}
-      <p className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-        How they feel
-      </p>
-      <FeelingTile
-        who={partner?.display_name ?? "Partner"}
-        row={theirFeel ?? null}
-        linkTo="/cooldown"
-      />
-
-      {/* 4. Latest memory (Locket / Between style presence) */}
-      <div className="mb-2 mt-5 flex items-center justify-between gap-2">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-          A recent memory
-        </p>
-        <Link to="/photos" className="text-xs font-bold text-primary">
-          All memories
-        </Link>
       </div>
-      {latestPhoto?.url ? (
-        <Link to="/photos" className="press block overflow-hidden rounded-3xl p-0">
-          <img
-            src={latestPhoto.url}
-            alt={latestPhoto.caption ?? "Memory"}
-            className="aspect-[4/5] w-full object-cover"
-            loading="lazy"
-          />
-          <div className="flex items-center justify-between gap-2 px-4 py-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold">
-                {latestPhoto.caption || latestPhoto.album || "Shared memory"}
-              </p>
-              <p className="text-xs text-muted-foreground">{latestPhoto.taken_on}</p>
-            </div>
-            <Images className="size-4 shrink-0 text-muted-foreground" />
+
+      {/* 2 unequal feature tiles */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Tall-ish purple tile — Daily question */}
+        <Link
+          to="/questions"
+          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] bg-[#8E97FD] p-4 text-white"
+        >
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/80">
+              Daily
+            </p>
+            <p className="mt-1 font-display text-lg font-bold leading-snug">Question</p>
+            <p className="mt-1 text-[11px] text-white/85">{questionHint}</p>
           </div>
-        </Link>
-      ) : (
-        <Link
-          to="/photos"
-          className="surface-quiet press flex flex-col items-center gap-2 px-4 py-10 text-center"
-        >
-          <span className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
-            <Images className="size-6" />
-          </span>
-          <p className="text-sm font-bold">No photos yet</p>
-          <p className="text-xs text-muted-foreground">
-            Add a memory so it shows up here for both of you
-          </p>
-        </Link>
-      )}
-
-      {/* 5. Coming up — compact */}
-      <SectionTitle
-        action={
-          <Link to="/calendar" className="text-xs font-bold text-primary">
-            Calendar
-          </Link>
-        }
-      >
-        Coming up
-      </SectionTitle>
-      {comingUp.length > 0 ? (
-        <ul className="space-y-2">
-          {comingUp.map((e) => {
-            const Icon = KIND_ICON[e.kind] ?? CalendarDays;
-            return (
-              <li key={e.id} className="list-row">
-                <span className="tile-peach grid size-10 shrink-0 place-items-center rounded-2xl text-primary">
-                  <Icon className="size-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold">{e.title}</p>
-                  <p className="text-xs text-muted-foreground">{e.date}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <Card className="text-sm text-muted-foreground">
-          Nothing planned — add a date on the calendar.
-        </Card>
-      )}
-
-      {/* 6. Quick links — secondary, not competing with Today */}
-      <p className="mb-2 mt-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-        Jump to
-      </p>
-      <div className="grid grid-cols-3 gap-2 pb-2">
-        <Link
-          to="/chat"
-          className="surface-quiet press flex flex-col items-center gap-1.5 p-3 text-center"
-        >
-          <MessageCircle className="size-5 text-primary" />
-          <span className="text-[11px] font-bold">Chat</span>
-          {badges?.unreadChat ? (
-            <span className="size-1.5 rounded-full bg-destructive" />
+          <div className="flex items-center justify-between gap-2">
+            <Doodle critter="cat" pose="wave" size={44} className="opacity-90" />
+            <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#3F414E]">
+              {questionCta}
+            </span>
+          </div>
+          {badges?.question ? (
+            <span className="absolute right-3 top-3 size-2 rounded-full bg-white" />
           ) : null}
         </Link>
+
+        {/* Warm tile — Memories */}
         <Link
           to="/photos"
-          className="surface-quiet press flex flex-col items-center gap-1.5 p-3 text-center"
+          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] bg-[#FFC97E] p-4 text-[#3F414E]"
         >
-          <Images className="size-5 text-primary" />
-          <span className="text-[11px] font-bold">Memories</span>
-        </Link>
-        <Link
-          to="/calendar"
-          className="surface-quiet press flex flex-col items-center gap-1.5 p-3 text-center"
-        >
-          <CalendarDays className="size-5 text-primary" />
-          <span className="text-[11px] font-bold">Calendar</span>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#3F414E]/70">
+              Album
+            </p>
+            <p className="mt-1 font-display text-lg font-bold leading-snug">Memories</p>
+            <p className="mt-1 text-[11px] text-[#3F414E]/80">
+              {latestPhoto ? "See your latest" : "Add a moment"}
+            </p>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            {latestPhoto?.url ? (
+              <img
+                src={latestPhoto.url}
+                alt=""
+                className="size-11 rounded-xl object-cover ring-2 ring-white/50"
+              />
+            ) : (
+              <Images className="size-8 opacity-70" />
+            )}
+            <span className="rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-bold">
+              Open
+            </span>
+          </div>
         </Link>
       </div>
+
+      {/* Wide featured banner — like Daily Thought */}
+      <Link
+        to="/cooldown"
+        className="press mt-3 flex items-center gap-3 overflow-hidden rounded-[1.25rem] bg-[#3F414E] px-4 py-4 text-white"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-base font-bold">How they feel</p>
+          <p className="mt-0.5 truncate text-xs text-white/70">
+            {theirFeel
+              ? `${partner?.display_name ?? "Partner"} shared a feeling`
+              : "Open the cool-down tool"}
+          </p>
+        </div>
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/15">
+          <Play className="size-4 fill-white text-white" />
+        </span>
+      </Link>
+
+      {/* Days / anniversary strip — different shape again */}
+      {(days !== null || untilAnniversary !== null) && (
+        <div className="mt-3 flex gap-3">
+          {days !== null ? (
+            <div className="flex-1 rounded-[1.25rem] bg-[#F2F2F2] px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#A1A4B2]">
+                Together
+              </p>
+              <p className="font-display text-xl font-bold text-[#3F414E]">Day {days}</p>
+            </div>
+          ) : null}
+          {untilAnniversary !== null ? (
+            <div className="flex-1 rounded-[1.25rem] bg-[#F6F1FB] px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#A1A4B2]">
+                Anniversary
+              </p>
+              <p className="font-display text-xl font-bold text-[#8E97FD]">
+                {untilAnniversary === 0 ? "Today" : `${untilAnniversary}d`}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {/* Recommended — mixed sizes like Silent Moon */}
+      <div className="mb-2 mt-7 flex items-end justify-between">
+        <h2 className="font-display text-xl font-bold text-[#3F414E]">For you both</h2>
+        <Link to="/more" className="text-xs font-semibold text-[#8E97FD]">
+          See all
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 pb-2">
+        {/* Large-ish tile */}
+        <Link
+          to="/games"
+          className="press col-span-1 flex min-h-[150px] flex-col justify-between rounded-[1.25rem] bg-[#AFDBC5] p-4"
+        >
+          <Gamepad2 className="size-7 text-[#3F414E]/80" />
+          <div>
+            <p className="font-display text-base font-bold text-[#3F414E]">Games</p>
+            <p className="text-[11px] text-[#3F414E]/70">Play together</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/chat"
+          className="press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] bg-[#FECFCF] p-4"
+        >
+          <MessageCircle className="size-7 text-[#3F414E]/80" />
+          <div>
+            <p className="font-display text-base font-bold text-[#3F414E]">Chat</p>
+            <p className="text-[11px] text-[#3F414E]/70">Private messages</p>
+          </div>
+          {badges?.unreadChat ? (
+            <span className="absolute right-3 top-3 size-2 rounded-full bg-[#8E97FD]" />
+          ) : null}
+        </Link>
+
+        <Link
+          to="/calendar"
+          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] bg-[#E0D7FF] p-4"
+        >
+          <CalendarDays className="size-6 text-[#3F414E]/80" />
+          <div>
+            <p className="font-display text-base font-bold text-[#3F414E]">Calendar</p>
+            <p className="truncate text-[11px] text-[#3F414E]/70">
+              {nextSpecial ? nextSpecial.title : "Plans & dates"}
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          to="/map"
+          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] bg-[#D9E8FF] p-4"
+        >
+          <MapPin className="size-6 text-[#3F414E]/80" />
+          <div>
+            <p className="font-display text-base font-bold text-[#3F414E]">Where we are</p>
+            <p className="text-[11px] text-[#3F414E]/70">Shared location</p>
+          </div>
+        </Link>
+      </div>
+
+      {!partner ? (
+        <Link
+          to="/profile"
+          className="press mt-4 flex items-center justify-center gap-2 rounded-full bg-[#8E97FD] py-3.5 text-sm font-bold text-white"
+        >
+          <Heart className="size-4" />
+          Pair with partner
+        </Link>
+      ) : null}
     </AppLayout>
   );
 }
