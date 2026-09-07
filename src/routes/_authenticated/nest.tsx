@@ -115,38 +115,39 @@ function NestPage() {
 
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      <SectionTitle>Right now</SectionTitle>
+      {/* Right now — kept */}
+      <p className="mb-3 font-display text-lg font-bold text-[#3F414E]">Right now</p>
       <div className="grid gap-3">
         <SummaryTile
-          tint="tile-lilac"
-          icon={<BookHeart className="size-3.5 text-primary" />}
+          tint="bg-[#E0D7FF]"
+          icon={<BookHeart className="size-3.5 text-[#8E97FD]" />}
           label="Diary"
           value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
-          detail={diaryStreak > 0 ? `${diaryStreak}-day streak 🔥` : "Write something small today"}
+          detail={diaryStreak > 0 ? `${diaryStreak}-day streak` : "Write something small today"}
         />
         <div className="grid grid-cols-2 gap-3">
           <SummaryTile
-            tint="tile-pink"
-            icon={<ListChecks className="size-3.5 text-primary" />}
+            tint="bg-[#FECFCF]"
+            icon={<ListChecks className="size-3.5 text-[#F86B8F]" />}
             label="To-Dos"
-            value={openTodos === 0 ? "All done 🩷" : `${openTodos} left to do`}
+            value={openTodos === 0 ? "All done" : `${openTodos} left to do`}
           />
           <SummaryTile
-            tint="tile-peach"
-            icon={<Sparkles className="size-3.5 text-primary" />}
+            tint="bg-[#FFE4C8]"
+            icon={<Sparkles className="size-3.5 text-[#C47A2C]" />}
             label="Bucket List"
             value={`${bucketDone}/${bucketTotal} done`}
           />
         </div>
         <SummaryTile
-          tint="tile-sky"
-          icon={<Wallet className="size-3.5 text-primary" />}
+          tint="bg-[#D4E5FF]"
+          icon={<Wallet className="size-3.5 text-[#5B6CFF]" />}
           label="Budget"
           value={
             !premium ? (
               "Premium space"
             ) : Math.abs(balance) < 0.01 ? (
-              "All square 🩷"
+              "All square"
             ) : (
               <>
                 <Money value={Math.abs(balance)} /> {balance > 0 ? "owed to you" : "you owe"}
@@ -156,14 +157,80 @@ function NestPage() {
         />
       </div>
 
-      <SectionTitle>Nest tools</SectionTitle>
-      <ul className="space-y-3">
-        <ToolRow to="/diary" tint="tile-lilac" icon={<BookHeart className="size-5" />} label="Diary" hint="Dated entries with a mood" />
-        <ToolRow to="/todos" tint="tile-pink" icon={<ListChecks className="size-5" />} label="To-Dos" hint="Our shared checklist" />
-        <ToolRow to="/bucket" tint="tile-peach" icon={<Sparkles className="size-5" />} label="Bucket List" hint="Dreams to tick off together" />
-        <ToolRow to="/budget" tint="tile-sky" icon={<Wallet className="size-5" />} label="Budget" hint="Expenses, goals and savings" />
-      </ul>
+      {/* Sleep-stories style nest tools panel */}
+      <div className="relative mt-6 overflow-hidden rounded-[1.75rem] bg-[#1F2757] px-4 pb-5 pt-6 text-white">
+        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[#8E97FD]/25 blur-2xl" />
+        <div className="pointer-events-none absolute -left-8 bottom-8 size-24 rounded-full bg-[#F86B8F]/15 blur-2xl" />
 
+        <div className="relative text-center">
+          <p className="font-display text-2xl font-bold">Nest tools</p>
+          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
+            Diary, lists, dreams and money — kept in one cozy place
+          </p>
+        </div>
+
+        {/* Featured — diary */}
+        <Link
+          to="/diary"
+          className="press relative mt-5 block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#3D4FBF] to-[#8E97FD] p-5"
+        >
+          <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">Featured</p>
+          <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
+          <p className="mt-1 max-w-[14rem] text-xs text-white/80">
+            {lastEntry
+              ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 42)}`
+              : "Write a small note for each other"}
+          </p>
+          <span className="mt-4 inline-flex rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#1F2757]">
+            Open
+          </span>
+          <BookHeart className="absolute bottom-4 right-4 size-14 text-white/20" />
+        </Link>
+
+        {/* Mixed tiles */}
+        <div className="relative mt-3 grid grid-cols-2 gap-3">
+          <Link
+            to="/todos"
+            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FECFCF] p-4 text-[#3F414E]"
+          >
+            <ListChecks className="size-7 opacity-80" />
+            <div>
+              <p className="font-display text-base font-bold">To-Dos</p>
+              <p className="text-[11px] opacity-70">
+                {openTodos === 0 ? "All clear" : `${openTodos} open`}
+              </p>
+            </div>
+          </Link>
+          <Link
+            to="/bucket"
+            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FFE4C8] p-4 text-[#3F414E]"
+          >
+            <Sparkles className="size-7 opacity-80" />
+            <div>
+              <p className="font-display text-base font-bold">Bucket List</p>
+              <p className="text-[11px] opacity-70">
+                {bucketDone}/{bucketTotal} done
+              </p>
+            </div>
+          </Link>
+          <Link
+            to="/budget"
+            className="press col-span-2 flex min-h-[100px] flex-col justify-between rounded-[1.25rem] bg-[#AFDBC5] p-4 text-[#3F414E]"
+          >
+            <Wallet className="size-6 opacity-80" />
+            <div>
+              <p className="font-display text-base font-bold">Budget</p>
+              <p className="text-[11px] opacity-70">
+                {!premium
+                  ? "Premium space"
+                  : Math.abs(balance) < 0.01
+                    ? "All square"
+                    : "Shared expenses & goals"}
+              </p>
+            </div>
+          </Link>
+        </div>
+      </div>
 
       <button
         type="button"
@@ -207,7 +274,7 @@ function SummaryTile({
   detail?: string;
 }) {
   return (
-    <div className={`card-soft p-4 ${tint}`}>
+    <div className={`rounded-[1.25rem] p-4 ${tint}`}>
       <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
         {icon}
         {label}
