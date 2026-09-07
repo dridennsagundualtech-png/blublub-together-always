@@ -54,6 +54,7 @@ const SLOT_META: { id: Slot; title: string; hint: string }[] = [
 
 
 export function ThemeEditor({ compact = false }: { compact?: boolean }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const coupleId = useCoupleId();
   const { data: couple } = useCouple();
   const qc = useQueryClient();
