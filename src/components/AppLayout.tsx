@@ -18,16 +18,12 @@ const DEFAULTS = {
   blue: "#A2D2FF",
   gradFrom: "#CDB4DB",
   gradTo: "#FFAFCC",
+  boxesGradient: false,
+  boxGradFrom: "#FFFFFF",
+  boxGradTo: "#FFC8DD",
 };
 
-function applyColors(map: {
-  main: string;
-  soft: string;
-  purple: string;
-  blue: string;
-  gradFrom: string;
-  gradTo: string;
-}) {
+function applyColors(map: typeof DEFAULTS) {
   const root = document.documentElement;
   root.style.setProperty("--primary", map.main);
   root.style.setProperty("--ring", map.main);
@@ -55,27 +51,31 @@ function applyColors(map: {
   root.style.setProperty("--grad-hero-to", map.gradTo);
   root.style.setProperty("--grad-panel-from", map.gradFrom);
   root.style.setProperty("--grad-panel-to", map.gradTo);
+
+  root.style.setProperty("--box-grad-from", map.boxGradFrom || map.soft);
+  root.style.setProperty("--box-grad-to", map.boxGradTo || map.main);
+  document.documentElement.classList.toggle("boxes-gradient", !!map.boxesGradient);
 }
 
 function normalizeTheme(raw: unknown): typeof DEFAULTS {
   if (!raw || typeof raw !== "object") return { ...DEFAULTS };
-  const o = raw as Record<string, string>;
-  if (o.main) {
+  const o = raw as Record<string, unknown>;
+  if (typeof o.main === "string") {
     return {
-      main: o.main || DEFAULTS.main,
-      soft: o.soft || DEFAULTS.soft,
-      purple: o.purple || DEFAULTS.purple,
-      blue: o.blue || DEFAULTS.blue,
-      gradFrom: o.gradFrom || o.purple || DEFAULTS.gradFrom,
-      gradTo: o.gradTo || o.main || DEFAULTS.gradTo,
+      main: (o.main as string) || DEFAULTS.main,
+      soft: (o.soft as string) || DEFAULTS.soft,
+      purple: (o.purple as string) || DEFAULTS.purple,
+      blue: (o.blue as string) || DEFAULTS.blue,
+      gradFrom: (o.gradFrom as string) || (o.purple as string) || DEFAULTS.gradFrom,
+      gradTo: (o.gradTo as string) || (o.main as string) || DEFAULTS.gradTo,
+      boxesGradient: !!o.boxesGradient,
+      boxGradFrom: (o.boxGradFrom as string) || DEFAULTS.soft,
+      boxGradTo: (o.boxGradTo as string) || DEFAULTS.main,
     };
   }
   return { ...DEFAULTS };
 }
 
-/**
- * App shell — open, unboxed layout (media-first, fewer chrome boxes).
- */
 export function AppLayout({
   title,
   subtitle,
@@ -99,7 +99,6 @@ export function AppLayout({
   useLocationPublisher();
   useCommitmentReminders();
 
-  // Apply shared couple theme (or local fallback) on every authenticated screen
   useEffect(() => {
     const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
     if (fromCouple) {
