@@ -9,8 +9,7 @@ import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
 
 /**
- * App shell — Instagram-inspired sticky header + content column.
- * Soft BLUBLUB branding kept (critter, lilac header, cozy wash).
+ * App shell — open, unboxed layout (media-first, fewer chrome boxes).
  */
 export function AppLayout({
   title,
@@ -36,32 +35,32 @@ export function AppLayout({
 
   return (
     <div className="page-wash min-h-screen bg-background pb-28">
-      {/* Sticky top bar — IG-style clean header that stays while scrolling */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-3">
+      {/* Light sticky header — no card chrome */}
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-lg items-center gap-3 px-5 py-3.5">
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-xl font-extrabold tracking-tight">
+            <h1 className="truncate font-display text-[1.35rem] font-extrabold tracking-tight">
               {title}
             </h1>
             {subtitle ? (
               <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
-          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 ring-1 ring-border shadow-soft">
+          <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10">
             <Doodle
               critter={critter ?? critterFor(title)}
               pose={critterPose ?? poseFor(title)}
-              size={36}
+              size={34}
             />
           </span>
         </div>
       </header>
 
-      <div className="mx-auto max-w-lg px-4">
+      <div className="mx-auto max-w-lg px-5">
         {!user ? (
           <Link
             to="/profile"
-            className="card-soft press mt-3 flex items-center justify-between gap-3 px-4 py-3"
+            className="surface-quiet press mt-2 flex items-center justify-between gap-3 px-4 py-3"
           >
             <span className="text-xs text-muted-foreground">
               You&apos;re browsing signed out — your data won&apos;t load.
@@ -70,12 +69,12 @@ export function AppLayout({
           </Link>
         ) : null}
 
-        <div className="mt-3">
+        <div className="mt-2">
           {isLoading ? (
-            <div className="card-soft space-y-3 p-5">
+            <div className="space-y-3 py-6">
               <div className="h-4 w-2/3 animate-pulse rounded-full bg-muted" />
               <div className="h-4 w-full animate-pulse rounded-full bg-muted" />
-              <div className="h-24 w-full animate-pulse rounded-2xl bg-muted" />
+              <div className="h-28 w-full animate-pulse rounded-3xl bg-muted" />
             </div>
           ) : user && requireCouple && !coupleId ? (
             <PairingScreen />
