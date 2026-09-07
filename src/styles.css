@@ -5,15 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * BLUBLUB design system — pastel pink + sky palette
- * Exact source colors:
+ * BLUBLUB – fully editable design system
+ * All visual tokens are CSS variables and can be overridden at runtime
+ * by the Theme Editor (localStorage key: blublub-theme-v2).
+ *
+ * Exact source palette:
  *   Pink Orchid  #CDB4DB
  *   Pastel Petal #FFC8DD
  *   Blush Pop    #FFAFCC
  *   Icy Blue     #BDE0FE
  *   Sky Blue     #A2D2FF
- *
- * Theme Editor can override --primary, --lavender, --sky, --petal, --icy at runtime.
  */
 
 @theme inline {
@@ -79,16 +80,20 @@
 }
 
 :root {
-  --radius: 1.25rem;
+  /* ===== EDITABLE CORE ===== */
+  --radius: 1.25rem;                 /* global corner radius */
+  --card-radius: 1.25rem;            /* cards / tiles */
+  --panel-radius: 1.75rem;           /* big dark panels */
+  --shadow-strength: 0.28;           /* 0–1, multiplies soft shadow */
 
-  /* Exact palette (overridable by Theme Editor) */
+  /* Exact palette (overridable) */
   --blush: #FFAFCC;
   --petal: #FFC8DD;
   --orchid: #CDB4DB;
   --icy: #BDE0FE;
   --sky: #A2D2FF;
 
-  /* Semantic tokens – Light */
+  /* Semantic */
   --background: #FFF7FB;
   --foreground: #3F2A3A;
   --card: #FFFFFF;
@@ -138,6 +143,23 @@
   --sidebar-accent-foreground: #3F2A3A;
   --sidebar-border: #F5D6E4;
   --sidebar-ring: #FFAFCC;
+
+  /* Gradients – fully editable direction + stops */
+  --grad-hero-from: var(--primary);
+  --grad-hero-to: var(--lavender);
+  --grad-hero-angle: 140deg;
+
+  --grad-stat-from: var(--accent);
+  --grad-stat-to: var(--lavender);
+  --grad-stat-angle: 135deg;
+
+  --grad-featured-from: var(--lavender);
+  --grad-featured-to: var(--primary);
+  --grad-featured-angle: 135deg;
+
+  --grad-panel-from: #2A1F3D;
+  --grad-panel-to: #1A1528;
+  --grad-panel-angle: 180deg;
 }
 
 .dark {
@@ -187,6 +209,9 @@
   --sidebar-accent-foreground: #2A1A24;
   --sidebar-border: rgba(255, 255, 255, 0.10);
   --sidebar-ring: #FFAFCC;
+
+  --grad-panel-from: #2A1F3D;
+  --grad-panel-to: #1A1528;
 }
 
 @layer base {
@@ -202,10 +227,7 @@
     overscroll-behavior-y: none;
   }
 
-  h1,
-  h2,
-  h3,
-  .font-display {
+  h1, h2, h3, .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
@@ -215,25 +237,34 @@
   }
 }
 
+/* ===== BOX / CARD UTILITIES (all driven by variables) ===== */
 @utility card-soft {
-  border-radius: var(--radius-2xl);
+  border-radius: var(--card-radius);
   background-color: var(--color-card);
   box-shadow: none;
   border: none;
 }
 
 @utility card-raised {
-  border-radius: var(--radius-2xl);
+  border-radius: var(--card-radius);
   background-color: var(--color-card);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 10px 28px -12px color-mix(in oklab, var(--primary) calc(var(--shadow-strength) * 100%), transparent);
   border: none;
 }
 
 @utility card-outline {
-  border-radius: var(--radius-2xl);
+  border-radius: var(--card-radius);
   background-color: var(--color-card);
   box-shadow: none;
   border: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
+}
+
+@utility panel-dark {
+  border-radius: var(--panel-radius);
+  background-image: linear-gradient(var(--grad-panel-angle), var(--grad-panel-from), var(--grad-panel-to));
+  color: white;
+  overflow: hidden;
+  position: relative;
 }
 
 @utility list-row {
@@ -250,7 +281,7 @@
 
 @utility surface-quiet {
   background-color: color-mix(in oklab, var(--color-muted) 45%, transparent);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--card-radius);
   border: none;
   box-shadow: none;
 }
@@ -270,19 +301,24 @@
 /* Gradients */
 :root {
   --gradient-hero: linear-gradient(
-    140deg,
-    color-mix(in oklab, var(--primary) 22%, var(--card)) 0%,
-    color-mix(in oklab, var(--lavender) 20%, var(--card)) 100%
+    var(--grad-hero-angle),
+    color-mix(in oklab, var(--grad-hero-from) 22%, var(--card)) 0%,
+    color-mix(in oklab, var(--grad-hero-to) 20%, var(--card)) 100%
   );
   --gradient-stat: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--accent) 70%, var(--card)) 0%,
-    color-mix(in oklab, var(--lavender) 16%, var(--card)) 100%
+    var(--grad-stat-angle),
+    color-mix(in oklab, var(--grad-stat-from) 70%, var(--card)) 0%,
+    color-mix(in oklab, var(--grad-stat-to) 16%, var(--card)) 100%
   );
   --gradient-lilac: linear-gradient(
     140deg,
     color-mix(in oklab, var(--lavender) 24%, var(--card)) 0%,
     color-mix(in oklab, var(--primary) 14%, var(--card)) 100%
+  );
+  --gradient-featured: linear-gradient(
+    var(--grad-featured-angle),
+    var(--grad-featured-from),
+    var(--grad-featured-to)
   );
   --page-wash:
     radial-gradient(
@@ -299,33 +335,21 @@
 
 .dark {
   --gradient-hero: linear-gradient(
-    140deg,
-    color-mix(in oklab, var(--primary) 26%, var(--card)) 0%,
-    color-mix(in oklab, var(--lavender) 26%, var(--card)) 100%
+    var(--grad-hero-angle),
+    color-mix(in oklab, var(--grad-hero-from) 26%, var(--card)) 0%,
+    color-mix(in oklab, var(--grad-hero-to) 26%, var(--card)) 100%
   );
   --gradient-stat: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--accent) 75%, var(--card)) 0%,
-    color-mix(in oklab, var(--lavender) 22%, var(--card)) 100%
-  );
-  --gradient-lilac: linear-gradient(
-    140deg,
-    color-mix(in oklab, var(--lavender) 30%, var(--card)) 0%,
-    color-mix(in oklab, var(--primary) 18%, var(--card)) 100%
+    var(--grad-stat-angle),
+    color-mix(in oklab, var(--grad-stat-from) 75%, var(--card)) 0%,
+    color-mix(in oklab, var(--grad-stat-to) 22%, var(--card)) 100%
   );
 }
 
-@utility hero-gradient {
-  background-image: var(--gradient-hero);
-}
-
-@utility stat-gradient {
-  background-image: var(--gradient-stat);
-}
-
-@utility lilac-gradient {
-  background-image: var(--gradient-lilac);
-}
+@utility hero-gradient { background-image: var(--gradient-hero); }
+@utility stat-gradient { background-image: var(--gradient-stat); }
+@utility lilac-gradient { background-image: var(--gradient-lilac); }
+@utility featured-gradient { background-image: var(--gradient-featured); }
 
 @utility page-wash {
   background-image: var(--page-wash);
@@ -336,26 +360,27 @@
 
 @utility tile-pink {
   background-color: color-mix(in oklab, var(--primary) 18%, var(--card));
+  border-radius: var(--card-radius);
 }
-
 @utility tile-lilac {
   background-color: color-mix(in oklab, var(--lavender) 20%, var(--card));
+  border-radius: var(--card-radius);
 }
-
 @utility tile-peach {
   background-color: color-mix(in oklab, var(--petal) 55%, var(--card));
+  border-radius: var(--card-radius);
 }
-
 @utility tile-sky {
   background-color: color-mix(in oklab, var(--sky) 55%, var(--card));
+  border-radius: var(--card-radius);
 }
-
 @utility tile-cream {
   background-color: color-mix(in oklab, var(--cream) 80%, var(--card));
+  border-radius: var(--card-radius);
 }
-
 @utility tile-icy {
   background-color: color-mix(in oklab, var(--icy) 60%, var(--card));
+  border-radius: var(--card-radius);
 }
 
 @utility streak-chip {
@@ -378,38 +403,28 @@
   75% { transform: rotate(-6deg) scale(1.04); }
   100% { transform: rotate(0deg) scale(1); }
 }
-
 @keyframes dice-settle {
   0% { transform: scale(0.82) rotate(-8deg); opacity: 0.4; }
   60% { transform: scale(1.08) rotate(3deg); opacity: 1; }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
-
-@utility dice-rolling {
-  animation: dice-tumble 0.45s ease-in-out infinite;
-}
-
-@utility dice-settled {
-  animation: dice-settle 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
-}
+@utility dice-rolling { animation: dice-tumble 0.45s ease-in-out infinite; }
+@utility dice-settled { animation: dice-settle 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
 
 @keyframes room-float {
   0%, 100% { transform: translate(-50%, -50%); }
   50% { transform: translate(-50%, calc(-50% - 5px)); }
 }
-
 @keyframes room-sway {
   0%, 100% { transform: rotate(-2.5deg); }
   50% { transform: rotate(2.5deg); }
 }
-
 @keyframes room-pop {
   0% { opacity: 0; transform: translate(-50%, 6px) scale(0.9); }
   15% { opacity: 1; transform: translate(-50%, 0) scale(1); }
   80% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -14px) scale(0.98); }
 }
-
 .room-float { animation: room-float 4.2s ease-in-out infinite; }
 .room-sway { animation: room-sway 3.4s ease-in-out infinite; transform-origin: 50% 90%; }
 .room-pop { animation: room-pop 2.2s ease-out forwards; }
@@ -418,12 +433,10 @@
   .room-float, .room-sway { animation: none; }
 }
 
-#lovable-badge {
-  display: none !important;
-}
+#lovable-badge { display: none !important; }
 
 @utility post-card {
-  border-radius: var(--radius-2xl);
+  border-radius: var(--card-radius);
   background-color: transparent;
   box-shadow: none;
   border: none;
@@ -455,10 +468,7 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
 }
-
-.animate-pulse {
-  animation: soft-pulse 1.4s ease-in-out infinite;
-}
+.animate-pulse { animation: soft-pulse 1.4s ease-in-out infinite; }
 
 @utility feed-gap {
   display: flex;
