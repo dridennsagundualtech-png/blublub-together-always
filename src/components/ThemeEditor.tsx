@@ -382,7 +382,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
           >
             <span
               className={`grid size-11 place-items-center rounded-2xl text-base shadow-soft transition-transform ${
-                (map as Record<string, string | boolean>)[active] === c.hex
+                (map as unknown as Record<string, string | boolean>)[active] === c.hex
                   ? "scale-110 ring-2 ring-foreground ring-offset-2"
                   : ""
               }`}
