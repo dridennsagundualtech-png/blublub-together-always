@@ -87,12 +87,12 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
 
   useEffect(() => {
     if (!loaded) return;
-    applyColors(map);
-  }, [map, loaded]);
+    applyColors(map, pathname);
+  }, [map, loaded, pathname]);
 
   async function saveShared(next: ThemeMap) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    applyColors(next);
+    applyColors(next, pathname);
     if (!coupleId) {
       toast.message("Pair with your partner to share colors");
       return;
