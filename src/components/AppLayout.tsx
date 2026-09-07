@@ -1,12 +1,77 @@
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { BottomNav } from "@/components/BottomNav";
 import { Doodle, critterFor, poseFor, type Critter, type Pose } from "@/components/Doodles";
 import { PairingScreen } from "@/components/CoupleGate";
 import { useBadges } from "@/lib/badges";
-import { useAuthUser, useCoupleId, useProfile } from "@/lib/session";
+import { useAuthUser, useCouple, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
+
+const STORAGE_KEY = "blublub-theme-v2";
+
+const DEFAULTS = {
+  main: "#FFAFCC",
+  soft: "#FFC8DD",
+  purple: "#CDB4DB",
+  blue: "#A2D2FF",
+  gradFrom: "#CDB4DB",
+  gradTo: "#FFAFCC",
+};
+
+function applyColors(map: {
+  main: string;
+  soft: string;
+  purple: string;
+  blue: string;
+  gradFrom: string;
+  gradTo: string;
+}) {
+  const root = document.documentElement;
+  root.style.setProperty("--primary", map.main);
+  root.style.setProperty("--ring", map.main);
+  root.style.setProperty("--sidebar-primary", map.main);
+  root.style.setProperty("--chart-1", map.main);
+
+  root.style.setProperty("--petal", map.soft);
+  root.style.setProperty("--peach", map.soft);
+  root.style.setProperty("--secondary", map.soft);
+  root.style.setProperty("--chart-5", map.soft);
+
+  root.style.setProperty("--accent", map.purple);
+  root.style.setProperty("--lavender", map.purple);
+  root.style.setProperty("--sidebar-accent", map.purple);
+  root.style.setProperty("--chart-2", map.purple);
+
+  root.style.setProperty("--sky", map.blue);
+  root.style.setProperty("--icy", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
+  root.style.setProperty("--chart-3", map.blue);
+  root.style.setProperty("--chart-4", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
+
+  root.style.setProperty("--grad-featured-from", map.gradFrom);
+  root.style.setProperty("--grad-featured-to", map.gradTo);
+  root.style.setProperty("--grad-hero-from", map.gradFrom);
+  root.style.setProperty("--grad-hero-to", map.gradTo);
+  root.style.setProperty("--grad-panel-from", map.gradFrom);
+  root.style.setProperty("--grad-panel-to", map.gradTo);
+}
+
+function normalizeTheme(raw: unknown): typeof DEFAULTS {
+  if (!raw || typeof raw !== "object") return { ...DEFAULTS };
+  const o = raw as Record<string, string>;
+  if (o.main) {
+    return {
+      main: o.main || DEFAULTS.main,
+      soft: o.soft || DEFAULTS.soft,
+      purple: o.purple || DEFAULTS.purple,
+      blue: o.blue || DEFAULTS.blue,
+      gradFrom: o.gradFrom || o.purple || DEFAULTS.gradFrom,
+      gradTo: o.gradTo || o.main || DEFAULTS.gradTo,
+    };
+  }
+  return { ...DEFAULTS };
+}
 
 /**
  * App shell — open, unboxed layout (media-first, fewer chrome boxes).
@@ -29,13 +94,30 @@ export function AppLayout({
   const { isLoading } = useProfile();
   const { data: user } = useAuthUser();
   const coupleId = useCoupleId();
+  const { data: couple } = useCouple();
   const { data: badges } = useBadges();
   useLocationPublisher();
   useCommitmentReminders();
 
+  // Apply shared couple theme (or local fallback) on every authenticated screen
+  useEffect(() => {
+    const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
+    if (fromCouple) {
+      const next = normalizeTheme(fromCouple);
+      applyColors(next);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) applyColors(normalizeTheme(JSON.parse(raw)));
+    } catch {
+      // ignore
+    }
+  }, [couple]);
+
   return (
     <div className="page-wash min-h-screen bg-background pb-28">
-      {/* Light sticky header — no card chrome */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-5 py-3.5">
           <div className="min-w-0 flex-1">
