@@ -3,11 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
   ChevronRight,
+  CircleDollarSign,
+  Heart,
   HelpCircle,
   Images,
+  ListTodo,
   MessageCircle,
+  Moon,
   Sparkles,
+  Target,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
@@ -23,7 +29,7 @@ import {
   useProfile,
 } from "@/lib/session";
 import { FeelingTile } from "@/components/FeelingTile";
-import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
+import { useDerivedDates } from "@/lib/calendar-sources";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -169,12 +175,21 @@ function HomePage() {
 
   const { data: derived } = useDerivedDates();
 
+  const KIND_ICON: Record<string, LucideIcon> = {
+    event: CalendarDays,
+    anniversary: Heart,
+    date: Moon,
+    bill: CircleDollarSign,
+    bucket: Target,
+    cycle: Sparkles,
+  };
+
   const comingUp = [
     ...(upcoming ?? []).map((e) => ({
       id: e.id,
       date: e.event_date,
       title: e.title,
-      emoji: "📅",
+      kind: "event" as const,
     })),
     ...(derived ?? [])
       .filter((d) => d.kind !== "cycle" && d.date >= today)
@@ -182,7 +197,7 @@ function HomePage() {
         id: d.id,
         date: d.date,
         title: d.title,
-        emoji: DERIVED_META[d.kind].emoji,
+        kind: d.kind,
       })),
   ]
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -191,7 +206,7 @@ function HomePage() {
   return (
     <AppLayout title="Today" subtitle="Let's grow together" critter="cat">
       {/* 1. Relationship hero */}
-      <section className="card-soft relative overflow-hidden bg-gradient-to-b from-primary/12 via-lavender-soft/50 to-card px-5 pb-5 pt-6 text-center">
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-primary/12 via-lavender-soft/40 to-transparent px-5 pb-5 pt-6 text-center">
         <Doodle
           critter="penguin"
           pose="wave"
@@ -231,7 +246,7 @@ function HomePage() {
         {untilAnniversary !== null && untilAnniversary <= 30 ? (
           <p className="mt-3 text-xs font-bold text-primary">
             {untilAnniversary === 0
-              ? "Anniversary is today 🩷"
+              ? "Anniversary is today"
               : `${untilAnniversary} days until your anniversary`}
           </p>
         ) : null}
@@ -253,7 +268,7 @@ function HomePage() {
       <Link
         to="/questions"
         className={cn(
-          "card-soft press relative flex items-center gap-3 overflow-hidden p-4",
+          "card-raised press relative flex items-center gap-3 overflow-hidden p-4",
           questionStatus === "done" && "ring-1 ring-primary/30",
           questionStatus === "reveal" && "ring-1 ring-destructive/40",
         )}
@@ -309,7 +324,7 @@ function HomePage() {
         </Link>
       </div>
       {latestPhoto?.url ? (
-        <Link to="/photos" className="card-soft press block overflow-hidden p-0">
+        <Link to="/photos" className="press block overflow-hidden rounded-3xl p-0">
           <img
             src={latestPhoto.url}
             alt={latestPhoto.caption ?? "Memory"}
@@ -329,7 +344,7 @@ function HomePage() {
       ) : (
         <Link
           to="/photos"
-          className="card-soft press flex flex-col items-center gap-2 px-4 py-8 text-center"
+          className="surface-quiet press flex flex-col items-center gap-2 px-4 py-10 text-center"
         >
           <span className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
             <Images className="size-6" />
@@ -353,17 +368,20 @@ function HomePage() {
       </SectionTitle>
       {comingUp.length > 0 ? (
         <ul className="space-y-2">
-          {comingUp.map((e) => (
-            <li key={e.id} className="card-soft flex items-center gap-3 p-3.5">
-              <span className="tile-peach grid size-10 shrink-0 place-items-center rounded-2xl text-base">
-                {e.emoji === "📅" ? <CalendarDays className="size-5 text-primary" /> : e.emoji}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{e.title}</p>
-                <p className="text-xs text-muted-foreground">{e.date}</p>
-              </div>
-            </li>
-          ))}
+          {comingUp.map((e) => {
+            const Icon = KIND_ICON[e.kind] ?? CalendarDays;
+            return (
+              <li key={e.id} className="list-row">
+                <span className="tile-peach grid size-10 shrink-0 place-items-center rounded-2xl text-primary">
+                  <Icon className="size-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{e.title}</p>
+                  <p className="text-xs text-muted-foreground">{e.date}</p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <Card className="text-sm text-muted-foreground">
@@ -378,7 +396,7 @@ function HomePage() {
       <div className="grid grid-cols-3 gap-2 pb-2">
         <Link
           to="/chat"
-          className="card-soft press flex flex-col items-center gap-1.5 p-3 text-center"
+          className="surface-quiet press flex flex-col items-center gap-1.5 p-3 text-center"
         >
           <MessageCircle className="size-5 text-primary" />
           <span className="text-[11px] font-bold">Chat</span>
@@ -388,14 +406,14 @@ function HomePage() {
         </Link>
         <Link
           to="/photos"
-          className="card-soft press flex flex-col items-center gap-1.5 p-3 text-center"
+          className="surface-quiet press flex flex-col items-center gap-1.5 p-3 text-center"
         >
           <Images className="size-5 text-primary" />
           <span className="text-[11px] font-bold">Memories</span>
         </Link>
         <Link
           to="/calendar"
-          className="card-soft press flex flex-col items-center gap-1.5 p-3 text-center"
+          className="surface-quiet press flex flex-col items-center gap-1.5 p-3 text-center"
         >
           <CalendarDays className="size-5 text-primary" />
           <span className="text-[11px] font-bold">Calendar</span>
