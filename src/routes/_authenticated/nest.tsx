@@ -37,14 +37,24 @@ export const Route = createFileRoute("/_authenticated/nest")({
 });
 
 type QuickKind = null | "choose" | "diary" | "todo" | "bucket" | "expense";
+type FilterId = "all" | "diary" | "todo" | "bucket" | "budget";
 
 const MOODS = ["🩷", "😊", "🥹", "😴", "🔥", "😤", "🌧️", "✨"];
 const CATEGORIES = ["Food", "Home", "Travel", "Gifts", "Health", "Fun", "Other"] as const;
+
+const FILTERS: { id: FilterId; label: string; icon: typeof BookHeart }[] = [
+  { id: "all", label: "All", icon: Sparkles },
+  { id: "diary", label: "Diary", icon: BookHeart },
+  { id: "todo", label: "To-Dos", icon: ListChecks },
+  { id: "bucket", label: "Dreams", icon: Sparkles },
+  { id: "budget", label: "Money", icon: Wallet },
+];
 
 function NestPage() {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const [quick, setQuick] = useState<QuickKind>(null);
+  const [filter, setFilter] = useState<FilterId>("all");
   const premium = usePremiumAccess();
 
   const { data: diary } = useQuery({
@@ -111,121 +121,167 @@ function NestPage() {
     return e.paid_by === user?.id ? sum + half : sum - half;
   }, 0);
 
+  const showDiary = filter === "all" || filter === "diary";
+  const showTodo = filter === "all" || filter === "todo";
+  const showBucket = filter === "all" || filter === "bucket";
+  const showBudget = filter === "all" || filter === "budget";
+
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
-      <div className="grid gap-3">
-        <SummaryTile
-          className="tile-peach"
-          icon={<BookHeart className="size-3.5 text-primary" />}
-          label="Diary"
-          value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
-          detail={diaryStreak > 0 ? `${diaryStreak}-day streak` : "Write something small today"}
-        />
-        <div className="grid grid-cols-2 gap-3">
-          <SummaryTile
-            className="tile-pink"
-            icon={<ListChecks className="size-3.5 text-primary" />}
-            label="To-Dos"
-            value={openTodos === 0 ? "All done" : `${openTodos} left to do`}
-          />
-          <SummaryTile
-            className="tile-lilac"
-            icon={<Sparkles className="size-3.5 text-accent" />}
-            label="Bucket List"
-            value={`${bucketDone}/${bucketTotal} done`}
-          />
+      {/* ===== Sleep Stories style dark panel ===== */}
+      <div
+        className="relative overflow-hidden px-4 pb-6 pt-5 text-white"
+        style={{
+          borderRadius: "var(--panel-radius, 1.75rem)",
+          background: "linear-gradient(180deg, var(--grad-panel-from, #2A1F3D), var(--grad-panel-to, #1A1528))",
+        }}
+      >
+        {/* soft glow blobs */}
+        <div className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-[#CDB4DB]/25 blur-3xl" />
+        <div className="pointer-events-none absolute -left-10 bottom-4 size-28 rounded-full bg-[#FFAFCC]/20 blur-3xl" />
+        <div className="pointer-events-none absolute right-16 top-24 size-20 rounded-full bg-[#A2D2FF]/15 blur-2xl" />
+
+        {/* Header */}
+        <div className="relative text-center">
+          <p className="font-display text-[1.65rem] font-bold leading-tight">Nest Stories</p>
+          <p className="mx-auto mt-1 max-w-[17rem] text-[11px] leading-snug text-white/65">
+            Soothing tools to keep your shared life cozy and close
+          </p>
         </div>
-        <SummaryTile
-          className="tile-icy"
-          icon={<Wallet className="size-3.5 text-sky" />}
-          label="Budget"
-          value={
-            !premium ? (
-              "Premium space"
-            ) : Math.abs(balance) < 0.01 ? (
-              "All square"
-            ) : (
-              <>
-                <Money value={Math.abs(balance)} /> {balance > 0 ? "owed to you" : "you owe"}
-              </>
-            )
-          }
-        />
+
+        {/* Filter chips – exact Sleep Stories layout */}
+        <div className="relative mt-5 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+          {FILTERS.map((f) => {
+            const active = filter === f.id;
+            const Icon = f.icon;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFilter(f.id)}
+                className="press flex shrink-0 flex-col items-center gap-1.5"
+              >
+                <span
+                  className="grid size-12 place-items-center rounded-full transition-colors"
+                  style={{
+                    backgroundColor: active ? "#FFAFCC" : "rgba(255,255,255,0.12)",
+                    color: active ? "#3F2A3A" : "rgba(255,255,255,0.85)",
+                  }}
+                >
+                  <Icon className="size-5" />
+                </span>
+                <span className="text-[10px] font-semibold text-white/80">{f.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Featured card */}
+        {showDiary && (
+          <Link
+            to="/diary"
+            className="press relative mt-5 block overflow-hidden p-5"
+            style={{
+              borderRadius: "1.35rem",
+              background: "linear-gradient(135deg, #CDB4DB 0%, #FFAFCC 100%)",
+              color: "#3F2A3A",
+            }}
+          >
+            <div className="relative z-10">
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Featured</p>
+              <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
+              <p className="mt-1 max-w-[14rem] text-xs leading-snug opacity-80">
+                {lastEntry
+                  ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 48)}`
+                  : "Write a small note for each other tonight"}
+              </p>
+              <span
+                className="mt-4 inline-flex rounded-full bg-white px-5 py-1.5 text-xs font-bold"
+                style={{ color: "#3F2A3A" }}
+              >
+                Open
+              </span>
+            </div>
+            <BookHeart className="absolute -bottom-2 -right-2 size-24 opacity-15" />
+          </Link>
+        )}
+
+        {/* Two smaller cards */}
+        <div className="relative mt-3 grid grid-cols-2 gap-3">
+          {showTodo && (
+            <Link
+              to="/todos"
+              className="press flex min-h-[140px] flex-col justify-between p-4"
+              style={{
+                borderRadius: "1.25rem",
+                backgroundColor: "#FFC8DD",
+                color: "#3F2A3A",
+              }}
+            >
+              <ListChecks className="size-8 opacity-80" />
+              <div>
+                <p className="font-display text-[15px] font-bold">To-Dos</p>
+                <p className="text-[11px] opacity-70">
+                  {openTodos === 0 ? "All clear" : `${openTodos} open`}
+                </p>
+              </div>
+            </Link>
+          )}
+          {showBucket && (
+            <Link
+              to="/bucket"
+              className="press flex min-h-[140px] flex-col justify-between p-4"
+              style={{
+                borderRadius: "1.25rem",
+                backgroundColor: "#CDB4DB",
+                color: "#3F2A3A",
+              }}
+            >
+              <Sparkles className="size-8 opacity-80" />
+              <div>
+                <p className="font-display text-[15px] font-bold">Bucket List</p>
+                <p className="text-[11px] opacity-70">
+                  {bucketDone}/{bucketTotal} done
+                </p>
+              </div>
+            </Link>
+          )}
+          {showBudget && (
+            <Link
+              to="/budget"
+              className="press col-span-2 flex min-h-[100px] flex-col justify-between p-4"
+              style={{
+                borderRadius: "1.25rem",
+                backgroundColor: "#BDE0FE",
+                color: "#3F2A3A",
+              }}
+            >
+              <Wallet className="size-7 opacity-80" />
+              <div>
+                <p className="font-display text-[15px] font-bold">Budget</p>
+                <p className="text-[11px] opacity-70">
+                  {!premium
+                    ? "Premium space"
+                    : Math.abs(balance) < 0.01
+                      ? "All square"
+                      : "Shared expenses & goals"}
+                </p>
+              </div>
+            </Link>
+          )}
+        </div>
       </div>
 
-      {/* Fully variable-driven panel */}
-      <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
-        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[var(--lavender)]/30 blur-2xl" />
-        <div className="pointer-events-none absolute -left-8 bottom-8 size-24 rounded-full bg-[var(--primary)]/20 blur-2xl" />
-        <div className="pointer-events-none absolute right-10 top-20 size-16 rounded-full bg-[var(--sky)]/15 blur-xl" />
-
-        <div className="relative text-center">
-          <p className="font-display text-2xl font-bold">Nest tools</p>
-          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
-            Diary, lists, dreams and money — kept in one cozy place
-          </p>
+      {/* Quick summary outside the dark panel */}
+      <p className="mb-2 mt-5 font-display text-base font-bold text-foreground">Right now</p>
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="rounded-[1.1rem] bg-[#FFC8DD]/45 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Diary streak</p>
+          <p className="mt-0.5 text-sm font-bold">{diaryStreak > 0 ? `${diaryStreak} days` : "Start today"}</p>
         </div>
-
-        <Link
-          to="/diary"
-          className="press featured-gradient relative mt-5 block overflow-hidden p-5 text-[var(--foreground)]"
-          style={{ borderRadius: "var(--card-radius)" }}
-        >
-          <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Featured</p>
-          <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
-          <p className="mt-1 max-w-[14rem] text-xs opacity-80">
-            {lastEntry
-              ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 42)}`
-              : "Write a small note for each other"}
-          </p>
-          <span className="mt-4 inline-flex rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-[var(--foreground)]">
-            Open
-          </span>
-          <BookHeart className="absolute bottom-4 right-4 size-14 opacity-20" />
-        </Link>
-
-        <div className="relative mt-3 grid grid-cols-2 gap-3">
-          <Link
-            to="/todos"
-            className="press tile-peach flex min-h-[130px] flex-col justify-between p-4 text-foreground"
-          >
-            <ListChecks className="size-7 opacity-80" />
-            <div>
-              <p className="font-display text-base font-bold">To-Dos</p>
-              <p className="text-[11px] opacity-70">
-                {openTodos === 0 ? "All clear" : `${openTodos} open`}
-              </p>
-            </div>
-          </Link>
-          <Link
-            to="/bucket"
-            className="press tile-lilac flex min-h-[130px] flex-col justify-between p-4 text-foreground"
-          >
-            <Sparkles className="size-7 opacity-80" />
-            <div>
-              <p className="font-display text-base font-bold">Bucket List</p>
-              <p className="text-[11px] opacity-70">
-                {bucketDone}/{bucketTotal} done
-              </p>
-            </div>
-          </Link>
-          <Link
-            to="/budget"
-            className="press tile-icy col-span-2 flex min-h-[100px] flex-col justify-between p-4 text-foreground"
-          >
-            <Wallet className="size-6 opacity-80" />
-            <div>
-              <p className="font-display text-base font-bold">Budget</p>
-              <p className="text-[11px] opacity-70">
-                {!premium
-                  ? "Premium space"
-                  : Math.abs(balance) < 0.01
-                    ? "All square"
-                    : "Shared expenses & goals"}
-              </p>
-            </div>
-          </Link>
+        <div className="rounded-[1.1rem] bg-[#BDE0FE]/50 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Open to-dos</p>
+          <p className="mt-0.5 text-sm font-bold">{openTodos === 0 ? "None" : openTodos}</p>
         </div>
       </div>
 
@@ -257,31 +313,6 @@ function NestPage() {
   );
 }
 
-function SummaryTile({
-  icon,
-  className,
-  label,
-  value,
-  detail,
-}: {
-  icon: React.ReactNode;
-  className: string;
-  label: string;
-  value: React.ReactNode;
-  detail?: string;
-}) {
-  return (
-    <div className={`p-4 ${className}`}>
-      <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-        {icon}
-        {label}
-      </span>
-      <span className="mt-1.5 block text-sm font-bold leading-snug">{value}</span>
-      {detail ? <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span> : null}
-    </div>
-  );
-}
-
 function ChoiceRow({
   icon,
   title,
@@ -297,7 +328,7 @@ function ChoiceRow({
       onClick={onClick}
       className="press card-soft flex items-center gap-3 p-4 text-left"
     >
-      <span className="tile-lilac grid size-11 shrink-0 place-items-center rounded-2xl text-primary">
+      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
         {icon}
       </span>
       <span className="text-sm font-bold">{title}</span>
