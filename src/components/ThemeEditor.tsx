@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouterState } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Palette, RotateCcw, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, PrimaryButton } from "@/components/ui-kit";
 import { useCouple, useCoupleId } from "@/lib/session";
+import {
+  applyColors,
+  normalizeTheme,
+  THEME_DEFAULTS as DEFAULTS,
+  THEME_SCREENS,
+  THEME_STORAGE_KEY as STORAGE_KEY,
+  type ThemeMap,
+} from "@/lib/theme";
+
+export type { ThemeMap };
+export { applyColors };
 
 const COLORS = [
   { id: "blush", hex: "#FFAFCC", label: "Blush", emoji: "💗" },
@@ -29,85 +41,6 @@ type Slot =
   | "boxGradFrom"
   | "boxGradTo";
 
-export type ThemeMap = {
-  main: string;
-  soft: string;
-  purple: string;
-  blue: string;
-  gradFrom: string;
-  gradTo: string;
-  boxesGradient: boolean;
-  boxGradFrom: string;
-  boxGradTo: string;
-};
-
-const DEFAULTS: ThemeMap = {
-  main: "#FFAFCC",
-  soft: "#FFC8DD",
-  purple: "#CDB4DB",
-  blue: "#A2D2FF",
-  gradFrom: "#CDB4DB",
-  gradTo: "#FFAFCC",
-  boxesGradient: false,
-  boxGradFrom: "#FFFFFF",
-  boxGradTo: "#FFC8DD",
-};
-
-const STORAGE_KEY = "blublub-theme-v2";
-
-export function applyColors(map: ThemeMap) {
-  const root = document.documentElement;
-  root.style.setProperty("--primary", map.main);
-  root.style.setProperty("--ring", map.main);
-  root.style.setProperty("--sidebar-primary", map.main);
-  root.style.setProperty("--chart-1", map.main);
-
-  root.style.setProperty("--petal", map.soft);
-  root.style.setProperty("--peach", map.soft);
-  root.style.setProperty("--secondary", map.soft);
-  root.style.setProperty("--chart-5", map.soft);
-
-  root.style.setProperty("--accent", map.purple);
-  root.style.setProperty("--lavender", map.purple);
-  root.style.setProperty("--sidebar-accent", map.purple);
-  root.style.setProperty("--chart-2", map.purple);
-
-  root.style.setProperty("--sky", map.blue);
-  root.style.setProperty("--icy", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
-  root.style.setProperty("--chart-3", map.blue);
-  root.style.setProperty("--chart-4", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
-
-  root.style.setProperty("--grad-featured-from", map.gradFrom);
-  root.style.setProperty("--grad-featured-to", map.gradTo);
-  root.style.setProperty("--grad-hero-from", map.gradFrom);
-  root.style.setProperty("--grad-hero-to", map.gradTo);
-  root.style.setProperty("--grad-panel-from", map.gradFrom);
-  root.style.setProperty("--grad-panel-to", map.gradTo);
-
-  root.style.setProperty("--box-grad-from", map.boxGradFrom || map.soft);
-  root.style.setProperty("--box-grad-to", map.boxGradTo || map.main);
-  document.documentElement.classList.toggle("boxes-gradient", !!map.boxesGradient);
-}
-
-function normalizeTheme(raw: unknown): ThemeMap {
-  if (!raw || typeof raw !== "object") return { ...DEFAULTS };
-  const o = raw as Record<string, unknown>;
-  if (typeof o.main === "string") {
-    return {
-      main: (o.main as string) || DEFAULTS.main,
-      soft: (o.soft as string) || DEFAULTS.soft,
-      purple: (o.purple as string) || DEFAULTS.purple,
-      blue: (o.blue as string) || DEFAULTS.blue,
-      gradFrom: (o.gradFrom as string) || (o.purple as string) || DEFAULTS.gradFrom,
-      gradTo: (o.gradTo as string) || (o.main as string) || DEFAULTS.gradTo,
-      boxesGradient: !!o.boxesGradient,
-      boxGradFrom: (o.boxGradFrom as string) || DEFAULTS.soft,
-      boxGradTo: (o.boxGradTo as string) || DEFAULTS.main,
-    };
-  }
-  return { ...DEFAULTS };
-}
-
 const SLOT_META: { id: Slot; title: string; hint: string }[] = [
   { id: "main", title: "Main color", hint: "Buttons & highlights" },
   { id: "soft", title: "Soft color", hint: "Gentle cards" },
@@ -118,6 +51,7 @@ const SLOT_META: { id: Slot; title: string; hint: string }[] = [
   { id: "boxGradFrom", title: "Box gradient start", hint: "All boxes" },
   { id: "boxGradTo", title: "Box gradient end", hint: "All boxes" },
 ];
+
 
 export function ThemeEditor({ compact = false }: { compact?: boolean }) {
   const coupleId = useCoupleId();
