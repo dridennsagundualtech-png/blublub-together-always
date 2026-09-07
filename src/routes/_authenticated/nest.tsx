@@ -115,33 +115,33 @@ function NestPage() {
 
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      {/* Right now — kept */}
-      <p className="mb-3 font-display text-lg font-bold text-[#3F414E]">Right now</p>
+      {/* Right now summary */}
+      <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
       <div className="grid gap-3">
         <SummaryTile
-          tint="bg-[#E0D7FF]"
-          icon={<BookHeart className="size-3.5 text-[#8E97FD]" />}
+          tint="bg-[#FFC8DD]/40"
+          icon={<BookHeart className="size-3.5 text-[#FFAFCC]" />}
           label="Diary"
           value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
           detail={diaryStreak > 0 ? `${diaryStreak}-day streak` : "Write something small today"}
         />
         <div className="grid grid-cols-2 gap-3">
           <SummaryTile
-            tint="bg-[#FECFCF]"
-            icon={<ListChecks className="size-3.5 text-[#F86B8F]" />}
+            tint="bg-[#FFAFCC]/35"
+            icon={<ListChecks className="size-3.5 text-[#FFAFCC]" />}
             label="To-Dos"
             value={openTodos === 0 ? "All done" : `${openTodos} left to do`}
           />
           <SummaryTile
-            tint="bg-[#FFE4C8]"
-            icon={<Sparkles className="size-3.5 text-[#C47A2C]" />}
+            tint="bg-[#CDB4DB]/35"
+            icon={<Sparkles className="size-3.5 text-[#CDB4DB]" />}
             label="Bucket List"
             value={`${bucketDone}/${bucketTotal} done`}
           />
         </div>
         <SummaryTile
-          tint="bg-[#D4E5FF]"
-          icon={<Wallet className="size-3.5 text-[#5B6CFF]" />}
+          tint="bg-[#BDE0FE]/45"
+          icon={<Wallet className="size-3.5 text-[#A2D2FF]" />}
           label="Budget"
           value={
             !premium ? (
@@ -158,9 +158,10 @@ function NestPage() {
       </div>
 
       {/* Sleep-stories style nest tools panel */}
-      <div className="relative mt-6 overflow-hidden rounded-[1.75rem] bg-[#1F2757] px-4 pb-5 pt-6 text-white">
-        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[#8E97FD]/25 blur-2xl" />
-        <div className="pointer-events-none absolute -left-8 bottom-8 size-24 rounded-full bg-[#F86B8F]/15 blur-2xl" />
+      <div className="relative mt-6 overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2A1F3D] to-[#1A1528] px-4 pb-5 pt-6 text-white">
+        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[#CDB4DB]/30 blur-2xl" />
+        <div className="pointer-events-none absolute -left-8 bottom-8 size-24 rounded-full bg-[#FFAFCC]/20 blur-2xl" />
+        <div className="pointer-events-none absolute right-10 top-20 size-16 rounded-full bg-[#A2D2FF]/15 blur-xl" />
 
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Nest tools</p>
@@ -172,26 +173,26 @@ function NestPage() {
         {/* Featured — diary */}
         <Link
           to="/diary"
-          className="press relative mt-5 block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#3D4FBF] to-[#8E97FD] p-5"
+          className="press relative mt-5 block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#CDB4DB] to-[#FFAFCC] p-5 text-[#3F2A3A]"
         >
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">Featured</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#3F2A3A]/70">Featured</p>
           <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
-          <p className="mt-1 max-w-[14rem] text-xs text-white/80">
+          <p className="mt-1 max-w-[14rem] text-xs text-[#3F2A3A]/80">
             {lastEntry
               ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 42)}`
               : "Write a small note for each other"}
           </p>
-          <span className="mt-4 inline-flex rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#1F2757]">
+          <span className="mt-4 inline-flex rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-[#3F2A3A]">
             Open
           </span>
-          <BookHeart className="absolute bottom-4 right-4 size-14 text-white/20" />
+          <BookHeart className="absolute bottom-4 right-4 size-14 text-[#3F2A3A]/20" />
         </Link>
 
         {/* Mixed tiles */}
         <div className="relative mt-3 grid grid-cols-2 gap-3">
           <Link
             to="/todos"
-            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FECFCF] p-4 text-[#3F414E]"
+            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FFC8DD] p-4 text-[#3F2A3A]"
           >
             <ListChecks className="size-7 opacity-80" />
             <div>
@@ -203,7 +204,7 @@ function NestPage() {
           </Link>
           <Link
             to="/bucket"
-            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FFE4C8] p-4 text-[#3F414E]"
+            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#CDB4DB] p-4 text-[#3F2A3A]"
           >
             <Sparkles className="size-7 opacity-80" />
             <div>
@@ -215,7 +216,7 @@ function NestPage() {
           </Link>
           <Link
             to="/budget"
-            className="press col-span-2 flex min-h-[100px] flex-col justify-between rounded-[1.25rem] bg-[#AFDBC5] p-4 text-[#3F414E]"
+            className="press col-span-2 flex min-h-[100px] flex-col justify-between rounded-[1.25rem] bg-[#BDE0FE] p-4 text-[#3F2A3A]"
           >
             <Wallet className="size-6 opacity-80" />
             <div>
@@ -285,35 +286,6 @@ function SummaryTile({
   );
 }
 
-function ToolRow({
-  to,
-  icon,
-  tint,
-  label,
-  hint,
-}: {
-  to: string;
-  icon: React.ReactNode;
-  tint: string;
-  label: string;
-  hint: string;
-}) {
-  return (
-    <li>
-      <Link to={to} className="card-soft press flex items-center gap-3 p-4">
-        <span className={`grid size-11 shrink-0 place-items-center rounded-2xl ${tint} text-primary`}>
-          {icon}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold">{label}</span>
-          <span className="block truncate text-xs text-muted-foreground">{hint}</span>
-        </span>
-        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-      </Link>
-    </li>
-  );
-}
-
 function ChoiceRow({
   icon,
   title,
@@ -375,26 +347,22 @@ function QuickDiary({ onDone }: { onDone: () => void }) {
               key={m}
               type="button"
               onClick={() => setMood(m)}
-              className={`press grid size-10 place-items-center rounded-2xl text-lg ${
-                mood === m ? "bg-primary text-primary-foreground" : "bg-muted"
-              }`}
+              className={`press size-10 rounded-full text-lg ${mood === m ? "bg-primary/30 ring-2 ring-primary" : "bg-muted"}`}
             >
               {m}
             </button>
           ))}
         </div>
         <Field label="Title (optional)">
-          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={80} />
         </Field>
-        <Field label="Entry">
-          <TextArea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            maxLength={4000}
-            placeholder="Today felt like…"
-          />
+        <Field label="What happened?">
+          <TextArea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
         </Field>
-        <PrimaryButton disabled={!body.trim() || add.isPending} onClick={() => add.mutate()}>
+        <PrimaryButton
+          disabled={!body.trim() || add.isPending}
+          onClick={() => add.mutate()}
+        >
           Save entry
         </PrimaryButton>
       </div>
@@ -410,15 +378,18 @@ function QuickTodo({ onDone }: { onDone: () => void }) {
 
   const add = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("todos")
-        .insert({ couple_id: coupleId!, created_by: user!.id, title: title.trim() });
+      const { error } = await supabase.from("todos").insert({
+        couple_id: coupleId!,
+        created_by: user!.id,
+        title: title.trim(),
+        done: false,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["todos"] });
       void qc.invalidateQueries({ queryKey: ["nest-todos"] });
-      toast.success("Added to the list");
+      toast.success("To-do added");
       onDone();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -428,14 +399,12 @@ function QuickTodo({ onDone }: { onDone: () => void }) {
     <Sheet title="New to-do" onClose={onDone}>
       <div className="space-y-3 pb-2">
         <Field label="What needs doing?">
-          <TextInput
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={140}
-            placeholder="Buy groceries"
-          />
+          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
         </Field>
-        <PrimaryButton disabled={!title.trim() || add.isPending} onClick={() => add.mutate()}>
+        <PrimaryButton
+          disabled={!title.trim() || add.isPending}
+          onClick={() => add.mutate()}
+        >
           Add to-do
         </PrimaryButton>
       </div>
@@ -448,8 +417,6 @@ function QuickBucket({ onDone }: { onDone: () => void }) {
   const { data: user } = useAuthUser();
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
-  const [targetDate, setTargetDate] = useState("");
 
   const add = useMutation({
     mutationFn: async () => {
@@ -457,16 +424,14 @@ function QuickBucket({ onDone }: { onDone: () => void }) {
         couple_id: coupleId!,
         created_by: user!.id,
         title: title.trim(),
-        notes: notes.trim() || null,
-        target_date: targetDate || null,
+        done: false,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["bucket"] });
       void qc.invalidateQueries({ queryKey: ["nest-bucket"] });
-      void qc.invalidateQueries({ queryKey: ["derived-dates"] });
-      toast.success("Added to the bucket list");
+      toast.success("Dream added");
       onDone();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -475,22 +440,14 @@ function QuickBucket({ onDone }: { onDone: () => void }) {
   return (
     <Sheet title="New bucket list item" onClose={onDone}>
       <div className="space-y-3 pb-2">
-        <Field label="Dream">
-          <TextInput
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={140}
-            placeholder="See the northern lights"
-          />
+        <Field label="A dream for us">
+          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
         </Field>
-        <Field label="Notes (optional)">
-          <TextArea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} />
-        </Field>
-        <Field label="Target date (optional)">
-          <TextInput type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
-        </Field>
-        <PrimaryButton disabled={!title.trim() || add.isPending} onClick={() => add.mutate()}>
-          Add to bucket list
+        <PrimaryButton
+          disabled={!title.trim() || add.isPending}
+          onClick={() => add.mutate()}
+        >
+          Add dream
         </PrimaryButton>
       </div>
     </Sheet>
@@ -500,27 +457,22 @@ function QuickBucket({ onDone }: { onDone: () => void }) {
 function QuickExpense({ onDone }: { onDone: () => void }) {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
-  const { data: members } = useMembers();
+  const members = useMembers();
   const qc = useQueryClient();
-  const navigate = useNavigate();
-  const premium = usePremiumAccess();
-  const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
-  const [paidBy, setPaidBy] = useState("");
+  const [note, setNote] = useState("");
+  const [paidBy, setPaidBy] = useState(user?.id ?? "");
 
   const add = useMutation({
     mutationFn: async () => {
-      const value = Number(amount);
-      if (!Number.isFinite(value) || value <= 0) throw new Error("Enter a valid amount");
       const { error } = await supabase.from("expenses").insert({
         couple_id: coupleId!,
-        created_by: user!.id,
-        paid_by: paidBy || user!.id,
-        description: description.trim(),
+        amount: Number(amount),
         category,
-        amount: value,
-        spent_on: todayISO(),
+        note: note.trim() || null,
+        paid_by: paidBy,
+        created_by: user!.id,
       });
       if (error) throw error;
     },
@@ -533,77 +485,44 @@ function QuickExpense({ onDone }: { onDone: () => void }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (!premium) {
-    return (
-      <Sheet title="Expense" onClose={onDone}>
-        <Card className="text-sm text-muted-foreground">
-          The budget tracker is a premium space. Unlock it to log expenses.
-        </Card>
-        <PrimaryButton
-          className="mt-3"
-          onClick={() => {
-            onDone();
-            void navigate({ to: "/budget" });
-          }}
-        >
-          See Budget
-        </PrimaryButton>
-      </Sheet>
-    );
-  }
-
   return (
-    <Sheet title="Log an expense" onClose={onDone}>
+    <Sheet title="Log expense" onClose={onDone}>
       <div className="space-y-3 pb-2">
-        <Field label="What for?">
+        <Field label="Amount">
           <TextInput
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={140}
-            placeholder="Groceries"
+            type="number"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
           />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Amount">
-            <TextInput
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </Field>
-          <Field label="Category">
-            <SelectInput
-              value={category}
-              onChange={(e) => setCategory((e.target as HTMLSelectElement).value)}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </SelectInput>
-          </Field>
-        </div>
-        <Field label="Paid by">
-          <SelectInput
-            value={paidBy || user?.id || ""}
-            onChange={(e) => setPaidBy((e.target as HTMLSelectElement).value)}
-          >
-            {(members ?? []).map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.id === user?.id ? "You" : (m.display_name ?? "Partner")}
+        <Field label="Category">
+          <SelectInput value={category} onChange={(e) => setCategory(e.target.value)}>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
               </option>
             ))}
           </SelectInput>
         </Field>
+        <Field label="Paid by">
+          <SelectInput value={paidBy} onChange={(e) => setPaidBy(e.target.value)}>
+            {(members ?? []).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.display_name ?? "Partner"}
+              </option>
+            ))}
+          </SelectInput>
+        </Field>
+        <Field label="Note (optional)">
+          <TextInput value={note} onChange={(e) => setNote(e.target.value)} maxLength={80} />
+        </Field>
         <PrimaryButton
-          disabled={!description.trim() || !amount || add.isPending}
+          disabled={!amount || Number(amount) <= 0 || add.isPending}
           onClick={() => add.mutate()}
         >
-          Add expense
+          Save expense
         </PrimaryButton>
       </div>
     </Sheet>

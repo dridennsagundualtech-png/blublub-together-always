@@ -37,45 +37,6 @@ export const Route = createFileRoute("/_authenticated/wellbeing")({
   component: WellbeingPage,
 });
 
-const TOOLS = [
-  {
-    id: "all",
-    to: "/cooldown",
-    label: "Cool-Down",
-    hint: "Pause & reconnect",
-    icon: HeartHandshake,
-    featured: true,
-    accent: "from-[#5B6CFF] to-[#8E97FD]",
-  },
-  {
-    id: "cycle",
-    to: "/period",
-    label: "Cycle",
-    hint: "Phase & predictions",
-    icon: Droplets,
-    tile: "bg-[#FFC97E]",
-    text: "text-[#3F414E]",
-  },
-  {
-    id: "commit",
-    to: "/commitments",
-    label: "Commitments",
-    hint: "Gentle streaks",
-    icon: Target,
-    tile: "bg-[#AFDBC5]",
-    text: "text-[#3F414E]",
-  },
-  {
-    id: "map",
-    to: "/map",
-    label: "Where We Are",
-    hint: "Live location",
-    icon: MapPin,
-    tile: "bg-[#E0D7FF]",
-    text: "text-[#3F414E]",
-  },
-] as const;
-
 type FilterId = "all" | "feel" | "cycle" | "map" | "commit";
 
 const FILTERS: { id: FilterId; label: string; icon: typeof LayoutGrid }[] = [
@@ -207,50 +168,51 @@ function WellbeingPage() {
 
   return (
     <AppLayout title="Care" subtitle="Taking care of each other" critter="seal">
-      {/* —— Right now (kept) —— */}
-      <p className="mb-3 font-display text-lg font-bold text-[#3F414E]">Right now</p>
+      {/* Right now */}
+      <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
       <div className="grid gap-3">
         <Link
           to="/cooldown"
-          className="press block rounded-[1.25rem] bg-[#D4E5FF] p-4"
+          className="press block rounded-[1.25rem] bg-[#BDE0FE]/50 p-4"
         >
-          <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#5B6CFF]">
+          <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#A2D2FF]">
             <HeartHandshake className="size-3.5" />
             Feelings
           </span>
-          <span className="mt-1.5 block text-sm font-bold leading-snug text-[#3F414E]">
+          <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
             {coolValue}
           </span>
-          <span className="mt-0.5 block text-xs text-[#A1A4B2]">{coolDetail}</span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">{coolDetail}</span>
         </Link>
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/period" className="press block rounded-[1.25rem] bg-[#FFE4C8] p-4">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#C47A2C]">
+          <Link to="/period" className="press block rounded-[1.25rem] bg-[#FFC8DD]/40 p-4">
+            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#FFAFCC]">
               <Droplets className="size-3.5" />
               Cycle
             </span>
-            <span className="mt-1.5 block text-sm font-bold leading-snug text-[#3F414E]">
+            <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
               {cycleValue}
             </span>
-            <span className="mt-0.5 block text-xs text-[#A1A4B2]">{cycleDetail}</span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">{cycleDetail}</span>
           </Link>
-          <Link to="/map" className="press block rounded-[1.25rem] bg-[#FFF3D6] p-4">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#B8860B]">
+          <Link to="/map" className="press block rounded-[1.25rem] bg-[#CDB4DB]/35 p-4">
+            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#CDB4DB]">
               <MapPin className="size-3.5" />
               Distance
             </span>
-            <span className="mt-1.5 block text-sm font-bold leading-snug text-[#3F414E]">
+            <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
               {distValue}
             </span>
-            <span className="mt-0.5 block text-xs text-[#A1A4B2]">{distDetail}</span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">{distDetail}</span>
           </Link>
         </div>
       </div>
 
-      {/* —— Sleep-stories style tools —— */}
-      <div className="relative mt-6 overflow-hidden rounded-[1.75rem] bg-[#1F2757] px-4 pb-5 pt-6 text-white">
-        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[#8E97FD]/25 blur-2xl" />
-        <div className="pointer-events-none absolute -left-8 bottom-10 size-24 rounded-full bg-[#5B6CFF]/20 blur-2xl" />
+      {/* Sleep-stories style tools panel */}
+      <div className="relative mt-6 overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2A1F3D] to-[#1A1528] px-4 pb-5 pt-6 text-white">
+        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[#CDB4DB]/30 blur-2xl" />
+        <div className="pointer-events-none absolute -left-8 bottom-10 size-24 rounded-full bg-[#FFAFCC]/20 blur-2xl" />
+        <div className="pointer-events-none absolute right-12 top-24 size-14 rounded-full bg-[#A2D2FF]/15 blur-xl" />
 
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Care tools</p>
@@ -259,7 +221,7 @@ function WellbeingPage() {
           </p>
         </div>
 
-        {/* Filter chips */}
+        {/* Filter chips – Sleep Stories style */}
         <div className="relative mt-5 flex gap-2 overflow-x-auto pb-1">
           {FILTERS.map((f) => {
             const active = filter === f.id;
@@ -269,14 +231,12 @@ function WellbeingPage() {
                 key={f.id}
                 type="button"
                 onClick={() => setFilter(f.id)}
-                className={cn(
-                  "press flex shrink-0 flex-col items-center gap-1",
-                )}
+                className="press flex shrink-0 flex-col items-center gap-1"
               >
                 <span
                   className={cn(
                     "grid size-11 place-items-center rounded-full",
-                    active ? "bg-[#8E97FD] text-white" : "bg-white/10 text-white/80",
+                    active ? "bg-[#FFAFCC] text-[#3F2A3A]" : "bg-white/10 text-white/80",
                   )}
                 >
                   <Icon className="size-5" />
@@ -291,19 +251,19 @@ function WellbeingPage() {
         {showFeel ? (
           <Link
             to="/cooldown"
-            className="press relative mt-5 block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#3D4FBF] to-[#6B7CFF] p-5"
+            className="press relative mt-5 block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#CDB4DB] to-[#FFAFCC] p-5 text-[#3F2A3A]"
           >
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#3F2A3A]/70">
               Featured
             </p>
             <p className="mt-1 font-display text-xl font-bold">Cool-Down Tool</p>
-            <p className="mt-1 max-w-[14rem] text-xs text-white/80">
+            <p className="mt-1 max-w-[14rem] text-xs text-[#3F2A3A]/80">
               Pause, name the feeling, and reconnect with each other
             </p>
-            <span className="mt-4 inline-flex rounded-full bg-white px-4 py-1.5 text-xs font-bold text-[#1F2757]">
+            <span className="mt-4 inline-flex rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-[#3F2A3A]">
               Start
             </span>
-            <HeartHandshake className="absolute bottom-4 right-4 size-14 text-white/20" />
+            <HeartHandshake className="absolute bottom-4 right-4 size-14 text-[#3F2A3A]/20" />
           </Link>
         ) : null}
 
@@ -312,7 +272,7 @@ function WellbeingPage() {
           {showCycle ? (
             <Link
               to="/period"
-              className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FFC97E] p-4 text-[#3F414E]"
+              className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FFC8DD] p-4 text-[#3F2A3A]"
             >
               <Droplets className="size-7 opacity-80" />
               <div>
@@ -324,7 +284,7 @@ function WellbeingPage() {
           {showCommit ? (
             <Link
               to="/commitments"
-              className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#AFDBC5] p-4 text-[#3F414E]"
+              className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#CDB4DB] p-4 text-[#3F2A3A]"
             >
               <Target className="size-7 opacity-80" />
               <div>
@@ -337,7 +297,7 @@ function WellbeingPage() {
             <Link
               to="/map"
               className={cn(
-                "press flex min-h-[110px] flex-col justify-between rounded-[1.25rem] bg-[#E0D7FF] p-4 text-[#3F414E]",
+                "press flex min-h-[110px] flex-col justify-between rounded-[1.25rem] bg-[#BDE0FE] p-4 text-[#3F2A3A]",
                 showCycle && showCommit ? "col-span-2" : "col-span-1",
               )}
             >

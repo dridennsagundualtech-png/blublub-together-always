@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Bell, MapPin } from "lucide-react";
+import { Bell, MapPin, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
@@ -13,7 +13,6 @@ import { useIsAdmin } from "@/lib/admin";
 import { clearMyLocation } from "@/lib/location";
 import { askNotificationPermission, canNotify } from "@/lib/reminders";
 import { useAuthUser, useCouple, usePartner, useProfile, useRefreshSession } from "@/lib/session";
-
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -29,6 +28,156 @@ export const Route = createFileRoute("/_authenticated/profile")({
   }),
   component: ProfilePage,
 });
+
+const THEME_COLORS = [
+  { id: "blush", hex: "#FFAFCC", name: "Blush Pop" },
+  { id: "petal", hex: "#FFC8DD", name: "Pastel Petal" },
+  { id: "orchid", hex: "#CDB4DB", name: "Pink Orchid" },
+  { id: "icy", hex: "#BDE0FE", name: "Icy Blue" },
+  { id: "sky", hex: "#A2D2FF", name: "Sky Blue" },
+] as const;
+
+type ThemeRole = "primary" | "accent" | "lavender" | "sky" | "petal";
+
+const DEFAULT_MAP: Record<ThemeRole, string> = {
+  primary: "#FFAFCC",
+  accent: "#CDB4DB",
+  lavender: "#CDB4DB",
+  sky: "#A2D2FF",
+  petal: "#FFC8DD",
+};
+
+const ROLE_LABELS: Record<ThemeRole, string> = {
+  primary: "Primary (buttons, highlights)",
+  accent: "Accent",
+  lavender: "Lavender",
+  sky: "Sky",
+  petal: "Soft Pink",
+};
+
+function applyTheme(map: Record<ThemeRole, string>) {
+  const root = document.documentElement;
+  root.style.setProperty("--primary", map.primary);
+  root.style.setProperty("--accent", map.accent);
+  root.style.setProperty("--lavender", map.lavender);
+  root.style.setProperty("--sky", map.sky);
+  root.style.setProperty("--petal", map.petal);
+  root.style.setProperty("--peach", map.petal);
+  root.style.setProperty("--icy", map.sky === "#A2D2FF" ? "#BDE0FE" : map.sky);
+  root.style.setProperty("--ring", map.primary);
+  root.style.setProperty("--sidebar-primary", map.primary);
+  root.style.setProperty("--sidebar-accent", map.accent);
+  root.style.setProperty("--chart-1", map.primary);
+  root.style.setProperty("--chart-2", map.lavender);
+  root.style.setProperty("--chart-3", map.sky);
+}
+
+function loadTheme(): Record<ThemeRole, string> {
+  try {
+    const raw = localStorage.getItem("blublub-theme");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_MAP, ...parsed };
+    }
+  } catch {}
+  return { ...DEFAULT_MAP };
+}
+
+function ThemeEditor() {
+  const [map, setMap] = useState<Record<ThemeRole, string>>(loadTheme);
+  const [activeRole, setActiveRole] = useState<ThemeRole>("primary");
+
+  useEffect(() => {
+    applyTheme(map);
+    localStorage.setItem("blublub-theme", JSON.stringify(map));
+  }, [map]);
+
+  useEffect(() => {
+    // Apply on mount
+    applyTheme(loadTheme());
+  }, []);
+
+  function pickColor(hex: string) {
+    setMap((prev) => ({ ...prev, [activeRole]: hex }));
+  }
+
+  function reset() {
+    setMap({ ...DEFAULT_MAP });
+    toast.success("Theme reset to default");
+  }
+
+  return (
+    <Card className="mt-4">
+      <div className="mb-3 flex items-center gap-2">
+        <Palette className="size-5 text-primary" />
+        <p className="text-sm font-bold">Theme Editor</p>
+      </div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Tap a role, then tap a color to assign it. Changes apply instantly and are saved on this device.
+      </p>
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {(Object.keys(ROLE_LABELS) as ThemeRole[]).map((role) => (
+          <button
+            key={role}
+            type="button"
+            onClick={() => setActiveRole(role)}
+            className={`press rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+              activeRole === role
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {ROLE_LABELS[role]}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-3 flex items-center gap-3">
+        <span
+          className="size-10 shrink-0 rounded-full border-2 border-border shadow-soft"
+          style={{ backgroundColor: map[activeRole] }}
+        />
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            Current {ROLE_LABELS[activeRole]}
+          </p>
+          <p className="font-mono text-sm font-bold">{map[activeRole]}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-5 gap-2">
+        {THEME_COLORS.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => pickColor(c.hex)}
+            className="press flex flex-col items-center gap-1"
+            title={c.name}
+          >
+            <span
+              className={`size-11 rounded-2xl border-2 shadow-soft transition-transform ${
+                map[activeRole] === c.hex ? "scale-110 border-foreground" : "border-transparent"
+              }`}
+              style={{ backgroundColor: c.hex }}
+            />
+            <span className="text-[9px] font-semibold leading-tight text-muted-foreground">
+              {c.name.split(" ")[0]}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={reset}
+        className="press mt-4 w-full rounded-full bg-muted py-2 text-xs font-bold text-muted-foreground"
+      >
+        Reset to default palette
+      </button>
+    </Card>
+  );
+}
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -47,7 +196,6 @@ function ProfilePage() {
   const [code, setCode] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // Sync local edit state once the profile loads.
   if (profile && name === "" && profile.display_name) setName(profile.display_name);
 
   const save = useMutation({
@@ -90,8 +238,6 @@ function ProfilePage() {
     onSuccess: () => refresh(),
     onError: (e: Error) => toast.error(e.message),
   });
-
-
 
   const uploadAvatar = useMutation({
     mutationFn: async (file: File) => {
@@ -149,7 +295,6 @@ function ProfilePage() {
   return (
     <AppLayout title="Profile" subtitle="You & your space" critter="cat">
       <Card>
-
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -205,6 +350,9 @@ function ProfilePage() {
           </PrimaryButton>
         </div>
       </Card>
+
+      <SectionTitle>Appearance</SectionTitle>
+      <ThemeEditor />
 
       <SectionTitle>Privacy</SectionTitle>
       <Card>
@@ -263,8 +411,6 @@ function ProfilePage() {
         </div>
       </Card>
 
-
-
       <SectionTitle>Your couple space</SectionTitle>
       <Card>
         <p className="text-sm">
@@ -312,7 +458,6 @@ function ProfilePage() {
           </Link>
         </div>
       ) : null}
-
 
       <div className="mt-6 flex justify-center">
         <GhostButton onClick={() => void signOut()}>Sign out</GhostButton>
