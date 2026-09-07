@@ -1,11 +1,11 @@
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
 import { useState } from "react";
-import { Flame, Plus, X } from "lucide-react";
+import { Flame, Heart, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playChirp } from "@/hooks/use-sound";
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("card-soft p-4", className)}>{children}</div>;
+  return <div className={cn("surface-quiet p-4", className)}>{children}</div>;
 }
 
 export function SectionTitle({
@@ -20,14 +20,14 @@ export function SectionTitle({
   onAction?: () => void;
 }) {
   return (
-    <div className="mb-2.5 mt-6 flex items-center justify-between gap-2">
-      <h2 className="text-[17px] font-extrabold tracking-tight">{children}</h2>
+    <div className="mb-3 mt-8 flex items-center justify-between gap-2">
+      <h2 className="text-lg font-bold tracking-tight text-foreground">{children}</h2>
       {action ??
         (onAction ? (
           <button
             type="button"
             onClick={onAction}
-            className="press text-xs font-bold text-primary"
+            className="press text-xs font-semibold text-primary"
           >
             {actionLabel}
           </button>
@@ -92,7 +92,7 @@ export function PrimaryButton({
         onClick?.();
       }}
       className={cn(
-        "press w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground shadow-float disabled:opacity-60",
+        "press w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground shadow-none disabled:opacity-60",
         className,
       )}
     >
@@ -137,8 +137,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="card-soft flex flex-col items-center gap-2 px-5 py-8 text-center">
-      <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-2xl">🩷</div>
+    <div className="surface-quiet flex flex-col items-center gap-2 px-5 py-10 text-center">
+      <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary"><Heart className="size-6" /></div>
       {title ? <p className="font-display text-base font-extrabold">{title}</p> : null}
       <p className="max-w-xs text-sm text-muted-foreground">{text}</p>
       {action}
@@ -184,7 +184,7 @@ export function StatHero({ className, children }: { className?: string; children
 
 /** Gradient card for secondary stats. */
 export function StatCard({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("card-soft stat-gradient p-4", className)}>{children}</div>;
+  return <div className={cn("surface-quiet stat-gradient p-4", className)}>{children}</div>;
 }
 
 /** Small consistency indicator: 🔥 + count of consecutive days. */
@@ -227,7 +227,7 @@ export function ListRow({
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "card-soft flex w-full items-center gap-3 p-3.5 text-left",
+        "list-row w-full text-left",
         onClick && "press",
       )}
     >
