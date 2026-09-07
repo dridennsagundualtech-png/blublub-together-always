@@ -207,7 +207,19 @@ function ProfilePage() {
       </Card>
 
       <SectionTitle>Appearance</SectionTitle>
-      <ThemeEditor />
+      <Link to="/appearance" className="card-soft press flex items-center gap-3 p-4">
+        <span className="grid size-11 place-items-center rounded-2xl tile-lilac text-primary">
+          <Palette className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold">Colors & gradients</span>
+          <span className="block text-xs text-muted-foreground">
+            Pick our palette and which screens use gradient boxes
+          </span>
+        </span>
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </Link>
+
 
       <SectionTitle>Privacy</SectionTitle>
       <Card>
