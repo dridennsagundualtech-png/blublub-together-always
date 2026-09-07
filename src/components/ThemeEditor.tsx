@@ -271,8 +271,8 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
 
       <div className="mb-3 flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2.5">
         <div>
-          <p className="text-xs font-bold">Gradient all boxes</p>
-          <p className="text-[10px] text-muted-foreground">Cards & panels across the app</p>
+          <p className="text-xs font-bold">Gradient boxes</p>
+          <p className="text-[10px] text-muted-foreground">Cards & panels on chosen screens</p>
         </div>
         <button
           type="button"
