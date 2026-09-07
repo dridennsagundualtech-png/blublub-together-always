@@ -2,13 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Bell, MapPin } from "lucide-react";
+import { Bell, MapPin, Palette, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { SignInPanel } from "@/components/SignInPanel";
-import { ThemeEditor } from "@/components/ThemeEditor";
 import { compressImage } from "@/lib/image";
 import { useIsAdmin } from "@/lib/admin";
 import { clearMyLocation } from "@/lib/location";
@@ -207,7 +206,19 @@ function ProfilePage() {
       </Card>
 
       <SectionTitle>Appearance</SectionTitle>
-      <ThemeEditor />
+      <Link to="/appearance" className="card-soft press flex items-center gap-3 p-4">
+        <span className="grid size-11 place-items-center rounded-2xl tile-lilac text-primary">
+          <Palette className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold">Colors & gradients</span>
+          <span className="block text-xs text-muted-foreground">
+            Pick our palette and which screens use gradient boxes
+          </span>
+        </span>
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </Link>
+
 
       <SectionTitle>Privacy</SectionTitle>
       <Card>

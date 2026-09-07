@@ -15,6 +15,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authenticated/admin-codes'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin-users'
+import { Route as AuthenticatedAppearanceRouteImport } from './routes/_authenticated/appearance'
 import { Route as AuthenticatedBucketRouteImport } from './routes/_authenticated/bucket'
 import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
@@ -65,6 +66,11 @@ const AuthenticatedAdminCodesRoute = AuthenticatedAdminCodesRouteImport.update({
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/admin-users',
   path: '/admin-users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppearanceRoute = AuthenticatedAppearanceRouteImport.update({
+  id: '/appearance',
+  path: '/appearance',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBucketRoute = AuthenticatedBucketRouteImport.update({
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
   '/admin-users': typeof AuthenticatedAdminUsersRoute
+  '/appearance': typeof AuthenticatedAppearanceRoute
   '/bucket': typeof AuthenticatedBucketRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin-codes': typeof AuthenticatedAdminCodesRoute
   '/admin-users': typeof AuthenticatedAdminUsersRoute
+  '/appearance': typeof AuthenticatedAppearanceRoute
   '/bucket': typeof AuthenticatedBucketRoute
   '/budget': typeof AuthenticatedBudgetRoute
   '/calendar': typeof AuthenticatedCalendarRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin-codes': typeof AuthenticatedAdminCodesRoute
   '/_authenticated/admin-users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/appearance': typeof AuthenticatedAppearanceRoute
   '/_authenticated/bucket': typeof AuthenticatedBucketRoute
   '/_authenticated/budget': typeof AuthenticatedBudgetRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin-codes'
     | '/admin-users'
+    | '/appearance'
     | '/bucket'
     | '/budget'
     | '/calendar'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin-codes'
     | '/admin-users'
+    | '/appearance'
     | '/bucket'
     | '/budget'
     | '/calendar'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin-codes'
     | '/_authenticated/admin-users'
+    | '/_authenticated/appearance'
     | '/_authenticated/bucket'
     | '/_authenticated/budget'
     | '/_authenticated/calendar'
@@ -408,6 +420,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-users'
       fullPath: '/admin-users'
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/appearance': {
+      id: '/_authenticated/appearance'
+      path: '/appearance'
+      fullPath: '/appearance'
+      preLoaderRoute: typeof AuthenticatedAppearanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bucket': {
@@ -570,6 +589,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCodesRoute: typeof AuthenticatedAdminCodesRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAppearanceRoute: typeof AuthenticatedAppearanceRoute
   AuthenticatedBucketRoute: typeof AuthenticatedBucketRoute
   AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
@@ -598,6 +618,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCodesRoute: AuthenticatedAdminCodesRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAppearanceRoute: AuthenticatedAppearanceRoute,
   AuthenticatedBucketRoute: AuthenticatedBucketRoute,
   AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,

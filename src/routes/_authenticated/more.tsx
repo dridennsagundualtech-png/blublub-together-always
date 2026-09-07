@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { HelpCircle, Images, UserCog, ChevronRight, BookHeart } from "lucide-react";
+import { HelpCircle, Images, UserCog, ChevronRight, BookHeart, Palette } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { useSoundSetting } from "@/hooks/use-sound";
 import { useBadges } from "@/lib/badges";
@@ -26,8 +26,10 @@ const SECTIONS = [
   { to: "/photos", label: "Memories", icon: Images, tint: "tile-sky" },
   { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question", tint: "tile-lilac" },
   { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart, tint: "tile-pink" },
+  { to: "/appearance", label: "Appearance", icon: Palette, tint: "tile-peach" },
   { to: "/profile", label: "Profile & Settings", icon: UserCog, tint: "tile-cream" },
 ] as const;
+
 
 function MorePage() {
   const { enabled, setEnabled } = useSoundSetting();

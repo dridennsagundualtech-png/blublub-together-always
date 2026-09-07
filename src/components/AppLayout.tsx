@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { BottomNav } from "@/components/BottomNav";
 import { Doodle, critterFor, poseFor, type Critter, type Pose } from "@/components/Doodles";
 import { PairingScreen } from "@/components/CoupleGate";
@@ -8,73 +8,7 @@ import { useBadges } from "@/lib/badges";
 import { useAuthUser, useCouple, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
-
-const STORAGE_KEY = "blublub-theme-v2";
-
-const DEFAULTS = {
-  main: "#FFAFCC",
-  soft: "#FFC8DD",
-  purple: "#CDB4DB",
-  blue: "#A2D2FF",
-  gradFrom: "#CDB4DB",
-  gradTo: "#FFAFCC",
-  boxesGradient: false,
-  boxGradFrom: "#FFFFFF",
-  boxGradTo: "#FFC8DD",
-};
-
-function applyColors(map: typeof DEFAULTS) {
-  const root = document.documentElement;
-  root.style.setProperty("--primary", map.main);
-  root.style.setProperty("--ring", map.main);
-  root.style.setProperty("--sidebar-primary", map.main);
-  root.style.setProperty("--chart-1", map.main);
-
-  root.style.setProperty("--petal", map.soft);
-  root.style.setProperty("--peach", map.soft);
-  root.style.setProperty("--secondary", map.soft);
-  root.style.setProperty("--chart-5", map.soft);
-
-  root.style.setProperty("--accent", map.purple);
-  root.style.setProperty("--lavender", map.purple);
-  root.style.setProperty("--sidebar-accent", map.purple);
-  root.style.setProperty("--chart-2", map.purple);
-
-  root.style.setProperty("--sky", map.blue);
-  root.style.setProperty("--icy", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
-  root.style.setProperty("--chart-3", map.blue);
-  root.style.setProperty("--chart-4", map.blue === "#A2D2FF" ? "#BDE0FE" : map.blue);
-
-  root.style.setProperty("--grad-featured-from", map.gradFrom);
-  root.style.setProperty("--grad-featured-to", map.gradTo);
-  root.style.setProperty("--grad-hero-from", map.gradFrom);
-  root.style.setProperty("--grad-hero-to", map.gradTo);
-  root.style.setProperty("--grad-panel-from", map.gradFrom);
-  root.style.setProperty("--grad-panel-to", map.gradTo);
-
-  root.style.setProperty("--box-grad-from", map.boxGradFrom || map.soft);
-  root.style.setProperty("--box-grad-to", map.boxGradTo || map.main);
-  document.documentElement.classList.toggle("boxes-gradient", !!map.boxesGradient);
-}
-
-function normalizeTheme(raw: unknown): typeof DEFAULTS {
-  if (!raw || typeof raw !== "object") return { ...DEFAULTS };
-  const o = raw as Record<string, unknown>;
-  if (typeof o.main === "string") {
-    return {
-      main: (o.main as string) || DEFAULTS.main,
-      soft: (o.soft as string) || DEFAULTS.soft,
-      purple: (o.purple as string) || DEFAULTS.purple,
-      blue: (o.blue as string) || DEFAULTS.blue,
-      gradFrom: (o.gradFrom as string) || (o.purple as string) || DEFAULTS.gradFrom,
-      gradTo: (o.gradTo as string) || (o.main as string) || DEFAULTS.gradTo,
-      boxesGradient: !!o.boxesGradient,
-      boxGradFrom: (o.boxGradFrom as string) || DEFAULTS.soft,
-      boxGradTo: (o.boxGradTo as string) || DEFAULTS.main,
-    };
-  }
-  return { ...DEFAULTS };
-}
+import { applyColors, normalizeTheme, THEME_STORAGE_KEY as STORAGE_KEY } from "@/lib/theme";
 
 export function AppLayout({
   title,
@@ -91,6 +25,7 @@ export function AppLayout({
   requireCouple?: boolean;
   children: ReactNode;
 }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isLoading } = useProfile();
   const { data: user } = useAuthUser();
   const coupleId = useCoupleId();
@@ -103,17 +38,18 @@ export function AppLayout({
     const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
     if (fromCouple) {
       const next = normalizeTheme(fromCouple);
-      applyColors(next);
+      applyColors(next, pathname);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       return;
     }
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) applyColors(normalizeTheme(JSON.parse(raw)));
+      if (raw) applyColors(normalizeTheme(JSON.parse(raw)), pathname);
     } catch {
       // ignore
     }
-  }, [couple]);
+  }, [couple, pathname]);
+
 
   return (
     <div className="page-wash min-h-screen bg-background pb-28">
