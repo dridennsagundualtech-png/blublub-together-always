@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ChevronRight,
   Droplets,
   HeartHandshake,
   LayoutGrid,
@@ -168,14 +167,10 @@ function WellbeingPage() {
 
   return (
     <AppLayout title="Care" subtitle="Taking care of each other" critter="seal">
-      {/* Right now */}
       <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
       <div className="grid gap-3">
-        <Link
-          to="/cooldown"
-          className="press block rounded-[1.25rem] bg-[#BDE0FE]/50 p-4"
-        >
-          <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#A2D2FF]">
+        <Link to="/cooldown" className="press tile-icy block p-4">
+          <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-sky">
             <HeartHandshake className="size-3.5" />
             Feelings
           </span>
@@ -185,8 +180,8 @@ function WellbeingPage() {
           <span className="mt-0.5 block text-xs text-muted-foreground">{coolDetail}</span>
         </Link>
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/period" className="press block rounded-[1.25rem] bg-[#FFC8DD]/40 p-4">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#FFAFCC]">
+          <Link to="/period" className="press tile-peach block p-4">
+            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-primary">
               <Droplets className="size-3.5" />
               Cycle
             </span>
@@ -195,8 +190,8 @@ function WellbeingPage() {
             </span>
             <span className="mt-0.5 block text-xs text-muted-foreground">{cycleDetail}</span>
           </Link>
-          <Link to="/map" className="press block rounded-[1.25rem] bg-[#CDB4DB]/35 p-4">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#CDB4DB]">
+          <Link to="/map" className="press tile-lilac block p-4">
+            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-accent">
               <MapPin className="size-3.5" />
               Distance
             </span>
@@ -208,11 +203,11 @@ function WellbeingPage() {
         </div>
       </div>
 
-      {/* Sleep-stories style tools panel */}
-      <div className="relative mt-6 overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2A1F3D] to-[#1A1528] px-4 pb-5 pt-6 text-white">
-        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[#CDB4DB]/30 blur-2xl" />
-        <div className="pointer-events-none absolute -left-8 bottom-10 size-24 rounded-full bg-[#FFAFCC]/20 blur-2xl" />
-        <div className="pointer-events-none absolute right-12 top-24 size-14 rounded-full bg-[#A2D2FF]/15 blur-xl" />
+      {/* Fully variable-driven panel */}
+      <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
+        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[var(--lavender)]/30 blur-2xl" />
+        <div className="pointer-events-none absolute -left-8 bottom-10 size-24 rounded-full bg-[var(--primary)]/20 blur-2xl" />
+        <div className="pointer-events-none absolute right-12 top-24 size-14 rounded-full bg-[var(--sky)]/15 blur-xl" />
 
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Care tools</p>
@@ -221,7 +216,6 @@ function WellbeingPage() {
           </p>
         </div>
 
-        {/* Filter chips – Sleep Stories style */}
         <div className="relative mt-5 flex gap-2 overflow-x-auto pb-1">
           {FILTERS.map((f) => {
             const active = filter === f.id;
@@ -236,7 +230,7 @@ function WellbeingPage() {
                 <span
                   className={cn(
                     "grid size-11 place-items-center rounded-full",
-                    active ? "bg-[#FFAFCC] text-[#3F2A3A]" : "bg-white/10 text-white/80",
+                    active ? "bg-primary text-primary-foreground" : "bg-white/10 text-white/80",
                   )}
                 >
                   <Icon className="size-5" />
@@ -247,32 +241,29 @@ function WellbeingPage() {
           })}
         </div>
 
-        {/* Featured hero card */}
         {showFeel ? (
           <Link
             to="/cooldown"
-            className="press relative mt-5 block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#CDB4DB] to-[#FFAFCC] p-5 text-[#3F2A3A]"
+            className="press featured-gradient relative mt-5 block overflow-hidden p-5 text-[var(--foreground)]"
+            style={{ borderRadius: "var(--card-radius)" }}
           >
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#3F2A3A]/70">
-              Featured
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Featured</p>
             <p className="mt-1 font-display text-xl font-bold">Cool-Down Tool</p>
-            <p className="mt-1 max-w-[14rem] text-xs text-[#3F2A3A]/80">
+            <p className="mt-1 max-w-[14rem] text-xs opacity-80">
               Pause, name the feeling, and reconnect with each other
             </p>
-            <span className="mt-4 inline-flex rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-[#3F2A3A]">
+            <span className="mt-4 inline-flex rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-[var(--foreground)]">
               Start
             </span>
-            <HeartHandshake className="absolute bottom-4 right-4 size-14 text-[#3F2A3A]/20" />
+            <HeartHandshake className="absolute bottom-4 right-4 size-14 opacity-20" />
           </Link>
         ) : null}
 
-        {/* Mixed grid */}
         <div className="relative mt-3 grid grid-cols-2 gap-3">
           {showCycle ? (
             <Link
               to="/period"
-              className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FFC8DD] p-4 text-[#3F2A3A]"
+              className="press tile-peach flex min-h-[130px] flex-col justify-between p-4 text-foreground"
             >
               <Droplets className="size-7 opacity-80" />
               <div>
@@ -284,7 +275,7 @@ function WellbeingPage() {
           {showCommit ? (
             <Link
               to="/commitments"
-              className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#CDB4DB] p-4 text-[#3F2A3A]"
+              className="press tile-lilac flex min-h-[130px] flex-col justify-between p-4 text-foreground"
             >
               <Target className="size-7 opacity-80" />
               <div>
@@ -297,7 +288,7 @@ function WellbeingPage() {
             <Link
               to="/map"
               className={cn(
-                "press flex min-h-[110px] flex-col justify-between rounded-[1.25rem] bg-[#BDE0FE] p-4 text-[#3F2A3A]",
+                "press tile-icy flex min-h-[110px] flex-col justify-between p-4 text-foreground",
                 showCycle && showCommit ? "col-span-2" : "col-span-1",
               )}
             >

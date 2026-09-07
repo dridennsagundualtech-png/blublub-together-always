@@ -1,16 +1,14 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { BookHeart, ChevronRight, ListChecks, Plus, Sparkles, Wallet } from "lucide-react";
+import { BookHeart, ListChecks, Plus, Sparkles, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import {
-  Card,
   Field,
   Money,
   PrimaryButton,
-  SectionTitle,
   SelectInput,
   Sheet,
   TextArea,
@@ -115,33 +113,32 @@ function NestPage() {
 
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      {/* Right now summary */}
       <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
       <div className="grid gap-3">
         <SummaryTile
-          tint="bg-[#FFC8DD]/40"
-          icon={<BookHeart className="size-3.5 text-[#FFAFCC]" />}
+          className="tile-peach"
+          icon={<BookHeart className="size-3.5 text-primary" />}
           label="Diary"
           value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
           detail={diaryStreak > 0 ? `${diaryStreak}-day streak` : "Write something small today"}
         />
         <div className="grid grid-cols-2 gap-3">
           <SummaryTile
-            tint="bg-[#FFAFCC]/35"
-            icon={<ListChecks className="size-3.5 text-[#FFAFCC]" />}
+            className="tile-pink"
+            icon={<ListChecks className="size-3.5 text-primary" />}
             label="To-Dos"
             value={openTodos === 0 ? "All done" : `${openTodos} left to do`}
           />
           <SummaryTile
-            tint="bg-[#CDB4DB]/35"
-            icon={<Sparkles className="size-3.5 text-[#CDB4DB]" />}
+            className="tile-lilac"
+            icon={<Sparkles className="size-3.5 text-accent" />}
             label="Bucket List"
             value={`${bucketDone}/${bucketTotal} done`}
           />
         </div>
         <SummaryTile
-          tint="bg-[#BDE0FE]/45"
-          icon={<Wallet className="size-3.5 text-[#A2D2FF]" />}
+          className="tile-icy"
+          icon={<Wallet className="size-3.5 text-sky" />}
           label="Budget"
           value={
             !premium ? (
@@ -157,11 +154,11 @@ function NestPage() {
         />
       </div>
 
-      {/* Sleep-stories style nest tools panel */}
-      <div className="relative mt-6 overflow-hidden rounded-[1.75rem] bg-gradient-to-b from-[#2A1F3D] to-[#1A1528] px-4 pb-5 pt-6 text-white">
-        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[#CDB4DB]/30 blur-2xl" />
-        <div className="pointer-events-none absolute -left-8 bottom-8 size-24 rounded-full bg-[#FFAFCC]/20 blur-2xl" />
-        <div className="pointer-events-none absolute right-10 top-20 size-16 rounded-full bg-[#A2D2FF]/15 blur-xl" />
+      {/* Fully variable-driven panel */}
+      <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
+        <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-[var(--lavender)]/30 blur-2xl" />
+        <div className="pointer-events-none absolute -left-8 bottom-8 size-24 rounded-full bg-[var(--primary)]/20 blur-2xl" />
+        <div className="pointer-events-none absolute right-10 top-20 size-16 rounded-full bg-[var(--sky)]/15 blur-xl" />
 
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Nest tools</p>
@@ -170,29 +167,28 @@ function NestPage() {
           </p>
         </div>
 
-        {/* Featured — diary */}
         <Link
           to="/diary"
-          className="press relative mt-5 block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#CDB4DB] to-[#FFAFCC] p-5 text-[#3F2A3A]"
+          className="press featured-gradient relative mt-5 block overflow-hidden p-5 text-[var(--foreground)]"
+          style={{ borderRadius: "var(--card-radius)" }}
         >
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#3F2A3A]/70">Featured</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Featured</p>
           <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
-          <p className="mt-1 max-w-[14rem] text-xs text-[#3F2A3A]/80">
+          <p className="mt-1 max-w-[14rem] text-xs opacity-80">
             {lastEntry
               ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 42)}`
               : "Write a small note for each other"}
           </p>
-          <span className="mt-4 inline-flex rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-[#3F2A3A]">
+          <span className="mt-4 inline-flex rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-[var(--foreground)]">
             Open
           </span>
-          <BookHeart className="absolute bottom-4 right-4 size-14 text-[#3F2A3A]/20" />
+          <BookHeart className="absolute bottom-4 right-4 size-14 opacity-20" />
         </Link>
 
-        {/* Mixed tiles */}
         <div className="relative mt-3 grid grid-cols-2 gap-3">
           <Link
             to="/todos"
-            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#FFC8DD] p-4 text-[#3F2A3A]"
+            className="press tile-peach flex min-h-[130px] flex-col justify-between p-4 text-foreground"
           >
             <ListChecks className="size-7 opacity-80" />
             <div>
@@ -204,7 +200,7 @@ function NestPage() {
           </Link>
           <Link
             to="/bucket"
-            className="press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] bg-[#CDB4DB] p-4 text-[#3F2A3A]"
+            className="press tile-lilac flex min-h-[130px] flex-col justify-between p-4 text-foreground"
           >
             <Sparkles className="size-7 opacity-80" />
             <div>
@@ -216,7 +212,7 @@ function NestPage() {
           </Link>
           <Link
             to="/budget"
-            className="press col-span-2 flex min-h-[100px] flex-col justify-between rounded-[1.25rem] bg-[#BDE0FE] p-4 text-[#3F2A3A]"
+            className="press tile-icy col-span-2 flex min-h-[100px] flex-col justify-between p-4 text-foreground"
           >
             <Wallet className="size-6 opacity-80" />
             <div>
@@ -263,19 +259,19 @@ function NestPage() {
 
 function SummaryTile({
   icon,
-  tint,
+  className,
   label,
   value,
   detail,
 }: {
   icon: React.ReactNode;
-  tint: string;
+  className: string;
   label: string;
   value: React.ReactNode;
   detail?: string;
 }) {
   return (
-    <div className={`rounded-[1.25rem] p-4 ${tint}`}>
+    <div className={`p-4 ${className}`}>
       <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
         {icon}
         {label}
@@ -359,10 +355,7 @@ function QuickDiary({ onDone }: { onDone: () => void }) {
         <Field label="What happened?">
           <TextArea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
         </Field>
-        <PrimaryButton
-          disabled={!body.trim() || add.isPending}
-          onClick={() => add.mutate()}
-        >
+        <PrimaryButton disabled={!body.trim() || add.isPending} onClick={() => add.mutate()}>
           Save entry
         </PrimaryButton>
       </div>
@@ -401,10 +394,7 @@ function QuickTodo({ onDone }: { onDone: () => void }) {
         <Field label="What needs doing?">
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
         </Field>
-        <PrimaryButton
-          disabled={!title.trim() || add.isPending}
-          onClick={() => add.mutate()}
-        >
+        <PrimaryButton disabled={!title.trim() || add.isPending} onClick={() => add.mutate()}>
           Add to-do
         </PrimaryButton>
       </div>
@@ -443,10 +433,7 @@ function QuickBucket({ onDone }: { onDone: () => void }) {
         <Field label="A dream for us">
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
         </Field>
-        <PrimaryButton
-          disabled={!title.trim() || add.isPending}
-          onClick={() => add.mutate()}
-        >
+        <PrimaryButton disabled={!title.trim() || add.isPending} onClick={() => add.mutate()}>
           Add dream
         </PrimaryButton>
       </div>
