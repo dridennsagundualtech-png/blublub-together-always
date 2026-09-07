@@ -108,19 +108,21 @@ export function applyColors(map: ThemeMap, pathname?: string) {
 export function normalizeTheme(raw: unknown): ThemeMap {
   if (!raw || typeof raw !== "object") return { ...THEME_DEFAULTS };
   const o = raw as Record<string, unknown>;
-  if (typeof o.main !== "string") return { ...THEME_DEFAULTS };
+  const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
+  if (!str("main")) return { ...THEME_DEFAULTS };
+  const screens = o["gradientScreens"];
   return {
-    main: (o.main as string) || THEME_DEFAULTS.main,
-    soft: (o.soft as string) || THEME_DEFAULTS.soft,
-    purple: (o.purple as string) || THEME_DEFAULTS.purple,
-    blue: (o.blue as string) || THEME_DEFAULTS.blue,
-    gradFrom: (o.gradFrom as string) || (o.purple as string) || THEME_DEFAULTS.gradFrom,
-    gradTo: (o.gradTo as string) || (o.main as string) || THEME_DEFAULTS.gradTo,
-    boxesGradient: !!o.boxesGradient,
-    boxGradFrom: (o.boxGradFrom as string) || THEME_DEFAULTS.soft,
-    boxGradTo: (o.boxGradTo as string) || THEME_DEFAULTS.main,
-    gradientScreens: Array.isArray(o.gradientScreens)
-      ? (o.gradientScreens as unknown[]).filter((s): s is string => typeof s === "string")
+    main: str("main") || THEME_DEFAULTS.main,
+    soft: str("soft") || THEME_DEFAULTS.soft,
+    purple: str("purple") || THEME_DEFAULTS.purple,
+    blue: str("blue") || THEME_DEFAULTS.blue,
+    gradFrom: str("gradFrom") || str("purple") || THEME_DEFAULTS.gradFrom,
+    gradTo: str("gradTo") || str("main") || THEME_DEFAULTS.gradTo,
+    boxesGradient: !!o["boxesGradient"],
+    boxGradFrom: str("boxGradFrom") || THEME_DEFAULTS.soft,
+    boxGradTo: str("boxGradTo") || THEME_DEFAULTS.main,
+    gradientScreens: Array.isArray(screens)
+      ? (screens as unknown[]).filter((s): s is string => typeof s === "string")
       : [],
   };
 }
