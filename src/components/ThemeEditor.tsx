@@ -316,6 +316,58 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
         </div>
       ) : null}
 
+      {map.boxesGradient ? (
+        <div className="mb-4 rounded-2xl bg-muted/40 p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              Screens with gradient boxes
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                setMap((m) => ({
+                  ...m,
+                  gradientScreens: m.gradientScreens.length ? [] : THEME_SCREENS.map((s) => s.id),
+                }))
+              }
+              className="press rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary"
+            >
+              {map.gradientScreens.length ? "All screens" : "Pick screens"}
+            </button>
+          </div>
+          {map.gradientScreens.length ? (
+            <div className="grid grid-cols-2 gap-2">
+              {THEME_SCREENS.map((s) => {
+                const on = map.gradientScreens.includes(s.id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() =>
+                      setMap((m) => {
+                        const next = on
+                          ? m.gradientScreens.filter((id) => id !== s.id)
+                          : [...m.gradientScreens, s.id];
+                        return { ...m, gradientScreens: next.length ? next : [s.id] };
+                      })
+                    }
+                    className={`press rounded-2xl border-2 px-3 py-2 text-left text-xs font-bold transition-colors ${
+                      on ? "border-foreground bg-card" : "border-transparent bg-card/50 text-muted-foreground"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground">
+              Every screen uses the gradient. Tap “Pick screens” to choose.
+            </p>
+          )}
+        </div>
+      ) : null}
+
       <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
         Tap a color for “{SLOT_META.find((s) => s.id === active)?.title ?? active}”
       </p>
