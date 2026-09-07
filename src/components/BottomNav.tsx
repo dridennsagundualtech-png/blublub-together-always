@@ -22,13 +22,12 @@ const ITEMS = [
 ] as const;
 
 /**
- * Floating white pill nav (mockup-style).
- * Active tab: filled soft pink circle + bold label.
+ * Minimal bottom nav — open style, filled active icon (coffee-app energy).
  */
 export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>> }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-1">
-      <ul className="mx-auto flex max-w-lg items-center justify-between gap-0.5 rounded-full border border-border/50 bg-card/95 px-1.5 py-1.5 shadow-float backdrop-blur-xl">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/40 bg-background/90 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-1 backdrop-blur-lg">
+      <ul className="mx-auto flex max-w-lg items-center justify-between">
         {ITEMS.map(({ to, label, icon: Icon }) => (
           <li key={to} className="flex-1">
             <Link
@@ -37,35 +36,25 @@ export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>
               activeOptions={{ exact: to === "/" }}
               activeProps={{ className: "text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="press flex flex-col items-center gap-0.5 rounded-full py-1"
+              className="press flex flex-col items-center gap-0.5 py-1.5"
             >
               {({ isActive }) => (
                 <>
-                  <span
-                    className={cn(
-                      "relative grid size-9 place-items-center rounded-full transition-all",
-                      isActive && "bg-primary text-primary-foreground shadow-soft",
-                    )}
-                  >
+                  <span className="relative grid size-8 place-items-center">
                     <Icon
-                      className="size-[1.1rem]"
-                      strokeWidth={isActive ? 2.4 : 2}
+                      className="size-5"
+                      strokeWidth={isActive ? 2.4 : 1.75}
                       fill={isActive ? "currentColor" : "none"}
                       fillOpacity={isActive ? 0.2 : 0}
                     />
                     {badges?.[to] ? (
-                      <span
-                        className={cn(
-                          "absolute right-0.5 top-0.5 size-2 rounded-full bg-destructive ring-2",
-                          isActive ? "ring-primary" : "ring-card",
-                        )}
-                      />
+                      <span className="absolute right-0 top-0 size-1.5 rounded-full bg-destructive" />
                     ) : null}
                   </span>
                   <span
                     className={cn(
                       "text-[9px] leading-none",
-                      isActive ? "font-extrabold text-primary" : "font-semibold",
+                      isActive ? "font-bold" : "font-medium",
                     )}
                   >
                     {label}
