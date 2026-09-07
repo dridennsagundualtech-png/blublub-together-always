@@ -14,6 +14,64 @@ import { supabase } from "@/integrations/supabase/client";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+function applySavedTheme() {
+  try {
+    const raw = localStorage.getItem("blublub-theme-v2");
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    const root = document.documentElement;
+
+    // New simple shape: { main, soft, purple, blue }
+    if (parsed.main) {
+      root.style.setProperty("--primary", parsed.main);
+      root.style.setProperty("--ring", parsed.main);
+      root.style.setProperty("--sidebar-primary", parsed.main);
+      root.style.setProperty("--chart-1", parsed.main);
+
+      root.style.setProperty("--petal", parsed.soft);
+      root.style.setProperty("--peach", parsed.soft);
+      root.style.setProperty("--secondary", parsed.soft);
+      root.style.setProperty("--chart-5", parsed.soft);
+
+      root.style.setProperty("--accent", parsed.purple);
+      root.style.setProperty("--lavender", parsed.purple);
+      root.style.setProperty("--sidebar-accent", parsed.purple);
+      root.style.setProperty("--chart-2", parsed.purple);
+      root.style.setProperty("--grad-featured-from", parsed.purple);
+      root.style.setProperty("--grad-featured-to", parsed.main);
+      root.style.setProperty("--grad-hero-from", parsed.main);
+      root.style.setProperty("--grad-hero-to", parsed.purple);
+
+      root.style.setProperty("--sky", parsed.blue);
+      root.style.setProperty("--icy", parsed.blue === "#A2D2FF" ? "#BDE0FE" : parsed.blue);
+      root.style.setProperty("--chart-3", parsed.blue);
+      return;
+    }
+
+    // Old complex shape with colors object
+    if (parsed.colors) {
+      const c = parsed.colors;
+      if (c.primary) {
+        root.style.setProperty("--primary", c.primary);
+        root.style.setProperty("--ring", c.primary);
+        root.style.setProperty("--sidebar-primary", c.primary);
+      }
+      if (c.lavender) {
+        root.style.setProperty("--lavender", c.lavender);
+        root.style.setProperty("--accent", c.lavender);
+      }
+      if (c.petal) {
+        root.style.setProperty("--petal", c.petal);
+        root.style.setProperty("--peach", c.petal);
+      }
+      if (c.sky) root.style.setProperty("--sky", c.sky);
+      if (c.icy) root.style.setProperty("--icy", c.icy);
+    }
+  } catch {
+    // ignore
+  }
+}
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -74,7 +132,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Go home
           </a>
         </div>
-        {/* Shown so failures inside a packaged app (Capacitor webview, no devtools) are diagnosable. */}
         <details className="mt-6 text-left">
           <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
             Error details
@@ -88,7 +145,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -99,7 +155,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { title: "BLUBLUB" },
       { name: "description", content: "A cozy private space for two." },
-      { name: "theme-color", content: "#fdf3f3" },
+      { name: "theme-color", content: "#FFAFCC" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -139,6 +195,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
 
+  // Apply saved theme colors on every page load
+  useEffect(() => {
+    applySavedTheme();
+  }, []);
+
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
@@ -150,7 +211,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
