@@ -106,6 +106,13 @@ export function applyColors(map: ThemeMap, pathname?: string) {
 }
 
 export function normalizeTheme(raw: unknown): ThemeMap {
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw);
+    } catch {
+      return { ...THEME_DEFAULTS };
+    }
+  }
   if (!raw || typeof raw !== "object") return { ...THEME_DEFAULTS };
   const o = raw as Record<string, unknown>;
   const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
