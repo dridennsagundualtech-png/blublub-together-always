@@ -179,7 +179,7 @@ function HomePage() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           to="/questions"
-          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] p-4 text-white"
+          className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] p-4 text-white"
           style={{ backgroundColor: "var(--primary, #FFAFCC)", color: "#3F2A3A" }}
         >
           <div>
@@ -200,7 +200,7 @@ function HomePage() {
 
         <Link
           to="/photos"
-          className="press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] p-4"
+          className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] p-4"
           style={{ backgroundColor: "var(--petal, #FFC8DD)", color: "#3F2A3A" }}
         >
           <div>
@@ -232,7 +232,7 @@ function HomePage() {
         How they feel
       </p>
       <div
-        className="rounded-[1.25rem] py-2"
+        className="grad-box rounded-[1.25rem] py-2"
         style={{ backgroundColor: "color-mix(in oklab, var(--lavender, #CDB4DB) 25%, white)" }}
       >
         <FeelingTile
@@ -246,7 +246,7 @@ function HomePage() {
       {(days !== null || untilAnniversary !== null) && (
         <div className="mt-3 flex gap-3">
           {days !== null ? (
-            <div className="flex-1 rounded-[1.25rem] bg-muted px-4 py-3">
+            <div className="grad-box flex-1 rounded-[1.25rem] bg-muted px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Together
               </p>
@@ -255,7 +255,7 @@ function HomePage() {
           ) : null}
           {untilAnniversary !== null ? (
             <div
-              className="flex-1 rounded-[1.25rem] px-4 py-3"
+              className="grad-box flex-1 rounded-[1.25rem] px-4 py-3"
               style={{ backgroundColor: "color-mix(in oklab, var(--lavender, #CDB4DB) 30%, white)" }}
             >
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -280,7 +280,7 @@ function HomePage() {
       <div className="grid grid-cols-2 gap-3 pb-2">
         <Link
           to="/games"
-          className="press col-span-1 flex min-h-[150px] flex-col justify-between rounded-[1.25rem] p-4"
+          className="grad-box press col-span-1 flex min-h-[150px] flex-col justify-between rounded-[1.25rem] p-4"
           style={{ backgroundColor: "var(--icy, #BDE0FE)", color: "#3F2A3A" }}
         >
           <Gamepad2 className="size-7 opacity-80" />
@@ -292,7 +292,7 @@ function HomePage() {
 
         <Link
           to="/chat"
-          className="press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] p-4"
+          className="grad-box press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] p-4"
           style={{ backgroundColor: "var(--petal, #FFC8DD)", color: "#3F2A3A" }}
         >
           <MessageCircle className="size-7 opacity-80" />
@@ -307,7 +307,7 @@ function HomePage() {
 
         <Link
           to="/calendar"
-          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] p-4"
+          className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] p-4"
           style={{ backgroundColor: "var(--lavender, #CDB4DB)", color: "#3F2A3A" }}
         >
           <CalendarDays className="size-6 opacity-80" />
@@ -321,7 +321,7 @@ function HomePage() {
 
         <Link
           to="/map"
-          className="press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] p-4"
+          className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] p-4"
           style={{ backgroundColor: "var(--sky, #A2D2FF)", color: "#3F2A3A" }}
         >
           <MapPin className="size-6 opacity-80" />
