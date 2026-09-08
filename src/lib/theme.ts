@@ -8,6 +8,11 @@ export type BoxOverride = {
   anim?: "none" | "flow" | "shine";
   /** Per-box shadow: default follows global, on/off forces */
   shadow?: "default" | "on" | "off";
+  /**
+   * Background picture for this box (URL or data-URL).
+   * When set, it covers the box and overwrites solid/gradient fill.
+   */
+  image?: string;
 };
 
 export type ThemeMap = {
@@ -272,28 +277,47 @@ export function styleForBoxOverride(
 }
 
 export function applyBoxOverrideToEl(el: HTMLElement, ov: BoxOverride | undefined) {
-  el.classList.remove("gradient-flow", "gradient-shine", "box-shadow-force-on", "box-shadow-force-off");
+  el.classList.remove("gradient-flow", "gradient-shine", "box-shadow-force-on", "box-shadow-force-off", "box-has-image");
 
   if (!ov) {
     el.style.removeProperty("background-image");
     el.style.removeProperty("background-color");
+    el.style.removeProperty("background-size");
+    el.style.removeProperty("background-position");
+    el.style.removeProperty("background-repeat");
     el.removeAttribute("data-theme-overridden");
     return;
   }
 
   const anim = ov.anim ?? "none";
   const shadow = ov.shadow ?? "default";
+  const image = (ov.image || "").trim();
   const isEmpty =
-    ov.mode === "default" && anim === "none" && shadow === "default";
+    ov.mode === "default" && anim === "none" && shadow === "default" && !image;
 
   if (isEmpty) {
     el.style.removeProperty("background-image");
     el.style.removeProperty("background-color");
+    el.style.removeProperty("background-size");
+    el.style.removeProperty("background-position");
+    el.style.removeProperty("background-repeat");
     el.removeAttribute("data-theme-overridden");
     return;
   }
 
-  if (ov.mode === "solid" || ov.mode === "gradient") {
+  // Picture wins over solid / gradient
+  if (image) {
+    el.style.backgroundImage = `url("${image.replace(/"/g, "%22")}")`;
+    el.style.backgroundSize = "cover";
+    el.style.backgroundPosition = "center";
+    el.style.backgroundRepeat = "no-repeat";
+    el.style.backgroundColor = "transparent";
+    el.classList.add("box-has-image");
+    el.setAttribute("data-theme-overridden", "1");
+  } else if (ov.mode === "solid" || ov.mode === "gradient") {
+    el.style.removeProperty("background-size");
+    el.style.removeProperty("background-position");
+    el.style.removeProperty("background-repeat");
     const style = styleForBoxOverride(ov);
     if (style) {
       if (style.backgroundImage !== undefined) el.style.backgroundImage = style.backgroundImage;
@@ -303,16 +327,21 @@ export function applyBoxOverrideToEl(el: HTMLElement, ov: BoxOverride | undefine
       el.setAttribute("data-theme-overridden", "1");
     }
   } else {
+    el.style.removeProperty("background-image");
+    el.style.removeProperty("background-color");
+    el.style.removeProperty("background-size");
+    el.style.removeProperty("background-position");
+    el.style.removeProperty("background-repeat");
     el.removeAttribute("data-theme-overridden");
   }
 
-  if (ov.anim === "flow") {
+  if (!image && ov.anim === "flow") {
     el.classList.add("gradient-flow");
     if (!el.style.backgroundImage || el.style.backgroundImage === "none") {
       el.style.backgroundImage =
         "linear-gradient(125deg, var(--grad-featured-from), var(--grad-featured-to), var(--grad-featured-from))";
     }
-  } else if (ov.anim === "shine") {
+  } else if (!image && ov.anim === "shine") {
     el.classList.add("gradient-shine");
   }
 
@@ -371,6 +400,7 @@ export function normalizeTheme(raw: unknown): ThemeMap {
         gradTo: typeof ov.gradTo === "string" ? ov.gradTo : undefined,
         anim,
         shadow,
+        image: typeof ov.image === "string" && ov.image.trim() ? ov.image.trim() : undefined,
       };
     }
   }
