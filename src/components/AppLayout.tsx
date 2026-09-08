@@ -8,7 +8,12 @@ import { useBadges } from "@/lib/badges";
 import { useAuthUser, useCouple, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
-import { applyColors, normalizeTheme, stampAndApplyBoxOverrides, THEME_STORAGE_KEY as STORAGE_KEY } from "@/lib/theme";
+import {
+  applyColors,
+  normalizeTheme,
+  stampAndApplyBoxOverrides,
+  THEME_STORAGE_KEY as STORAGE_KEY,
+} from "@/lib/theme";
 import { DevThemeHost } from "@/components/DevThemeHost";
 import { useSwipeTabs } from "@/hooks/useSwipeTabs";
 
@@ -35,7 +40,7 @@ export function AppLayout({
   const { data: badges } = useBadges();
   useLocationPublisher();
   useCommitmentReminders();
-  useSwipeTabs(true);
+  const swipe = useSwipeTabs();
 
   useEffect(() => {
     const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
@@ -58,9 +63,14 @@ export function AppLayout({
     }
   }, [couple, pathname]);
 
-
   return (
-    <div className="page-wash min-h-screen bg-background pb-28">
+    <div
+      className="page-wash min-h-screen bg-background pb-28"
+      style={swipe.style}
+      onTouchStart={swipe.onTouchStart}
+      onTouchEnd={swipe.onTouchEnd}
+      onTouchCancel={swipe.onTouchCancel}
+    >
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-5 py-3.5">
           <div className="min-w-0 flex-1">
