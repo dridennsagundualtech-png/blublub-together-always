@@ -10,6 +10,7 @@ import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
 import { applyColors, normalizeTheme, stampAndApplyBoxOverrides, THEME_STORAGE_KEY as STORAGE_KEY } from "@/lib/theme";
 import { DevThemeHost } from "@/components/DevThemeHost";
+import { useSwipeTabs } from "@/hooks/useSwipeTabs";
 
 export function AppLayout({
   title,
@@ -34,6 +35,7 @@ export function AppLayout({
   const { data: badges } = useBadges();
   useLocationPublisher();
   useCommitmentReminders();
+  useSwipeTabs(true);
 
   useEffect(() => {
     const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
