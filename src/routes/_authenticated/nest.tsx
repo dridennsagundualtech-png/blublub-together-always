@@ -128,156 +128,113 @@ function NestPage() {
 
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      {/* ===== Flat pastel panel ===== */}
-      <div
-        className="relative overflow-hidden px-4 pb-6 pt-5"
-        style={{
-          borderRadius: "var(--panel-radius, 1.75rem)",
-          backgroundColor: "#A2D2FF",
-          color: "#3F2A3A",
-        }}
-      >
-        {/* Header */}
+      <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
+      <div className="grid gap-3">
+        <SummaryTile
+          tint="tile-lilac"
+          icon={<BookHeart className="size-3.5 text-primary" />}
+          label="Diary"
+          value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
+          detail={diaryStreak > 0 ? `${diaryStreak}-day streak` : "Write something small today"}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <SummaryTile
+            tint="tile-pink"
+            icon={<ListChecks className="size-3.5 text-primary" />}
+            label="To-Dos"
+            value={openTodos === 0 ? "All done" : `${openTodos} left to do`}
+          />
+          <SummaryTile
+            tint="tile-peach"
+            icon={<Sparkles className="size-3.5 text-primary" />}
+            label="Bucket List"
+            value={`${bucketDone}/${bucketTotal} done`}
+          />
+        </div>
+        <SummaryTile
+          tint="tile-sky"
+          icon={<Wallet className="size-3.5 text-primary" />}
+          label="Budget"
+          value={
+            !premium ? (
+              "Premium space"
+            ) : Math.abs(balance) < 0.01 ? (
+              "All square"
+            ) : (
+              <>
+                <Money value={Math.abs(balance)} /> {balance > 0 ? "owed to you" : "you owe"}
+              </>
+            )
+          }
+        />
+      </div>
+
+      <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
         <div className="relative text-center">
-          <p className="font-display text-[1.65rem] font-bold leading-tight">Nest Stories</p>
-          <p className="mx-auto mt-1 max-w-[17rem] text-[11px] leading-snug opacity-70">
-            Soothing tools to keep your shared life cozy and close
+          <p className="font-display text-2xl font-bold">Nest tools</p>
+          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
+            Diary, lists, dreams and money — kept in one cozy place
           </p>
         </div>
 
-        {/* Filter chips */}
-        <div className="relative mt-5 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-          {FILTERS.map((f) => {
-            const active = filter === f.id;
-            const Icon = f.icon;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setFilter(f.id)}
-                className="press flex shrink-0 flex-col items-center gap-1.5"
-              >
-                <span
-                  className="grid size-12 place-items-center rounded-full transition-colors"
-                  style={{
-                    backgroundColor: active ? "#FFAFCC" : "rgba(255,255,255,0.65)",
-                    color: "#3F2A3A",
-                  }}
-                >
-                  <Icon className="size-5" />
-                </span>
-                <span className="text-[10px] font-semibold opacity-80">{f.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <Link
+          to="/diary"
+          className="featured-gradient press relative mt-5 block overflow-hidden rounded-[1.35rem] p-5 text-primary-foreground"
+        >
+          <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Featured</p>
+          <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
+          <p className="mt-1 max-w-[14rem] text-xs opacity-90">
+            {lastEntry
+              ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 42)}`
+              : "Write a small note for each other"}
+          </p>
+          <span className="mt-4 inline-flex rounded-full bg-card px-4 py-1.5 text-xs font-bold text-card-foreground">
+            Open
+          </span>
+          <BookHeart className="absolute bottom-4 right-4 size-14 opacity-20" />
+        </Link>
 
-        {/* Featured card */}
-        {showDiary && (
-          <Link
-            to="/diary"
-            className="press relative mt-5 block overflow-hidden p-5"
-            style={{
-              borderRadius: "1.35rem",
-              backgroundColor: "#CDB4DB",
-              color: "#3F2A3A",
-            }}
-          >
-            <div className="relative z-10">
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Featured</p>
-              <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
-              <p className="mt-1 max-w-[14rem] text-xs leading-snug opacity-80">
-                {lastEntry
-                  ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 48)}`
-                  : "Write a small note for each other tonight"}
-              </p>
-              <span
-                className="mt-4 inline-flex rounded-full bg-white px-5 py-1.5 text-xs font-bold"
-                style={{ color: "#3F2A3A" }}
-              >
-                Open
-              </span>
-            </div>
-            <BookHeart className="absolute -bottom-2 -right-2 size-24 opacity-15" />
-          </Link>
-        )}
-
-        {/* Two smaller cards */}
         <div className="relative mt-3 grid grid-cols-2 gap-3">
-          {showTodo && (
-            <Link
-              to="/todos"
-              className="press flex min-h-[140px] flex-col justify-between p-4"
-              style={{
-                borderRadius: "1.25rem",
-                backgroundColor: "#FFC8DD",
-                color: "#3F2A3A",
-              }}
-            >
-              <ListChecks className="size-8 opacity-80" />
-              <div>
-                <p className="font-display text-[15px] font-bold">To-Dos</p>
-                <p className="text-[11px] opacity-70">
-                  {openTodos === 0 ? "All clear" : `${openTodos} open`}
-                </p>
-              </div>
-            </Link>
-          )}
-          {showBucket && (
-            <Link
-              to="/bucket"
-              className="press flex min-h-[140px] flex-col justify-between p-4"
-              style={{
-                borderRadius: "1.25rem",
-                backgroundColor: "#CDB4DB",
-                color: "#3F2A3A",
-              }}
-            >
-              <Sparkles className="size-8 opacity-80" />
-              <div>
-                <p className="font-display text-[15px] font-bold">Bucket List</p>
-                <p className="text-[11px] opacity-70">
-                  {bucketDone}/{bucketTotal} done
-                </p>
-              </div>
-            </Link>
-          )}
-          {showBudget && (
-            <Link
-              to="/budget"
-              className="press col-span-2 flex min-h-[100px] flex-col justify-between p-4"
-              style={{
-                borderRadius: "1.25rem",
-                backgroundColor: "#BDE0FE",
-                color: "#3F2A3A",
-              }}
-            >
-              <Wallet className="size-7 opacity-80" />
-              <div>
-                <p className="font-display text-[15px] font-bold">Budget</p>
-                <p className="text-[11px] opacity-70">
-                  {!premium
-                    ? "Premium space"
-                    : Math.abs(balance) < 0.01
-                      ? "All square"
-                      : "Shared expenses & goals"}
-                </p>
-              </div>
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* Quick summary outside the dark panel */}
-      <p className="mb-2 mt-5 font-display text-base font-bold text-foreground">Right now</p>
-      <div className="grid grid-cols-2 gap-2.5">
-        <div className="rounded-[1.1rem] bg-[#FFC8DD]/45 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Diary streak</p>
-          <p className="mt-0.5 text-sm font-bold">{diaryStreak > 0 ? `${diaryStreak} days` : "Start today"}</p>
-        </div>
-        <div className="rounded-[1.1rem] bg-[#BDE0FE]/50 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Open to-dos</p>
-          <p className="mt-0.5 text-sm font-bold">{openTodos === 0 ? "None" : openTodos}</p>
+          <Link
+            to="/todos"
+            className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-pink p-4 text-foreground"
+          >
+            <ListChecks className="size-7 text-primary opacity-80" />
+            <div>
+              <p className="font-display text-base font-bold">To-Dos</p>
+              <p className="text-[11px] text-muted-foreground">
+                {openTodos === 0 ? "All clear" : `${openTodos} open`}
+              </p>
+            </div>
+          </Link>
+          <Link
+            to="/bucket"
+            className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-peach p-4 text-foreground"
+          >
+            <Sparkles className="size-7 text-primary opacity-80" />
+            <div>
+              <p className="font-display text-base font-bold">Bucket List</p>
+              <p className="text-[11px] text-muted-foreground">
+                {bucketDone}/{bucketTotal} done
+              </p>
+            </div>
+          </Link>
+          <Link
+            to="/budget"
+            className="grad-box press col-span-2 flex min-h-[100px] flex-col justify-between rounded-[1.25rem] tile-cream p-4 text-foreground"
+          >
+            <Wallet className="size-6 text-primary opacity-80" />
+            <div>
+              <p className="font-display text-base font-bold">Budget</p>
+              <p className="text-[11px] text-muted-foreground">
+                {!premium
+                  ? "Premium space"
+                  : Math.abs(balance) < 0.01
+                    ? "All square"
+                    : "Shared expenses & goals"}
+              </p>
+            </div>
+          </Link>
         </div>
       </div>
 

@@ -127,15 +127,13 @@ function WellbeingPage() {
       : coolDecoded.text.slice(0, 48) || "A note was shared"
     : "No feelings shared yet";
   const coolDetail = latestCool
-    ? `${latestCool.need ? `Needs: ${latestCool.need} · ` : ""}${timeAgo(latestCool.created_at)}`
+    ? `${latestCool.needs ? `Needs: ${latestCool.needs} · ` : ""}${timeAgo(latestCool.created_at)}`
     : "Open cool-down to share";
 
-  const sharedCycle = (cycles ?? []).find((c) => c.user_id !== user?.id);
+  const sharedCycle = (cycles ?? []).find((c) => c.user_id !== user?.id && c.shared);
   const myLatest = (cycles ?? []).find((c) => c.user_id === user?.id);
   const cycleSrc = sharedCycle ?? myLatest;
-  const nextStart = cycleSrc
-    ? addDays(cycleSrc.start_date, cycleSrc.cycle_length)
-    : null;
+  const nextStart = cycleSrc ? addDays(cycleSrc.start_date, cycleSrc.cycle_length) : null;
   const cycleValue = nextStart
     ? `Next period in ${Math.max(0, daysUntil(nextStart))} days`
     : "No cycle logged";
@@ -167,25 +165,53 @@ function WellbeingPage() {
 
   return (
     <AppLayout title="Care" subtitle="Taking care of each other" critter="seal">
-      {/* ===== Flat pastel panel ===== */}
-      <div
-        className="relative overflow-hidden px-4 pb-6 pt-5"
-        style={{
-          borderRadius: "var(--panel-radius, 1.75rem)",
-          backgroundColor: "#FFC8DD",
-          color: "#3F2A3A",
-        }}
-      >
-        {/* Header */}
+      {/* Right now — theme-aware summary tiles */}
+      <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
+      <div className="grid gap-3">
+        <Link to="/cooldown" className="grad-box press block rounded-[1.25rem] tile-sky p-4">
+          <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            <HeartHandshake className="size-3.5 text-primary" />
+            Feelings
+          </span>
+          <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
+            {coolValue}
+          </span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">{coolDetail}</span>
+        </Link>
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/period" className="grad-box press block rounded-[1.25rem] tile-peach p-4">
+            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              <Droplets className="size-3.5 text-primary" />
+              Cycle
+            </span>
+            <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
+              {cycleValue}
+            </span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">{cycleDetail}</span>
+          </Link>
+          <Link to="/map" className="grad-box press block rounded-[1.25rem] tile-cream p-4">
+            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              <MapPin className="size-3.5 text-primary" />
+              Distance
+            </span>
+            <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
+              {distValue}
+            </span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">{distDetail}</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Care tools panel — uses theme panel-dark + featured-gradient */}
+      <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
         <div className="relative text-center">
-          <p className="font-display text-[1.65rem] font-bold leading-tight">Care Stories</p>
-          <p className="mx-auto mt-1 max-w-[17rem] text-[11px] leading-snug opacity-70">
-            Soft tools to help you both feel seen, safe and close
+          <p className="font-display text-2xl font-bold">Care tools</p>
+          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
+            Soft tools for feelings, cycles, distance and gentle goals
           </p>
         </div>
 
-        {/* Filter chips */}
-        <div className="relative mt-5 flex gap-3 overflow-x-auto pb-1">
+        <div className="relative mt-5 flex gap-2 overflow-x-auto pb-1">
           {FILTERS.map((f) => {
             const active = filter === f.id;
             const Icon = f.icon;
@@ -194,130 +220,79 @@ function WellbeingPage() {
                 key={f.id}
                 type="button"
                 onClick={() => setFilter(f.id)}
-                className="press flex shrink-0 flex-col items-center gap-1.5"
+                className="press flex shrink-0 flex-col items-center gap-1"
               >
                 <span
-                  className="grid size-12 place-items-center rounded-full transition-colors"
-                  style={{
-                    backgroundColor: active ? "#FFAFCC" : "rgba(255,255,255,0.65)",
-                    color: "#3F2A3A",
-                  }}
+                  className={cn(
+                    "grid size-11 place-items-center rounded-full",
+                    active ? "bg-primary text-primary-foreground" : "bg-white/10 text-white/80",
+                  )}
                 >
                   <Icon className="size-5" />
                 </span>
-                <span className="text-[10px] font-semibold opacity-80">{f.label}</span>
+                <span className="text-[10px] font-semibold text-white/80">{f.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Featured card */}
-        {showFeel && (
+        {showFeel ? (
           <Link
             to="/cooldown"
-            className="press relative mt-5 block overflow-hidden p-5"
-            style={{
-              borderRadius: "1.35rem",
-              backgroundColor: "#CDB4DB",
-              color: "#3F2A3A",
-            }}
+            className="featured-gradient press relative mt-5 block overflow-hidden rounded-[1.35rem] p-5 text-primary-foreground"
           >
-            <div className="relative z-10">
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Featured</p>
-              <p className="mt-1 font-display text-xl font-bold">Cool-Down Tool</p>
-              <p className="mt-1 max-w-[14rem] text-xs leading-snug opacity-80">
-                Pause, name the feeling, and reconnect with each other
-              </p>
-              <span
-                className="mt-4 inline-flex rounded-full bg-white px-5 py-1.5 text-xs font-bold"
-                style={{ color: "#3F2A3A" }}
-              >
-                Start
-              </span>
-            </div>
-            <HeartHandshake className="absolute -bottom-2 -right-2 size-24 opacity-15" />
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Featured</p>
+            <p className="mt-1 font-display text-xl font-bold">Cool-Down Tool</p>
+            <p className="mt-1 max-w-[14rem] text-xs opacity-90">
+              Pause, name the feeling, and reconnect with each other
+            </p>
+            <span className="mt-4 inline-flex rounded-full bg-card px-4 py-1.5 text-xs font-bold text-card-foreground">
+              Start
+            </span>
+            <HeartHandshake className="absolute bottom-4 right-4 size-14 opacity-20" />
           </Link>
-        )}
+        ) : null}
 
-        {/* Smaller cards grid */}
         <div className="relative mt-3 grid grid-cols-2 gap-3">
-          {showCycle && (
+          {showCycle ? (
             <Link
               to="/period"
-              className="press flex min-h-[140px] flex-col justify-between p-4"
-              style={{
-                borderRadius: "1.25rem",
-                backgroundColor: "#FFC8DD",
-                color: "#3F2A3A",
-              }}
+              className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-peach p-4 text-foreground"
             >
-              <Droplets className="size-8 opacity-80" />
+              <Droplets className="size-7 text-primary opacity-80" />
               <div>
-                <p className="font-display text-[15px] font-bold">Cycle</p>
-                <p className="text-[11px] opacity-70">Phase & predictions</p>
+                <p className="font-display text-base font-bold">Cycle</p>
+                <p className="text-[11px] text-muted-foreground">Phase & predictions</p>
               </div>
             </Link>
-          )}
-          {showCommit && (
+          ) : null}
+          {showCommit ? (
             <Link
               to="/commitments"
-              className="press flex min-h-[140px] flex-col justify-between p-4"
-              style={{
-                borderRadius: "1.25rem",
-                backgroundColor: "#CDB4DB",
-                color: "#3F2A3A",
-              }}
+              className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-cream p-4 text-foreground"
             >
-              <Target className="size-8 opacity-80" />
+              <Target className="size-7 text-primary opacity-80" />
               <div>
-                <p className="font-display text-[15px] font-bold">Commitments</p>
-                <p className="text-[11px] opacity-70">Gentle streaks</p>
+                <p className="font-display text-base font-bold">Commitments</p>
+                <p className="text-[11px] text-muted-foreground">Gentle streaks</p>
               </div>
             </Link>
-          )}
-          {showMap && (
+          ) : null}
+          {showMap ? (
             <Link
               to="/map"
               className={cn(
-                "press flex min-h-[110px] flex-col justify-between p-4",
+                "grad-box press flex min-h-[110px] flex-col justify-between rounded-[1.25rem] tile-lilac p-4 text-foreground",
                 showCycle && showCommit ? "col-span-2" : "col-span-1",
               )}
-              style={{
-                borderRadius: "1.25rem",
-                backgroundColor: "#BDE0FE",
-                color: "#3F2A3A",
-              }}
             >
-              <MapPin className="size-7 opacity-80" />
+              <MapPin className="size-6 text-primary opacity-80" />
               <div>
-                <p className="font-display text-[15px] font-bold">Where We Are</p>
-                <p className="text-[11px] opacity-70">Live location when shared</p>
+                <p className="font-display text-base font-bold">Where We Are</p>
+                <p className="text-[11px] text-muted-foreground">Live location when shared</p>
               </div>
             </Link>
-          )}
-        </div>
-      </div>
-
-      {/* Quick status row outside panel */}
-      <p className="mb-2 mt-5 font-display text-base font-bold text-foreground">Right now</p>
-      <div className="grid gap-2.5">
-        <Link
-          to="/cooldown"
-          className="press block rounded-[1.15rem] bg-[#BDE0FE]/45 p-3.5"
-        >
-          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Feelings</p>
-          <p className="mt-0.5 text-sm font-bold leading-snug">{coolValue}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{coolDetail}</p>
-        </Link>
-        <div className="grid grid-cols-2 gap-2.5">
-          <Link to="/period" className="press block rounded-[1.15rem] bg-[#FFC8DD]/40 p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Cycle</p>
-            <p className="mt-0.5 text-sm font-bold leading-snug">{cycleValue}</p>
-          </Link>
-          <Link to="/map" className="press block rounded-[1.15rem] bg-[#CDB4DB]/35 p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Distance</p>
-            <p className="mt-0.5 text-sm font-bold leading-snug">{distValue}</p>
-          </Link>
+          ) : null}
         </div>
       </div>
     </AppLayout>
