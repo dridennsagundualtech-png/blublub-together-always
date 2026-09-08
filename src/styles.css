@@ -515,3 +515,50 @@ html.boxes-gradient .grad-box {
   object-fit: cover;
   background: var(--color-muted);
 }
+
+
+/* —— Gradient motion (developer mode can enable per box) —— */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shine-sweep {
+  0% { transform: translateX(-130%); }
+  100% { transform: translateX(130%); }
+}
+
+@utility gradient-flow {
+  background-size: 220% 220%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Shine overlay — element must be position relative + overflow hidden */
+@utility gradient-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.gradient-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 58%
+  );
+  transform: translateX(-130%);
+  animation: shine-sweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Keep text/icons above shine */
+.gradient-shine > * {
+  position: relative;
+  z-index: 2;
+}
