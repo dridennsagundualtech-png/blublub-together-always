@@ -8,7 +8,8 @@ import { useBadges } from "@/lib/badges";
 import { useAuthUser, useCouple, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
-import { applyColors, normalizeTheme, THEME_STORAGE_KEY as STORAGE_KEY } from "@/lib/theme";
+import { applyColors, normalizeTheme, stampAndApplyBoxOverrides, THEME_STORAGE_KEY as STORAGE_KEY } from "@/lib/theme";
+import { DevThemeHost } from "@/components/DevThemeHost";
 
 export function AppLayout({
   title,
@@ -40,11 +41,16 @@ export function AppLayout({
       const next = normalizeTheme(fromCouple);
       applyColors(next, pathname);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      requestAnimationFrame(() => stampAndApplyBoxOverrides(next, pathname));
       return;
     }
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) applyColors(normalizeTheme(JSON.parse(raw)), pathname);
+      if (raw) {
+        const next = normalizeTheme(JSON.parse(raw));
+        applyColors(next, pathname);
+        requestAnimationFrame(() => stampAndApplyBoxOverrides(next, pathname));
+      }
     } catch {
       // ignore
     }
@@ -100,6 +106,8 @@ export function AppLayout({
           )}
         </div>
       </div>
+
+      <DevThemeHost />
 
       <BottomNav
         badges={{
