@@ -228,7 +228,7 @@ function PhotosPage() {
 
   // keep each album's photos sorted
   for (const name of Object.keys(albums)) {
-    albums[name].sort(sortByDate);
+    albums[name]?.sort(sortByDate);
   }
 
   const albumNames = Object.keys(albums).sort((a, b) => {
@@ -466,14 +466,15 @@ function PhotosPage() {
 
                 <ReactionBar
                   postId={
-                    post.kind === "carousel" ? post.photos[0].id : post.photo.id
+                    post.kind === "carousel" ? (post.photos[0]?.id ?? "") : post.photo.id
                   }
                 />
                 <PhotoComments
                   photoId={
-                    post.kind === "carousel" ? post.photos[0].id : post.photo.id
+                    post.kind === "carousel" ? (post.photos[0]?.id ?? "") : post.photo.id
                   }
                 />
+
               </div>
             </li>
           ))}
@@ -840,8 +841,9 @@ function buildFeedPosts(
         dir * a.taken_on.localeCompare(b.taken_on) ||
         Number(b.is_pinned) - Number(a.is_pinned),
     );
-    if (list.length === 1) {
-      posts.push({ kind: "single", key: list[0].id, photo: list[0] });
+    const only = list[0];
+    if (list.length === 1 && only) {
+      posts.push({ kind: "single", key: only.id, photo: only });
     } else {
       posts.push({
         kind: "carousel",
