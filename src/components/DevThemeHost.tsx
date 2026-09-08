@@ -62,7 +62,7 @@ export function DevThemeHost() {
   const [map, setMap] = useState<ThemeMap>(() => loadTheme());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingEl, setEditingEl] = useState<HTMLElement | null>(null);
-  const [draft, setDraft] = useState<BoxOverride>({ mode: "default" });
+  const [draft, setDraft] = useState<BoxOverride>({ mode: "default", anim: "none" });
 
   // Sync dev flag from storage (Appearance toggle writes this)
   useEffect(() => {
@@ -149,8 +149,8 @@ export function DevThemeHost() {
 
       const id = makeBoxId(el, pathname);
       el.setAttribute("data-theme-box", id);
-      const current = loadTheme().boxOverrides?.[id] ?? { mode: "default" as const };
-      setDraft({ ...current });
+      const current = loadTheme().boxOverrides?.[id] ?? { mode: "default" as const, anim: "none" as const };
+      setDraft({ anim: "none", ...current });
       setEditingId(id);
       setEditingEl(el);
 
@@ -191,14 +191,16 @@ export function DevThemeHost() {
       ...loadTheme(),
       boxOverrides: { ...loadTheme().boxOverrides },
     };
-    if (draft.mode === "default") {
+    const anim = draft.anim ?? "none";
+    const isEmpty = draft.mode === "default" && anim === "none";
+    if (isEmpty) {
       delete next.boxOverrides[editingId];
     } else {
-      next.boxOverrides[editingId] = { ...draft };
+      next.boxOverrides[editingId] = { ...draft, anim };
     }
     void persist(next);
-    if (editingEl) applyBoxOverrideToEl(editingEl, draft.mode === "default" ? undefined : draft);
-    toast.success(draft.mode === "default" ? "Box reset to default" : "Box style saved");
+    if (editingEl) applyBoxOverrideToEl(editingEl, isEmpty ? undefined : { ...draft, anim });
+    toast.success(isEmpty ? "Box reset to default" : "Box style saved");
     setEditingId(null);
     setEditingEl(null);
     document.querySelectorAll("[data-theme-selected]").forEach((n) => n.removeAttribute("data-theme-selected"));
@@ -346,6 +348,37 @@ export function DevThemeHost() {
               />
             </div>
           ) : null}
+
+          <div className="mb-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              Animation
+            </p>
+            <div className="flex gap-2">
+              {(
+                [
+                  ["none", "None"],
+                  ["flow", "Flow"],
+                  ["shine", "Shine"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setDraft((d) => ({ ...d, anim: id }))}
+                  className={`press flex-1 rounded-full py-2 text-[11px] font-bold ${
+                    (draft.anim ?? "none") === id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-[10px] text-muted-foreground">
+              Flow = moving gradient · Shine = light sweep across the box
+            </p>
+          </div>
 
           <div className="flex gap-2">
             <button
