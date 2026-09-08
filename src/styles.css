@@ -281,6 +281,17 @@ html.boxes-gradient .surface-quiet {
   );
 }
 
+/* Tiles that use inline background colors opt in with .grad-box */
+html.boxes-gradient .grad-box {
+  background-image: linear-gradient(
+    var(--box-grad-angle),
+    var(--box-grad-from),
+    var(--box-grad-to)
+  ) !important;
+}
+
+
+
 @utility panel-dark {
   border-radius: var(--panel-radius);
   background-image: linear-gradient(var(--grad-panel-angle), var(--grad-panel-from), var(--grad-panel-to));
