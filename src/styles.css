@@ -75,8 +75,9 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --shadow-soft: 0 10px 28px -12px color-mix(in oklab, var(--primary) 28%, transparent);
-  --shadow-float: 0 14px 40px -14px color-mix(in oklab, var(--primary) 42%, transparent);
+  --shadow-soft: 0 8px 24px -10px color-mix(in oklab, var(--primary) calc(var(--shadow-strength, 0.32) * 100%), transparent);
+  --shadow-float: 0 14px 40px -12px color-mix(in oklab, var(--primary) calc(var(--shadow-strength, 0.32) * 140%), transparent);
+  --shadow-tile: 0 6px 18px -8px color-mix(in oklab, var(--primary) calc(var(--shadow-strength, 0.32) * 90%), transparent);
 }
 
 :root {
@@ -84,7 +85,8 @@
   --radius: 1.25rem;                 /* global corner radius */
   --card-radius: 1.25rem;            /* cards / tiles */
   --panel-radius: 1.75rem;           /* big dark panels */
-  --shadow-strength: 0.28;           /* 0–1, multiplies soft shadow */
+  --shadow-strength: 0.32;           /* 0–1, multiplies soft shadow */
+  --shadow-enabled: 1;               /* 0 = flat, 1 = soft shadows on boxes */
 
   /* Exact palette (overridable) */
   --blush: #FFAFCC;
@@ -248,7 +250,7 @@
   border-radius: var(--card-radius);
   background-color: var(--color-card);
   background-image: none;
-  box-shadow: none;
+  box-shadow: var(--shadow-soft);
   border: none;
 }
 
@@ -256,7 +258,7 @@
   border-radius: var(--card-radius);
   background-color: var(--color-card);
   background-image: none;
-  box-shadow: 0 10px 28px -12px color-mix(in oklab, var(--primary) calc(var(--shadow-strength) * 100%), transparent);
+  box-shadow: var(--shadow-float);
   border: none;
 }
 
@@ -298,6 +300,7 @@ html.boxes-gradient .grad-box {
   color: white;
   overflow: hidden;
   position: relative;
+  box-shadow: var(--shadow-float);
 }
 
 @utility list-row {
@@ -316,7 +319,7 @@ html.boxes-gradient .grad-box {
   background-color: color-mix(in oklab, var(--color-muted) 45%, transparent);
   border-radius: var(--card-radius);
   border: none;
-  box-shadow: none;
+  box-shadow: var(--shadow-tile);
 }
 
 @utility press {
@@ -382,7 +385,10 @@ html.boxes-gradient .grad-box {
 @utility hero-gradient { background-image: var(--gradient-hero); }
 @utility stat-gradient { background-image: var(--gradient-stat); }
 @utility lilac-gradient { background-image: var(--gradient-lilac); }
-@utility featured-gradient { background-image: var(--gradient-featured); }
+@utility featured-gradient {
+  background-image: var(--gradient-featured);
+  box-shadow: var(--shadow-float);
+}
 
 @utility page-wash {
   background-image: var(--page-wash);
@@ -561,4 +567,40 @@ html.boxes-gradient .grad-box {
 .gradient-shine > * {
   position: relative;
   z-index: 2;
+}
+
+
+/* Colored tiles / boxes get the same soft elevation */
+.grad-box,
+.tile-pink,
+.tile-lilac,
+.tile-peach,
+.tile-sky,
+.tile-cream {
+  box-shadow: var(--shadow-tile);
+}
+
+/* Master switch: Appearance can set --shadow-enabled: 0 */
+html.shadows-off .card-soft,
+html.shadows-off .card-raised,
+html.shadows-off .card-outline,
+html.shadows-off .surface-quiet,
+html.shadows-off .panel-dark,
+html.shadows-off .featured-gradient,
+html.shadows-off .grad-box,
+html.shadows-off .tile-pink,
+html.shadows-off .tile-lilac,
+html.shadows-off .tile-peach,
+html.shadows-off .tile-sky,
+html.shadows-off .tile-cream {
+  box-shadow: none !important;
+}
+
+
+/* Per-box shadow force (developer mode) */
+.box-shadow-force-on {
+  box-shadow: var(--shadow-soft) !important;
+}
+.box-shadow-force-off {
+  box-shadow: none !important;
 }
