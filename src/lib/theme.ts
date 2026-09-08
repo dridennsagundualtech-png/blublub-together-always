@@ -4,6 +4,8 @@ export type BoxOverride = {
   solid?: string;
   gradFrom?: string;
   gradTo?: string;
+  /** Motion on this box only */
+  anim?: "none" | "flow" | "shine";
 };
 
 export type ThemeMap = {
@@ -151,19 +153,42 @@ export function styleForBoxOverride(
 
 /** Apply a single override onto a DOM element. */
 export function applyBoxOverrideToEl(el: HTMLElement, ov: BoxOverride | undefined) {
-  if (!ov || ov.mode === "default") {
+  // Always clear motion classes first
+  el.classList.remove("gradient-flow", "gradient-shine");
+
+  if (!ov || (ov.mode === "default" && (!ov.anim || ov.anim === "none"))) {
     el.style.removeProperty("background-image");
     el.style.removeProperty("background-color");
     el.removeAttribute("data-theme-overridden");
     return;
   }
-  const style = styleForBoxOverride(ov);
-  if (!style) return;
-  if (style.backgroundImage !== undefined) el.style.backgroundImage = style.backgroundImage;
-  else el.style.removeProperty("background-image");
-  if (style.backgroundColor !== undefined) el.style.backgroundColor = style.backgroundColor;
-  else el.style.removeProperty("background-color");
-  el.setAttribute("data-theme-overridden", "1");
+
+  if (ov.mode === "solid" || ov.mode === "gradient") {
+    const style = styleForBoxOverride(ov);
+    if (style) {
+      if (style.backgroundImage !== undefined) el.style.backgroundImage = style.backgroundImage;
+      else el.style.removeProperty("background-image");
+      if (style.backgroundColor !== undefined) el.style.backgroundColor = style.backgroundColor;
+      else el.style.removeProperty("background-color");
+      el.setAttribute("data-theme-overridden", "1");
+    }
+  } else {
+    // mode default but may still have anim — don't clear existing theme background
+    el.removeAttribute("data-theme-overridden");
+  }
+
+  // Motion (can combine with default / solid / gradient)
+  if (ov.anim === "flow") {
+    // Ensure a gradient-like surface can move; expand size for shift effect
+    el.classList.add("gradient-flow");
+    if (!el.style.backgroundImage || el.style.backgroundImage === "none") {
+      // fall back to featured gradient vars so flow is visible
+      el.style.backgroundImage =
+        "linear-gradient(125deg, var(--grad-featured-from), var(--grad-featured-to), var(--grad-featured-from))";
+    }
+  } else if (ov.anim === "shine") {
+    el.classList.add("gradient-shine");
+  }
 }
 
 export function makeBoxId(el: HTMLElement, pathname: string): string {
@@ -208,14 +233,16 @@ export function normalizeTheme(raw: unknown): ThemeMap {
     for (const [k, v] of Object.entries(overridesRaw as Record<string, unknown>)) {
       if (!v || typeof v !== "object") continue;
       const ov = v as Record<string, unknown>;
-      const rawMode = ov["mode"];
-      const mode =
-        rawMode === "solid" || rawMode === "gradient" || rawMode === "default" ? rawMode : "default";
-      const entry: BoxOverride = { mode };
-      if (typeof ov["solid"] === "string") entry.solid = ov["solid"];
-      if (typeof ov["gradFrom"] === "string") entry.gradFrom = ov["gradFrom"];
-      if (typeof ov["gradTo"] === "string") entry.gradTo = ov["gradTo"];
-      boxOverrides[k] = entry;
+      const mode = ov.mode === "solid" || ov.mode === "gradient" || ov.mode === "default" ? ov.mode : "default";
+      const anim =
+        ov.anim === "flow" || ov.anim === "shine" || ov.anim === "none" ? ov.anim : "none";
+      boxOverrides[k] = {
+        mode,
+        solid: typeof ov.solid === "string" ? ov.solid : undefined,
+        gradFrom: typeof ov.gradFrom === "string" ? ov.gradFrom : undefined,
+        gradTo: typeof ov.gradTo === "string" ? ov.gradTo : undefined,
+        anim,
+      };
     }
   }
   return {
