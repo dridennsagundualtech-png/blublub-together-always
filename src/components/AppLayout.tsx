@@ -70,6 +70,9 @@ export function AppLayout({
       onTouchStart={swipe.onTouchStart}
       onTouchEnd={swipe.onTouchEnd}
       onTouchCancel={swipe.onTouchCancel}
+      onMouseDown={swipe.onMouseDown}
+      onMouseUp={swipe.onMouseUp}
+      onMouseLeave={swipe.onMouseLeave}
     >
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-5 py-3.5">
