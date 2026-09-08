@@ -128,28 +128,24 @@ function NestPage() {
 
   return (
     <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      {/* ===== Sleep Stories style dark panel ===== */}
+      {/* ===== Flat pastel panel ===== */}
       <div
-        className="relative overflow-hidden px-4 pb-6 pt-5 text-white"
+        className="relative overflow-hidden px-4 pb-6 pt-5"
         style={{
           borderRadius: "var(--panel-radius, 1.75rem)",
-          background: "linear-gradient(180deg, var(--grad-panel-from, #2A1F3D), var(--grad-panel-to, #1A1528))",
+          backgroundColor: "#A2D2FF",
+          color: "#3F2A3A",
         }}
       >
-        {/* soft glow blobs */}
-        <div className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-[#CDB4DB]/25 blur-3xl" />
-        <div className="pointer-events-none absolute -left-10 bottom-4 size-28 rounded-full bg-[#FFAFCC]/20 blur-3xl" />
-        <div className="pointer-events-none absolute right-16 top-24 size-20 rounded-full bg-[#A2D2FF]/15 blur-2xl" />
-
         {/* Header */}
         <div className="relative text-center">
           <p className="font-display text-[1.65rem] font-bold leading-tight">Nest Stories</p>
-          <p className="mx-auto mt-1 max-w-[17rem] text-[11px] leading-snug text-white/65">
+          <p className="mx-auto mt-1 max-w-[17rem] text-[11px] leading-snug opacity-70">
             Soothing tools to keep your shared life cozy and close
           </p>
         </div>
 
-        {/* Filter chips – exact Sleep Stories layout */}
+        {/* Filter chips */}
         <div className="relative mt-5 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
           {FILTERS.map((f) => {
             const active = filter === f.id;
@@ -164,13 +160,13 @@ function NestPage() {
                 <span
                   className="grid size-12 place-items-center rounded-full transition-colors"
                   style={{
-                    backgroundColor: active ? "#FFAFCC" : "rgba(255,255,255,0.12)",
-                    color: active ? "#3F2A3A" : "rgba(255,255,255,0.85)",
+                    backgroundColor: active ? "#FFAFCC" : "rgba(255,255,255,0.65)",
+                    color: "#3F2A3A",
                   }}
                 >
                   <Icon className="size-5" />
                 </span>
-                <span className="text-[10px] font-semibold text-white/80">{f.label}</span>
+                <span className="text-[10px] font-semibold opacity-80">{f.label}</span>
               </button>
             );
           })}
@@ -183,7 +179,7 @@ function NestPage() {
             className="press relative mt-5 block overflow-hidden p-5"
             style={{
               borderRadius: "1.35rem",
-              background: "linear-gradient(135deg, var(--grad-featured-from, #CDB4DB), var(--grad-featured-to, #FFAFCC))",
+              backgroundColor: "#CDB4DB",
               color: "#3F2A3A",
             }}
           >
