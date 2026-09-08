@@ -13,7 +13,7 @@ export const MAIN_TAB_ROUTES = [
 ] as const;
 
 const MIN_DX = 50;
-const MAX_DY = 80;
+const MAX_DY = 90;
 
 function isBlockedTarget(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
@@ -55,13 +55,14 @@ function tabIndexForPath(pathname: string): number {
 type Start = { x: number; y: number; blocked: boolean };
 
 /**
- * Returns touch handlers to put on the main page wrapper.
- * Swipe left → next tab, swipe right → previous tab.
+ * Swipe / drag between main tabs (phone touch + desktop mouse).
+ * Attach the returned handlers to the page root in AppLayout.
  */
 export function useSwipeTabs() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const startRef = useRef<Start | null>(null);
+  const draggingRef = useRef(false);
 
   const go = useCallback(
     (dir: -1 | 1) => {
@@ -69,60 +70,104 @@ export function useSwipeTabs() {
       if (idx < 0) return;
       const next = idx + dir;
       if (next < 0 || next >= MAIN_TAB_ROUTES.length) return;
-      const to = MAIN_TAB_ROUTES[next]!;
-      void navigate({ to });
+      void navigate({ to: MAIN_TAB_ROUTES[next]! });
     },
     [navigate, pathname],
   );
 
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length !== 1) {
-      startRef.current = null;
-      return;
-    }
+  const begin = useCallback((x: number, y: number, target: EventTarget | null) => {
     if (document.documentElement.classList.contains("dev-theme-on")) {
       startRef.current = null;
       return;
     }
-    const t = e.touches[0]!;
     startRef.current = {
-      x: t.clientX,
-      y: t.clientY,
-      blocked: isBlockedTarget(e.target),
+      x,
+      y,
+      blocked: isBlockedTarget(target),
     };
   }, []);
 
-  const onTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
+  const finish = useCallback(
+    (x: number, y: number) => {
       const s = startRef.current;
       startRef.current = null;
+      draggingRef.current = false;
       if (!s || s.blocked) return;
-      if (e.changedTouches.length !== 1) return;
 
-      const t = e.changedTouches[0]!;
-      const dx = t.clientX - s.x;
-      const dy = t.clientY - s.y;
+      const dx = x - s.x;
+      const dy = y - s.y;
 
-      // Need a clear horizontal swipe
       if (Math.abs(dx) < MIN_DX) return;
       if (Math.abs(dy) > MAX_DY) return;
       if (Math.abs(dx) < Math.abs(dy)) return;
 
-      if (dx < 0) go(1); // finger moved left → next
-      else go(-1); // finger moved right → previous
+      if (dx < 0) go(1);
+      else go(-1);
     },
     [go],
   );
 
+  // —— Touch (phone) ——
+  const onTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length !== 1) {
+        startRef.current = null;
+        return;
+      }
+      const t = e.touches[0]!;
+      begin(t.clientX, t.clientY, e.target);
+    },
+    [begin],
+  );
+
+  const onTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.changedTouches.length !== 1) {
+        startRef.current = null;
+        return;
+      }
+      const t = e.changedTouches[0]!;
+      finish(t.clientX, t.clientY);
+    },
+    [finish],
+  );
+
   const onTouchCancel = useCallback(() => {
     startRef.current = null;
+    draggingRef.current = false;
+  }, []);
+
+  // —— Mouse (desktop) ——
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return;
+      begin(e.clientX, e.clientY, e.target);
+      draggingRef.current = true;
+    },
+    [begin],
+  );
+
+  const onMouseUp = useCallback(
+    (e: React.MouseEvent) => {
+      if (!draggingRef.current && !startRef.current) return;
+      finish(e.clientX, e.clientY);
+    },
+    [finish],
+  );
+
+  const onMouseLeave = useCallback(() => {
+    // Cancel if pointer leaves the page area without release
+    startRef.current = null;
+    draggingRef.current = false;
   }, []);
 
   return {
     onTouchStart,
     onTouchEnd,
     onTouchCancel,
-    // Helps the browser prefer vertical scroll but still deliver horizontal swipes
-    style: { touchAction: "pan-y" } as const,
+    onMouseDown,
+    onMouseUp,
+    onMouseLeave,
+    style: { touchAction: "pan-y", userSelect: "none" } as const,
   };
 }
