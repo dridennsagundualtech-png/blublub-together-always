@@ -656,3 +656,11 @@ html.shadows-off .tile-cream {
 .box-shadow-force-off {
   box-shadow: none !important;
 }
+
+
+/* Box with custom picture — keep content readable */
+.box-has-image {
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
