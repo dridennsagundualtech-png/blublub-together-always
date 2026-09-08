@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
 import { FeelingTile } from "@/components/FeelingTile";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import {
@@ -163,13 +164,16 @@ function HomePage() {
 
   return (
     <AppLayout title="BLUBLUB" subtitle={partner ? `With ${partner.display_name}` : "Your space"}>
-      <div className="pb-4 pt-1">
-        <p className="font-display text-[1.65rem] font-bold leading-tight tracking-tight text-foreground">
-          {greetingForHour()}, {name}
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {days !== null ? `Day ${days} together — make it count` : "We wish you a good day"}
-        </p>
+      <div className="flex items-start justify-between gap-3 pb-4 pt-1">
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-[1.65rem] font-bold leading-tight tracking-tight text-foreground">
+            {greetingForHour()}, {name}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {days !== null ? `Day ${days} together — make it count` : "We wish you a good day"}
+          </p>
+        </div>
+        <NotificationBell className="shrink-0" />
       </div>
 
       {/* 2 feature tiles — theme tokens */}
