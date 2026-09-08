@@ -127,10 +127,10 @@ function WellbeingPage() {
       : coolDecoded.text.slice(0, 48) || "A note was shared"
     : "No feelings shared yet";
   const coolDetail = latestCool
-    ? `${latestCool.needs ? `Needs: ${latestCool.needs} · ` : ""}${timeAgo(latestCool.created_at)}`
+    ? `${latestCool.need ? `Needs: ${latestCool.need} · ` : ""}${timeAgo(latestCool.created_at)}`
     : "Open cool-down to share";
 
-  const sharedCycle = (cycles ?? []).find((c) => c.user_id !== user?.id && c.shared);
+  const sharedCycle = (cycles ?? []).find((c) => c.user_id !== user?.id);
   const myLatest = (cycles ?? []).find((c) => c.user_id === user?.id);
   const cycleSrc = sharedCycle ?? myLatest;
   const nextStart = cycleSrc
