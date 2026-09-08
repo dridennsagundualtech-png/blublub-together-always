@@ -50,10 +50,6 @@ function saveThemeLocal(map: ThemeMap) {
   localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(map));
 }
 
-/**
- * Developer mode: on every screen, tap a box to set solid color or gradient.
- * Enable from Appearance → Developer mode.
- */
 export function DevThemeHost() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const coupleId = useCoupleId();
@@ -62,9 +58,13 @@ export function DevThemeHost() {
   const [map, setMap] = useState<ThemeMap>(() => loadTheme());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingEl, setEditingEl] = useState<HTMLElement | null>(null);
-  const [draft, setDraft] = useState<BoxOverride>({ mode: "default", anim: "none" });
+  const [draft, setDraft] = useState<BoxOverride>({
+    mode: "default",
+    anim: "none",
+    shadow: "default",
+  });
+  const [showGlobal, setShowGlobal] = useState(false);
 
-  // Sync dev flag from storage (Appearance toggle writes this)
   useEffect(() => {
     const read = () => setDevOn(localStorage.getItem(DEV_MODE_KEY) === "1");
     read();
@@ -72,7 +72,6 @@ export function DevThemeHost() {
       if (e.key === DEV_MODE_KEY) read();
     };
     window.addEventListener("storage", onStorage);
-    // custom event for same-tab toggle
     window.addEventListener("blublub-dev-mode", read);
     return () => {
       window.removeEventListener("storage", onStorage);
@@ -80,22 +79,6 @@ export function DevThemeHost() {
     };
   }, []);
 
-  // Re-stamp boxes when route or theme overrides change
-  useEffect(() => {
-    const theme = loadTheme();
-    setMap(theme);
-    applyColors(theme, pathname);
-    const t = window.setTimeout(() => stampAndApplyBoxOverrides(theme, pathname), 50);
-    const t2 = window.setTimeout(() => stampAndApplyBoxOverrides(theme, pathname), 300);
-    return () => {
-      window.clearTimeout(t);
-      window.clearTimeout(t2);
-    };
-  }, [pathname, devOn]);
-
-  // Outline boxes while developer mode is on
-
-  // Outline editable boxes while developer mode is on
   useEffect(() => {
     if (!document.getElementById("dev-theme-css")) {
       const style = document.createElement("style");
@@ -126,10 +109,23 @@ export function DevThemeHost() {
   }, []);
 
   useEffect(() => {
+    const theme = loadTheme();
+    setMap(theme);
+    applyColors(theme, pathname);
+    const t = window.setTimeout(() => stampAndApplyBoxOverrides(theme, pathname), 50);
+    const t2 = window.setTimeout(() => stampAndApplyBoxOverrides(theme, pathname), 300);
+    return () => {
+      window.clearTimeout(t);
+      window.clearTimeout(t2);
+    };
+  }, [pathname, devOn]);
+
+  useEffect(() => {
     document.documentElement.classList.toggle("dev-theme-on", devOn);
     if (!devOn) {
       setEditingId(null);
       setEditingEl(null);
+      setShowGlobal(false);
     }
   }, [devOn]);
 
@@ -138,7 +134,6 @@ export function DevThemeHost() {
       if (!devOn) return;
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      // ignore clicks inside the editor chrome
       if (target.closest("[data-dev-theme-ui]")) return;
 
       const el = target.closest(BOX_SELECTORS) as HTMLElement | null;
@@ -149,12 +144,16 @@ export function DevThemeHost() {
 
       const id = makeBoxId(el, pathname);
       el.setAttribute("data-theme-box", id);
-      const current = loadTheme().boxOverrides?.[id] ?? { mode: "default" as const, anim: "none" as const };
-      setDraft({ anim: "none", ...current });
+      const current = loadTheme().boxOverrides?.[id] ?? {
+        mode: "default" as const,
+        anim: "none" as const,
+        shadow: "default" as const,
+      };
+      setDraft({ mode: "default", anim: "none", shadow: "default", ...current });
       setEditingId(id);
       setEditingEl(el);
+      setShowGlobal(false);
 
-      // highlight
       document.querySelectorAll("[data-theme-selected]").forEach((n) => n.removeAttribute("data-theme-selected"));
       el.setAttribute("data-theme-selected", "1");
     },
@@ -180,26 +179,30 @@ export function DevThemeHost() {
           .eq("id", coupleId);
         void qc.invalidateQueries({ queryKey: ["couple", coupleId] });
       } catch {
-        // local still saved
+        /* local still saved */
       }
     }
   }
 
   function applyDraft() {
     if (!editingId) return;
+    const base = loadTheme();
     const next: ThemeMap = {
-      ...loadTheme(),
-      boxOverrides: { ...loadTheme().boxOverrides },
+      ...base,
+      boxOverrides: { ...base.boxOverrides },
     };
     const anim = draft.anim ?? "none";
-    const isEmpty = draft.mode === "default" && anim === "none";
+    const shadow = draft.shadow ?? "default";
+    const isEmpty = draft.mode === "default" && anim === "none" && shadow === "default";
     if (isEmpty) {
       delete next.boxOverrides[editingId];
     } else {
-      next.boxOverrides[editingId] = { ...draft, anim };
+      next.boxOverrides[editingId] = { ...draft, anim, shadow };
     }
     void persist(next);
-    if (editingEl) applyBoxOverrideToEl(editingEl, isEmpty ? undefined : { ...draft, anim });
+    if (editingEl) {
+      applyBoxOverrideToEl(editingEl, isEmpty ? undefined : { ...draft, anim, shadow });
+    }
     toast.success(isEmpty ? "Box reset to default" : "Box style saved");
     setEditingId(null);
     setEditingEl(null);
@@ -213,35 +216,68 @@ export function DevThemeHost() {
     setEditingId(null);
   }
 
+  function updateCorners(value: number) {
+    const next = { ...loadTheme(), cornerRadius: value };
+    void persist(next);
+  }
+
   if (!devOn) return null;
 
   return (
     <>
-      {/* Floating pill */}
       <div
         data-dev-theme-ui
-        className="fixed bottom-24 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-full bg-foreground px-3 py-2 text-background shadow-lg"
+        className="fixed bottom-24 left-1/2 z-[60] flex max-w-[95vw] -translate-x-1/2 flex-col items-center gap-2"
       >
-        <Paintbrush className="size-3.5" />
-        <span className="text-[11px] font-bold">Dev mode — tap any box</span>
-        <button
-          type="button"
-          className="rounded-full bg-background/20 px-2 py-0.5 text-[10px] font-bold"
-          onClick={() => {
-            localStorage.setItem(DEV_MODE_KEY, "0");
-            window.dispatchEvent(new Event("blublub-dev-mode"));
-            setDevOn(false);
-          }}
-        >
-          Off
-        </button>
+        {showGlobal ? (
+          <div className="w-[min(22rem,92vw)] rounded-2xl border border-border bg-card p-3 shadow-lg">
+            <p className="mb-1 text-xs font-bold">Edge sharpness (whole app)</p>
+            <p className="mb-2 text-[10px] text-muted-foreground">
+              Left = sharper · Right = rounder
+            </p>
+            <input
+              type="range"
+              min={0.35}
+              max={2.2}
+              step={0.05}
+              value={map.cornerRadius ?? 1.25}
+              onChange={(e) => updateCorners(Number(e.target.value))}
+              className="w-full"
+            />
+            <p className="mt-1 text-center text-[10px] font-semibold text-muted-foreground">
+              {(map.cornerRadius ?? 1.25).toFixed(2)} rem
+            </p>
+          </div>
+        ) : null}
+
+        <div className="flex items-center gap-2 rounded-full bg-foreground px-3 py-2 text-background shadow-lg">
+          <Paintbrush className="size-3.5 shrink-0" />
+          <span className="text-[11px] font-bold">Dev — tap a box</span>
+          <button
+            type="button"
+            className="rounded-full bg-background/20 px-2 py-0.5 text-[10px] font-bold"
+            onClick={() => setShowGlobal((v) => !v)}
+          >
+            Corners
+          </button>
+          <button
+            type="button"
+            className="rounded-full bg-background/20 px-2 py-0.5 text-[10px] font-bold"
+            onClick={() => {
+              localStorage.setItem(DEV_MODE_KEY, "0");
+              window.dispatchEvent(new Event("blublub-dev-mode"));
+              setDevOn(false);
+            }}
+          >
+            Off
+          </button>
+        </div>
       </div>
 
-      {/* Editor sheet */}
       {editingId ? (
         <div
           data-dev-theme-ui
-          className="fixed inset-x-0 bottom-0 z-[70] mx-auto max-w-lg rounded-t-3xl border border-border bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
+          className="fixed inset-x-0 bottom-0 z-[70] mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-3xl border border-border bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
             <div className="min-w-0">
@@ -268,7 +304,7 @@ export function DevThemeHost() {
             {(
               [
                 ["default", "Default"],
-                ["solid", "Solid color"],
+                ["solid", "Solid"],
                 ["gradient", "Gradient"],
               ] as const
             ).map(([mode, label]) => (
@@ -340,14 +376,36 @@ export function DevThemeHost() {
                   />
                 </label>
               </div>
-              <div
-                className="h-10 rounded-xl"
-                style={{
-                  background: `linear-gradient(135deg, ${draft.gradFrom || map.gradFrom}, ${draft.gradTo || map.gradTo})`,
-                }}
-              />
             </div>
           ) : null}
+
+          <div className="mb-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              Shadow (this box)
+            </p>
+            <div className="flex gap-2">
+              {(
+                [
+                  ["default", "Default"],
+                  ["on", "On"],
+                  ["off", "Off"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setDraft((d) => ({ ...d, shadow: id }))}
+                  className={`press flex-1 rounded-full py-2 text-[11px] font-bold ${
+                    (draft.shadow ?? "default") === id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="mb-3">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -375,9 +433,6 @@ export function DevThemeHost() {
                 </button>
               ))}
             </div>
-            <p className="mt-1.5 text-[10px] text-muted-foreground">
-              Flow = moving gradient · Shine = light sweep across the box
-            </p>
           </div>
 
           <div className="flex gap-2">
