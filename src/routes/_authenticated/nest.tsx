@@ -488,7 +488,7 @@ function QuickExpense({ onDone }: { onDone: () => void }) {
         couple_id: coupleId!,
         amount: Number(amount),
         category,
-        note: note.trim() || null,
+        description: note.trim() || category,
         paid_by: paidBy,
         created_by: user!.id,
       });
@@ -526,7 +526,7 @@ function QuickExpense({ onDone }: { onDone: () => void }) {
         </Field>
         <Field label="Paid by">
           <SelectInput value={paidBy} onChange={(e) => setPaidBy(e.target.value)}>
-            {(members ?? []).map((m) => (
+            {(members.data ?? []).map((m) => (
               <option key={m.id} value={m.id}>
                 {m.display_name ?? "Partner"}
               </option>

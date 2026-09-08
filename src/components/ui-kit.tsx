@@ -166,7 +166,7 @@ export function ProgressBar({
   return (
     <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted/80">
       <div
-        className={`h-full rounded-full transition-all duration-500 ${tones[tone] ?? tones.pink}`}
+        className={`h-full rounded-full transition-all duration-500 ${tones[tone] ?? tones["pink"]}`}
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
@@ -234,7 +234,7 @@ export function ListRow({
       <span
         className={cn(
           "grid size-11 shrink-0 place-items-center rounded-2xl text-primary",
-          tints[tint] ?? tints.pink,
+          tints[tint] ?? tints["pink"],
         )}
       >
         {icon}
