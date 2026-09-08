@@ -723,6 +723,53 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          couple_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          related_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          couple_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          related_id?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          couple_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          related_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photo_comments: {
         Row: {
           body: string
@@ -1312,7 +1359,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          p_actor_id: string
+          p_body: string
+          p_couple_id: string
+          p_related_id?: string
+          p_title: string
+          p_type: string
+        }
+        Returns: undefined
+      }
       current_couple_id: { Args: never; Returns: string }
+      cycle_phase_info: {
+        Args: {
+          p_as_of?: string
+          p_cycle_length: number
+          p_period_length: number
+          p_start_date: string
+        }
+        Returns: {
+          explanation: string
+          phase: string
+        }[]
+      }
       generate_redeem_code: {
         Args: { _valid_hours?: number }
         Returns: {
@@ -1338,6 +1408,10 @@ export type Database = {
         Returns: boolean
       }
       join_couple: { Args: { _code: string }; Returns: string }
+      partner_id: {
+        Args: { p_couple_id: string; p_exclude: string }
+        Returns: string
+      }
       redeem_premium: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
