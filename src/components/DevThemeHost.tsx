@@ -193,15 +193,27 @@ export function DevThemeHost() {
     };
     const anim = draft.anim ?? "none";
     const shadow = draft.shadow ?? "default";
-    const isEmpty = draft.mode === "default" && anim === "none" && shadow === "default";
+    const image = (draft.image || "").trim();
+    const isEmpty =
+      draft.mode === "default" && anim === "none" && shadow === "default" && !image;
     if (isEmpty) {
       delete next.boxOverrides[editingId];
     } else {
-      next.boxOverrides[editingId] = { ...draft, anim, shadow };
+      next.boxOverrides[editingId] = {
+        ...draft,
+        anim,
+        shadow,
+        image: image || undefined,
+      };
     }
     void persist(next);
     if (editingEl) {
-      applyBoxOverrideToEl(editingEl, isEmpty ? undefined : { ...draft, anim, shadow });
+      applyBoxOverrideToEl(
+        editingEl,
+        isEmpty
+          ? undefined
+          : { ...draft, anim, shadow, image: image || undefined },
+      );
     }
     toast.success(isEmpty ? "Box reset to default" : "Box style saved");
     setEditingId(null);
@@ -378,6 +390,91 @@ export function DevThemeHost() {
               </div>
             </div>
           ) : null}
+
+
+          <div className="mb-3 rounded-2xl border border-border bg-muted/30 p-3">
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              Picture (covers box)
+            </p>
+            <p className="mb-2 text-[10px] text-muted-foreground">
+              Overwrites solid / gradient — like illustrated cards
+            </p>
+            {draft.image ? (
+              <div
+                className="mb-2 h-20 rounded-xl bg-cover bg-center"
+                style={{ backgroundImage: `url(${draft.image})` }}
+              />
+            ) : null}
+            <input
+              type="url"
+              placeholder="Paste image link (https://…)"
+              value={draft.image?.startsWith("data:") ? "" : draft.image || ""}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, image: e.target.value.trim() || undefined }))
+              }
+              className="mb-2 w-full rounded-full border border-border bg-background px-3 py-2 text-xs"
+            />
+            <div className="flex gap-2">
+              <label className="press flex flex-1 cursor-pointer items-center justify-center rounded-full bg-primary py-2 text-[11px] font-bold text-primary-foreground">
+                Upload photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file) return;
+                    if (file.size > 2_500_000) {
+                      toast.error("Use a smaller image (under ~2.5 MB)");
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const result = String(reader.result || "");
+                      // shrink large data URLs via canvas
+                      const img = new Image();
+                      img.onload = () => {
+                        const max = 900;
+                        let { width, height } = img;
+                        if (width > max || height > max) {
+                          const scale = max / Math.max(width, height);
+                          width = Math.round(width * scale);
+                          height = Math.round(height * scale);
+                        }
+                        const canvas = document.createElement("canvas");
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext("2d");
+                        if (!ctx) {
+                          setDraft((d) => ({ ...d, image: result }));
+                          return;
+                        }
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressed = canvas.toDataURL("image/jpeg", 0.82);
+                        setDraft((d) => ({ ...d, image: compressed }));
+                        toast.message("Picture added — Save box");
+                      };
+                      img.onerror = () => {
+                        setDraft((d) => ({ ...d, image: result }));
+                      };
+                      img.src = result;
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
+              {draft.image ? (
+                <button
+                  type="button"
+                  onClick={() => setDraft((d) => ({ ...d, image: undefined }))}
+                  className="press rounded-full bg-muted px-3 py-2 text-[11px] font-bold text-muted-foreground"
+                >
+                  Remove
+                </button>
+              ) : null}
+            </div>
+          </div>
 
           <div className="mb-3">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
