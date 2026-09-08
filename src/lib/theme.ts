@@ -208,13 +208,14 @@ export function normalizeTheme(raw: unknown): ThemeMap {
     for (const [k, v] of Object.entries(overridesRaw as Record<string, unknown>)) {
       if (!v || typeof v !== "object") continue;
       const ov = v as Record<string, unknown>;
-      const mode = ov.mode === "solid" || ov.mode === "gradient" || ov.mode === "default" ? ov.mode : "default";
-      boxOverrides[k] = {
-        mode,
-        solid: typeof ov.solid === "string" ? ov.solid : undefined,
-        gradFrom: typeof ov.gradFrom === "string" ? ov.gradFrom : undefined,
-        gradTo: typeof ov.gradTo === "string" ? ov.gradTo : undefined,
-      };
+      const rawMode = ov["mode"];
+      const mode =
+        rawMode === "solid" || rawMode === "gradient" || rawMode === "default" ? rawMode : "default";
+      const entry: BoxOverride = { mode };
+      if (typeof ov["solid"] === "string") entry.solid = ov["solid"];
+      if (typeof ov["gradFrom"] === "string") entry.gradFrom = ov["gradFrom"];
+      if (typeof ov["gradTo"] === "string") entry.gradTo = ov["gradTo"];
+      boxOverrides[k] = entry;
     }
   }
   return {
