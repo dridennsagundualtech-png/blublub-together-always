@@ -12,6 +12,7 @@ import {
   THEME_DEFAULTS as DEFAULTS,
   THEME_SCREENS,
   THEME_STORAGE_KEY as STORAGE_KEY,
+  DEV_MODE_KEY,
   type ThemeMap,
 } from "@/lib/theme";
 
@@ -395,6 +396,29 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
             </span>
           </button>
         ))}
+      </div>
+
+      <div className="mt-5 rounded-[1.25rem] border border-border bg-muted/40 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-sm font-bold">Developer mode</p>
+            <p className="text-[11px] text-muted-foreground">
+              On any screen, tap a box to set its own color or gradient
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const on = localStorage.getItem(DEV_MODE_KEY) === "1";
+              localStorage.setItem(DEV_MODE_KEY, on ? "0" : "1");
+              window.dispatchEvent(new Event("blublub-dev-mode"));
+              toast.message(on ? "Developer mode off" : "Developer mode on — open any page and tap a box");
+            }}
+            className="press shrink-0 rounded-full bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground"
+          >
+            Toggle
+          </button>
+        </div>
       </div>
 
       <PrimaryButton className="mt-4" disabled={saving} onClick={() => void saveShared(map)}>
