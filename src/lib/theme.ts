@@ -6,6 +6,8 @@ export type BoxOverride = {
   gradTo?: string;
   /** Motion on this box only */
   anim?: "none" | "flow" | "shine";
+  /** Per-box shadow: default follows global, on/off forces */
+  shadow?: "default" | "on" | "off";
 };
 
 export type ThemeMap = {
@@ -22,6 +24,20 @@ export type ThemeMap = {
   gradientScreens: string[];
   /** Per-box overrides (any screen). Key = data-theme-box id */
   boxOverrides: Record<string, BoxOverride>;
+  /** Soft elevation on cards/tiles app-wide */
+  shadowsEnabled: boolean;
+  /** 0–1 strength of primary-tinted shadow */
+  shadowStrength: number;
+  /** Corner radius in rem (edge sharpness). Lower = sharper, higher = rounder */
+  cornerRadius: number;
+};
+
+export type ThemePreset = {
+  id: string;
+  name: string;
+  /** built-in presets cannot be deleted */
+  builtin?: boolean;
+  theme: ThemeMap;
 };
 
 export const THEME_DEFAULTS: ThemeMap = {
@@ -36,10 +52,14 @@ export const THEME_DEFAULTS: ThemeMap = {
   boxGradTo: "#FFC8DD",
   gradientScreens: [],
   boxOverrides: {},
+  shadowsEnabled: true,
+  shadowStrength: 0.32,
+  cornerRadius: 1.25,
 };
 
 export const THEME_STORAGE_KEY = "blublub-theme-v2";
 export const DEV_MODE_KEY = "blublub-dev-mode";
+export const PRESETS_STORAGE_KEY = "blublub-theme-presets-v1";
 
 /** Screens the user can switch the box gradient on/off for. */
 export const THEME_SCREENS: { id: string; label: string; match: string[] }[] = [
@@ -69,6 +89,99 @@ export const BOX_SELECTORS = [
   ".featured-gradient",
   "[data-theme-box]",
 ].join(", ");
+
+/** Recommended built-in appearance packs */
+export const BUILTIN_PRESETS: ThemePreset[] = [
+  {
+    id: "blush",
+    name: "Blush default",
+    builtin: true,
+    theme: { ...THEME_DEFAULTS },
+  },
+  {
+    id: "lilac-dream",
+    name: "Lilac dream",
+    builtin: true,
+    theme: {
+      ...THEME_DEFAULTS,
+      main: "#CDB4DB",
+      soft: "#E8DFF5",
+      purple: "#B8A9E8",
+      blue: "#C5D6FF",
+      gradFrom: "#B8A9E8",
+      gradTo: "#FFC8DD",
+      cornerRadius: 1.5,
+      shadowStrength: 0.28,
+    },
+  },
+  {
+    id: "ocean-calm",
+    name: "Ocean calm",
+    builtin: true,
+    theme: {
+      ...THEME_DEFAULTS,
+      main: "#7EB8DA",
+      soft: "#D6EEF8",
+      purple: "#A8C5E2",
+      blue: "#A2D2FF",
+      gradFrom: "#A2D2FF",
+      gradTo: "#BDE0FE",
+      cornerRadius: 1.1,
+      shadowStrength: 0.3,
+    },
+  },
+  {
+    id: "peach-warm",
+    name: "Peach warm",
+    builtin: true,
+    theme: {
+      ...THEME_DEFAULTS,
+      main: "#FFB4A2",
+      soft: "#FFE5D9",
+      purple: "#E8B4BC",
+      blue: "#FEC89A",
+      gradFrom: "#FFCAD4",
+      gradTo: "#FFE5D9",
+      cornerRadius: 1.35,
+      shadowStrength: 0.35,
+    },
+  },
+  {
+    id: "midnight-soft",
+    name: "Midnight soft",
+    builtin: true,
+    theme: {
+      ...THEME_DEFAULTS,
+      main: "#9B8CFF",
+      soft: "#2A2438",
+      purple: "#6B5B95",
+      blue: "#5B7C99",
+      gradFrom: "#6B5B95",
+      gradTo: "#9B8CFF",
+      boxGradFrom: "#2A2438",
+      boxGradTo: "#3D3555",
+      cornerRadius: 1.0,
+      shadowStrength: 0.4,
+    },
+  },
+  {
+    id: "sharp-minimal",
+    name: "Sharp minimal",
+    builtin: true,
+    theme: {
+      ...THEME_DEFAULTS,
+      main: "#FFAFCC",
+      soft: "#F5F5F5",
+      purple: "#D0D0D8",
+      blue: "#E0E8F0",
+      gradFrom: "#E8E8EE",
+      gradTo: "#FFAFCC",
+      cornerRadius: 0.55,
+      shadowStrength: 0.18,
+      shadowsEnabled: true,
+    },
+  },
+];
 
 export function screenIdForPath(pathname: string): string {
   let best = "other";
@@ -128,6 +241,16 @@ export function applyColors(map: ThemeMap, pathname?: string) {
 
   const path = pathname ?? (typeof window !== "undefined" ? window.location.pathname : "/");
   root.classList.toggle("boxes-gradient", gradientEnabledFor(map, path));
+
+  const strength = typeof map.shadowStrength === "number" ? map.shadowStrength : 0.32;
+  root.style.setProperty("--shadow-strength", String(Math.min(1, Math.max(0, strength))));
+  root.classList.toggle("shadows-off", map.shadowsEnabled === false);
+
+  const radius = typeof map.cornerRadius === "number" ? map.cornerRadius : 1.25;
+  const r = `${Math.min(2.5, Math.max(0.25, radius))}rem`;
+  root.style.setProperty("--radius", r);
+  root.style.setProperty("--card-radius", r);
+  root.style.setProperty("--panel-radius", `calc(${r} + 0.4rem)`);
 }
 
 export function styleForBoxOverride(
@@ -135,10 +258,7 @@ export function styleForBoxOverride(
 ): { backgroundImage?: string; backgroundColor?: string } | undefined {
   if (!ov || ov.mode === "default") return undefined;
   if (ov.mode === "solid" && ov.solid) {
-    return {
-      backgroundImage: "none",
-      backgroundColor: ov.solid,
-    };
+    return { backgroundImage: "none", backgroundColor: ov.solid };
   }
   if (ov.mode === "gradient") {
     const from = ov.gradFrom || "#CDB4DB";
@@ -151,12 +271,22 @@ export function styleForBoxOverride(
   return undefined;
 }
 
-/** Apply a single override onto a DOM element. */
 export function applyBoxOverrideToEl(el: HTMLElement, ov: BoxOverride | undefined) {
-  // Always clear motion classes first
-  el.classList.remove("gradient-flow", "gradient-shine");
+  el.classList.remove("gradient-flow", "gradient-shine", "box-shadow-force-on", "box-shadow-force-off");
 
-  if (!ov || (ov.mode === "default" && (!ov.anim || ov.anim === "none"))) {
+  if (!ov) {
+    el.style.removeProperty("background-image");
+    el.style.removeProperty("background-color");
+    el.removeAttribute("data-theme-overridden");
+    return;
+  }
+
+  const anim = ov.anim ?? "none";
+  const shadow = ov.shadow ?? "default";
+  const isEmpty =
+    ov.mode === "default" && anim === "none" && shadow === "default";
+
+  if (isEmpty) {
     el.style.removeProperty("background-image");
     el.style.removeProperty("background-color");
     el.removeAttribute("data-theme-overridden");
@@ -173,22 +303,21 @@ export function applyBoxOverrideToEl(el: HTMLElement, ov: BoxOverride | undefine
       el.setAttribute("data-theme-overridden", "1");
     }
   } else {
-    // mode default but may still have anim — don't clear existing theme background
     el.removeAttribute("data-theme-overridden");
   }
 
-  // Motion (can combine with default / solid / gradient)
   if (ov.anim === "flow") {
-    // Ensure a gradient-like surface can move; expand size for shift effect
     el.classList.add("gradient-flow");
     if (!el.style.backgroundImage || el.style.backgroundImage === "none") {
-      // fall back to featured gradient vars so flow is visible
       el.style.backgroundImage =
         "linear-gradient(125deg, var(--grad-featured-from), var(--grad-featured-to), var(--grad-featured-from))";
     }
   } else if (ov.anim === "shine") {
     el.classList.add("gradient-shine");
   }
+
+  if (shadow === "on") el.classList.add("box-shadow-force-on");
+  if (shadow === "off") el.classList.add("box-shadow-force-off");
 }
 
 export function makeBoxId(el: HTMLElement, pathname: string): string {
@@ -206,8 +335,6 @@ export function stampAndApplyBoxOverrides(map: ThemeMap, pathname: string) {
   if (typeof document === "undefined") return;
   const nodes = document.querySelectorAll<HTMLElement>(BOX_SELECTORS);
   nodes.forEach((el) => {
-    // skip nested boxes deeper than first match when parent is already a box
-    // (still allow nesting ids; overrides apply to each)
     const id = makeBoxId(el, pathname);
     el.setAttribute("data-theme-box", id);
     applyBoxOverrideToEl(el, map.boxOverrides?.[id]);
@@ -227,21 +354,23 @@ export function normalizeTheme(raw: unknown): ThemeMap {
   const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
   if (!str("main")) return { ...THEME_DEFAULTS, boxOverrides: {} };
   const screens = o["gradientScreens"];
-  const overridesRaw = o["boxOverrides"];
   const boxOverrides: Record<string, BoxOverride> = {};
-  if (overridesRaw && typeof overridesRaw === "object") {
-    for (const [k, v] of Object.entries(overridesRaw as Record<string, unknown>)) {
+  if (o["boxOverrides"] && typeof o["boxOverrides"] === "object") {
+    for (const [k, v] of Object.entries(o["boxOverrides"] as Record<string, unknown>)) {
       if (!v || typeof v !== "object") continue;
       const ov = v as Record<string, unknown>;
       const mode = ov.mode === "solid" || ov.mode === "gradient" || ov.mode === "default" ? ov.mode : "default";
       const anim =
         ov.anim === "flow" || ov.anim === "shine" || ov.anim === "none" ? ov.anim : "none";
+      const shadow =
+        ov.shadow === "on" || ov.shadow === "off" || ov.shadow === "default" ? ov.shadow : "default";
       boxOverrides[k] = {
         mode,
         solid: typeof ov.solid === "string" ? ov.solid : undefined,
         gradFrom: typeof ov.gradFrom === "string" ? ov.gradFrom : undefined,
         gradTo: typeof ov.gradTo === "string" ? ov.gradTo : undefined,
         anim,
+        shadow,
       };
     }
   }
@@ -259,6 +388,46 @@ export function normalizeTheme(raw: unknown): ThemeMap {
       ? (screens as unknown[]).filter((s): s is string => typeof s === "string")
       : [],
     boxOverrides,
+    shadowsEnabled: o["shadowsEnabled"] === false ? false : true,
+    shadowStrength:
+      typeof o["shadowStrength"] === "number"
+        ? Math.min(1, Math.max(0, o["shadowStrength"] as number))
+        : THEME_DEFAULTS.shadowStrength,
+    cornerRadius:
+      typeof o["cornerRadius"] === "number"
+        ? Math.min(2.5, Math.max(0.25, o["cornerRadius"] as number))
+        : THEME_DEFAULTS.cornerRadius,
   };
 }
 
+export function loadUserPresets(): ThemePreset[] {
+  try {
+    const raw = localStorage.getItem(PRESETS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((p): p is ThemePreset => !!p && typeof p === "object" && typeof (p as ThemePreset).id === "string")
+      .map((p) => ({
+        id: p.id,
+        name: String(p.name || "My preset"),
+        builtin: false,
+        theme: normalizeTheme(p.theme),
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export function saveUserPresets(list: ThemePreset[]) {
+  const custom = list.filter((p) => !p.builtin).map((p) => ({
+    id: p.id,
+    name: p.name,
+    theme: p.theme,
+  }));
+  localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(custom));
+}
+
+export function allPresets(): ThemePreset[] {
+  return [...BUILTIN_PRESETS, ...loadUserPresets()];
+}
