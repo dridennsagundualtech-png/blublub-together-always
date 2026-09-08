@@ -13,7 +13,11 @@ import {
   THEME_SCREENS,
   THEME_STORAGE_KEY as STORAGE_KEY,
   DEV_MODE_KEY,
+  allPresets,
+  saveUserPresets,
+  loadUserPresets,
   type ThemeMap,
+  type ThemePreset,
 } from "@/lib/theme";
 
 export type { ThemeMap };
@@ -63,6 +67,8 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
   const [active, setActive] = useState<Slot>("main");
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [presets, setPresets] = useState<ThemePreset[]>(() => allPresets());
+  const [presetName, setPresetName] = useState("");
 
   useEffect(() => {
     if (loaded) return;
@@ -396,6 +402,153 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
             </span>
           </button>
         ))}
+      </div>
+
+
+
+      <div className="mb-4 rounded-[1.25rem] border border-border bg-card p-3">
+        <p className="mb-1 text-sm font-bold">Theme presets</p>
+        <p className="mb-3 text-[11px] text-muted-foreground">
+          Recommended looks, or save the one you&apos;re using now
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {presets.map((p) => (
+            <div
+              key={p.id}
+              className="rounded-2xl border border-border bg-background p-2"
+            >
+              <div
+                className="mb-2 h-8 rounded-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${p.theme.gradFrom}, ${p.theme.gradTo})`,
+                }}
+              />
+              <p className="truncate text-[11px] font-bold">{p.name}</p>
+              <div className="mt-1.5 flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = normalizeTheme(p.theme);
+                    setMap(next);
+                    applyColors(next, pathname);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+                    toast.success(`Applied “${p.name}”`);
+                  }}
+                  className="press flex-1 rounded-full bg-primary py-1 text-[10px] font-bold text-primary-foreground"
+                >
+                  Use
+                </button>
+                {!p.builtin ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = loadUserPresets().filter((x) => x.id !== p.id);
+                      saveUserPresets(next);
+                      setPresets(allPresets());
+                      toast.message("Preset deleted");
+                    }}
+                    className="press rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-muted-foreground"
+                  >
+                    Del
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex gap-2">
+          <input
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            placeholder="Name this look…"
+            className="min-w-0 flex-1 rounded-full border border-border bg-background px-3 py-2 text-xs"
+            maxLength={32}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const name = presetName.trim() || "My look";
+              const id = `user-${Date.now()}`;
+              const custom = [
+                ...loadUserPresets(),
+                { id, name, theme: map, builtin: false as const },
+              ];
+              saveUserPresets(custom);
+              setPresets(allPresets());
+              setPresetName("");
+              toast.success("Preset saved");
+            }}
+            className="press shrink-0 rounded-full bg-foreground px-3 py-2 text-[11px] font-bold text-background"
+          >
+            Save current
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-[1.25rem] border border-border bg-card p-3">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div>
+            <p className="text-sm font-bold">Soft shadows</p>
+            <p className="text-[11px] text-muted-foreground">
+              Elevation on cards & tiles across the whole app
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              setMap((m) => ({
+                ...m,
+                shadowsEnabled: m.shadowsEnabled === false ? true : false,
+              }))
+            }
+            className={`press shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold ${
+              map.shadowsEnabled !== false
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {map.shadowsEnabled === false ? "Off" : "On"}
+          </button>
+        </div>
+        {map.shadowsEnabled !== false ? (
+          <label className="block text-[11px] font-semibold text-muted-foreground">
+            Strength
+            <input
+              type="range"
+              min={0.1}
+              max={0.7}
+              step={0.05}
+              value={map.shadowStrength ?? 0.32}
+              onChange={(e) =>
+                setMap((m) => ({
+                  ...m,
+                  shadowStrength: Number(e.target.value),
+                }))
+              }
+              className="mt-1 w-full"
+            />
+          </label>
+        ) : null}
+
+        <label className="mt-3 block text-[11px] font-semibold text-muted-foreground">
+          Edge sharpness (whole app)
+          <input
+            type="range"
+            min={0.35}
+            max={2.2}
+            step={0.05}
+            value={map.cornerRadius ?? 1.25}
+            onChange={(e) =>
+              setMap((m) => ({
+                ...m,
+                cornerRadius: Number(e.target.value),
+              }))
+            }
+            className="mt-1 w-full"
+          />
+          <span className="text-[10px]">Sharper ← → Rounder ({(map.cornerRadius ?? 1.25).toFixed(2)})</span>
+        </label>
+
       </div>
 
       <div className="mt-5 rounded-[1.25rem] border border-border bg-muted/40 p-3">
