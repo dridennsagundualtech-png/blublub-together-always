@@ -101,7 +101,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
     try {
       const { error } = await supabase
         .from("couples")
-        .update({ theme: next } as never)
+        .update({ theme: JSON.stringify(next) } as never)
         .eq("id", coupleId);
       if (error) throw error;
       void qc.invalidateQueries({ queryKey: ["couple", coupleId] });
