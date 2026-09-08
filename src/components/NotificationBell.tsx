@@ -13,6 +13,7 @@ import {
   Palette,
   Sparkles,
   Target,
+  Trash2,
   Wallet,
   X,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import {
   type AppNotification,
   type NotifKind,
   useAppNotifications,
+  useDeleteNotification,
   useMarkNotificationsSeen,
 } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
@@ -70,33 +72,66 @@ function timeLabel(iso: string) {
   return new Date(t).toLocaleDateString();
 }
 
-function NotifRow({ n, onNavigate }: { n: AppNotification; onNavigate: () => void }) {
+function NotifRow({
+  n,
+  onNavigate,
+  onDelete,
+}: {
+  n: AppNotification;
+  onNavigate: () => void;
+  onDelete: (id: string) => void;
+}) {
   const Icon = iconFor(n.kind);
   return (
-    <Link
-      to={n.href}
-      onClick={onNavigate}
-      className="press flex gap-3 rounded-2xl bg-muted/50 p-3 text-left"
+    <div
+      className={cn(
+        "flex gap-2 rounded-2xl p-3",
+        n.read ? "bg-muted/40" : "bg-primary/10",
+      )}
     >
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-start justify-between gap-2">
-          <span className="text-sm font-bold leading-snug">{n.title}</span>
-          <span className="shrink-0 text-[10px] font-semibold text-muted-foreground">
-            {timeLabel(n.at)}
-          </span>
+      <Link
+        to={n.href}
+        onClick={onNavigate}
+        className="press flex min-w-0 flex-1 gap-3 text-left"
+      >
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+          <Icon className="size-4" />
         </span>
-        <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{n.body}</span>
-      </span>
-    </Link>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-start justify-between gap-2">
+            <span className="text-sm font-bold leading-snug">
+              {!n.read ? (
+                <span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary align-middle" />
+              ) : null}
+              {n.title}
+            </span>
+            <span className="shrink-0 text-[10px] font-semibold text-muted-foreground">
+              {timeLabel(n.at)}
+            </span>
+          </span>
+          <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{n.body}</span>
+        </span>
+      </Link>
+      <button
+        type="button"
+        aria-label="Delete notification"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelete(n.id);
+        }}
+        className="press grid size-9 shrink-0 place-items-center self-center rounded-full border border-border text-muted-foreground hover:text-destructive"
+      >
+        <Trash2 className="size-3.5" />
+      </button>
+    </div>
   );
 }
 
 export function NotificationBell({ className }: { className?: string }) {
   const { data } = useAppNotifications();
   const markSeen = useMarkNotificationsSeen();
+  const deleteNotif = useDeleteNotification();
   const [open, setOpen] = useState(false);
 
   const count = data?.unseenCount ?? 0;
@@ -104,6 +139,7 @@ export function NotificationBell({ className }: { className?: string }) {
 
   function openPanel() {
     setOpen(true);
+    // Marks as read for badge only — does NOT remove items
     markSeen();
   }
 
@@ -139,7 +175,7 @@ export function NotificationBell({ className }: { className?: string }) {
               <div>
                 <p className="font-display text-lg font-bold">Updates</p>
                 <p className="text-[11px] text-muted-foreground">
-                  Everything new across your space
+                  Stay until you delete them
                 </p>
               </div>
               <button
@@ -157,7 +193,7 @@ export function NotificationBell({ className }: { className?: string }) {
                 <div className="px-2 py-10 text-center">
                   <Bell className="mx-auto size-8 text-muted-foreground/50" />
                   <p className="mt-3 text-sm font-semibold text-muted-foreground">
-                    You’re all caught up
+                    You&apos;re all caught up
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     New posts, messages, feelings, and nest updates will show here.
@@ -167,7 +203,11 @@ export function NotificationBell({ className }: { className?: string }) {
                 <ul className="space-y-2 pb-4">
                   {items.map((n) => (
                     <li key={n.id}>
-                      <NotifRow n={n} onNavigate={() => setOpen(false)} />
+                      <NotifRow
+                        n={n}
+                        onNavigate={() => setOpen(false)}
+                        onDelete={deleteNotif}
+                      />
                     </li>
                   ))}
                 </ul>
