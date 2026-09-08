@@ -266,6 +266,33 @@ function NestPage() {
   );
 }
 
+function SummaryTile({
+  tint,
+  icon,
+  label,
+  value,
+  detail,
+}: {
+  tint: string;
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  detail?: string;
+}) {
+  return (
+    <div className={`grad-box card-soft rounded-[1.25rem] ${tint} p-4`}>
+      <div className="flex items-center gap-2">
+        <span className="grid size-7 place-items-center rounded-full bg-card/70">{icon}</span>
+        <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+      </div>
+      <p className="mt-2 font-display text-base font-bold text-foreground">{value}</p>
+      {detail ? <p className="mt-0.5 text-[11px] text-muted-foreground">{detail}</p> : null}
+    </div>
+  );
+}
+
 function ChoiceRow({
   icon,
   title,
