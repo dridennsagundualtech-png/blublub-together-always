@@ -1081,6 +1081,7 @@ export type Database = {
           created_by: string
           id: string
           item_key: string
+          room_page_id: string | null
           rotation: number
           scale: number
           updated_at: string
@@ -1094,6 +1095,7 @@ export type Database = {
           created_by: string
           id?: string
           item_key: string
+          room_page_id?: string | null
           rotation?: number
           scale?: number
           updated_at?: string
@@ -1107,6 +1109,7 @@ export type Database = {
           created_by?: string
           id?: string
           item_key?: string
+          room_page_id?: string | null
           rotation?: number
           scale?: number
           updated_at?: string
@@ -1158,6 +1161,7 @@ export type Database = {
       }
       rooms: {
         Row: {
+          active_room_id: string | null
           background_key: string | null
           couple_id: string
           created_at: string
@@ -1167,11 +1171,13 @@ export type Database = {
           pet_z: Json
           plant_growth: number
           plant_watered_on: string | null
+          room_pages: Json | null
           seed_character: string | null
           seed_color: string | null
           updated_at: string
         }
         Insert: {
+          active_room_id?: string | null
           background_key?: string | null
           couple_id: string
           created_at?: string
@@ -1181,11 +1187,13 @@ export type Database = {
           pet_z?: Json
           plant_growth?: number
           plant_watered_on?: string | null
+          room_pages?: Json | null
           seed_character?: string | null
           seed_color?: string | null
           updated_at?: string
         }
         Update: {
+          active_room_id?: string | null
           background_key?: string | null
           couple_id?: string
           created_at?: string
@@ -1195,6 +1203,7 @@ export type Database = {
           pet_z?: Json
           plant_growth?: number
           plant_watered_on?: string | null
+          room_pages?: Json | null
           seed_character?: string | null
           seed_color?: string | null
           updated_at?: string
