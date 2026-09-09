@@ -664,3 +664,49 @@ html.shadows-off .tile-cream {
   background-position: center !important;
   background-repeat: no-repeat !important;
 }
+
+
+/* —— Tab / swipe page transitions —— */
+@keyframes page-in-from-right {
+  from {
+    opacity: 0.35;
+    transform: translateX(18%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-in-from-left {
+  from {
+    opacity: 0.35;
+    transform: translateX(-18%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.page-slide-from-right {
+  animation: page-in-from-right 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page-slide-from-left {
+  animation: page-in-from-left 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-slide-from-right,
+  .page-slide-from-left {
+    animation: none;
+  }
+}
+
+/* View Transitions API (when browser supports startViewTransition) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
