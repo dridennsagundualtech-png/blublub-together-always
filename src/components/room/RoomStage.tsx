@@ -29,7 +29,9 @@ export function RoomStage({
   petPositions,
   petZ,
   mascotVisibility,
+  showSeed = true,
   fullscreen,
+  roomNav,
   toolbar,
   onSelect,
   onMove,
@@ -162,7 +164,8 @@ export function RoomStage({
         <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--lavender)_28%,white)_0%,color-mix(in_oklab,var(--peach)_30%,white)_100%)]" />
       )}
 
-      {/* Shared seed — fixed square hitbox; art centered inside (handles transparent padding in sprites) */}
+      {/* Seed only in the room where it lives */}
+      {showSeed ? (
       <div
         className="absolute flex flex-col items-center"
         style={{
@@ -208,6 +211,7 @@ export function RoomStage({
           {seedLabel ?? stage.label}
         </span>
       </div>
+      ) : null}
 
       {/* Mascots */}
       {MASCOTS.filter((m) => mascotVisibility?.[m.critter] !== false).map((m, i) => {
@@ -357,6 +361,58 @@ export function RoomStage({
       ) : null}
 
       {/* Fullscreen toolbar — hidden while decorating so nothing covers the room */}
+
+      {/* Room arrows — inside stage so they show in fullscreen */}
+      {fullscreen && roomNav ? (
+        <>
+          <button
+            type="button"
+            aria-label="Previous room"
+            disabled={!roomNav.canPrev}
+            onClick={(e) => {
+              e.stopPropagation();
+              roomNav.onPrev();
+            }}
+            className="press absolute left-2 top-1/2 z-[80] -translate-y-1/2 rounded-xl bg-card/90 p-2 shadow-float disabled:opacity-25"
+          >
+            {roomNav.arrowLeftSrc ? (
+              <img
+                src={roomNav.arrowLeftSrc}
+                alt=""
+                className="size-9 object-contain"
+                style={{ imageRendering: "pixelated" }}
+              />
+            ) : (
+              <span className="px-1 text-lg font-black">‹</span>
+            )}
+          </button>
+          <button
+            type="button"
+            aria-label="Next room"
+            disabled={!roomNav.canNext}
+            onClick={(e) => {
+              e.stopPropagation();
+              roomNav.onNext();
+            }}
+            className="press absolute right-2 top-1/2 z-[80] -translate-y-1/2 rounded-xl bg-card/90 p-2 shadow-float disabled:opacity-25"
+          >
+            {roomNav.arrowRightSrc ? (
+              <img
+                src={roomNav.arrowRightSrc}
+                alt=""
+                className="size-9 object-contain"
+                style={{ imageRendering: "pixelated" }}
+              />
+            ) : (
+              <span className="px-1 text-lg font-black">›</span>
+            )}
+          </button>
+          <p className="pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top)+0.6rem)] z-[80] -translate-x-1/2 rounded-full bg-card/90 px-3 py-1 text-[11px] font-bold text-foreground shadow-sm">
+            {roomNav.label}
+          </p>
+        </>
+      ) : null}
+
       {fullscreen && toolbar && !editing ? (
         <div
           className="absolute inset-x-0 bottom-0 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3"
