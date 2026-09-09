@@ -487,6 +487,115 @@ a[href]:active.bg-primary {
   border: 1px solid var(--color-border);
 }
 
+/* —— Dice corner: 3D tumble roll —— */
+.dice-scene {
+  perspective: 700px;
+  perspective-origin: 50% 40%;
+}
+
+.dice-body {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 1.1rem;
+  box-shadow:
+    0 10px 22px -10px color-mix(in oklab, var(--primary) 35%, transparent),
+    inset 0 1px 0 color-mix(in oklab, white 55%, transparent);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.dice-face-text {
+  position: relative;
+  z-index: 1;
+  max-width: 92%;
+  padding: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  transition: filter 80ms linear, opacity 80ms linear;
+}
+
+.dice-text-blur {
+  filter: blur(0.6px);
+  opacity: 0.85;
+}
+
+.dice-edge {
+  pointer-events: none;
+  position: absolute;
+  border-radius: inherit;
+  inset: 0;
+}
+.dice-edge-tl {
+  box-shadow: inset 2px 2px 0 color-mix(in oklab, white 40%, transparent);
+}
+.dice-edge-br {
+  box-shadow: inset -2px -3px 0 color-mix(in oklab, black 12%, transparent);
+}
+
+@keyframes dice-roll-3d {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateY(0) scale(1);
+  }
+  15% {
+    transform: rotateX(calc(var(--dice-spin-x, 1) * 90deg)) rotateY(calc(var(--dice-spin-y, 1) * 40deg)) rotateZ(-20deg) translateY(-8%) scale(1.05);
+  }
+  35% {
+    transform: rotateX(calc(var(--dice-spin-x, 1) * 200deg)) rotateY(calc(var(--dice-spin-y, 1) * 160deg)) rotateZ(15deg) translateY(-14%) scale(1.08);
+  }
+  55% {
+    transform: rotateX(calc(var(--dice-spin-x, 1) * 320deg)) rotateY(calc(var(--dice-spin-y, 1) * 280deg)) rotateZ(-10deg) translateY(-6%) scale(1.02);
+  }
+  75% {
+    transform: rotateX(calc(var(--dice-spin-x, 1) * 400deg)) rotateY(calc(var(--dice-spin-y, 1) * 360deg)) rotateZ(6deg) translateY(-2%) scale(1.04);
+  }
+  100% {
+    transform: rotateX(calc(var(--dice-spin-x, 1) * 450deg)) rotateY(calc(var(--dice-spin-y, 1) * 420deg)) rotateZ(0deg) translateY(0) scale(1);
+  }
+}
+
+@keyframes dice-land {
+  0% {
+    transform: rotateX(18deg) rotateY(-12deg) scale(0.88);
+    filter: brightness(1.08);
+  }
+  40% {
+    transform: rotateX(-6deg) rotateY(4deg) scale(1.06);
+  }
+  70% {
+    transform: rotateX(3deg) rotateY(-2deg) scale(0.98);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(0deg) scale(1);
+    filter: none;
+  }
+}
+
+.dice-is-rolling {
+  animation: dice-roll-3d 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+  animation-delay: var(--dice-delay, 0ms);
+}
+
+.dice-is-settled {
+  animation: dice-land 0.55s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+  animation-delay: var(--dice-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dice-is-rolling,
+  .dice-is-settled {
+    animation: none;
+  }
+  .dice-text-blur {
+    filter: none;
+  }
+}
+
+/* keep old utility names working if referenced elsewhere */
 @keyframes dice-tumble {
   0% { transform: rotate(0deg) scale(1); }
   25% { transform: rotate(-14deg) scale(1.06); }
