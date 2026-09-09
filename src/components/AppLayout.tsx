@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { BottomNav } from "@/components/BottomNav";
 import { Doodle, critterFor, poseFor, type Critter, type Pose } from "@/components/Doodles";
@@ -15,7 +15,7 @@ import {
   THEME_STORAGE_KEY as STORAGE_KEY,
 } from "@/lib/theme";
 import { DevThemeHost } from "@/components/DevThemeHost";
-import { useSwipeTabs } from "@/hooks/useSwipeTabs";
+import { TAB_DIR_KEY, useSwipeTabs } from "@/hooks/useSwipeTabs";
 
 export function AppLayout({
   title,
@@ -41,6 +41,7 @@ export function AppLayout({
   useLocationPublisher();
   useCommitmentReminders();
   const swipe = useSwipeTabs();
+  const [slideClass, setSlideClass] = useState("");
 
   useEffect(() => {
     const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
@@ -62,6 +63,21 @@ export function AppLayout({
       // ignore
     }
   }, [couple, pathname]);
+
+  // Page slide animation when route changes (from swipe or tab)
+  useEffect(() => {
+    let dir = "left";
+    try {
+      dir = sessionStorage.getItem(TAB_DIR_KEY) || "left";
+      sessionStorage.removeItem(TAB_DIR_KEY);
+    } catch {
+      /* ignore */
+    }
+    const cls = dir === "right" ? "page-slide-from-left" : "page-slide-from-right";
+    setSlideClass(cls);
+    const t = window.setTimeout(() => setSlideClass(""), 320);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
 
   return (
     <div
@@ -94,7 +110,7 @@ export function AppLayout({
         </div>
       </header>
 
-      <div className="mx-auto max-w-lg px-5">
+      <div className={`mx-auto max-w-lg px-5 ${slideClass}`}>
         {!user ? (
           <Link
             to="/profile"
