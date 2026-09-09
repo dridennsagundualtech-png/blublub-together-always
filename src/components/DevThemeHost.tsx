@@ -149,7 +149,7 @@ export function DevThemeHost() {
         anim: "none" as const,
         shadow: "default" as const,
       };
-      setDraft({ mode: "default", anim: "none", shadow: "default", ...current });
+      setDraft({ ...current });
       setEditingId(id);
       setEditingEl(el);
       setShowGlobal(false);
@@ -199,12 +199,14 @@ export function DevThemeHost() {
     if (isEmpty) {
       delete next.boxOverrides[editingId];
     } else {
-      next.boxOverrides[editingId] = {
+      const savedDraft: BoxOverride = {
         ...draft,
         anim,
         shadow,
-        image: image || undefined,
+        ...(image ? { image } : {}),
       };
+      if (!image) delete savedDraft.image;
+      next.boxOverrides[editingId] = savedDraft;
     }
     void persist(next);
     if (editingEl) {
@@ -212,7 +214,7 @@ export function DevThemeHost() {
         editingEl,
         isEmpty
           ? undefined
-          : { ...draft, anim, shadow, image: image || undefined },
+          : next.boxOverrides[editingId],
       );
     }
     toast.success(isEmpty ? "Box reset to default" : "Box style saved");
@@ -409,9 +411,13 @@ export function DevThemeHost() {
               type="url"
               placeholder="Paste image link (https://…)"
               value={draft.image?.startsWith("data:") ? "" : draft.image || ""}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, image: e.target.value.trim() || undefined }))
-              }
+              onChange={(e) => {
+                const value = e.target.value.trim();
+                setDraft((d) => {
+                  const { image: _image, ...rest } = d;
+                  return value ? { ...rest, image: value } : rest;
+                });
+              }}
               className="mb-2 w-full rounded-full border border-border bg-background px-3 py-2 text-xs"
             />
             <div className="flex gap-2">
@@ -467,7 +473,12 @@ export function DevThemeHost() {
               {draft.image ? (
                 <button
                   type="button"
-                  onClick={() => setDraft((d) => ({ ...d, image: undefined }))}
+                  onClick={() =>
+                    setDraft((d) => {
+                      const { image: _image, ...rest } = d;
+                      return rest;
+                    })
+                  }
                   className="press rounded-full bg-muted px-3 py-2 text-[11px] font-bold text-muted-foreground"
                 >
                   Remove
