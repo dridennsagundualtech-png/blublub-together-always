@@ -44,6 +44,8 @@ import {
 } from "@/lib/room";
 
 import roomCover from "@/assets/our-room-cover.jpg.asset.json";
+import arrowLeftPink from "@/assets/icons/arrow-left-pink.png";
+import arrowRightPink from "@/assets/icons/arrow-right-pink.png";
 import { playChirp } from "@/hooks/use-sound";
 
 import { cn } from "@/lib/utils";
@@ -90,6 +92,17 @@ function RoomPage() {
   const actions = useRoomActions(resolvedPageId);
   const { data: isAdmin } = useIsAdmin();
   const nextRoomCost = costForNextRoom(roomPages.length);
+  const pageIndex = Math.max(
+    0,
+    roomPages.findIndex((p) => p.id === resolvedPageId),
+  );
+  function goAdjacentRoom(dir: -1 | 1) {
+    const next = pageIndex + dir;
+    if (next < 0 || next >= roomPages.length) return;
+    playChirp("tap");
+    setActivePageId(roomPages[next]!.id);
+    setSelectedId(null);
+  }
 
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -207,6 +220,22 @@ function RoomPage() {
       petPositions={(activePage?.pet_positions ?? {}) as Record<string, { x: number; y: number }>}
       petZ={(activePage?.pet_z ?? {}) as Record<string, number>}
       mascotVisibility={(activePage?.mascot_visibility ?? {}) as Record<string, boolean>}
+      showSeed={
+        (room?.seed_room_id ?? roomPages[0]?.id ?? "main") === resolvedPageId
+      }
+      roomNav={
+        fullscreen && roomPages.length > 1
+          ? {
+              label: `${pageIndex + 1} / ${roomPages.length} · ${activePage?.name ?? "Room"}`,
+              canPrev: pageIndex > 0,
+              canNext: pageIndex < roomPages.length - 1,
+              onPrev: () => goAdjacentRoom(-1),
+              onNext: () => goAdjacentRoom(1),
+              arrowLeftSrc: arrowLeftPink,
+              arrowRightSrc: arrowRightPink,
+            }
+          : undefined
+      }
       fullscreen={fullscreen}
       toolbar={
         <div className="space-y-2">
@@ -348,6 +377,22 @@ function RoomPage() {
           ))}
         </div>
         <p className="mt-1 text-[11px] text-muted-foreground">
+          {(room?.seed_room_id ?? roomPages[0]?.id ?? "main") !== resolvedPageId ? (
+            <button
+              type="button"
+              className="press mb-2 w-full rounded-full bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+              onClick={() => {
+                actions.moveSeedToRoom.mutate(resolvedPageId, {
+                  onSuccess: () => toast("Seed moved to this room 🌱"),
+                  onError: (e) => toast((e as Error).message),
+                });
+              }}
+            >
+              Move seed to this room
+            </button>
+          ) : (
+            <p className="mb-2 text-[11px] font-semibold text-primary">Seed is in this room</p>
+          )}
           Your seed only shows its grown-up form from step 5 — but you can pick who they'll become
           any time.
         </p>
