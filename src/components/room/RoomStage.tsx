@@ -143,8 +143,9 @@ export function RoomStage({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onClick={() => editing && onSelect(null)}
+      data-no-page-swipe
       className={cn(
-        "relative touch-none select-none overflow-hidden",
+        "room-stage relative touch-none select-none overflow-hidden",
         fullscreen
           ? "fixed inset-0 z-[70] h-[100dvh] w-full bg-black"
           : "card-soft aspect-[4/5] w-full p-0",
@@ -188,10 +189,9 @@ export function RoomStage({
             onWater();
           }}
           className={cn(
-            // No overflow-hidden / rounded-full — full pixel sprite must stay visible (antenna + feet)
-            "press flex h-[5.5rem] w-[5.5rem] items-end justify-center rounded-2xl p-0.5 leading-none",
+            "press grid size-[4.75rem] place-items-center overflow-hidden rounded-full p-1 leading-none",
             selectedId === "pet:seed"
-              ? "bg-card/70 ring-2 ring-primary ring-offset-2 ring-offset-transparent"
+              ? "bg-card/80 ring-2 ring-primary ring-offset-2 ring-offset-transparent"
               : "bg-transparent",
           )}
           aria-label="Shared seed companion"
@@ -201,7 +201,7 @@ export function RoomStage({
               src={seedUrl}
               alt={seedLabel ?? stage.label}
               draggable={false}
-              className="room-float pointer-events-none h-full w-full object-contain object-bottom select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.12)]"
+              className="room-float pointer-events-none h-[85%] w-[85%] max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.12)]"
               style={{ imageRendering: "pixelated" }}
             />
           ) : (
@@ -363,9 +363,9 @@ export function RoomStage({
 
       {/* Fullscreen toolbar — hidden while decorating so nothing covers the room */}
 
-      {/* Room arrows — inside stage so they show in fullscreen */}
+      {/* Room arrows — top bar, compact */}
       {fullscreen && roomNav ? (
-        <>
+        <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+0.4rem)] z-[80] flex items-center justify-between gap-2 px-2">
           <button
             type="button"
             aria-label="Previous room"
@@ -374,19 +374,22 @@ export function RoomStage({
               e.stopPropagation();
               roomNav.onPrev();
             }}
-            className="press absolute left-2 top-1/2 z-[80] -translate-y-1/2 rounded-xl bg-card/90 p-2 shadow-float disabled:opacity-25"
+            className="press shrink-0 rounded-lg bg-card/90 p-1 shadow-sm disabled:opacity-25"
           >
             {roomNav.arrowLeftSrc ? (
               <img
                 src={roomNav.arrowLeftSrc}
                 alt=""
-                className="size-9 object-contain"
+                className="size-5 object-contain"
                 style={{ imageRendering: "pixelated" }}
               />
             ) : (
-              <span className="px-1 text-lg font-black">‹</span>
+              <span className="px-1 text-sm font-black">‹</span>
             )}
           </button>
+          <p className="pointer-events-none min-w-0 truncate rounded-full bg-card/90 px-2.5 py-0.5 text-center text-[10px] font-bold text-foreground shadow-sm">
+            {roomNav.label}
+          </p>
           <button
             type="button"
             aria-label="Next room"
@@ -395,23 +398,20 @@ export function RoomStage({
               e.stopPropagation();
               roomNav.onNext();
             }}
-            className="press absolute right-2 top-1/2 z-[80] -translate-y-1/2 rounded-xl bg-card/90 p-2 shadow-float disabled:opacity-25"
+            className="press shrink-0 rounded-lg bg-card/90 p-1 shadow-sm disabled:opacity-25"
           >
             {roomNav.arrowRightSrc ? (
               <img
                 src={roomNav.arrowRightSrc}
                 alt=""
-                className="size-9 object-contain"
+                className="size-5 object-contain"
                 style={{ imageRendering: "pixelated" }}
               />
             ) : (
-              <span className="px-1 text-lg font-black">›</span>
+              <span className="px-1 text-sm font-black">›</span>
             )}
           </button>
-          <p className="pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top)+0.6rem)] z-[80] -translate-x-1/2 rounded-full bg-card/90 px-3 py-1 text-[11px] font-bold text-foreground shadow-sm">
-            {roomNav.label}
-          </p>
-        </>
+        </div>
       ) : null}
 
       {fullscreen && toolbar && !editing ? (
