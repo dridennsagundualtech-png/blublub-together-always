@@ -31,6 +31,7 @@ function isBlockedTarget(target: EventTarget | null): boolean {
         "select",
         "[contenteditable=true]",
         "[data-no-page-swipe]",
+        ".room-stage",
         "nav",
         "[data-dev-theme-ui]",
         "[role='dialog']",
@@ -113,6 +114,22 @@ export function useSwipeTabs() {
     if (document.documentElement.classList.contains("dev-theme-on")) {
       startRef.current = null;
       return;
+    }
+    // Our Room fullscreen / any room stage — never change tabs while decorating
+    if (document.querySelector(".room-stage.fixed, .room-stage[data-no-page-swipe]")) {
+      const stage = document.querySelector(".room-stage");
+      if (stage && (stage.classList.contains("fixed") || stage.getAttribute("data-no-page-swipe") !== null)) {
+        // If touch started on/inside stage, always block
+        if (target instanceof Element && target.closest(".room-stage, [data-no-page-swipe]")) {
+          startRef.current = { x, y, blocked: true };
+          return;
+        }
+        // Fullscreen stage covers the viewport — block all swipes
+        if (stage.classList.contains("fixed")) {
+          startRef.current = { x, y, blocked: true };
+          return;
+        }
+      }
     }
     startRef.current = {
       x,
