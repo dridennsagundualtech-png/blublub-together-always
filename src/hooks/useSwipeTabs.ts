@@ -12,6 +12,8 @@ export const MAIN_TAB_ROUTES = [
   "/more",
 ] as const;
 
+export const TAB_DIR_KEY = "blublub-tab-dir";
+
 const MIN_DX = 50;
 const MAX_DY = 90;
 
@@ -54,9 +56,39 @@ function tabIndexForPath(pathname: string): number {
 
 type Start = { x: number; y: number; blocked: boolean };
 
+function navigateWithDir(
+  navigate: ReturnType<typeof useNavigate>,
+  to: string,
+  dir: "left" | "right",
+) {
+  try {
+    sessionStorage.setItem(TAB_DIR_KEY, dir);
+  } catch {
+    /* ignore */
+  }
+
+  const go = () => {
+    void navigate({ to });
+  };
+
+  // Smooth browser View Transition when available (Chrome/Android, Safari 18+)
+  const doc = document as Document & {
+    startViewTransition?: (cb: () => void) => { finished: Promise<void> };
+  };
+  if (typeof doc.startViewTransition === "function") {
+    try {
+      doc.startViewTransition(go);
+      return;
+    } catch {
+      /* fall through */
+    }
+  }
+  go();
+}
+
 /**
- * Swipe / drag between main tabs (phone touch + desktop mouse).
- * Attach the returned handlers to the page root in AppLayout.
+ * Swipe / drag between main tabs (phone + desktop).
+ * Sets slide direction for page animation.
  */
 export function useSwipeTabs() {
   const navigate = useNavigate();
@@ -70,7 +102,9 @@ export function useSwipeTabs() {
       if (idx < 0) return;
       const next = idx + dir;
       if (next < 0 || next >= MAIN_TAB_ROUTES.length) return;
-      void navigate({ to: MAIN_TAB_ROUTES[next]! });
+      // dir 1 = next tab = content slides from right (finger swiped left)
+      const slide: "left" | "right" = dir === 1 ? "left" : "right";
+      navigateWithDir(navigate, MAIN_TAB_ROUTES[next]!, slide);
     },
     [navigate, pathname],
   );
@@ -107,7 +141,6 @@ export function useSwipeTabs() {
     [go],
   );
 
-  // —— Touch (phone) ——
   const onTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (e.touches.length !== 1) {
@@ -137,7 +170,6 @@ export function useSwipeTabs() {
     draggingRef.current = false;
   }, []);
 
-  // —— Mouse (desktop) ——
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (e.button !== 0) return;
@@ -156,7 +188,6 @@ export function useSwipeTabs() {
   );
 
   const onMouseLeave = useCallback(() => {
-    // Cancel if pointer leaves the page area without release
     startRef.current = null;
     draggingRef.current = false;
   }, []);
@@ -168,6 +199,6 @@ export function useSwipeTabs() {
     onMouseDown,
     onMouseUp,
     onMouseLeave,
-    style: { touchAction: "pan-y", userSelect: "none" } as const,
+    style: { touchAction: "pan-y" } as const,
   };
 }
