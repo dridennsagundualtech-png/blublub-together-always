@@ -34,6 +34,9 @@ import {
   useRoomActions,
   useRoomItems,
   useRoomUnlocks,
+  ensureRoomPages,
+  costForNextRoom,
+  MAX_ROOM_PAGES,
   type RoomTheme,
   type BgCategory,
 } from "@/lib/room";
@@ -68,16 +71,26 @@ const CATEGORIES = ROOM_THEMES;
 function RoomPage() {
   const { data: badges } = useBadges();
   const { data: room, isLoading } = useRoom();
-  const { data: items } = useRoomItems();
+  const roomPages = ensureRoomPages(room);
+  const resolvedPageId =
+    activePageId && roomPages.some((p) => p.id === activePageId)
+      ? activePageId
+      : roomPages[0]?.id ?? "main";
+  const activePage = roomPages.find((p) => p.id === resolvedPageId) ?? roomPages[0];
+  const { data: items } = useRoomItems(resolvedPageId);
   const { data: unlocks } = useRoomUnlocks();
-  const actions = useRoomActions();
+  const actions = useRoomActions(resolvedPageId);
   const { data: isAdmin } = useIsAdmin();
+  const nextRoomCost = costForNextRoom(roomPages.length);
 
   const [editing, setEditing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [bgOpen, setBgOpen] = useState(false);
   const [seedOpen, setSeedOpen] = useState(false);
+  const [activePageId, setActivePageId] = useState<string | null>(null);
+  const [addRoomOpen, setAddRoomOpen] = useState(false);
+  const [newRoomName, setNewRoomName] = useState("");
   const [fullscreen, setFullscreen] = useState(true);
   const [bgCategory, setBgCategory] = useState<BgCategory>("indoor");
   const [category, setCategory] = useState<RoomTheme>(ROOM_THEMES[0]!);
@@ -93,7 +106,8 @@ function RoomPage() {
   const seedColor = room?.seed_color ?? "pink";
   const seedCharacter = room?.seed_character ?? null;
   const seedUrl = seedArt(growth, seedColor, seedCharacter, sleeping);
-  const bgUrl = BG_BY_KEY.get(room?.background_key ?? DEFAULT_BACKGROUND_KEY)?.url;
+  const bgKey = activePage?.background_key ?? room?.background_key ?? DEFAULT_BACKGROUND_KEY;
+  const bgUrl = BG_BY_KEY.get(bgKey ?? DEFAULT_BACKGROUND_KEY)?.url;
 
   function toast(text: string) {
     setNote(text);
@@ -171,9 +185,9 @@ function RoomPage() {
       backgroundUrl={bgUrl}
       seedUrl={seedUrl}
       seedLabel={stage.label}
-      petScales={(room?.pet_scales ?? {}) as Record<string, number>}
-      petPositions={(room?.pet_positions ?? {}) as Record<string, { x: number; y: number }>}
-      petZ={(room?.pet_z ?? {}) as Record<string, number>}
+      petScales={(activePage?.pet_scales ?? {}) as Record<string, number>}
+      petPositions={(activePage?.pet_positions ?? {}) as Record<string, { x: number; y: number }>}
+      petZ={(activePage?.pet_z ?? {}) as Record<string, number>}
       fullscreen={fullscreen}
       toolbar={
         <div className="space-y-2">
@@ -355,6 +369,55 @@ function RoomPage() {
           ) : null}
         </div>
       </StatHero>
+
+
+      {/* Multi-room switcher — max 4; seed stays shared */}
+      <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
+        {roomPages.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => {
+              playChirp("tap");
+              setActivePageId(p.id);
+              setSelectedId(null);
+            }}
+            className={cn(
+              "press shrink-0 rounded-full px-3 py-1.5 text-xs font-bold",
+              resolvedPageId === p.id
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground",
+            )}
+          >
+            {p.name}
+          </button>
+        ))}
+        {roomPages.length < MAX_ROOM_PAGES ? (
+          <button
+            type="button"
+            onClick={() => {
+              playChirp("tap");
+              setAddRoomOpen(true);
+            }}
+            className="press flex shrink-0 items-center gap-1 rounded-full border border-dashed border-primary/50 px-3 py-1.5 text-xs font-bold text-primary"
+          >
+            <Plus className="size-3.5" />
+            Room
+            {nextRoomCost != null && nextRoomCost > 0 ? (
+              <span className="opacity-80">· {nextRoomCost} LP</span>
+            ) : null}
+          </button>
+        ) : (
+          <span className="shrink-0 text-[10px] font-semibold text-muted-foreground">
+            4 / 4 rooms
+          </span>
+        )}
+      </div>
+      <p className="mb-3 text-[11px] text-muted-foreground">
+        Decorating <span className="font-bold text-foreground">{activePage?.name ?? "Our room"}</span>
+        {" · "}
+        One shared seed for all rooms
+      </p>
 
       {isLoading ? (
         <Card>Loading your room…</Card>
@@ -646,6 +709,52 @@ function RoomPage() {
           {placed.length} item{placed.length === 1 ? "" : "s"} placed
         </p>
       ) : null}
+    
+      {addRoomOpen ? (
+        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Add room">
+          <button
+            type="button"
+            className="absolute inset-0 bg-foreground/40"
+            aria-label="Close"
+            onClick={() => setAddRoomOpen(false)}
+          />
+          <div className="relative z-10 max-h-[70vh] w-full overflow-y-auto rounded-t-3xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+            <p className="font-display text-lg font-bold">Add a room</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Empty room with its own furniture & background. Your seed stays shared
+              (not copied). Max {MAX_ROOM_PAGES} rooms.
+            </p>
+            <p className="mt-3 text-sm font-bold text-primary">
+              Cost: {nextRoomCost === 0 ? "Free" : `${nextRoomCost} Love Points`}
+            </p>
+            <input
+              value={newRoomName}
+              onChange={(e) => setNewRoomName(e.target.value)}
+              placeholder="Room name (e.g. Bedroom)"
+              maxLength={24}
+              className="mt-3 w-full rounded-full border border-border bg-card px-4 py-3 text-sm"
+            />
+            <button
+              type="button"
+              className="press mt-4 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground"
+              onClick={() => {
+                actions.addRoomPage.mutate(newRoomName || undefined, {
+                  onSuccess: (page) => {
+                    setActivePageId(page.id);
+                    setNewRoomName("");
+                    setAddRoomOpen(false);
+                    toast(`“${page.name}” unlocked ✨`);
+                  },
+                  onError: (e) => toast((e as Error).message),
+                });
+              }}
+            >
+              {actions.addRoomPage.isPending ? "Adding…" : "Unlock room"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
     </AppLayout>
   );
 }
