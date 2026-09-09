@@ -8,6 +8,8 @@ import { useIsAdmin } from "@/lib/admin";
 export type RoomRow = Tables<"rooms"> & {
   room_pages?: RoomPage[] | null;
   active_room_id?: string | null;
+  /** Which room page currently holds the shared seed (visual). Growth is still global. */
+  seed_room_id?: string | null;
 };
 export type RoomItemRow = Tables<"room_items"> & {
   room_page_id?: string | null;
@@ -397,16 +399,34 @@ export function useRoomActions(activePageId: string) {
 
   const setPetPosition = useMutation({
     mutationFn: async (v: { key: string; x: number; y: number }) => {
-      await patchActivePage((p) => ({
-        ...p,
-        pet_positions: {
-          ...p.pet_positions,
-          [v.key]: {
-            x: Math.round(v.x * 10) / 10,
-            y: Math.round(v.y * 10) / 10,
+      const extra =
+        v.key === "seed" ? { seed_room_id: pageId } : undefined;
+      await patchActivePage(
+        (p) => ({
+          ...p,
+          pet_positions: {
+            ...p.pet_positions,
+            [v.key]: {
+              x: Math.round(v.x * 10) / 10,
+              y: Math.round(v.y * 10) / 10,
+            },
           },
-        },
-      }));
+        }),
+        extra,
+      );
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
+  /** Move the shared seed into the current room (growth stays shared). */
+  const moveSeedToRoom = useMutation({
+    mutationFn: async (targetPageId?: string) => {
+      const id = targetPageId || pageId;
+      const { error } = await supabase
+        .from("rooms")
+        .update({ seed_room_id: id } as never)
+        .eq("couple_id", coupleId!);
+      if (error) throw error;
     },
     onSuccess: () => void refreshRoom(),
   });
@@ -492,6 +512,7 @@ export function useRoomActions(activePageId: string) {
     setPetPosition,
     setPetZ,
     setMascotVisible,
+    moveSeedToRoom,
     addRoomPage,
     renameRoomPage,
     wateredToday: room?.plant_watered_on === today(),
