@@ -54,6 +54,7 @@ export type RoomPage = {
   pet_positions: Record<string, { x: number; y: number }>;
   pet_scales: Record<string, number>;
   pet_z: Record<string, number>;
+  mascot_visibility: Record<string, boolean>;
 };
 
 export function plantStage(growth: number) {
@@ -77,6 +78,7 @@ export function defaultRoomPage(partial?: Partial<RoomPage>): RoomPage {
     pet_positions: partial?.pet_positions ?? {},
     pet_scales: partial?.pet_scales ?? {},
     pet_z: partial?.pet_z ?? {},
+    mascot_visibility: partial?.mascot_visibility ?? {},
   };
 }
 
@@ -93,6 +95,7 @@ export function ensureRoomPages(room: RoomRow | null | undefined): RoomPage[] {
         pet_positions: (p?.pet_positions as RoomPage["pet_positions"]) ?? {},
         pet_scales: (p?.pet_scales as RoomPage["pet_scales"]) ?? {},
         pet_z: (p?.pet_z as RoomPage["pet_z"]) ?? {},
+        mascot_visibility: (p?.mascot_visibility as RoomPage["mascot_visibility"]) ?? {},
       }),
     );
   }
@@ -105,6 +108,7 @@ export function ensureRoomPages(room: RoomRow | null | undefined): RoomPage[] {
       pet_positions: (room.pet_positions as RoomPage["pet_positions"]) ?? {},
       pet_scales: (room.pet_scales as RoomPage["pet_scales"]) ?? {},
       pet_z: (room.pet_z as RoomPage["pet_z"]) ?? {},
+      mascot_visibility: {},
     }),
   ];
 }
@@ -417,6 +421,16 @@ export function useRoomActions(activePageId: string) {
     onSuccess: () => void refreshRoom(),
   });
 
+  const setMascotVisible = useMutation({
+    mutationFn: async (v: { key: string; visible: boolean }) => {
+      await patchActivePage((p) => ({
+        ...p,
+        mascot_visibility: { ...p.mascot_visibility, [v.key]: v.visible },
+      }));
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
   /** Unlock a new empty room (max 4). Costs Love Points. Seed is not copied. */
   const addRoomPage = useMutation({
     mutationFn: async (name?: string) => {
@@ -436,6 +450,7 @@ export function useRoomActions(activePageId: string) {
         pet_positions: {},
         pet_scales: {},
         pet_z: {},
+        mascot_visibility: {},
       });
       const nextPages = [...current, page];
       const patch: Record<string, unknown> = {
@@ -443,7 +458,7 @@ export function useRoomActions(activePageId: string) {
         active_room_id: page.id,
       };
       if (!isAdmin && cost > 0) {
-        patch.love_points = room.love_points - cost;
+        patch["love_points"] = room.love_points - cost;
       }
       const { error } = await supabase
         .from("rooms")
@@ -476,6 +491,7 @@ export function useRoomActions(activePageId: string) {
     setPetScale,
     setPetPosition,
     setPetZ,
+    setMascotVisible,
     addRoomPage,
     renameRoomPage,
     wateredToday: room?.plant_watered_on === today(),

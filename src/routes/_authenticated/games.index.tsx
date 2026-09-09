@@ -8,6 +8,7 @@ import {
   Lock,
   Maximize2,
   Minimize2,
+  PawPrint,
   Pencil,
   Plus,
   Sparkles,
@@ -16,6 +17,7 @@ import {
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/components/ui-kit";
 import { RoomStage } from "@/components/room/RoomStage";
+import { Doodle, type Critter } from "@/components/Doodles";
 import { useBadges } from "@/lib/badges";
 import { useIsAdmin } from "@/lib/admin";
 import {
@@ -67,10 +69,16 @@ export const Route = createFileRoute("/_authenticated/games/")({
 });
 
 const CATEGORIES = ROOM_THEMES;
+const ROOM_MASCOTS: { key: Critter; label: string }[] = [
+  { key: "penguin", label: "Penguin" },
+  { key: "seal", label: "Seal" },
+  { key: "cat", label: "Cat" },
+];
 
 function RoomPage() {
   const { data: badges } = useBadges();
   const { data: room, isLoading } = useRoom();
+  const [activePageId, setActivePageId] = useState<string | null>(null);
   const roomPages = ensureRoomPages(room);
   const resolvedPageId =
     activePageId && roomPages.some((p) => p.id === activePageId)
@@ -88,7 +96,7 @@ function RoomPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [bgOpen, setBgOpen] = useState(false);
   const [seedOpen, setSeedOpen] = useState(false);
-  const [activePageId, setActivePageId] = useState<string | null>(null);
+  const [mascotOpen, setMascotOpen] = useState(false);
   const [addRoomOpen, setAddRoomOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   const [fullscreen, setFullscreen] = useState(true);
@@ -115,7 +123,7 @@ function RoomPage() {
   }
 
   const controls = (
-    <div className="grid grid-cols-5 gap-1.5">
+    <div className="grid grid-cols-6 gap-1.5">
       <button
         type="button"
         onClick={() => {
@@ -165,6 +173,16 @@ function RoomPage() {
         type="button"
         onClick={() => {
           playChirp("tap");
+          setMascotOpen(true);
+        }}
+        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
+      >
+        <PawPrint className="size-4" /> Mascots
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          playChirp("tap");
           setFullscreen((v) => !v);
           setSelectedId(null);
         }}
@@ -188,6 +206,7 @@ function RoomPage() {
       petScales={(activePage?.pet_scales ?? {}) as Record<string, number>}
       petPositions={(activePage?.pet_positions ?? {}) as Record<string, { x: number; y: number }>}
       petZ={(activePage?.pet_z ?? {}) as Record<string, number>}
+      mascotVisibility={(activePage?.mascot_visibility ?? {}) as Record<string, boolean>}
       fullscreen={fullscreen}
       toolbar={
         <div className="space-y-2">
@@ -597,6 +616,60 @@ function RoomPage() {
             {seedPanel}
             <div className="mt-4">
               <PrimaryButton onClick={() => setSeedOpen(false)}>Close</PrimaryButton>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Mascot visibility sheet */}
+      {mascotOpen ? (
+        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Room mascots">
+          <button
+            type="button"
+            aria-label="Close mascot settings"
+            onClick={() => setMascotOpen(false)}
+            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
+          />
+          <div className="card-soft relative w-full rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
+            <p className="font-display text-lg font-extrabold">Room mascots</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Choose who lives in {activePage?.name ?? "this room"}. This is shared with your partner.
+            </p>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {ROOM_MASCOTS.map((mascot) => {
+                const visible = activePage?.mascot_visibility?.[mascot.key] !== false;
+                return (
+                  <button
+                    key={mascot.key}
+                    type="button"
+                    aria-pressed={visible}
+                    onClick={() => {
+                      playChirp("tap");
+                      actions.setMascotVisible.mutate(
+                        { key: mascot.key, visible: !visible },
+                        {
+                          onSuccess: () => toast(`${mascot.label} ${visible ? "hidden" : "is back"}`),
+                          onError: (error) => toast((error as Error).message),
+                        },
+                      );
+                    }}
+                    className={cn(
+                      "press card-soft flex flex-col items-center gap-2 p-3 text-center",
+                      visible ? "ring-2 ring-primary" : "opacity-55",
+                    )}
+                  >
+                    <Doodle critter={mascot.key} pose={mascot.key === "seal" ? "sleep" : "love"} size={52} />
+                    <span className="text-xs font-bold">{mascot.label}</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground">
+                      {visible ? "Showing" : "Hidden"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4">
+              <PrimaryButton onClick={() => setMascotOpen(false)}>Done</PrimaryButton>
             </div>
           </div>
         </div>

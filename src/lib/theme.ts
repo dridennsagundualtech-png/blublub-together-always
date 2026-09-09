@@ -388,19 +388,21 @@ export function normalizeTheme(raw: unknown): ThemeMap {
     for (const [k, v] of Object.entries(o["boxOverrides"] as Record<string, unknown>)) {
       if (!v || typeof v !== "object") continue;
       const ov = v as Record<string, unknown>;
-      const mode = ov.mode === "solid" || ov.mode === "gradient" || ov.mode === "default" ? ov.mode : "default";
+      const mode = ov["mode"] === "solid" || ov["mode"] === "gradient" || ov["mode"] === "default" ? ov["mode"] : "default";
       const anim =
-        ov.anim === "flow" || ov.anim === "shine" || ov.anim === "none" ? ov.anim : "none";
+        ov["anim"] === "flow" || ov["anim"] === "shine" || ov["anim"] === "none" ? ov["anim"] : "none";
       const shadow =
-        ov.shadow === "on" || ov.shadow === "off" || ov.shadow === "default" ? ov.shadow : "default";
+        ov["shadow"] === "on" || ov["shadow"] === "off" || ov["shadow"] === "default" ? ov["shadow"] : "default";
       boxOverrides[k] = {
         mode,
-        solid: typeof ov.solid === "string" ? ov.solid : undefined,
-        gradFrom: typeof ov.gradFrom === "string" ? ov.gradFrom : undefined,
-        gradTo: typeof ov.gradTo === "string" ? ov.gradTo : undefined,
+        ...(typeof ov["solid"] === "string" ? { solid: ov["solid"] } : {}),
+        ...(typeof ov["gradFrom"] === "string" ? { gradFrom: ov["gradFrom"] } : {}),
+        ...(typeof ov["gradTo"] === "string" ? { gradTo: ov["gradTo"] } : {}),
         anim,
         shadow,
-        image: typeof ov.image === "string" && ov.image.trim() ? ov.image.trim() : undefined,
+        ...(typeof ov["image"] === "string" && ov["image"].trim()
+          ? { image: ov["image"].trim() }
+          : {}),
       };
     }
   }

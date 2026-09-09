@@ -28,6 +28,7 @@ export function RoomStage({
   petScales,
   petPositions,
   petZ,
+  mascotVisibility,
   fullscreen,
   toolbar,
   onSelect,
@@ -50,6 +51,7 @@ export function RoomStage({
   petScales?: Record<string, number> | undefined;
   petPositions?: Record<string, Pos> | undefined;
   petZ?: Record<string, number> | undefined;
+  mascotVisibility?: Record<string, boolean> | undefined;
   fullscreen?: boolean | undefined;
   toolbar?: ReactNode | undefined;
   onSelect: (id: string | null) => void;
@@ -201,7 +203,7 @@ export function RoomStage({
       </button>
 
       {/* Mascots */}
-      {MASCOTS.map((m, i) => {
+      {MASCOTS.filter((m) => mascotVisibility?.[m.critter] !== false).map((m, i) => {
         const live = drag && drag.id === `pet:${m.critter}` ? drag : null;
         const pos = live ?? petPos(m.critter, { x: m.x, y: m.y });
         return (
