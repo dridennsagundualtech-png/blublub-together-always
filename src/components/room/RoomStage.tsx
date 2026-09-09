@@ -162,45 +162,50 @@ export function RoomStage({
         <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--lavender)_28%,white)_0%,color-mix(in_oklab,var(--peach)_30%,white)_100%)]" />
       )}
 
-      {/* Shared seed companion */}
-      <button
-        type="button"
-        onPointerDown={(e) => startDrag(e, "pet:seed")}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (editing) {
-            onSelect("pet:seed");
-            return;
-          }
-          onWater();
-        }}
+      {/* Shared seed companion — position anchors at feet; label sits under art, not in drag hitbox */}
+      <div
+        className="absolute flex flex-col items-center"
         style={{
           left: `${seedPos.x}%`,
           top: `${seedPos.y}%`,
-          transform: `translate(-50%,-50%) scale(${petScale("seed")})`,
+          transform: `translate(-50%, -100%) scale(${petScale("seed")})`,
+          transformOrigin: "center bottom",
           zIndex: 20 + petLayer("seed"),
         }}
-        className={cn(
-          "press absolute grid place-items-center rounded-2xl",
-          selectedId === "pet:seed" && "bg-card/70 ring-2 ring-primary",
-        )}
-        aria-label="Shared seed companion"
       >
-        {seedUrl ? (
-          <img
-            src={seedUrl}
-            alt={seedLabel ?? stage.label}
-            draggable={false}
-            className="room-float pointer-events-none h-16 w-auto max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.15)]"
-            style={{ imageRendering: "pixelated" }}
-          />
-        ) : (
-          <span className="room-sway block text-4xl drop-shadow">🌱</span>
-        )}
-        <span className="mt-0.5 rounded-full bg-card/85 px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+        <button
+          type="button"
+          onPointerDown={(e) => startDrag(e, "pet:seed")}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (editing) {
+              onSelect("pet:seed");
+              return;
+            }
+            onWater();
+          }}
+          className={cn(
+            "press relative block rounded-2xl p-0 leading-none",
+            selectedId === "pet:seed" && "bg-card/70 ring-2 ring-primary",
+          )}
+          aria-label="Shared seed companion"
+        >
+          {seedUrl ? (
+            <img
+              src={seedUrl}
+              alt={seedLabel ?? stage.label}
+              draggable={false}
+              className="room-float pointer-events-none block h-16 w-auto max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.15)]"
+              style={{ imageRendering: "pixelated" }}
+            />
+          ) : (
+            <span className="room-sway block text-4xl drop-shadow">🌱</span>
+          )}
+        </button>
+        <span className="pointer-events-none mt-1 whitespace-nowrap rounded-full bg-card/90 px-2 py-0.5 text-[10px] font-bold text-muted-foreground shadow-sm">
           {seedLabel ?? stage.label}
         </span>
-      </button>
+      </div>
 
       {/* Mascots */}
       {MASCOTS.filter((m) => mascotVisibility?.[m.critter] !== false).map((m, i) => {
@@ -218,11 +223,13 @@ export function RoomStage({
             style={{
               left: `${pos.x}%`,
               top: `${pos.y}%`,
+              transform: `translate(-50%, -100%) scale(${petScale(m.critter)})`,
+              transformOrigin: "center bottom",
               animationDelay: `${i * 0.7}s`,
               zIndex: 20 + petLayer(m.critter),
             }}
             className={cn(
-              "room-float absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl",
+              "room-float absolute rounded-2xl p-0 leading-none",
               selectedId === `pet:${m.critter}` && "bg-card/70 ring-2 ring-primary",
             )}
             aria-label={m.critter}
@@ -230,7 +237,7 @@ export function RoomStage({
             <Doodle
               critter={m.critter}
               pose={m.critter === "seal" ? "sleep" : "love"}
-              size={Math.round(m.size * petScale(m.critter))}
+              size={m.size}
             />
           </button>
         );
