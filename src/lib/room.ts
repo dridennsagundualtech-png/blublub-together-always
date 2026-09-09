@@ -5,8 +5,13 @@ import type { Tables } from "@/integrations/supabase/types";
 import { useAuthUser, useCoupleId } from "@/lib/session";
 import { useIsAdmin } from "@/lib/admin";
 
-export type RoomRow = Tables<"rooms">;
-export type RoomItemRow = Tables<"room_items">;
+export type RoomRow = Tables<"rooms"> & {
+  room_pages?: RoomPage[] | null;
+  active_room_id?: string | null;
+};
+export type RoomItemRow = Tables<"room_items"> & {
+  room_page_id?: string | null;
+};
 
 export {
   ROOM_CATALOG,
@@ -36,6 +41,21 @@ import { ITEM_BY_KEY } from "@/lib/room-catalog";
 import { BG_BY_KEY } from "@/lib/room-backgrounds";
 import { seedStep } from "@/lib/room-seed";
 
+/** Max rooms a couple can own (including the free first room). */
+export const MAX_ROOM_PAGES = 4;
+
+/** Love Point cost to unlock room slots 1..4 (slot 0 is free). */
+export const ROOM_PAGE_COSTS = [0, 120, 250, 400] as const;
+
+export type RoomPage = {
+  id: string;
+  name: string;
+  background_key: string | null;
+  pet_positions: Record<string, { x: number; y: number }>;
+  pet_scales: Record<string, number>;
+  pet_z: Record<string, number>;
+};
+
 export function plantStage(growth: number) {
   const s = seedStep(growth);
   return { index: s.step - 1, glyph: "🌱", label: s.label };
@@ -45,7 +65,56 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** The couple's room record — created lazily on first visit. */
+function newPageId() {
+  return `room_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export function defaultRoomPage(partial?: Partial<RoomPage>): RoomPage {
+  return {
+    id: partial?.id ?? "main",
+    name: partial?.name ?? "Our room",
+    background_key: partial?.background_key ?? null,
+    pet_positions: partial?.pet_positions ?? {},
+    pet_scales: partial?.pet_scales ?? {},
+    pet_z: partial?.pet_z ?? {},
+  };
+}
+
+/** Normalize room_pages from DB (or legacy single-room row). */
+export function ensureRoomPages(room: RoomRow | null | undefined): RoomPage[] {
+  if (!room) return [defaultRoomPage()];
+  const raw = room.room_pages;
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw.slice(0, MAX_ROOM_PAGES).map((p, i) =>
+      defaultRoomPage({
+        id: typeof p?.id === "string" ? p.id : i === 0 ? "main" : newPageId(),
+        name: typeof p?.name === "string" && p.name.trim() ? p.name : i === 0 ? "Our room" : `Room ${i + 1}`,
+        background_key: p?.background_key ?? (i === 0 ? room.background_key : null),
+        pet_positions: (p?.pet_positions as RoomPage["pet_positions"]) ?? {},
+        pet_scales: (p?.pet_scales as RoomPage["pet_scales"]) ?? {},
+        pet_z: (p?.pet_z as RoomPage["pet_z"]) ?? {},
+      }),
+    );
+  }
+  // Legacy: one room from top-level columns
+  return [
+    defaultRoomPage({
+      id: "main",
+      name: "Our room",
+      background_key: room.background_key,
+      pet_positions: (room.pet_positions as RoomPage["pet_positions"]) ?? {},
+      pet_scales: (room.pet_scales as RoomPage["pet_scales"]) ?? {},
+      pet_z: (room.pet_z as RoomPage["pet_z"]) ?? {},
+    }),
+  ];
+}
+
+export function costForNextRoom(currentCount: number): number | null {
+  if (currentCount >= MAX_ROOM_PAGES) return null;
+  return ROOM_PAGE_COSTS[currentCount] ?? 400;
+}
+
+/** The couple's room record — created lazily on first visit. Seed lives here (shared). */
 export function useRoom() {
   const coupleId = useCoupleId();
   return useQuery({
@@ -58,26 +127,47 @@ export function useRoom() {
         .eq("couple_id", coupleId!)
         .maybeSingle();
       if (error) throw error;
-      if (data) return data as RoomRow;
-      const created = await supabase
-        .from("rooms")
-        .insert({ couple_id: coupleId! })
-        .select("*")
-        .maybeSingle();
-      if (created.error) throw created.error;
-      return created.data as RoomRow;
+      let row = data as RoomRow | null;
+      if (!row) {
+        const created = await supabase
+          .from("rooms")
+          .insert({ couple_id: coupleId! })
+          .select("*")
+          .maybeSingle();
+        if (created.error) throw created.error;
+        row = created.data as RoomRow;
+      }
+      // Ensure room_pages exists in DB
+      const pages = ensureRoomPages(row);
+      if (!row.room_pages || !Array.isArray(row.room_pages) || row.room_pages.length === 0) {
+        const patch = {
+          room_pages: pages,
+          active_room_id: pages[0]!.id,
+        };
+        const { data: updated, error: upErr } = await supabase
+          .from("rooms")
+          .update(patch as never)
+          .eq("couple_id", coupleId!)
+          .select("*")
+          .maybeSingle();
+        if (!upErr && updated) row = updated as RoomRow;
+        else row = { ...row, ...patch };
+      }
+      return row as RoomRow;
     },
   });
 }
 
-export function useRoomItems() {
+/** Furniture for one room page (seed is not per-room). */
+export function useRoomItems(roomPageId: string | null | undefined) {
   const coupleId = useCoupleId();
   const qc = useQueryClient();
+  const pageId = roomPageId || "main";
 
   useEffect(() => {
     if (!coupleId) return;
     const channel = supabase
-      .channel(`room-${coupleId}`)
+      .channel(`room-items-${coupleId}-${pageId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "room_items", filter: `couple_id=eq.${coupleId}` },
@@ -92,11 +182,11 @@ export function useRoomItems() {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [coupleId, qc]);
+  }, [coupleId, pageId, qc]);
 
   return useQuery({
-    queryKey: ["room-items", coupleId],
-    enabled: !!coupleId,
+    queryKey: ["room-items", coupleId, pageId],
+    enabled: !!coupleId && !!pageId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("room_items")
@@ -104,7 +194,12 @@ export function useRoomItems() {
         .eq("couple_id", coupleId!)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as RoomItemRow[];
+      const rows = (data ?? []) as RoomItemRow[];
+      // Include legacy rows with null room_page_id only on "main"
+      return rows.filter((r) => {
+        const id = r.room_page_id || "main";
+        return id === pageId;
+      });
     },
   });
 }
@@ -125,15 +220,32 @@ export function useRoomUnlocks() {
   });
 }
 
-export function useRoomActions() {
+export function useRoomActions(activePageId: string) {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const { data: room } = useRoom();
   const { data: isAdmin } = useIsAdmin();
   const qc = useQueryClient();
 
-  const refreshItems = () => qc.invalidateQueries({ queryKey: ["room-items", coupleId] });
-  const refreshRoom = () => qc.invalidateQueries({ queryKey: ["room", coupleId] });
+  const refreshItems = () =>
+    void qc.invalidateQueries({ queryKey: ["room-items", coupleId] });
+  const refreshRoom = () => void qc.invalidateQueries({ queryKey: ["room", coupleId] });
+
+  const pages = ensureRoomPages(room);
+  const pageId = activePageId || pages[0]?.id || "main";
+
+  async function writePages(nextPages: RoomPage[], extra?: Record<string, unknown>) {
+    const { error } = await supabase
+      .from("rooms")
+      .update({ room_pages: nextPages, ...extra } as never)
+      .eq("couple_id", coupleId!);
+    if (error) throw error;
+  }
+
+  function patchActivePage(mutator: (p: RoomPage) => RoomPage, extra?: Record<string, unknown>) {
+    const next = pages.map((p) => (p.id === pageId ? mutator(p) : p));
+    return writePages(next, extra);
+  }
 
   const place = useMutation({
     mutationFn: async (v: { itemKey: string; x?: number; y?: number }) => {
@@ -143,7 +255,8 @@ export function useRoomActions() {
         item_key: v.itemKey,
         x: v.x ?? 50,
         y: v.y ?? 70,
-      });
+        room_page_id: pageId,
+      } as never);
       if (error) throw error;
     },
     onSuccess: () => void refreshItems(),
@@ -164,7 +277,6 @@ export function useRoomActions() {
       if (v.scale !== undefined) patch.scale = v.scale;
       if (v.z !== undefined) patch.z = v.z;
       const { error } = await supabase.from("room_items").update(patch).eq("id", v.id);
-
       if (error) throw error;
     },
     onSuccess: () => void refreshItems(),
@@ -201,7 +313,7 @@ export function useRoomActions() {
     },
   });
 
-  /** Water the shared plant — once a day, grows it and earns Love Points. */
+  /** Water the shared plant once a day — not tied to which room you're in. */
   const water = useMutation({
     mutationFn: async () => {
       if (!room) throw new Error("No room yet");
@@ -219,7 +331,6 @@ export function useRoomActions() {
     onSuccess: () => void refreshRoom(),
   });
 
-  /** Buy (if needed) and apply a room background. */
   const setBackground = useMutation({
     mutationFn: async (key: string) => {
       const bg = BG_BY_KEY.get(key);
@@ -245,11 +356,10 @@ export function useRoomActions() {
           if (spent.error) throw spent.error;
         }
       }
-      const { error } = await supabase
-        .from("rooms")
-        .update({ background_key: key })
-        .eq("couple_id", coupleId!);
-      if (error) throw error;
+      await patchActivePage((p) => ({ ...p, background_key: key }), {
+        // keep legacy column in sync for first page
+        ...(pageId === "main" || pageId === pages[0]?.id ? { background_key: key } : {}),
+      });
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["room-unlocks", coupleId] });
@@ -257,7 +367,6 @@ export function useRoomActions() {
     },
   });
 
-  /** Choose the seed companion's colour / character variant. */
   const setSeedVariant = useMutation({
     mutationFn: async (v: { color?: string; character?: string | null }) => {
       const patch: { seed_color?: string; seed_character?: string | null } = {};
@@ -269,47 +378,88 @@ export function useRoomActions() {
     onSuccess: () => void refreshRoom(),
   });
 
-  /** Resize a pet (seed companion or a mascot) — shared with your partner. */
   const setPetScale = useMutation({
     mutationFn: async (v: { key: string; scale: number }) => {
-      const current = (room?.pet_scales ?? {}) as Record<string, number>;
-      const next = { ...current, [v.key]: Math.round(v.scale * 100) / 100 };
-      const { error } = await supabase
-        .from("rooms")
-        .update({ pet_scales: next })
-        .eq("couple_id", coupleId!);
-      if (error) throw error;
+      await patchActivePage((p) => ({
+        ...p,
+        pet_scales: {
+          ...p.pet_scales,
+          [v.key]: Math.round(v.scale * 100) / 100,
+        },
+      }));
     },
     onSuccess: () => void refreshRoom(),
   });
 
-  /** Move a pet around the room — shared with your partner. */
   const setPetPosition = useMutation({
     mutationFn: async (v: { key: string; x: number; y: number }) => {
-      const current = (room?.pet_positions ?? {}) as Record<string, { x: number; y: number }>;
-      const next = {
-        ...current,
-        [v.key]: { x: Math.round(v.x * 10) / 10, y: Math.round(v.y * 10) / 10 },
-      };
-      const { error } = await supabase
-        .from("rooms")
-        .update({ pet_positions: next })
-        .eq("couple_id", coupleId!);
-      if (error) throw error;
+      await patchActivePage((p) => ({
+        ...p,
+        pet_positions: {
+          ...p.pet_positions,
+          [v.key]: {
+            x: Math.round(v.x * 10) / 10,
+            y: Math.round(v.y * 10) / 10,
+          },
+        },
+      }));
     },
     onSuccess: () => void refreshRoom(),
   });
 
-  /** Change a pet's layer (front / back) — shared with your partner. */
   const setPetZ = useMutation({
     mutationFn: async (v: { key: string; z: number }) => {
-      const current = (room?.pet_z ?? {}) as Record<string, number>;
-      const next = { ...current, [v.key]: Math.round(v.z) };
+      await patchActivePage((p) => ({
+        ...p,
+        pet_z: { ...p.pet_z, [v.key]: Math.round(v.z) },
+      }));
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
+  /** Unlock a new empty room (max 4). Costs Love Points. Seed is not copied. */
+  const addRoomPage = useMutation({
+    mutationFn: async (name?: string) => {
+      if (!room) throw new Error("No room yet");
+      const current = ensureRoomPages(room);
+      if (current.length >= MAX_ROOM_PAGES) {
+        throw new Error("You already have the maximum of 4 rooms");
+      }
+      const cost = costForNextRoom(current.length) ?? 0;
+      if (!isAdmin && room.love_points < cost) {
+        throw new Error(`Need ${cost} Love Points to add a room`);
+      }
+      const page = defaultRoomPage({
+        id: newPageId(),
+        name: (name || "").trim() || `Room ${current.length + 1}`,
+        background_key: null,
+        pet_positions: {},
+        pet_scales: {},
+        pet_z: {},
+      });
+      const nextPages = [...current, page];
+      const patch: Record<string, unknown> = {
+        room_pages: nextPages,
+        active_room_id: page.id,
+      };
+      if (!isAdmin && cost > 0) {
+        patch.love_points = room.love_points - cost;
+      }
       const { error } = await supabase
         .from("rooms")
-        .update({ pet_z: next })
+        .update(patch as never)
         .eq("couple_id", coupleId!);
       if (error) throw error;
+      return page;
+    },
+    onSuccess: () => void refreshRoom(),
+  });
+
+  const renameRoomPage = useMutation({
+    mutationFn: async (v: { id: string; name: string }) => {
+      const name = v.name.trim().slice(0, 24);
+      if (!name) throw new Error("Name required");
+      await writePages(pages.map((p) => (p.id === v.id ? { ...p, name } : p)));
     },
     onSuccess: () => void refreshRoom(),
   });
@@ -326,6 +476,10 @@ export function useRoomActions() {
     setPetScale,
     setPetPosition,
     setPetZ,
+    addRoomPage,
+    renameRoomPage,
     wateredToday: room?.plant_watered_on === today(),
+    pages,
+    pageId,
   };
 }
