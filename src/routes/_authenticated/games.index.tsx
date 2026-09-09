@@ -637,7 +637,33 @@ function RoomPage() {
               Choose who lives in {activePage?.name ?? "this room"}. This is shared with your partner.
             </p>
             <div className="mt-4 grid grid-cols-3 gap-2">
-              {ROOM_MASCOTS.map((mascot) => {
+                          <div className="mb-3 mt-2 flex gap-2">
+              <button
+                type="button"
+                className="press flex-1 rounded-full bg-muted py-2 text-[11px] font-bold"
+                onClick={() => {
+                  for (const m of ROOM_MASCOTS) {
+                    actions.setMascotVisible.mutate({ key: m.key, visible: false });
+                  }
+                  toast("Mascots hidden");
+                }}
+              >
+                Hide all
+              </button>
+              <button
+                type="button"
+                className="press flex-1 rounded-full bg-primary py-2 text-[11px] font-bold text-primary-foreground"
+                onClick={() => {
+                  for (const m of ROOM_MASCOTS) {
+                    actions.setMascotVisible.mutate({ key: m.key, visible: true });
+                  }
+                  toast("Mascots shown");
+                }}
+              >
+                Show all
+              </button>
+            </div>
+{ROOM_MASCOTS.map((mascot) => {
                 const visible = activePage?.mascot_visibility?.[mascot.key] !== false;
                 return (
                   <button
