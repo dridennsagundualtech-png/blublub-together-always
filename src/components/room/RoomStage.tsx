@@ -162,7 +162,7 @@ export function RoomStage({
         <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--lavender)_28%,white)_0%,color-mix(in_oklab,var(--peach)_30%,white)_100%)]" />
       )}
 
-      {/* Shared seed companion — position anchors at feet; label sits under art, not in drag hitbox */}
+      {/* Shared seed — fixed square hitbox; art centered inside (handles transparent padding in sprites) */}
       <div
         className="absolute flex flex-col items-center"
         style={{
@@ -185,8 +185,10 @@ export function RoomStage({
             onWater();
           }}
           className={cn(
-            "press relative block rounded-2xl p-0 leading-none",
-            selectedId === "pet:seed" && "bg-card/70 ring-2 ring-primary",
+            "press grid size-[4.75rem] place-items-center overflow-hidden rounded-full p-1 leading-none",
+            selectedId === "pet:seed"
+              ? "bg-card/80 ring-2 ring-primary ring-offset-2 ring-offset-transparent"
+              : "bg-transparent",
           )}
           aria-label="Shared seed companion"
         >
@@ -195,7 +197,7 @@ export function RoomStage({
               src={seedUrl}
               alt={seedLabel ?? stage.label}
               draggable={false}
-              className="room-float pointer-events-none block h-16 w-auto max-w-none select-none drop-shadow-[0_6px_6px_rgba(0,0,0,0.15)]"
+              className="room-float pointer-events-none h-[85%] w-[85%] max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.12)]"
               style={{ imageRendering: "pixelated" }}
             />
           ) : (
