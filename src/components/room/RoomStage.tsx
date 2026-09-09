@@ -188,9 +188,10 @@ export function RoomStage({
             onWater();
           }}
           className={cn(
-            "press grid size-[4.75rem] place-items-center overflow-hidden rounded-full p-1 leading-none",
+            // No overflow-hidden / rounded-full — full pixel sprite must stay visible (antenna + feet)
+            "press flex h-[5.5rem] w-[5.5rem] items-end justify-center rounded-2xl p-0.5 leading-none",
             selectedId === "pet:seed"
-              ? "bg-card/80 ring-2 ring-primary ring-offset-2 ring-offset-transparent"
+              ? "bg-card/70 ring-2 ring-primary ring-offset-2 ring-offset-transparent"
               : "bg-transparent",
           )}
           aria-label="Shared seed companion"
@@ -200,7 +201,7 @@ export function RoomStage({
               src={seedUrl}
               alt={seedLabel ?? stage.label}
               draggable={false}
-              className="room-float pointer-events-none h-[85%] w-[85%] max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.12)]"
+              className="room-float pointer-events-none h-full w-full object-contain object-bottom select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.12)]"
               style={{ imageRendering: "pixelated" }}
             />
           ) : (
