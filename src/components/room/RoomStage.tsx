@@ -189,7 +189,7 @@ export function RoomStage({
             onWater();
           }}
           className={cn(
-            "press grid size-[4.75rem] place-items-center overflow-hidden rounded-full p-1 leading-none",
+            "press grid size-[5.25rem] place-items-center overflow-visible rounded-full p-2 leading-none",
             selectedId === "pet:seed"
               ? "bg-card/80 ring-2 ring-primary ring-offset-2 ring-offset-transparent"
               : "bg-transparent",
@@ -201,7 +201,7 @@ export function RoomStage({
               src={seedUrl}
               alt={seedLabel ?? stage.label}
               draggable={false}
-              className="room-float pointer-events-none h-[85%] w-[85%] max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.12)]"
+              className="room-float pointer-events-none h-[76%] w-[76%] max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.12)]"
               style={{ imageRendering: "pixelated" }}
             />
           ) : (
