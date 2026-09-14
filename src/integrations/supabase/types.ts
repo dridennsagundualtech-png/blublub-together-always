@@ -1174,6 +1174,7 @@ export type Database = {
           room_pages: Json | null
           seed_character: string | null
           seed_color: string | null
+          seed_room_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1190,6 +1191,7 @@ export type Database = {
           room_pages?: Json | null
           seed_character?: string | null
           seed_color?: string | null
+          seed_room_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1206,6 +1208,7 @@ export type Database = {
           room_pages?: Json | null
           seed_character?: string | null
           seed_color?: string | null
+          seed_room_id?: string | null
           updated_at?: string
         }
         Relationships: [
