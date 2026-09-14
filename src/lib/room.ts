@@ -89,7 +89,8 @@ export function ensureRoomPages(room: RoomRow | null | undefined): RoomPage[] {
   if (!room) return [defaultRoomPage()];
   const raw = room.room_pages;
   if (Array.isArray(raw) && raw.length > 0) {
-    return raw.slice(0, MAX_ROOM_PAGES).map((p, i) =>
+    const pages = raw as unknown as RoomPage[];
+    return pages.slice(0, MAX_ROOM_PAGES).map((p, i) =>
       defaultRoomPage({
         id: typeof p?.id === "string" ? p.id : i === 0 ? "main" : newPageId(),
         name: typeof p?.name === "string" && p.name.trim() ? p.name : i === 0 ? "Our room" : `Room ${i + 1}`,

@@ -54,7 +54,17 @@ export function RoomStage({
   petPositions?: Record<string, Pos> | undefined;
   petZ?: Record<string, number> | undefined;
   mascotVisibility?: Record<string, boolean> | undefined;
+  showSeed?: boolean | undefined;
   fullscreen?: boolean | undefined;
+  roomNav?: {
+    label: string;
+    canPrev: boolean;
+    canNext: boolean;
+    onPrev: () => void;
+    onNext: () => void;
+    arrowLeftSrc?: string | undefined;
+    arrowRightSrc?: string | undefined;
+  } | undefined;
   toolbar?: ReactNode | undefined;
   onSelect: (id: string | null) => void;
   onMove: (id: string, x: number, y: number) => void;
