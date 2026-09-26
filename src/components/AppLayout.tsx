@@ -73,9 +73,9 @@ export function AppLayout({
     } catch {
       /* ignore */
     }
-    const cls = dir === "right" ? "page-slide-from-left" : "page-slide-from-right";
+    const cls = dir === "right" ? "page-gym-from-left" : "page-gym-from-right";
     setSlideClass(cls);
-    const t = window.setTimeout(() => setSlideClass(""), 320);
+    const t = window.setTimeout(() => setSlideClass(""), 420);
     return () => window.clearTimeout(t);
   }, [pathname]);
 
@@ -110,7 +110,7 @@ export function AppLayout({
         </div>
       </header>
 
-      <div className={`mx-auto max-w-lg px-5 ${slideClass}`}>
+      <div className={`page-transition-root mx-auto max-w-lg px-5 ${slideClass}`}>
         {!user ? (
           <Link
             to="/profile"
