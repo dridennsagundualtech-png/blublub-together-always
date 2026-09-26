@@ -136,74 +136,79 @@ function RoomPage() {
   }
 
   const controls = (
-    <div className="grid grid-cols-6 gap-1.5">
-      <button
-        type="button"
-        onClick={() => {
-          playChirp("tap");
-          setEditing((v) => !v);
-          setSelectedId(null);
-        }}
-        className={cn(
-          "press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold",
-          editing && "bg-primary text-primary-foreground",
-        )}
-      >
-        {editing ? <Check className="size-4" /> : <Pencil className="size-4" />}
-        {editing ? "Done" : "Edit"}
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          playChirp("tap");
-          setSheetOpen(true);
-        }}
-        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
-      >
-        <Plus className="size-4" /> Decor
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          playChirp("tap");
-          setBgOpen(true);
-        }}
-        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
-      >
-        <ImageIcon className="size-4" /> Rooms
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          playChirp("tap");
-          setSeedOpen(true);
-        }}
-        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
-      >
-        <Sprout className="size-4" /> Seed
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          playChirp("tap");
-          setMascotOpen(true);
-        }}
-        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
-      >
-        <PawPrint className="size-4" /> Mascots
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          playChirp("tap");
-          setFullscreen((v) => !v);
-          setSelectedId(null);
-        }}
-        className="press card-soft flex flex-col items-center justify-center gap-1 p-2 text-[10px] font-bold"
-      >
-        {fullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-        {fullscreen ? "Exit" : "Full"}
-      </button>
+    <div
+      className={cn(
+        "pointer-events-auto flex gap-1.5",
+        fullscreen ? "flex-col items-center" : "flex-row flex-wrap justify-center",
+      )}
+    >
+      {(
+        [
+          {
+            key: "edit",
+            label: editing ? "Done" : "Edit",
+            active: editing,
+            onClick: () => {
+              setEditing((v) => !v);
+              setSelectedId(null);
+            },
+            icon: editing ? <Check className="size-4" /> : <Pencil className="size-4" />,
+          },
+          {
+            key: "decor",
+            label: "Decor",
+            onClick: () => setSheetOpen(true),
+            icon: <Plus className="size-4" />,
+          },
+          {
+            key: "rooms",
+            label: "BG",
+            onClick: () => setBgOpen(true),
+            icon: <ImageIcon className="size-4" />,
+          },
+          {
+            key: "seed",
+            label: "Seed",
+            onClick: () => setSeedOpen(true),
+            icon: <Sprout className="size-4" />,
+          },
+          {
+            key: "mascot",
+            label: "Pets",
+            onClick: () => setMascotOpen(true),
+            icon: <PawPrint className="size-4" />,
+          },
+          {
+            key: "full",
+            label: fullscreen ? "Exit" : "Full",
+            onClick: () => {
+              setFullscreen((v) => !v);
+              setSelectedId(null);
+            },
+            icon: fullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />,
+          },
+        ] as const
+      ).map((btn) => (
+        <button
+          key={btn.key}
+          type="button"
+          title={btn.label}
+          aria-label={btn.label}
+          onClick={() => {
+            playChirp("tap");
+            btn.onClick();
+          }}
+          className={cn(
+            "press flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-2 text-[10px] font-bold shadow-float backdrop-blur-md",
+            "border border-border/50",
+            "active" in btn && btn.active && "bg-primary text-primary-foreground border-primary",
+            fullscreen && "min-w-[2.75rem] flex-col gap-0.5 px-2 py-1.5",
+          )}
+        >
+          {btn.icon}
+          <span className={cn(fullscreen && "text-[9px] leading-none")}>{btn.label}</span>
+        </button>
+      ))}
     </div>
   );
 
@@ -508,13 +513,20 @@ function RoomPage() {
         </button>
       )}
 
+      {!fullscreen ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+3.75rem)] z-40 flex justify-center px-3">
+          <div className="pointer-events-auto max-w-lg rounded-full bg-background/80 p-1.5 shadow-float backdrop-blur-md">
+            {controls}
+          </div>
+        </div>
+      ) : null}
+
       {note && !fullscreen ? (
         <p className="mt-2 rounded-2xl bg-secondary px-4 py-2 text-center text-xs font-bold">
           {note}
         </p>
       ) : null}
 
-      <div className="mt-3">{!fullscreen ? controls : null}</div>
 
       {/* Seed companion */}
       <SectionTitle>Our seed</SectionTitle>
