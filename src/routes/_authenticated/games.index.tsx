@@ -113,7 +113,7 @@ function RoomPage() {
   const [mascotOpen, setMascotOpen] = useState(false);
   const [addRoomOpen, setAddRoomOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
-  const [fullscreen, setFullscreen] = useState(true);
+  const [fullscreen, setFullscreen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [bgCategory, setBgCategory] = useState<BgCategory>("indoor");
@@ -155,6 +155,10 @@ function RoomPage() {
       document.removeEventListener("pointerdown", onDoc, true);
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (!fullscreen) setMenuOpen(false);
+  }, [fullscreen]);
 
   const toolsMenu = (
     <div
@@ -560,8 +564,8 @@ function RoomPage() {
         </button>
       )}
 
-      {/* Tools menu is fixed (toolsMenu) — not clipped by room stage */}
-      {toolsMenu}
+      {/* Tools only while inside fullscreen room — not on the Play hub */}
+      {fullscreen ? toolsMenu : null}
 
       {note && !fullscreen ? (
         <p className="mt-2 rounded-2xl bg-secondary px-4 py-2 text-center text-xs font-bold">
