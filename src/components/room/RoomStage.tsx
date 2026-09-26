@@ -306,7 +306,9 @@ export function RoomStage({
         <div
           className={cn(
             "absolute inset-x-0 mx-auto flex w-fit max-w-[95%] flex-wrap items-center justify-center gap-2 rounded-full bg-card/95 px-3 py-2 shadow-float",
-            fullscreen ? "bottom-[calc(env(safe-area-inset-bottom)+1rem)]" : "bottom-2",
+            fullscreen
+              ? "bottom-[calc(env(safe-area-inset-bottom)+5.5rem)]"
+              : "bottom-2",
           )}
           style={{ zIndex: 310 }}
           onClick={(e) => e.stopPropagation()}
@@ -426,8 +428,7 @@ export function RoomStage({
 
       {fullscreen && toolbar && !editing ? (
         <div
-          className="absolute inset-x-0 bottom-0 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3"
-          style={{ zIndex: 300 }}
+          className="absolute right-2 top-[calc(env(safe-area-inset-top)+3.1rem)] z-[300] max-h-[70dvh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {toolbar}
