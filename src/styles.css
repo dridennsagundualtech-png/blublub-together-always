@@ -775,47 +775,77 @@ html.shadows-off .tile-cream {
 }
 
 
-/* —— Tab / swipe page transitions —— */
-@keyframes page-in-from-right {
-  from {
-    opacity: 0.35;
-    transform: translateX(18%);
+/* —— GymMane-inspired page transitions (fade + slide + scale + soft blur) —— */
+.page-transition-root {
+  will-change: transform, opacity, filter;
+}
+
+@keyframes page-gym-in-from-right {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateX(22px) scale(1.03);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateX(0);
+    filter: blur(0);
+    transform: translateX(0) scale(1);
   }
 }
 
-@keyframes page-in-from-left {
-  from {
-    opacity: 0.35;
-    transform: translateX(-18%);
+@keyframes page-gym-in-from-left {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateX(-22px) scale(1.03);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateX(0);
+    filter: blur(0);
+    transform: translateX(0) scale(1);
   }
 }
 
+.page-gym-from-right {
+  animation: page-gym-in-from-right 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page-gym-from-left {
+  animation: page-gym-in-from-left 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* keep older names as aliases */
 .page-slide-from-right {
-  animation: page-in-from-right 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-gym-in-from-right 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
 .page-slide-from-left {
-  animation: page-in-from-left 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-gym-in-from-left 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .page-gym-from-right,
+  .page-gym-from-left,
   .page-slide-from-right,
   .page-slide-from-left {
     animation: none;
   }
 }
 
-/* View Transitions API (when browser supports startViewTransition) */
+/* —— Liquid pill bottom nav —— */
+.nav-liquid-pill {
+  transition:
+    left 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.25s ease;
+}
+
+.nav-icon-lift {
+  transform: translateY(-2px) scale(1.08);
+}
+
+/* View Transitions API */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.28s;
+  animation-duration: 0.32s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
