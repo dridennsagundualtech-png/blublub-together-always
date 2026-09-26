@@ -200,7 +200,7 @@ function ChatPage() {
 
   return (
     <AppLayout title="Chat" subtitle="Just the two of you" critter="penguin">
-      <div className="flex flex-col gap-2 pb-32">
+      <div className="flex flex-col gap-2 pb-24">
         {(messages ?? []).map((m) => {
           const mine = m.created_by === user?.id;
           return (
@@ -251,7 +251,7 @@ function ChatPage() {
           e.preventDefault();
           if (text.trim()) send.mutate();
         }}
-        className="fixed inset-x-0 bottom-16 z-40 mx-auto mb-2 flex max-w-lg items-center gap-2 px-4 pb-2"
+        className="fixed inset-x-0 z-40 mx-auto flex max-w-lg items-center gap-2 px-4 bottom-[calc(3.6rem+env(safe-area-inset-bottom))]"
       >
         <input
           value={text}
