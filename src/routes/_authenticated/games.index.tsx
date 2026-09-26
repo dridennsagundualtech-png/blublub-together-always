@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   ChevronRight,
@@ -8,6 +8,7 @@ import {
   Lock,
   Maximize2,
   Minimize2,
+  MoreHorizontal,
   PawPrint,
   Pencil,
   Plus,
@@ -113,6 +114,8 @@ function RoomPage() {
   const [addRoomOpen, setAddRoomOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   const [fullscreen, setFullscreen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [bgCategory, setBgCategory] = useState<BgCategory>("indoor");
   const [category, setCategory] = useState<RoomTheme>(ROOM_THEMES[0]!);
   const [note, setNote] = useState<string | null>(null);
@@ -135,80 +138,109 @@ function RoomPage() {
     window.setTimeout(() => setNote((n) => (n === text ? null : n)), 2200);
   }
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDoc(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [menuOpen]);
+
   const controls = (
-    <div
-      className={cn(
-        "pointer-events-auto flex gap-1.5",
-        fullscreen ? "flex-col items-center" : "flex-row flex-wrap justify-center",
-      )}
-    >
-      {(
-        [
-          {
-            key: "edit",
-            label: editing ? "Done" : "Edit",
-            active: editing,
-            onClick: () => {
-              setEditing((v) => !v);
-              setSelectedId(null);
-            },
-            icon: editing ? <Check className="size-4" /> : <Pencil className="size-4" />,
-          },
-          {
-            key: "decor",
-            label: "Decor",
-            onClick: () => setSheetOpen(true),
-            icon: <Plus className="size-4" />,
-          },
-          {
-            key: "rooms",
-            label: "BG",
-            onClick: () => setBgOpen(true),
-            icon: <ImageIcon className="size-4" />,
-          },
-          {
-            key: "seed",
-            label: "Seed",
-            onClick: () => setSeedOpen(true),
-            icon: <Sprout className="size-4" />,
-          },
-          {
-            key: "mascot",
-            label: "Pets",
-            onClick: () => setMascotOpen(true),
-            icon: <PawPrint className="size-4" />,
-          },
-          {
-            key: "full",
-            label: fullscreen ? "Exit" : "Full",
-            onClick: () => {
-              setFullscreen((v) => !v);
-              setSelectedId(null);
-            },
-            icon: fullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />,
-          },
-        ] as const
-      ).map((btn) => (
-        <button
-          key={btn.key}
-          type="button"
-          title={btn.label}
-          aria-label={btn.label}
-          onClick={() => {
-            playChirp("tap");
-            btn.onClick();
-          }}
+    <div ref={menuRef} className="relative pointer-events-auto">
+      <button
+        type="button"
+        aria-label="Room tools"
+        aria-expanded={menuOpen}
+        onClick={() => {
+          playChirp("tap");
+          setMenuOpen((v) => !v);
+        }}
+        className={cn(
+          "press inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/95 px-3 py-2 text-xs font-bold shadow-float backdrop-blur-md",
+          menuOpen && "ring-2 ring-primary/40",
+        )}
+      >
+        <MoreHorizontal className="size-4" />
+        Tools
+      </button>
+
+      {menuOpen ? (
+        <div
           className={cn(
-            "press flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-2 text-[10px] font-bold shadow-float backdrop-blur-md",
-            "border border-border/50",
-            "active" in btn && btn.active && "bg-primary text-primary-foreground border-primary",
-            fullscreen && "min-w-[2.75rem] flex-col gap-0.5 px-2 py-1.5",
+            "absolute z-[40] min-w-[11.5rem] overflow-hidden rounded-2xl border border-border/60 bg-card/95 py-1 shadow-float backdrop-blur-md",
+            fullscreen ? "right-0 top-full mt-1.5" : "bottom-full left-1/2 mb-1.5 -translate-x-1/2",
           )}
+          role="menu"
         >
-          {btn.icon}
-          <span className={cn(fullscreen && "text-[9px] leading-none")}>{btn.label}</span>
-        </button>
-      ))}
+          {(
+            [
+              {
+                key: "edit",
+                label: editing ? "Done editing" : "Edit room",
+                onClick: () => {
+                  setEditing((v) => !v);
+                  setSelectedId(null);
+                },
+                icon: editing ? <Check className="size-4" /> : <Pencil className="size-4" />,
+              },
+              {
+                key: "decor",
+                label: "Decorations",
+                onClick: () => setSheetOpen(true),
+                icon: <Plus className="size-4" />,
+              },
+              {
+                key: "rooms",
+                label: "Background",
+                onClick: () => setBgOpen(true),
+                icon: <ImageIcon className="size-4" />,
+              },
+              {
+                key: "seed",
+                label: "Seed",
+                onClick: () => setSeedOpen(true),
+                icon: <Sprout className="size-4" />,
+              },
+              {
+                key: "mascot",
+                label: "Mascots",
+                onClick: () => setMascotOpen(true),
+                icon: <PawPrint className="size-4" />,
+              },
+              {
+                key: "full",
+                label: fullscreen ? "Exit fullscreen" : "Fullscreen",
+                onClick: () => {
+                  setFullscreen((v) => !v);
+                  setSelectedId(null);
+                },
+                icon: fullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />,
+              },
+            ] as const
+          ).map((btn) => (
+            <button
+              key={btn.key}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                playChirp("tap");
+                setMenuOpen(false);
+                btn.onClick();
+              }}
+              className="press flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs font-bold text-foreground hover:bg-muted/80"
+            >
+              <span className="grid size-7 place-items-center rounded-full bg-muted text-foreground">
+                {btn.icon}
+              </span>
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 
