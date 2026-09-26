@@ -140,28 +140,50 @@ function RoomPage() {
 
   useEffect(() => {
     if (!menuOpen) return;
-    function onDoc(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+    function onDoc(e: Event) {
+      const t = e.target as Node | null;
+      if (menuRef.current && t && !menuRef.current.contains(t)) {
         setMenuOpen(false);
       }
     }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    // pointerdown after current click finishes toggling open
+    const id = window.setTimeout(() => {
+      document.addEventListener("pointerdown", onDoc, true);
+    }, 0);
+    return () => {
+      window.clearTimeout(id);
+      document.removeEventListener("pointerdown", onDoc, true);
+    };
   }, [menuOpen]);
 
-  const controls = (
-    <div ref={menuRef} className="relative pointer-events-auto">
+  const toolsMenu = (
+    <div
+      ref={menuRef}
+      className="pointer-events-auto fixed z-[90]"
+      style={{
+        top: fullscreen
+          ? "calc(env(safe-area-inset-top) + 3.25rem)"
+          : "auto",
+        bottom: fullscreen
+          ? "auto"
+          : "calc(env(safe-area-inset-bottom) + 4.25rem)",
+        right: fullscreen ? "0.75rem" : "auto",
+        left: fullscreen ? "auto" : "50%",
+        transform: fullscreen ? "none" : "translateX(-50%)",
+      }}
+    >
       <button
         type="button"
         aria-label="Room tools"
         aria-expanded={menuOpen}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           playChirp("tap");
           setMenuOpen((v) => !v);
         }}
         className={cn(
-          "press inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/95 px-3 py-2 text-xs font-bold shadow-float backdrop-blur-md",
-          menuOpen && "ring-2 ring-primary/40",
+          "press inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-2 text-xs font-bold shadow-float",
+          menuOpen && "ring-2 ring-primary/50",
         )}
       >
         <MoreHorizontal className="size-4" />
@@ -170,11 +192,12 @@ function RoomPage() {
 
       {menuOpen ? (
         <div
-          className={cn(
-            "absolute z-[40] min-w-[11.5rem] overflow-hidden rounded-2xl border border-border/60 bg-card/95 py-1 shadow-float backdrop-blur-md",
-            fullscreen ? "right-0 top-full mt-1.5" : "bottom-full left-1/2 mb-1.5 -translate-x-1/2",
-          )}
           role="menu"
+          className={cn(
+            "absolute z-[91] w-[13rem] overflow-hidden rounded-2xl border border-border bg-card py-1 shadow-float",
+            fullscreen ? "right-0 top-full mt-2" : "bottom-full left-1/2 mb-2 -translate-x-1/2",
+          )}
+          onClick={(e) => e.stopPropagation()}
         >
           {(
             [
@@ -226,7 +249,8 @@ function RoomPage() {
               key={btn.key}
               type="button"
               role="menuitem"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 playChirp("tap");
                 setMenuOpen(false);
                 btn.onClick();
@@ -274,16 +298,7 @@ function RoomPage() {
           : undefined
       }
       fullscreen={fullscreen}
-      toolbar={
-        <div className="space-y-2">
-          {note ? (
-            <p className="rounded-2xl bg-card/95 px-4 py-2 text-center text-xs font-bold shadow-float">
-              {note}
-            </p>
-          ) : null}
-          {controls}
-        </div>
-      }
+      toolbar={undefined}
       onDoneEditing={() => {
         playChirp("tap");
         setEditing(false);
@@ -545,13 +560,8 @@ function RoomPage() {
         </button>
       )}
 
-      {!fullscreen ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+3.75rem)] z-40 flex justify-center px-3">
-          <div className="pointer-events-auto max-w-lg rounded-full bg-background/80 p-1.5 shadow-float backdrop-blur-md">
-            {controls}
-          </div>
-        </div>
-      ) : null}
+      {/* Tools menu is fixed (toolsMenu) — not clipped by room stage */}
+      {toolsMenu}
 
       {note && !fullscreen ? (
         <p className="mt-2 rounded-2xl bg-secondary px-4 py-2 text-center text-xs font-bold">
