@@ -216,7 +216,7 @@ function CommitmentsPage() {
               type="checkbox"
               checked={shared}
               onChange={(e) => setShared(e.target.checked)}
-              className="size-4 accent-primary"
+              className="size-4 accent-primary-ink"
             />
             <span>
               Share with {partner?.display_name ?? "partner"}
@@ -240,7 +240,7 @@ function CommitmentsPage() {
             Turn on notifications to get your reminder times.
           </p>
           <button
-            className="press shrink-0 text-xs font-bold text-primary"
+            className="press shrink-0 text-xs font-bold text-primary-ink"
             onClick={() =>
               void askNotificationPermission().then((r) =>
                 toast(r === "granted" ? "Reminders on 🩷" : "Notifications are blocked"),
@@ -295,7 +295,7 @@ function CommitmentsPage() {
                           type="checkbox"
                           checked={c.shared}
                           onChange={(e) => setShare.mutate({ id: c.id, shared: e.target.checked })}
-                          className="size-3.5 accent-primary"
+                          className="size-3.5 accent-primary-ink"
                         />
                         Shared
                       </label>

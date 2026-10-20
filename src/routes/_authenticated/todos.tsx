@@ -214,7 +214,7 @@ function TodosPage() {
               step={5}
               value={g.progress}
               onChange={(e) => setProgress.mutate({ id: g.id, progress: Number(e.target.value) })}
-              className="mt-3 w-full accent-primary"
+              className="mt-3 w-full accent-primary-ink"
             />
           </li>
         ))}

@@ -81,7 +81,7 @@ export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>
                   }
                 }}
                 activeOptions={{ exact: to === "/" }}
-                activeProps={{ className: "text-primary" }}
+                activeProps={{ className: "text-primary-ink" }}
                 inactiveProps={{ className: "text-muted-foreground" }}
                 className="press flex flex-col items-center gap-0.5 py-1.5"
               >
@@ -100,12 +100,14 @@ export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>
                         fillOpacity={isActive ? 0.22 : 0}
                       />
                       {badges?.[to] ? (
-                        <span className="absolute right-0 top-0 size-1.5 rounded-full bg-destructive" />
+                        <span className="absolute right-0 top-0 size-1.5 rounded-full bg-destructive">
+                          <span className="sr-only">New</span>
+                        </span>
                       ) : null}
                     </span>
                     <span
                       className={cn(
-                        "text-[9px] leading-none transition-all duration-300",
+                        "text-xs leading-none transition-all duration-300",
                         isActive ? "font-bold" : "font-medium",
                       )}
                     >

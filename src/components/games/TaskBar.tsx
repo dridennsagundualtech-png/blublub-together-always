@@ -21,7 +21,7 @@ export function TaskBar({
           Loser's task
         </p>
         <p className="truncate text-sm font-extrabold">{game.task}</p>
-        <p className="mt-1 text-xs text-primary">{status}</p>
+        <p className="mt-1 text-xs text-primary-ink">{status}</p>
       </div>
       <button
         type="button"

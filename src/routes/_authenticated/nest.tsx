@@ -67,12 +67,12 @@ function SummaryTile({
     <div className={`grad-box card-soft rounded-[1.25rem] ${tint} p-4`}>
       <div className="flex items-center gap-2">
         <span className="grid size-7 place-items-center rounded-full bg-card/70">{icon}</span>
-        <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
       </div>
       <p className="mt-2 font-display text-base font-bold text-foreground">{value}</p>
-      {detail ? <p className="mt-0.5 text-[11px] text-muted-foreground">{detail}</p> : null}
+      {detail ? <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p> : null}
     </div>
   );
 }
@@ -159,7 +159,7 @@ function NestPage() {
       <div className="grid gap-3">
         <SummaryTile
           tint="tile-lilac"
-          icon={<BookHeart className="size-3.5 text-primary" />}
+          icon={<BookHeart className="size-3.5 text-primary-ink" />}
           label="Diary"
           value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
           detail={diaryStreak > 0 ? `${diaryStreak}-day streak` : "Write something small today"}
@@ -167,20 +167,20 @@ function NestPage() {
         <div className="grid grid-cols-2 gap-3">
           <SummaryTile
             tint="tile-pink"
-            icon={<ListChecks className="size-3.5 text-primary" />}
+            icon={<ListChecks className="size-3.5 text-primary-ink" />}
             label="To-Dos"
             value={openTodos === 0 ? "All done" : `${openTodos} left to do`}
           />
           <SummaryTile
             tint="tile-peach"
-            icon={<Sparkles className="size-3.5 text-primary" />}
+            icon={<Sparkles className="size-3.5 text-primary-ink" />}
             label="Bucket List"
             value={`${bucketDone}/${bucketTotal} done`}
           />
         </div>
         <SummaryTile
           tint="tile-sky"
-          icon={<Wallet className="size-3.5 text-primary" />}
+          icon={<Wallet className="size-3.5 text-primary-ink" />}
           label="Budget"
           value={
             !premium ? (
@@ -199,7 +199,7 @@ function NestPage() {
       <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Nest tools</p>
-          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
+          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-primary-foreground/80">
             Diary, lists, dreams and money — kept in one cozy place
           </p>
         </div>
@@ -208,7 +208,7 @@ function NestPage() {
           to="/diary"
           className="featured-gradient press relative mt-5 block overflow-hidden rounded-[1.35rem] p-5 text-primary-foreground"
         >
-          <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Featured</p>
+          <p className="text-xs font-bold uppercase tracking-widest opacity-80">Featured</p>
           <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
           <p className="mt-1 max-w-[14rem] text-xs opacity-90">
             {lastEntry
@@ -226,10 +226,10 @@ function NestPage() {
             to="/todos"
             className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-pink p-4 text-foreground"
           >
-            <ListChecks className="size-7 text-primary opacity-80" />
+            <ListChecks className="size-7 text-primary-ink opacity-80" />
             <div>
               <p className="font-display text-base font-bold">To-Dos</p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {openTodos === 0 ? "All clear" : `${openTodos} open`}
               </p>
             </div>
@@ -238,10 +238,10 @@ function NestPage() {
             to="/bucket"
             className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-peach p-4 text-foreground"
           >
-            <Sparkles className="size-7 text-primary opacity-80" />
+            <Sparkles className="size-7 text-primary-ink opacity-80" />
             <div>
               <p className="font-display text-base font-bold">Bucket List</p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {bucketDone}/{bucketTotal} done
               </p>
             </div>
@@ -250,10 +250,10 @@ function NestPage() {
             to="/budget"
             className="grad-box press col-span-2 flex min-h-[100px] flex-col justify-between rounded-[1.25rem] tile-cream p-4 text-foreground"
           >
-            <Wallet className="size-6 text-primary opacity-80" />
+            <Wallet className="size-6 text-primary-ink opacity-80" />
             <div>
               <p className="font-display text-base font-bold">Budget</p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {!premium
                   ? "Premium space"
                   : Math.abs(balance) < 0.01
@@ -308,7 +308,7 @@ function ChoiceRow({
       onClick={onClick}
       className="press card-soft flex items-center gap-3 p-4 text-left"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
+      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary-ink">
         {icon}
       </span>
       <span className="text-sm font-bold">{title}</span>

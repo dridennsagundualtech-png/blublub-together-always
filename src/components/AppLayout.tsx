@@ -119,7 +119,7 @@ export function AppLayout({
             <span className="text-xs text-muted-foreground">
               You&apos;re browsing signed out — your data won&apos;t load.
             </span>
-            <span className="shrink-0 text-xs font-bold text-primary">Sign in</span>
+            <span className="shrink-0 text-xs font-bold text-primary-ink">Sign in</span>
           </Link>
         ) : null}
 

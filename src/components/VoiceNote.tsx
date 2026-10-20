@@ -38,7 +38,7 @@ export function VoiceNote({
           <Play className="size-3.5" /> loading…
         </span>
       )}
-      {secs ? <span className="text-[10px] opacity-70">{secs}s</span> : null}
+      {secs ? <span className="text-xs opacity-70">{secs}s</span> : null}
     </div>
   );
 }

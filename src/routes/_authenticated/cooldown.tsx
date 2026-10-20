@@ -109,7 +109,7 @@ function CooldownPage() {
     <AppLayout title="Cool-down" subtitle="Fill it in alone, then share" critter="cat" critterPose="curious">
       <Card>
         <div className="flex items-start gap-3">
-          <HeartHandshake className="mt-0.5 size-5 shrink-0 text-primary" />
+          <HeartHandshake className="mt-0.5 size-5 shrink-0 text-primary-ink" />
           <p className="text-xs text-muted-foreground">
             Take a breath first. Answer honestly and gently — you choose whether to keep it private
             or share it when you&apos;re ready.
@@ -153,7 +153,7 @@ function CooldownPage() {
                   className="size-12 object-contain"
                   style={{ imageRendering: "pixelated" }}
                 />
-                <span className="text-[10px] font-bold leading-tight">{f.label}</span>
+                <span className="text-xs font-bold leading-tight">{f.label}</span>
               </button>
             );
           })}
@@ -260,7 +260,7 @@ function CooldownPage() {
                       return (
                         <span
                           key={k}
-                          className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1 text-[11px] font-bold"
+                          className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1 text-xs font-bold"
                         >
                           <img
                             src={f.url}

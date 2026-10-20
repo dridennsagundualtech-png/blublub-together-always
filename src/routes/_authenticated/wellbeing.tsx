@@ -169,8 +169,8 @@ function WellbeingPage() {
       <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
       <div className="grid gap-3">
         <Link to="/cooldown" className="grad-box press block rounded-[1.25rem] tile-sky p-4">
-          <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-            <HeartHandshake className="size-3.5 text-primary" />
+          <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            <HeartHandshake className="size-3.5 text-primary-ink" />
             Feelings
           </span>
           <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
@@ -180,8 +180,8 @@ function WellbeingPage() {
         </Link>
         <div className="grid grid-cols-2 gap-3">
           <Link to="/period" className="grad-box press block rounded-[1.25rem] tile-peach p-4">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-              <Droplets className="size-3.5 text-primary" />
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <Droplets className="size-3.5 text-primary-ink" />
               Cycle
             </span>
             <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
@@ -190,8 +190,8 @@ function WellbeingPage() {
             <span className="mt-0.5 block text-xs text-muted-foreground">{cycleDetail}</span>
           </Link>
           <Link to="/map" className="grad-box press block rounded-[1.25rem] tile-cream p-4">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-              <MapPin className="size-3.5 text-primary" />
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <MapPin className="size-3.5 text-primary-ink" />
               Distance
             </span>
             <span className="mt-1.5 block text-sm font-bold leading-snug text-foreground">
@@ -206,7 +206,7 @@ function WellbeingPage() {
       <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Care tools</p>
-          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
+          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-primary-foreground/80">
             Soft tools for feelings, cycles, distance and gentle goals
           </p>
         </div>
@@ -225,12 +225,12 @@ function WellbeingPage() {
                 <span
                   className={cn(
                     "grid size-11 place-items-center rounded-full",
-                    active ? "bg-primary text-primary-foreground" : "bg-white/10 text-white/80",
+                    active ? "bg-primary text-primary-foreground" : "bg-card/50 text-primary-foreground",
                   )}
                 >
                   <Icon className="size-5" />
                 </span>
-                <span className="text-[10px] font-semibold text-white/80">{f.label}</span>
+                <span className="text-xs font-semibold text-primary-foreground">{f.label}</span>
               </button>
             );
           })}
@@ -241,7 +241,7 @@ function WellbeingPage() {
             to="/cooldown"
             className="featured-gradient press relative mt-5 block overflow-hidden rounded-[1.35rem] p-5 text-primary-foreground"
           >
-            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Featured</p>
+            <p className="text-xs font-bold uppercase tracking-widest opacity-80">Featured</p>
             <p className="mt-1 font-display text-xl font-bold">Cool-Down Tool</p>
             <p className="mt-1 max-w-[14rem] text-xs opacity-90">
               Pause, name the feeling, and reconnect with each other
@@ -259,10 +259,10 @@ function WellbeingPage() {
               to="/period"
               className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-peach p-4 text-foreground"
             >
-              <Droplets className="size-7 text-primary opacity-80" />
+              <Droplets className="size-7 text-primary-ink opacity-80" />
               <div>
                 <p className="font-display text-base font-bold">Cycle</p>
-                <p className="text-[11px] text-muted-foreground">Phase & predictions</p>
+                <p className="text-xs text-muted-foreground">Phase & predictions</p>
               </div>
             </Link>
           ) : null}
@@ -271,10 +271,10 @@ function WellbeingPage() {
               to="/commitments"
               className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-cream p-4 text-foreground"
             >
-              <Target className="size-7 text-primary opacity-80" />
+              <Target className="size-7 text-primary-ink opacity-80" />
               <div>
                 <p className="font-display text-base font-bold">Commitments</p>
-                <p className="text-[11px] text-muted-foreground">Gentle streaks</p>
+                <p className="text-xs text-muted-foreground">Gentle streaks</p>
               </div>
             </Link>
           ) : null}
@@ -286,10 +286,10 @@ function WellbeingPage() {
                 showCycle && showCommit ? "col-span-2" : "col-span-1",
               )}
             >
-              <MapPin className="size-6 text-primary opacity-80" />
+              <MapPin className="size-6 text-primary-ink opacity-80" />
               <div>
                 <p className="font-display text-base font-bold">Where We Are</p>
-                <p className="text-[11px] text-muted-foreground">Live location when shared</p>
+                <p className="text-xs text-muted-foreground">Live location when shared</p>
               </div>
             </Link>
           ) : null}

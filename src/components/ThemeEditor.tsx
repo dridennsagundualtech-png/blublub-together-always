@@ -141,13 +141,13 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
     <Card className={compact ? "mt-0" : "mt-4"}>
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Palette className="size-5 text-primary" />
+          <Palette className="size-5 text-primary-ink" />
           <p className="text-sm font-bold">Our app colors</p>
         </div>
         <button
           type="button"
           onClick={reset}
-          className="press flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground"
+          className="press flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground"
         >
           <RotateCcw className="size-3" />
           Reset
@@ -155,14 +155,14 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
       </div>
 
       <div className="mb-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2">
-        <Users className="size-4 shrink-0 text-primary" />
-        <p className="text-[11px] font-semibold leading-snug text-foreground">
+        <Users className="size-4 shrink-0 text-primary-ink" />
+        <p className="text-xs font-semibold leading-snug text-foreground">
           Shared with both of you — pick colors & gradients together.
         </p>
       </div>
 
       <div className="mb-4 overflow-hidden rounded-[1.25rem] border border-border bg-background p-3">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
           Live preview
         </p>
         <div className="flex gap-2">
@@ -184,14 +184,14 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
             className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
             style={{ backgroundColor: map.purple, color: "#3F2A3A" }}
           >
-            <span className="text-[9px] font-bold opacity-70">Tile</span>
+            <span className="text-xs font-bold opacity-70">Tile</span>
             <span className="text-xs font-bold">Accent</span>
           </div>
           <div
             className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
             style={{ backgroundColor: map.blue, color: "#3F2A3A" }}
           >
-            <span className="text-[9px] font-bold opacity-70">Tile</span>
+            <span className="text-xs font-bold opacity-70">Tile</span>
             <span className="text-xs font-bold">Calm</span>
           </div>
         </div>
@@ -203,10 +203,10 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
           }}
         >
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-wide opacity-70">Gradient</p>
+            <p className="text-xs font-bold uppercase tracking-wide opacity-70">Gradient</p>
             <p className="text-xs font-bold">Featured card</p>
           </div>
-          <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold">Open</span>
+          <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-bold">Open</span>
         </div>
         {map.boxesGradient ? (
           <div
@@ -221,7 +221,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
         ) : null}
       </div>
 
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
         Solid colors
       </p>
       <div className="mb-3 grid grid-cols-2 gap-2">
@@ -240,13 +240,13 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
             />
             <span>
               <span className="block text-xs font-bold">{s.title}</span>
-              <span className="block text-[10px] text-muted-foreground">{s.hint}</span>
+              <span className="block text-xs text-muted-foreground">{s.hint}</span>
             </span>
           </button>
         ))}
       </div>
 
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
         Featured gradient
       </p>
       <div className="mb-2 grid grid-cols-2 gap-2">
@@ -279,12 +279,13 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
       <div className="mb-3 flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2.5">
         <div>
           <p className="text-xs font-bold">Gradient boxes</p>
-          <p className="text-[10px] text-muted-foreground">Cards & panels on chosen screens</p>
+          <p className="text-xs text-muted-foreground">Cards & panels on chosen screens</p>
         </div>
         <button
           type="button"
           role="switch"
           aria-checked={map.boxesGradient}
+          aria-label="Gradient boxes"
           onClick={() => setMap((m) => ({ ...m, boxesGradient: !m.boxesGradient }))}
           className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
             map.boxesGradient ? "bg-primary" : "bg-muted"
@@ -326,7 +327,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
       {map.boxesGradient ? (
         <div className="mb-4 rounded-2xl bg-muted/40 p-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Screens with gradient boxes
             </p>
             <button
@@ -337,7 +338,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
                   gradientScreens: m.gradientScreens.length ? [] : THEME_SCREENS.map((s) => s.id),
                 }))
               }
-              className="press rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary"
+              className="press rounded-full bg-card px-2.5 py-1 text-xs font-bold text-primary-ink"
             >
               {map.gradientScreens.length ? "All screens" : "Pick screens"}
             </button>
@@ -368,14 +369,14 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
               })}
             </div>
           ) : (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Every screen uses the gradient. Tap “Pick screens” to choose.
             </p>
           )}
         </div>
       ) : null}
 
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
         Tap a color for “{SLOT_META.find((s) => s.id === active)?.title ?? active}”
       </p>
 
@@ -397,7 +398,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
             >
               {c.emoji}
             </span>
-            <span className="text-[8px] font-semibold leading-tight text-muted-foreground">
+            <span className="text-xs font-semibold leading-tight text-muted-foreground">
               {c.label}
             </span>
           </button>
@@ -408,7 +409,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
 
       <div className="mb-4 rounded-[1.25rem] border border-border bg-card p-3">
         <p className="mb-1 text-sm font-bold">Theme presets</p>
-        <p className="mb-3 text-[11px] text-muted-foreground">
+        <p className="mb-3 text-xs text-muted-foreground">
           Recommended looks, or save the one you&apos;re using now
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -423,7 +424,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
                   background: `linear-gradient(135deg, ${p.theme.gradFrom}, ${p.theme.gradTo})`,
                 }}
               />
-              <p className="truncate text-[11px] font-bold">{p.name}</p>
+              <p className="truncate text-xs font-bold">{p.name}</p>
               <div className="mt-1.5 flex gap-1">
                 <button
                   type="button"
@@ -434,7 +435,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
                     toast.success(`Applied “${p.name}”`);
                   }}
-                  className="press flex-1 rounded-full bg-primary py-1 text-[10px] font-bold text-primary-foreground"
+                  className="press flex-1 rounded-full bg-primary py-1 text-xs font-bold text-primary-foreground"
                 >
                   Use
                 </button>
@@ -447,7 +448,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
                       setPresets(allPresets());
                       toast.message("Preset deleted");
                     }}
-                    className="press rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-muted-foreground"
+                    className="press rounded-full bg-muted px-2 py-1 text-xs font-bold text-muted-foreground"
                   >
                     Del
                   </button>
@@ -478,7 +479,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
               setPresetName("");
               toast.success("Preset saved");
             }}
-            className="press shrink-0 rounded-full bg-foreground px-3 py-2 text-[11px] font-bold text-background"
+            className="press shrink-0 rounded-full bg-foreground px-3 py-2 text-xs font-bold text-background"
           >
             Save current
           </button>
@@ -489,7 +490,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
         <div className="mb-2 flex items-center justify-between gap-2">
           <div>
             <p className="text-sm font-bold">Soft shadows</p>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Elevation on cards & tiles across the whole app
             </p>
           </div>
@@ -501,7 +502,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
                 shadowsEnabled: m.shadowsEnabled === false ? true : false,
               }))
             }
-            className={`press shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold ${
+            className={`press shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
               map.shadowsEnabled !== false
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground"
@@ -511,7 +512,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
           </button>
         </div>
         {map.shadowsEnabled !== false ? (
-          <label className="block text-[11px] font-semibold text-muted-foreground">
+          <label className="block text-xs font-semibold text-muted-foreground">
             Strength
             <input
               type="range"
@@ -530,7 +531,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
           </label>
         ) : null}
 
-        <label className="mt-3 block text-[11px] font-semibold text-muted-foreground">
+        <label className="mt-3 block text-xs font-semibold text-muted-foreground">
           Edge sharpness (whole app)
           <input
             type="range"
@@ -546,7 +547,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
             }
             className="mt-1 w-full"
           />
-          <span className="text-[10px]">Sharper ← → Rounder ({(map.cornerRadius ?? 1.25).toFixed(2)})</span>
+          <span className="text-xs">Sharper ← → Rounder ({(map.cornerRadius ?? 1.25).toFixed(2)})</span>
         </label>
 
       </div>
@@ -555,7 +556,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
         <div className="flex items-center justify-between gap-2">
           <div>
             <p className="text-sm font-bold">Developer mode</p>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               On any screen, tap a box to set its own color or gradient
             </p>
           </div>
@@ -567,7 +568,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
               window.dispatchEvent(new Event("blublub-dev-mode"));
               toast.message(on ? "Developer mode off" : "Developer mode on — open any page and tap a box");
             }}
-            className="press shrink-0 rounded-full bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground"
+            className="press shrink-0 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
           >
             Toggle
           </button>

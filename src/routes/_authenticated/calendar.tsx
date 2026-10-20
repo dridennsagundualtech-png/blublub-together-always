@@ -61,11 +61,11 @@ function weekStrip(selectedIso: string) {
 }
 
 const EVENT_COLORS = [
-  "bg-[#F86B8F] text-white",
-  "bg-[#8E97FD] text-white",
-  "bg-[#FFC97E] text-[#3F414E]",
-  "bg-[#AFDBC5] text-[#3F414E]",
-  "bg-[#E0D7FF] text-[#3F414E]",
+  "bg-primary text-primary-foreground",
+  "bg-lavender text-primary-foreground",
+  "bg-honey text-primary-foreground",
+  "bg-mint text-primary-foreground",
+  "bg-lavender-soft text-lavender-foreground",
 ];
 
 export const Route = createFileRoute("/_authenticated/calendar")({
@@ -214,7 +214,7 @@ function CalendarPage() {
       {/* Greeting row */}
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="font-display text-[1.5rem] font-bold leading-tight text-[#3F414E]">
+          <p className="font-display text-[1.5rem] font-bold leading-tight text-foreground">
             {greet},
             <br />
             {name}
@@ -223,7 +223,7 @@ function CalendarPage() {
         <button
           type="button"
           onClick={() => setShowMonth((v) => !v)}
-          className="press rounded-full bg-[#F2F2F2] px-3 py-1.5 text-xs font-bold text-[#3F414E]"
+          className="press inline-flex min-h-11 items-center rounded-full bg-muted px-4 text-xs font-bold text-foreground"
         >
           {showMonth ? "Week" : "Month"}
         </button>
@@ -243,41 +243,41 @@ function CalendarPage() {
                 onClick={() => selectDay(d.iso)}
                 className="press flex flex-1 flex-col items-center gap-1"
               >
-                <span className="text-[10px] font-semibold text-[#A1A4B2]">{d.weekday}</span>
+                <span className="text-xs font-semibold text-muted-foreground">{d.weekday}</span>
                 <span
                   className={
                     selected
-                      ? "grid size-10 place-items-center rounded-2xl bg-[#F86B8F] text-sm font-bold text-white"
+                      ? "grid size-10 place-items-center rounded-2xl bg-primary text-sm font-bold text-primary-foreground"
                       : isToday
-                        ? "grid size-10 place-items-center rounded-2xl bg-[#F6F1FB] text-sm font-bold text-[#8E97FD]"
-                        : "grid size-10 place-items-center rounded-2xl text-sm font-bold text-[#3F414E]"
+                        ? "grid size-10 place-items-center rounded-2xl bg-lavender-soft text-sm font-bold text-primary-ink"
+                        : "grid size-10 place-items-center rounded-2xl text-sm font-bold text-foreground"
                   }
                 >
                   {d.dateNum}
                 </span>
                 <span
-                  className={`size-1 rounded-full ${has ? (selected ? "bg-white" : "bg-[#F86B8F]") : "bg-transparent"}`}
+                  className={`size-1 rounded-full ${has ? "bg-primary-ink" : "bg-transparent"}`}
                 />
               </button>
             );
           })}
         </div>
       ) : (
-        <div className="grad-box mb-5 rounded-[1.5rem] bg-[#F8F8FA] p-3">
+        <div className="grad-box mb-5 rounded-[1.5rem] bg-card p-3">
           <div className="mb-2 flex items-center justify-between">
-            <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)} className="press rounded-full p-2">
-              <ChevronLeft className="size-4 text-[#A1A4B2]" />
+            <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)} className="press grid size-11 place-items-center rounded-full">
+              <ChevronLeft className="size-4 text-muted-foreground" />
             </button>
-            <p className="font-display text-sm font-bold text-[#3F414E]">
+            <p className="font-display text-sm font-bold text-foreground">
               {MONTH_NAMES[view.month]} {view.year}
             </p>
-            <button type="button" aria-label="Next month" onClick={() => shiftMonth(1)} className="press rounded-full p-2">
-              <ChevronRight className="size-4 text-[#A1A4B2]" />
+            <button type="button" aria-label="Next month" onClick={() => shiftMonth(1)} className="press grid size-11 place-items-center rounded-full">
+              <ChevronRight className="size-4 text-muted-foreground" />
             </button>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center">
             {WEEKDAYS_SHORT.map((w) => (
-              <span key={w} className="text-[10px] font-bold text-[#A1A4B2]">
+              <span key={w} className="text-xs font-bold text-muted-foreground">
                 {w}
               </span>
             ))}
@@ -294,15 +294,15 @@ function CalendarPage() {
                   onClick={() => selectDay(iso)}
                   className={`press relative flex aspect-square items-center justify-center rounded-xl text-sm font-semibold ${
                     selected
-                      ? "bg-[#F86B8F] text-white"
+                      ? "bg-primary text-primary-foreground"
                       : isToday
-                        ? "bg-[#F6F1FB] text-[#8E97FD]"
-                        : "text-[#3F414E]"
+                        ? "bg-lavender-soft text-primary-ink"
+                        : "text-foreground"
                   }`}
                 >
                   {day}
                   {has && !selected ? (
-                    <span className="absolute bottom-1 size-1 rounded-full bg-[#F86B8F]" />
+                    <span className="absolute bottom-1 size-1 rounded-full bg-primary-ink" />
                   ) : null}
                 </button>
               );
@@ -312,12 +312,12 @@ function CalendarPage() {
       )}
 
       {/* Schedule for selected day */}
-      <p className="mb-3 font-display text-lg font-bold text-[#3F414E]">
+      <p className="mb-3 font-display text-lg font-bold text-foreground">
         {date === today ? "Schedule Today" : `Schedule · ${date.slice(5)}`}
       </p>
 
       {selectedEvents.length === 0 ? (
-        <div className="grad-box mb-4 rounded-[1.25rem] bg-[#F2F2F2] px-4 py-6 text-center text-sm text-[#A1A4B2]">
+        <div className="grad-box mb-4 rounded-[1.25rem] bg-muted px-4 py-6 text-center text-sm text-muted-foreground">
           Nothing planned on this day yet.
         </div>
       ) : (
@@ -325,7 +325,7 @@ function CalendarPage() {
           {/* Timed events as colorful cards */}
           {timed.map((e, i) => (
             <div key={e.id} className="flex gap-3">
-              <div className="w-12 shrink-0 pt-3 text-right text-xs font-bold text-[#A1A4B2]">
+              <div className="w-12 shrink-0 pt-3 text-right text-xs font-bold text-muted-foreground">
                 {e.time!.slice(0, 5)}
               </div>
               <div
@@ -338,7 +338,7 @@ function CalendarPage() {
                       type="button"
                       aria-label="Delete"
                       onClick={() => remove.mutate(e.id)}
-                      className="press shrink-0 rounded-full p-1 opacity-80"
+                      className="press -m-2.5 grid size-11 shrink-0 place-items-center rounded-full opacity-80"
                     >
                       <Trash2 className="size-3.5" />
                     </button>
@@ -356,7 +356,7 @@ function CalendarPage() {
               <div className="min-w-0">
                 <p className="text-sm font-bold">{e.title}</p>
                 {e.kind !== "event" ? (
-                  <p className="text-[11px] opacity-80">{DERIVED_META[e.kind].label}</p>
+                  <p className="text-xs opacity-80">{DERIVED_META[e.kind].label}</p>
                 ) : null}
               </div>
               {e.removable ? (
@@ -364,7 +364,7 @@ function CalendarPage() {
                   type="button"
                   aria-label="Delete"
                   onClick={() => remove.mutate(e.id)}
-                  className="press rounded-full p-1 opacity-80"
+                  className="press -m-2.5 grid size-11 place-items-center rounded-full opacity-80"
                 >
                   <Trash2 className="size-3.5" />
                 </button>
@@ -377,8 +377,8 @@ function CalendarPage() {
       {/* Reminders — upcoming other days */}
       {reminders.length > 0 ? (
         <>
-          <p className="mb-1 font-display text-lg font-bold text-[#3F414E]">Reminder</p>
-          <p className="mb-3 text-xs text-[#A1A4B2]">Coming up next</p>
+          <p className="mb-1 font-display text-lg font-bold text-foreground">Reminder</p>
+          <p className="mb-3 text-xs text-muted-foreground">Coming up next</p>
           <ul className="space-y-2">
             {reminders.map((e, i) => (
               <li key={e.id}>
@@ -386,15 +386,15 @@ function CalendarPage() {
                   type="button"
                   onClick={() => selectDay(e.date)}
                   className={`grad-box press flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left ${
-                    i % 2 === 0 ? "bg-[#8E97FD] text-white" : "bg-[#B8A9F5] text-white"
+                    i % 2 === 0 ? "bg-lavender text-primary-foreground" : "bg-lavender-soft text-lavender-foreground"
                   }`}
                 >
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/20">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-card/40">
                     <CalendarPlus className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-bold">{e.title}</span>
-                    <span className="block text-[11px] opacity-90">
+                    <span className="block text-xs opacity-90">
                       {e.date}
                       {e.time ? ` · ${e.time.slice(0, 5)}` : ""}
                     </span>
@@ -410,7 +410,7 @@ function CalendarPage() {
       <button
         type="button"
         onClick={() => setAddMode("choose")}
-        className="press mt-6 w-full rounded-full bg-gradient-to-r from-[#F86B8F] to-[#FF8FAB] py-3.5 text-sm font-bold text-white shadow-none"
+        className="press mt-6 w-full rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-none"
       >
         Set schedule
       </button>
@@ -484,14 +484,14 @@ function ChoiceRow({
     <button
       type="button"
       onClick={onClick}
-      className="grad-box press flex w-full items-center gap-3 rounded-[1.15rem] bg-[#F2F2F2] p-4 text-left"
+      className="grad-box press flex w-full items-center gap-3 rounded-[1.15rem] bg-muted p-4 text-left"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#E0D7FF] text-[#8E97FD]">
+      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-lavender-soft text-primary-ink">
         {icon}
       </span>
       <span className="min-w-0">
-        <span className="block text-sm font-bold text-[#3F414E]">{title}</span>
-        <span className="block text-xs text-[#A1A4B2]">{subtitle}</span>
+        <span className="block text-sm font-bold text-foreground">{title}</span>
+        <span className="block text-xs text-muted-foreground">{subtitle}</span>
       </span>
     </button>
   );
@@ -591,7 +591,7 @@ export function DateNightPlanner({ defaultDate }: { defaultDate?: string }) {
           type="checkbox"
           checked={intimate}
           onChange={(e) => setIntimate(e.target.checked)}
-          className="size-4 accent-primary"
+          className="size-4 accent-primary-ink"
         />
         Save under private intimacy notes
       </label>

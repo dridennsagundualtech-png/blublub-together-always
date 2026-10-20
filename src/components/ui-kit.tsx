@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Flame, Heart, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playChirp } from "@/hooks/use-sound";
@@ -27,7 +28,7 @@ export function SectionTitle({
           <button
             type="button"
             onClick={onAction}
-            className="press text-xs font-semibold text-primary"
+            className="press -mr-2 inline-flex min-h-11 items-center px-2 text-xs font-semibold text-primary-ink"
           >
             {actionLabel}
           </button>
@@ -118,7 +119,7 @@ export function GhostButton({
         onClick?.();
       }}
       className={cn(
-        "press rounded-full border border-border bg-card px-4 py-2 text-xs font-bold",
+        "press inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-card px-4 text-xs font-bold",
         className,
       )}
     >
@@ -138,7 +139,7 @@ export function EmptyState({
 }) {
   return (
     <div className="surface-quiet flex flex-col items-center gap-2 px-5 py-10 text-center">
-      <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary"><Heart className="size-6" /></div>
+      <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary-ink"><Heart className="size-6" /></div>
       {title ? <p className="font-display text-base font-extrabold">{title}</p> : null}
       <p className="max-w-xs text-sm text-muted-foreground">{text}</p>
       {action}
@@ -233,7 +234,7 @@ export function ListRow({
     >
       <span
         className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-2xl text-primary",
+          "grid size-11 shrink-0 place-items-center rounded-2xl text-primary-ink",
           tints[tint] ?? tints["pink"],
         )}
       >
@@ -250,6 +251,48 @@ export function ListRow({
   );
 }
 
+/**
+ * Bottom panel frame with the dialog basics: focus stays inside, Esc closes,
+ * focus returns to the button that opened it. Every bottom sheet uses this.
+ */
+export function SheetFrame({
+  label,
+  onClose,
+  className,
+  children,
+}: {
+  label: string;
+  onClose: () => void;
+  className?: string;
+  children: ReactNode;
+}) {
+  // Sheets open from plain buttons (no Radix trigger), so remember the opener ourselves.
+  const opener = useRef(typeof document === "undefined" ? null : (document.activeElement as HTMLElement | null));
+  return (
+    <DialogPrimitive.Root open onOpenChange={(open) => (open ? undefined : onClose())}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[80] bg-foreground/30 backdrop-blur-[2px]" />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          // Focus the panel, not its first field, so the phone keyboard doesn't pop up on open.
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            (e.currentTarget as HTMLElement | null)?.focus();
+          }}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            opener.current?.focus();
+          }}
+          className={cn(className, "fixed inset-x-0 bottom-0 z-[80] outline-none")}
+        >
+          <DialogPrimitive.Title className="sr-only">{label}</DialogPrimitive.Title>
+          {children}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
+}
+
 /** Bottom sheet used for hidden add-flows across the app. */
 export function Sheet({
   title,
@@ -261,28 +304,22 @@ export function Sheet({
   children: ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[70] flex items-end" role="dialog" aria-label={title}>
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
-      />
-      <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-card p-4 shadow-float">
-        <div className="mb-3 flex items-center justify-between">
-          <p className="font-display text-lg font-extrabold">{title}</p>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            className="press grid size-9 place-items-center rounded-full bg-muted"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
-        {children}
+    <SheetFrame
+      label={title}
+      onClose={onClose}
+      className="max-h-[85vh] overflow-y-auto rounded-t-3xl bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-float"
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <p className="font-display text-lg font-extrabold">{title}</p>
+        <DialogPrimitive.Close
+          aria-label="Close"
+          className="press grid size-11 place-items-center rounded-full bg-muted"
+        >
+          <X className="size-4" />
+        </DialogPrimitive.Close>
       </div>
-    </div>
+      {children}
+    </SheetFrame>
   );
 }
 
@@ -311,7 +348,7 @@ export function AddPanel({
               type="button"
               aria-label="Close"
               onClick={close}
-              className="press grid size-8 place-items-center rounded-full bg-muted"
+              className="press -m-1.5 grid size-11 place-items-center rounded-full bg-muted"
             >
               <X className="size-4" />
             </button>

@@ -102,7 +102,7 @@ export function Rps({ game, seat, players, nameOf }: GameViewProps) {
             {[3, 5].map((b) => (
               <GhostButton
                 key={b}
-                className={s.best === b ? "border-primary text-primary" : ""}
+                className={s.best === b ? "border-primary text-primary-ink" : ""}
                 onClick={() => setBest(b)}
               >
                 Best of {b}
@@ -124,7 +124,7 @@ export function Rps({ game, seat, players, nameOf }: GameViewProps) {
             } ${myPick && myPick !== t.key ? "opacity-50" : ""}`}
           >
             <Doodle critter={t.critter} pose="default" size={48} />
-            <span className="text-[10px] font-bold">{t.label}</span>
+            <span className="text-xs font-bold">{t.label}</span>
           </button>
         ))}
       </div>

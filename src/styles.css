@@ -37,6 +37,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-ink: var(--primary-ink);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -105,12 +106,15 @@
 
   --primary: #FFAFCC;
   --primary-foreground: #3F2A3A;
+  /* Pink for text and icons. --primary is a background colour: as text it is
+     only 1.7:1 on white. Same hue, darker, ≥4.5:1 on every tile. */
+  --primary-ink: #943860;
 
   --secondary: #FFC8DD;
   --secondary-foreground: #3F2A3A;
 
   --muted: #FFF0F6;
-  --muted-foreground: #8A6B7A;
+  --muted-foreground: #77596A;
 
   --accent: #CDB4DB;
   --accent-foreground: #3F2A3A;
@@ -120,7 +124,7 @@
 
   --border: #F5D6E4;
   --input: #F5D6E4;
-  --ring: #FFAFCC;
+  --ring: var(--primary-ink);
 
   --cream: #FFF5F0;
   --honey: #FFD6A5;
@@ -170,6 +174,12 @@
   --box-grad-angle: 145deg;
 }
 
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --primary-ink: oklch(from var(--primary) 0.48 max(c, 0.13) h);
+  }
+}
+
 .dark {
   --background: #1A1520;
   --foreground: #F8EAF2;
@@ -180,6 +190,7 @@
 
   --primary: #FFAFCC;
   --primary-foreground: #2A1A24;
+  --primary-ink: var(--primary);
 
   --secondary: #5A3A4A;
   --secondary-foreground: #F8EAF2;
@@ -195,7 +206,7 @@
 
   --border: rgba(255, 255, 255, 0.10);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: #FFAFCC;
+  --ring: var(--primary-ink);
 
   --cream: #3A2E30;
   --honey: #E8B87A;
@@ -242,6 +253,16 @@
 
   button {
     touch-action: manipulation;
+  }
+
+  :where(a, button, summary, [role="button"], [role="switch"], [role="tab"], [tabindex]):focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary) 55%, transparent);
+    color: var(--color-foreground);
   }
 }
 
@@ -297,7 +318,7 @@ html.boxes-gradient .grad-box {
 @utility panel-dark {
   border-radius: var(--panel-radius);
   background-image: linear-gradient(var(--grad-panel-angle), var(--grad-panel-from), var(--grad-panel-to));
-  color: white;
+  color: var(--color-primary-foreground);
   overflow: hidden;
   position: relative;
   box-shadow: var(--shadow-float);
@@ -660,7 +681,7 @@ a[href]:active.bg-primary {
   font-size: 0.75rem;
   font-weight: 700;
   background: color-mix(in oklab, var(--primary) 12%, var(--card));
-  color: var(--color-primary);
+  color: var(--color-primary-ink);
   border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent);
 }
 
@@ -776,34 +797,32 @@ html.shadows-off .tile-cream {
 
 
 /* —— GymMane-inspired page transitions (fade + slide + scale + soft blur) —— */
-.page-transition-root {
-  will-change: transform, opacity, filter;
-}
 
 @keyframes page-gym-in-from-right {
   0% {
     opacity: 0;
-    filter: blur(8px);
-    transform: translateX(22px) scale(1.03);
+    transform: translateX(22px);
   }
   100% {
     opacity: 1;
-    filter: blur(0);
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
 }
 
 @keyframes page-gym-in-from-left {
   0% {
     opacity: 0;
-    filter: blur(8px);
-    transform: translateX(-22px) scale(1.03);
+    transform: translateX(-22px);
   }
   100% {
     opacity: 1;
-    filter: blur(0);
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
+}
+
+.page-gym-from-right,
+.page-gym-from-left {
+  will-change: transform, opacity;
 }
 
 .page-gym-from-right {

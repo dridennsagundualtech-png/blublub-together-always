@@ -65,7 +65,7 @@ export function DiceRoller({
       >
         {dice.map((d, i) => (
           <div key={d.label} className="min-w-0">
-            <p className="mb-1.5 truncate text-[10px] font-extrabold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-1.5 truncate text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
               {d.label}
             </p>
             <div className="dice-scene mx-auto aspect-square w-full max-w-[7.5rem]">
@@ -107,7 +107,7 @@ export function DiceRoller({
       </div>
 
       {footnote ? (
-        <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{footnote}</p>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{footnote}</p>
       ) : null}
 
       {withTimer ? <RoundTimer /> : null}
@@ -143,11 +143,11 @@ function RoundTimer() {
 
   return (
     <div className="mt-5 rounded-3xl border border-border bg-card/70 p-4">
-      <p className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wide text-muted-foreground">
+      <p className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
         <Timer className="size-3.5" /> Round timer
       </p>
 
-      <p className={`mt-1 text-4xl font-extrabold tabular-nums ${left === 0 ? "text-primary" : ""}`}>
+      <p className={`mt-1 text-4xl font-extrabold tabular-nums ${left === 0 ? "text-primary-ink" : ""}`}>
         {mm}:{ss}
       </p>
 
@@ -209,7 +209,7 @@ function RoundTimer() {
         </GhostButton>
       </div>
 
-      <p className="mt-2 text-[11px] text-muted-foreground">
+      <p className="mt-2 text-xs text-muted-foreground">
         Roller performs the combo for the full round, then swap.
       </p>
     </div>

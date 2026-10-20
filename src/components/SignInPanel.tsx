@@ -67,7 +67,7 @@ export function SignInPanel() {
           We emailed a password reset link to {email}. Tap it to set a new password.
         </p>
         <button
-          className="press mt-4 text-sm font-bold text-primary"
+          className="press mt-4 text-sm font-bold text-primary-ink"
           onClick={() => {
             setResetSent(false);
             setMode("signin");
@@ -89,7 +89,7 @@ export function SignInPanel() {
           We sent a confirmation link to {email}. Tap it, then come back and sign in.
         </p>
         <button
-          className="press mt-4 text-sm font-bold text-primary"
+          className="press mt-4 text-sm font-bold text-primary-ink"
           onClick={() => {
             setSent(false);
             setMode("signin");
@@ -168,7 +168,7 @@ export function SignInPanel() {
           <button
             type="button"
             onClick={() => setMode("forgot")}
-            className="press w-full text-center text-sm font-bold text-primary"
+            className="press w-full text-center text-sm font-bold text-primary-ink"
           >
             Forgot password?
           </button>
@@ -177,7 +177,7 @@ export function SignInPanel() {
           <button
             type="button"
             onClick={() => setMode("signin")}
-            className="press w-full text-center text-sm font-bold text-primary"
+            className="press w-full text-center text-sm font-bold text-primary-ink"
           >
             Back to sign in
           </button>
@@ -189,7 +189,7 @@ export function SignInPanel() {
           {mode === "signup" ? "Already have an account?" : "New here?"}{" "}
           <button
             type="button"
-            className="font-bold text-primary"
+            className="font-bold text-primary-ink"
             onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
           >
             {mode === "signup" ? "Sign in" : "Create one"}

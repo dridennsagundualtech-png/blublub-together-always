@@ -136,7 +136,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
             Error details
           </summary>
-          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted p-3 text-left text-[11px] leading-snug text-muted-foreground">
+          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted p-3 text-left text-xs leading-snug text-muted-foreground">
             {detail}
           </pre>
         </details>

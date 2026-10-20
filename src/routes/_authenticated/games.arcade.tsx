@@ -71,7 +71,7 @@ function ArcadePage() {
       <StatCard>
         <div className="grid grid-cols-3 text-center">
           <div>
-            <p className="text-2xl font-extrabold text-primary">{tally.mine}</p>
+            <p className="text-2xl font-extrabold text-primary-ink">{tally.mine}</p>
             <p className="text-xs text-muted-foreground">You</p>
           </div>
           <div>
@@ -79,7 +79,7 @@ function ArcadePage() {
             <p className="text-xs text-muted-foreground">Draws</p>
           </div>
           <div>
-            <p className="text-2xl font-extrabold text-primary">{tally.theirs}</p>
+            <p className="text-2xl font-extrabold text-primary-ink">{tally.theirs}</p>
             <p className="truncate text-xs text-muted-foreground">
               {history.find((g) => g.winner_id && g.winner_id !== me)
                 ? nameOf(history.find((g) => g.winner_id && g.winner_id !== me)!.winner_id)
@@ -104,7 +104,9 @@ function ArcadePage() {
               <span className="relative grid size-10 place-items-center rounded-full bg-accent text-accent-foreground">
                 <Icon className="size-5" />
                 {badges?.gameKinds?.[kind] ? (
-                  <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-card" />
+                  <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-card">
+                    <span className="sr-only">New</span>
+                  </span>
                 ) : null}
               </span>
               <span className="min-w-0 flex-1">
@@ -138,7 +140,7 @@ function ArcadePage() {
         {spicy ? (
           <li>
             <Link to="/spicy" className="press card-soft flex items-center gap-3 p-4">
-              <span className="grid size-10 place-items-center rounded-full bg-primary/15 text-primary">
+              <span className="grid size-10 place-items-center rounded-full bg-primary/15 text-primary-ink">
                 <Heart className="size-5" />
               </span>
               <span className="min-w-0 flex-1">

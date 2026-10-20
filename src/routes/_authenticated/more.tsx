@@ -44,12 +44,14 @@ function MorePage() {
               to={s.to}
               className="card-soft press relative flex h-full flex-col gap-3 p-4 text-sm font-semibold"
             >
-              <span className={`grid size-11 place-items-center rounded-2xl ${s.tint} text-primary`}>
+              <span className={`grid size-11 place-items-center rounded-2xl ${s.tint} text-primary-ink`}>
                 <s.icon className="size-5" />
               </span>
               <span className="leading-snug">{s.label}</span>
               {"badge" in s && badges?.question ? (
-                <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive" />
+                <span className="absolute right-3 top-3 size-2.5 rounded-full bg-destructive">
+                  <span className="sr-only">New</span>
+                </span>
               ) : (
                 <ChevronRight className="absolute right-3 top-3 size-4 text-muted-foreground" />
               )}
@@ -65,6 +67,7 @@ function MorePage() {
           type="button"
           role="switch"
           aria-checked={enabled}
+          aria-label="Sound effects"
           onClick={() => setEnabled(!enabled)}
           className={`press h-7 w-12 rounded-full transition-colors ${enabled ? "bg-primary" : "bg-muted"}`}
         >

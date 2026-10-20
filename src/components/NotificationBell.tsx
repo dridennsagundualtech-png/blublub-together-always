@@ -94,7 +94,7 @@ function NotifRow({
         onClick={onNavigate}
         className="press flex min-w-0 flex-1 gap-3 text-left"
       >
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary-ink">
           <Icon className="size-4" />
         </span>
         <span className="min-w-0 flex-1">
@@ -105,7 +105,7 @@ function NotifRow({
               ) : null}
               {n.title}
             </span>
-            <span className="shrink-0 text-[10px] font-semibold text-muted-foreground">
+            <span className="shrink-0 text-xs font-semibold text-muted-foreground">
               {timeLabel(n.at)}
             </span>
           </span>
@@ -156,7 +156,7 @@ export function NotificationBell({ className }: { className?: string }) {
       >
         <Bell className="size-5 text-foreground" />
         {count > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 grid min-w-[1.15rem] place-items-center rounded-full bg-primary px-1 text-[10px] font-extrabold text-primary-foreground">
+          <span className="absolute -right-0.5 -top-0.5 grid min-w-[1.15rem] place-items-center rounded-full bg-primary px-1 text-xs font-extrabold text-primary-foreground">
             {count > 9 ? "9+" : count}
           </span>
         ) : null}
@@ -174,7 +174,7 @@ export function NotificationBell({ className }: { className?: string }) {
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div>
                 <p className="font-display text-lg font-bold">Updates</p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Stay until you delete them
                 </p>
               </div>

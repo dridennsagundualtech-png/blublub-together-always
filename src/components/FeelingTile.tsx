@@ -21,7 +21,7 @@ export function FeelingTile({
 
   const body = (
     <>
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
         {who}
       </span>
       {picks.length > 0 ? (
@@ -50,7 +50,7 @@ export function FeelingTile({
             : "Nothing shared yet"}
       </span>
       {row ? (
-        <span className="text-[11px] text-muted-foreground">{timeAgo(row.created_at)}</span>
+        <span className="text-xs text-muted-foreground">{timeAgo(row.created_at)}</span>
       ) : null}
     </>
   );

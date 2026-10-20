@@ -207,7 +207,7 @@ function ProfilePage() {
 
       <SectionTitle>Appearance</SectionTitle>
       <Link to="/appearance" className="card-soft press flex items-center gap-3 p-4">
-        <span className="grid size-11 place-items-center rounded-2xl tile-lilac text-primary">
+        <span className="grid size-11 place-items-center rounded-2xl tile-lilac text-primary-ink">
           <Palette className="size-5" />
         </span>
         <span className="min-w-0 flex-1">
@@ -223,7 +223,7 @@ function ProfilePage() {
       <SectionTitle>Privacy</SectionTitle>
       <Card>
         <div className="flex items-center gap-3">
-          <MapPin className="size-5 shrink-0 text-primary" />
+          <MapPin className="size-5 shrink-0 text-primary-ink" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">Share my location</p>
             <p className="text-xs text-muted-foreground">
@@ -252,7 +252,7 @@ function ProfilePage() {
 
       <Card className="mt-3">
         <div className="flex items-center gap-3">
-          <Bell className="size-5 shrink-0 text-primary" />
+          <Bell className="size-5 shrink-0 text-primary-ink" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">Anniversary reminders</p>
             <p className="text-xs text-muted-foreground">
@@ -281,7 +281,7 @@ function ProfilePage() {
       <Card>
         <p className="text-sm">
           Invite code:{" "}
-          <span className="font-mono text-lg font-extrabold tracking-widest text-primary">
+          <span className="font-mono text-lg font-extrabold tracking-widest text-primary-ink">
             {couple?.invite_code ?? "—"}
           </span>
         </p>

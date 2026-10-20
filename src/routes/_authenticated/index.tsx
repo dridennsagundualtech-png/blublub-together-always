@@ -183,18 +183,20 @@ function HomePage() {
           className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] bg-primary p-4 text-primary-foreground"
         >
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Daily</p>
+            <p className="text-xs font-bold uppercase tracking-widest opacity-80">Daily</p>
             <p className="mt-1 font-display text-lg font-bold leading-snug">Question</p>
-            <p className="mt-1 text-[11px] opacity-90">{questionHint}</p>
+            <p className="mt-1 text-xs opacity-90">{questionHint}</p>
           </div>
           <div className="flex items-center justify-between gap-2">
             <Doodle critter="cat" pose="wave" size={44} className="opacity-90" />
-            <span className="rounded-full bg-card px-3 py-1.5 text-[11px] font-bold text-card-foreground">
+            <span className="rounded-full bg-card px-3 py-1.5 text-xs font-bold text-card-foreground">
               {questionCta}
             </span>
           </div>
           {badges?.question ? (
-            <span className="absolute right-3 top-3 size-2 rounded-full bg-card" />
+            <span className="absolute right-3 top-3 size-2 rounded-full bg-card">
+              <span className="sr-only">New</span>
+            </span>
           ) : null}
         </Link>
 
@@ -203,11 +205,11 @@ function HomePage() {
           className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] tile-peach p-4 text-foreground"
         >
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Album
             </p>
             <p className="mt-1 font-display text-lg font-bold leading-snug">Memories</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               {latestPhoto ? "See your latest" : "Add a moment"}
             </p>
           </div>
@@ -219,9 +221,9 @@ function HomePage() {
                 className="size-11 rounded-xl object-cover ring-2 ring-card/60"
               />
             ) : (
-              <Images className="size-8 text-primary opacity-80" />
+              <Images className="size-8 text-primary-ink opacity-80" />
             )}
-            <span className="rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-bold text-foreground">
+            <span className="rounded-full bg-card/90 px-3 py-1.5 text-xs font-bold text-foreground">
               Open
             </span>
           </div>
@@ -229,7 +231,7 @@ function HomePage() {
       </div>
 
       {/* How they feel */}
-      <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mb-1 mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
         How they feel
       </p>
       <div className="grad-box surface-quiet rounded-[1.25rem] py-2">
@@ -245,7 +247,7 @@ function HomePage() {
         <div className="mt-3 flex gap-3">
           {days !== null ? (
             <div className="grad-box surface-quiet flex-1 rounded-[1.25rem] px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Together
               </p>
               <p className="font-display text-xl font-bold text-foreground">Day {days}</p>
@@ -253,10 +255,10 @@ function HomePage() {
           ) : null}
           {untilAnniversary !== null ? (
             <div className="grad-box tile-lilac flex-1 rounded-[1.25rem] px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Anniversary
               </p>
-              <p className="font-display text-xl font-bold text-primary">
+              <p className="font-display text-xl font-bold text-primary-ink">
                 {untilAnniversary === 0 ? "Today" : `${untilAnniversary}d`}
               </p>
             </div>
@@ -266,7 +268,7 @@ function HomePage() {
 
       <div className="mb-2 mt-7 flex items-end justify-between">
         <h2 className="font-display text-xl font-bold text-foreground">For you both</h2>
-        <Link to="/more" className="text-xs font-semibold text-primary">
+        <Link to="/more" className="text-xs font-semibold text-primary-ink">
           See all
         </Link>
       </div>
@@ -276,33 +278,35 @@ function HomePage() {
           to="/games"
           className="grad-box press flex min-h-[150px] flex-col justify-between rounded-[1.25rem] tile-cream p-4"
         >
-          <Gamepad2 className="size-7 text-primary" />
+          <Gamepad2 className="size-7 text-primary-ink" />
           <div>
             <p className="font-display text-base font-bold text-foreground">Games</p>
-            <p className="text-[11px] text-muted-foreground">Play together</p>
+            <p className="text-xs text-muted-foreground">Play together</p>
           </div>
         </Link>
         <Link
           to="/chat"
           className="grad-box press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] tile-pink p-4"
         >
-          <MessageCircle className="size-7 text-primary" />
+          <MessageCircle className="size-7 text-primary-ink" />
           <div>
             <p className="font-display text-base font-bold text-foreground">Chat</p>
-            <p className="text-[11px] text-muted-foreground">Private messages</p>
+            <p className="text-xs text-muted-foreground">Private messages</p>
           </div>
           {badges?.unreadChat ? (
-            <span className="absolute right-3 top-3 size-2 rounded-full bg-destructive" />
+            <span className="absolute right-3 top-3 size-2 rounded-full bg-destructive">
+              <span className="sr-only">New</span>
+            </span>
           ) : null}
         </Link>
         <Link
           to="/calendar"
           className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] tile-lilac p-4"
         >
-          <CalendarDays className="size-6 text-primary" />
+          <CalendarDays className="size-6 text-primary-ink" />
           <div>
             <p className="font-display text-base font-bold text-foreground">Calendar</p>
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p className="truncate text-xs text-muted-foreground">
               {nextSpecial ? nextSpecial.title : "Plans & dates"}
             </p>
           </div>
@@ -311,10 +315,10 @@ function HomePage() {
           to="/map"
           className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] tile-sky p-4"
         >
-          <MapPin className="size-6 text-primary" />
+          <MapPin className="size-6 text-primary-ink" />
           <div>
             <p className="font-display text-base font-bold text-foreground">Where we are</p>
-            <p className="text-[11px] text-muted-foreground">Shared location</p>
+            <p className="text-xs text-muted-foreground">Shared location</p>
           </div>
         </Link>
       </div>

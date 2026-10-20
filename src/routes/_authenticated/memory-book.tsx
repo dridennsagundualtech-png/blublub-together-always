@@ -187,7 +187,7 @@ function MemoryBookPage() {
     <AppLayout title="Memory book" subtitle="Export a PDF keepsake" critter="seal" critterPose="sleep">
       <Card>
         <div className="flex items-start gap-3">
-          <BookHeart className="mt-0.5 size-5 shrink-0 text-primary" />
+          <BookHeart className="mt-0.5 size-5 shrink-0 text-primary-ink" />
           <p className="text-xs text-muted-foreground">
             Pick a date range and we&apos;ll bundle your diary entries and photos into one PDF you
             can keep or print.

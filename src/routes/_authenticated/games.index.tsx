@@ -16,7 +16,7 @@ import {
   Sprout,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, EmptyState, PrimaryButton, SectionTitle, StatHero } from "@/components/ui-kit";
+import { Card, EmptyState, PrimaryButton, SectionTitle, SheetFrame, StatHero } from "@/components/ui-kit";
 import { RoomStage } from "@/components/room/RoomStage";
 import { Doodle, type Critter } from "@/components/Doodles";
 import { useBadges } from "@/lib/badges";
@@ -428,11 +428,11 @@ function RoomPage() {
                 className="h-10 w-auto"
                 style={{ imageRendering: "pixelated" }}
               />
-              <span className="text-[11px] font-bold">{ch.label}</span>
+              <span className="text-xs font-bold">{ch.label}</span>
             </button>
           ))}
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <p className="mt-1 text-xs text-muted-foreground">
           {(room?.seed_room_id ?? roomPages[0]?.id ?? "main") !== resolvedPageId ? (
             <button
               type="button"
@@ -447,7 +447,7 @@ function RoomPage() {
               Move seed to this room
             </button>
           ) : (
-            <p className="mb-2 text-[11px] font-semibold text-primary">Seed is in this room</p>
+            <p className="mb-2 text-xs font-semibold text-primary-ink">Seed is in this room</p>
           )}
           Your seed only shows its grown-up form from step 5 — but you can pick who they'll become
           any time.
@@ -468,7 +468,7 @@ function RoomPage() {
           <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Love Points
           </p>
-          <p className="font-display text-3xl font-extrabold text-primary">{points}</p>
+          <p className="font-display text-3xl font-extrabold text-primary-ink">{points}</p>
         </div>
         <div className="flex items-center gap-2 text-right">
           <div>
@@ -519,7 +519,7 @@ function RoomPage() {
               playChirp("tap");
               setAddRoomOpen(true);
             }}
-            className="press flex shrink-0 items-center gap-1 rounded-full border border-dashed border-primary/50 px-3 py-1.5 text-xs font-bold text-primary"
+            className="press flex shrink-0 items-center gap-1 rounded-full border border-dashed border-primary/50 px-3 py-1.5 text-xs font-bold text-primary-ink"
           >
             <Plus className="size-3.5" />
             Room
@@ -528,12 +528,12 @@ function RoomPage() {
             ) : null}
           </button>
         ) : (
-          <span className="shrink-0 text-[10px] font-semibold text-muted-foreground">
+          <span className="shrink-0 text-xs font-semibold text-muted-foreground">
             4 / 4 rooms
           </span>
         )}
       </div>
-      <p className="mb-3 text-[11px] text-muted-foreground">
+      <p className="mb-3 text-xs text-muted-foreground">
         Decorating <span className="font-bold text-foreground">{activePage?.name ?? "Our room"}</span>
         {" · "}
         One shared seed for all rooms
@@ -558,7 +558,7 @@ function RoomPage() {
             className="aspect-[9/16] max-h-[52vh] w-full object-cover"
             style={{ imageRendering: "pixelated" }}
           />
-          <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-foreground/45 px-4 py-3 text-sm font-extrabold text-background">
+          <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-foreground/80 px-4 py-3 text-sm font-extrabold text-background">
             <Maximize2 className="size-4" /> Open our room
           </span>
         </button>
@@ -585,7 +585,9 @@ function RoomPage() {
             <span className="relative grid size-10 place-items-center rounded-full bg-accent text-accent-foreground">
               <Gamepad2 className="size-5" />
               {badges?.games ? (
-                <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-card" />
+                <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-card">
+                  <span className="sr-only">New</span>
+                </span>
               ) : null}
             </span>
             <span className="min-w-0 flex-1">
@@ -607,303 +609,267 @@ function RoomPage() {
 
       {/* Inventory bottom sheet */}
       {sheetOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Decorations">
-          <button
-            type="button"
-            aria-label="Close decorations"
-            onClick={() => setSheetOpen(false)}
-            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
-          />
-          <div className="card-soft relative max-h-[76vh] w-full overflow-y-auto rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="font-display text-lg font-extrabold">Decorations</p>
-              <span className="streak-chip">
-                <Sparkles className="size-3" /> {points} pts
-              </span>
-            </div>
-
-            <div className="-mx-1 mb-3 flex gap-2 overflow-x-auto px-1 pb-1">
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCategory(c)}
-                  className={cn(
-                    "press shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-bold",
-                    category === c ? "bg-primary text-primary-foreground" : "bg-card",
-                  )}
-                >
-                  {THEME_LABELS[c]}
-                </button>
-              ))}
-            </div>
-
-            <ul className="grid grid-cols-3 gap-2">
-              {ROOM_CATALOG.filter((i) => i.theme === category).map((item) => {
-                const owned = isAdmin || item.cost === 0 || unlocked.has(item.key);
-                const affordable = points >= item.cost;
-                return (
-                  <li key={item.key}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playChirp("tap");
-                        if (owned) {
-                          actions.place.mutate(
-                            { itemKey: item.key },
-                            {
-                              onSuccess: () => {
-                                setSheetOpen(false);
-                                setEditing(true);
-                                toast(`${item.label} placed — drag it where you like`);
-                              },
-                            },
-                          );
-                          return;
-                        }
-                        if (!affordable) {
-                          toast(`${item.label} needs ${item.cost} Love Points`);
-                          return;
-                        }
-                        actions.unlock.mutate(item.key, {
-                          onSuccess: () => toast(`Unlocked ${item.label}! 💗`),
-                        });
-                      }}
-                      className={cn(
-                        "press card-soft flex h-full w-full flex-col items-center gap-1 p-3 text-center",
-                        !owned && !affordable && "opacity-60",
-                      )}
-                    >
-                      <img
-                        src={item.url}
-                        alt={item.label}
-                        loading="lazy"
-                        className="h-12 w-auto max-w-full object-contain"
-                      />
-
-                      <span className="text-[11px] font-bold leading-tight">{item.label}</span>
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
-                        {owned ? (
-                          "Tap to place"
-                        ) : (
-                          <>
-                            <Lock className="size-3" /> {item.cost}
-                          </>
-                        )}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <div className="mt-4">
-              <PrimaryButton onClick={() => setSheetOpen(false)}>Close</PrimaryButton>
-            </div>
+        <SheetFrame label="Decorations" onClose={() => setSheetOpen(false)} className="card-soft max-h-[76vh] overflow-y-auto rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="font-display text-lg font-extrabold">Decorations</p>
+            <span className="streak-chip">
+              <Sparkles className="size-3" /> {points} pts
+            </span>
           </div>
-        </div>
+
+          <div className="-mx-1 mb-3 flex gap-2 overflow-x-auto px-1 pb-1">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCategory(c)}
+                className={cn(
+                  "press shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-bold",
+                  category === c ? "bg-primary text-primary-foreground" : "bg-card",
+                )}
+              >
+                {THEME_LABELS[c]}
+              </button>
+            ))}
+          </div>
+
+          <ul className="grid grid-cols-3 gap-2">
+            {ROOM_CATALOG.filter((i) => i.theme === category).map((item) => {
+              const owned = isAdmin || item.cost === 0 || unlocked.has(item.key);
+              const affordable = points >= item.cost;
+              return (
+                <li key={item.key}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playChirp("tap");
+                      if (owned) {
+                        actions.place.mutate(
+                          { itemKey: item.key },
+                          {
+                            onSuccess: () => {
+                              setSheetOpen(false);
+                              setEditing(true);
+                              toast(`${item.label} placed — drag it where you like`);
+                            },
+                          },
+                        );
+                        return;
+                      }
+                      if (!affordable) {
+                        toast(`${item.label} needs ${item.cost} Love Points`);
+                        return;
+                      }
+                      actions.unlock.mutate(item.key, {
+                        onSuccess: () => toast(`Unlocked ${item.label}! 💗`),
+                      });
+                    }}
+                    className={cn(
+                      "press card-soft flex h-full w-full flex-col items-center gap-1 p-3 text-center",
+                      !owned && !affordable && "opacity-60",
+                    )}
+                  >
+                    <img
+                      src={item.url}
+                      alt={item.label}
+                      loading="lazy"
+                      className="h-12 w-auto max-w-full object-contain"
+                    />
+
+                    <span className="text-xs font-bold leading-tight">{item.label}</span>
+                    <span className="flex items-center gap-1 text-xs font-bold text-muted-foreground">
+                      {owned ? (
+                        "Tap to place"
+                      ) : (
+                        <>
+                          <Lock className="size-3" /> {item.cost}
+                        </>
+                      )}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-4">
+            <PrimaryButton onClick={() => setSheetOpen(false)}>Close</PrimaryButton>
+          </div>
+        </SheetFrame>
       ) : null}
 
       {/* Seed sheet */}
       {seedOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Our seed">
-          <button
-            type="button"
-            aria-label="Close seed panel"
-            onClick={() => setSeedOpen(false)}
-            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
-          />
-          <div className="relative max-h-[80vh] w-full overflow-y-auto rounded-t-3xl bg-card p-4 shadow-float">
-            <p className="mb-3 font-display text-lg font-extrabold">Our seed</p>
-            {seedPanel}
-            <div className="mt-4">
-              <PrimaryButton onClick={() => setSeedOpen(false)}>Close</PrimaryButton>
-            </div>
+        <SheetFrame label="Our seed" onClose={() => setSeedOpen(false)} className="max-h-[80vh] overflow-y-auto rounded-t-3xl bg-card p-4 shadow-float">
+          <p className="mb-3 font-display text-lg font-extrabold">Our seed</p>
+          {seedPanel}
+          <div className="mt-4">
+            <PrimaryButton onClick={() => setSeedOpen(false)}>Close</PrimaryButton>
           </div>
-        </div>
+        </SheetFrame>
       ) : null}
 
       {/* Mascot visibility sheet */}
       {mascotOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Room mascots">
-          <button
-            type="button"
-            aria-label="Close mascot settings"
-            onClick={() => setMascotOpen(false)}
-            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
-          />
-          <div className="card-soft relative w-full rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
-            <p className="font-display text-lg font-extrabold">Room mascots</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Choose who lives in {activePage?.name ?? "this room"}. This is shared with your partner.
-            </p>
-            <div className="mt-4 grid grid-cols-3 gap-2">
-                          <div className="mb-3 mt-2 flex gap-2">
-              <button
-                type="button"
-                className="press flex-1 rounded-full bg-muted py-2 text-[11px] font-bold"
-                onClick={() => {
-                  for (const m of ROOM_MASCOTS) {
-                    actions.setMascotVisible.mutate({ key: m.key, visible: false });
-                  }
-                  toast("Mascots hidden");
-                }}
-              >
-                Hide all
-              </button>
-              <button
-                type="button"
-                className="press flex-1 rounded-full bg-primary py-2 text-[11px] font-bold text-primary-foreground"
-                onClick={() => {
-                  for (const m of ROOM_MASCOTS) {
-                    actions.setMascotVisible.mutate({ key: m.key, visible: true });
-                  }
-                  toast("Mascots shown");
-                }}
-              >
-                Show all
-              </button>
-            </div>
-{ROOM_MASCOTS.map((mascot) => {
-                const visible = activePage?.mascot_visibility?.[mascot.key] !== false;
-                return (
-                  <button
-                    key={mascot.key}
-                    type="button"
-                    aria-pressed={visible}
-                    onClick={() => {
-                      playChirp("tap");
-                      actions.setMascotVisible.mutate(
-                        { key: mascot.key, visible: !visible },
-                        {
-                          onSuccess: () => toast(`${mascot.label} ${visible ? "hidden" : "is back"}`),
-                          onError: (error) => toast((error as Error).message),
-                        },
-                      );
-                    }}
-                    className={cn(
-                      "press card-soft flex flex-col items-center gap-2 p-3 text-center",
-                      visible ? "ring-2 ring-primary" : "opacity-55",
-                    )}
-                  >
-                    <Doodle critter={mascot.key} pose={mascot.key === "seal" ? "sleep" : "love"} size={52} />
-                    <span className="text-xs font-bold">{mascot.label}</span>
-                    <span className="text-[10px] font-semibold text-muted-foreground">
-                      {visible ? "Showing" : "Hidden"}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mt-4">
-              <PrimaryButton onClick={() => setMascotOpen(false)}>Done</PrimaryButton>
-            </div>
+        <SheetFrame label="Room mascots" onClose={() => setMascotOpen(false)} className="card-soft rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
+          <p className="font-display text-lg font-extrabold">Room mascots</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Choose who lives in {activePage?.name ?? "this room"}. This is shared with your partner.
+          </p>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+                        <div className="mb-3 mt-2 flex gap-2">
+            <button
+              type="button"
+              className="press flex-1 rounded-full bg-muted py-2 text-xs font-bold"
+              onClick={() => {
+                for (const m of ROOM_MASCOTS) {
+                  actions.setMascotVisible.mutate({ key: m.key, visible: false });
+                }
+                toast("Mascots hidden");
+              }}
+            >
+              Hide all
+            </button>
+            <button
+              type="button"
+              className="press flex-1 rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground"
+              onClick={() => {
+                for (const m of ROOM_MASCOTS) {
+                  actions.setMascotVisible.mutate({ key: m.key, visible: true });
+                }
+                toast("Mascots shown");
+              }}
+            >
+              Show all
+            </button>
           </div>
-        </div>
+{ROOM_MASCOTS.map((mascot) => {
+              const visible = activePage?.mascot_visibility?.[mascot.key] !== false;
+              return (
+                <button
+                  key={mascot.key}
+                  type="button"
+                  aria-pressed={visible}
+                  onClick={() => {
+                    playChirp("tap");
+                    actions.setMascotVisible.mutate(
+                      { key: mascot.key, visible: !visible },
+                      {
+                        onSuccess: () => toast(`${mascot.label} ${visible ? "hidden" : "is back"}`),
+                        onError: (error) => toast((error as Error).message),
+                      },
+                    );
+                  }}
+                  className={cn(
+                    "press card-soft flex flex-col items-center gap-2 p-3 text-center",
+                    visible ? "ring-2 ring-primary" : "opacity-55",
+                  )}
+                >
+                  <Doodle critter={mascot.key} pose={mascot.key === "seal" ? "sleep" : "love"} size={52} />
+                  <span className="text-xs font-bold">{mascot.label}</span>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    {visible ? "Showing" : "Hidden"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-4">
+            <PrimaryButton onClick={() => setMascotOpen(false)}>Done</PrimaryButton>
+          </div>
+        </SheetFrame>
       ) : null}
 
       {/* Background picker sheet */}
       {bgOpen ? (
-        <div
-          className="fixed inset-0 z-[80] flex items-end"
-          role="dialog"
-          aria-label="Room backgrounds"
-        >
-          <button
-            type="button"
-            aria-label="Close backgrounds"
-            onClick={() => setBgOpen(false)}
-            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
-          />
-          <div className="card-soft relative max-h-[76vh] w-full overflow-y-auto rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="font-display text-lg font-extrabold">Rooms & scenery</p>
-              <span className="streak-chip">
-                <Sparkles className="size-3" /> {points} pts
-              </span>
-            </div>
-
-            <div className="mb-3 flex gap-2">
-              {(["indoor", "outdoor"] as BgCategory[]).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setBgCategory(c)}
-                  className={cn(
-                    "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
-                    bgCategory === c ? "bg-primary text-primary-foreground" : "bg-card",
-                  )}
-                >
-                  {c === "indoor" ? "Indoor" : "Outdoor"}
-                </button>
-              ))}
-            </div>
-
-            <ul className="grid grid-cols-2 gap-2">
-              {ROOM_BACKGROUNDS.filter((b) => b.category === bgCategory).map((bg) => {
-                const owned = isAdmin || bg.cost === 0 || unlocked.has(bg.key);
-                const active = (room?.background_key ?? DEFAULT_BACKGROUND_KEY) === bg.key;
-                return (
-                  <li key={bg.key}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playChirp("tap");
-                        if (!owned && points < bg.cost && !isAdmin) {
-                          toast(`${bg.label} needs ${bg.cost} Love Points`);
-                          return;
-                        }
-                        actions.setBackground.mutate(bg.key, {
-                          onSuccess: () => {
-                            setBgOpen(false);
-                            toast(`Moved into ${bg.label} ✨`);
-                          },
-                          onError: (e) => toast((e as Error).message),
-                        });
-                      }}
-                      className={cn(
-                        "press card-soft w-full overflow-hidden p-0 text-left",
-                        active && "ring-2 ring-primary",
-                        !owned && points < bg.cost && "opacity-60",
-                      )}
-                    >
-                      <img
-                        src={bg.url}
-                        alt={bg.label}
-                        loading="lazy"
-                        className="aspect-[4/3] w-full object-cover"
-                        style={{ imageRendering: "pixelated" }}
-                      />
-                      <span className="flex items-center justify-between gap-1 px-2 py-1.5">
-                        <span className="truncate text-[11px] font-bold">{bg.label}</span>
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
-                          {owned ? (
-                            active ? (
-                              "Active"
-                            ) : (
-                              "Free"
-                            )
-                          ) : (
-                            <>
-                              <Lock className="size-3" /> {bg.cost}
-                            </>
-                          )}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <div className="mt-4">
-              <PrimaryButton onClick={() => setBgOpen(false)}>Close</PrimaryButton>
-            </div>
+        <SheetFrame label="Room backgrounds" onClose={() => setBgOpen(false)} className="card-soft max-h-[76vh] overflow-y-auto rounded-b-none p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="font-display text-lg font-extrabold">Rooms & scenery</p>
+            <span className="streak-chip">
+              <Sparkles className="size-3" /> {points} pts
+            </span>
           </div>
-        </div>
+
+          <div className="mb-3 flex gap-2">
+            {(["indoor", "outdoor"] as BgCategory[]).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setBgCategory(c)}
+                className={cn(
+                  "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                  bgCategory === c ? "bg-primary text-primary-foreground" : "bg-card",
+                )}
+              >
+                {c === "indoor" ? "Indoor" : "Outdoor"}
+              </button>
+            ))}
+          </div>
+
+          <ul className="grid grid-cols-2 gap-2">
+            {ROOM_BACKGROUNDS.filter((b) => b.category === bgCategory).map((bg) => {
+              const owned = isAdmin || bg.cost === 0 || unlocked.has(bg.key);
+              const active = (room?.background_key ?? DEFAULT_BACKGROUND_KEY) === bg.key;
+              return (
+                <li key={bg.key}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playChirp("tap");
+                      if (!owned && points < bg.cost && !isAdmin) {
+                        toast(`${bg.label} needs ${bg.cost} Love Points`);
+                        return;
+                      }
+                      actions.setBackground.mutate(bg.key, {
+                        onSuccess: () => {
+                          setBgOpen(false);
+                          toast(`Moved into ${bg.label} ✨`);
+                        },
+                        onError: (e) => toast((e as Error).message),
+                      });
+                    }}
+                    className={cn(
+                      "press card-soft w-full overflow-hidden p-0 text-left",
+                      active && "ring-2 ring-primary",
+                      !owned && points < bg.cost && "opacity-60",
+                    )}
+                  >
+                    <img
+                      src={bg.url}
+                      alt={bg.label}
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover"
+                      style={{ imageRendering: "pixelated" }}
+                    />
+                    <span className="flex items-center justify-between gap-1 px-2 py-1.5">
+                      <span className="truncate text-xs font-bold">{bg.label}</span>
+                      <span className="flex items-center gap-1 text-xs font-bold text-muted-foreground">
+                        {owned ? (
+                          active ? (
+                            "Active"
+                          ) : (
+                            "Free"
+                          )
+                        ) : (
+                          <>
+                            <Lock className="size-3" /> {bg.cost}
+                          </>
+                        )}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-4">
+            <PrimaryButton onClick={() => setBgOpen(false)}>Close</PrimaryButton>
+          </div>
+        </SheetFrame>
       ) : null}
 
       {placed.length > 0 ? (
@@ -913,48 +879,40 @@ function RoomPage() {
       ) : null}
     
       {addRoomOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-end" role="dialog" aria-label="Add room">
+        <SheetFrame label="Add room" onClose={() => setAddRoomOpen(false)} className="max-h-[70vh] overflow-y-auto rounded-t-3xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+          <p className="font-display text-lg font-bold">Add a room</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Empty room with its own furniture & background. Your seed stays shared
+            (not copied). Max {MAX_ROOM_PAGES} rooms.
+          </p>
+          <p className="mt-3 text-sm font-bold text-primary-ink">
+            Cost: {nextRoomCost === 0 ? "Free" : `${nextRoomCost} Love Points`}
+          </p>
+          <input
+            value={newRoomName}
+            onChange={(e) => setNewRoomName(e.target.value)}
+            placeholder="Room name (e.g. Bedroom)"
+            maxLength={24}
+            className="mt-3 w-full rounded-full border border-border bg-card px-4 py-3 text-sm"
+          />
           <button
             type="button"
-            className="absolute inset-0 bg-foreground/40"
-            aria-label="Close"
-            onClick={() => setAddRoomOpen(false)}
-          />
-          <div className="relative z-10 max-h-[70vh] w-full overflow-y-auto rounded-t-3xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-            <p className="font-display text-lg font-bold">Add a room</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Empty room with its own furniture & background. Your seed stays shared
-              (not copied). Max {MAX_ROOM_PAGES} rooms.
-            </p>
-            <p className="mt-3 text-sm font-bold text-primary">
-              Cost: {nextRoomCost === 0 ? "Free" : `${nextRoomCost} Love Points`}
-            </p>
-            <input
-              value={newRoomName}
-              onChange={(e) => setNewRoomName(e.target.value)}
-              placeholder="Room name (e.g. Bedroom)"
-              maxLength={24}
-              className="mt-3 w-full rounded-full border border-border bg-card px-4 py-3 text-sm"
-            />
-            <button
-              type="button"
-              className="press mt-4 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground"
-              onClick={() => {
-                actions.addRoomPage.mutate(newRoomName || undefined, {
-                  onSuccess: (page) => {
-                    setActivePageId(page.id);
-                    setNewRoomName("");
-                    setAddRoomOpen(false);
-                    toast(`“${page.name}” unlocked ✨`);
-                  },
-                  onError: (e) => toast((e as Error).message),
-                });
-              }}
-            >
-              {actions.addRoomPage.isPending ? "Adding…" : "Unlock room"}
-            </button>
-          </div>
-        </div>
+            className="press mt-4 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground"
+            onClick={() => {
+              actions.addRoomPage.mutate(newRoomName || undefined, {
+                onSuccess: (page) => {
+                  setActivePageId(page.id);
+                  setNewRoomName("");
+                  setAddRoomOpen(false);
+                  toast(`“${page.name}” unlocked ✨`);
+                },
+                onError: (e) => toast((e as Error).message),
+              });
+            }}
+          >
+            {actions.addRoomPage.isPending ? "Adding…" : "Unlock room"}
+          </button>
+        </SheetFrame>
       ) : null}
 
     </AppLayout>

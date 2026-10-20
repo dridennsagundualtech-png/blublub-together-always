@@ -350,7 +350,7 @@ function QuestionArchive({ today }: { today: string }) {
                     <ul className="mt-2 space-y-2">
                       {(byDate[date] ?? []).map((a) => (
                         <li key={a.id} className="rounded-2xl bg-muted/60 px-3 py-2">
-                          <p className="text-xs font-bold text-primary">{nameOf(a.created_by)}</p>
+                          <p className="text-xs font-bold text-primary-ink">{nameOf(a.created_by)}</p>
                           <p className="whitespace-pre-wrap text-sm">{a.body}</p>
                         </li>
                       ))}
@@ -409,7 +409,7 @@ function MissedDay({
       <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="mt-1 text-sm font-extrabold">{prompt}</p>
       {partnerAnswered ? (
-        <p className="mt-1 text-xs text-primary">Your partner already answered this one 💌</p>
+        <p className="mt-1 text-xs text-primary-ink">Your partner already answered this one 💌</p>
       ) : null}
       {open ? (
         <div className="mt-2">

@@ -105,7 +105,7 @@ function PeriodPage() {
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
             Current phase
           </p>
-          <p className="mt-1 text-3xl font-extrabold text-primary">
+          <p className="mt-1 text-3xl font-extrabold text-primary-ink">
             {phaseFor(latest.start_date, latest.cycle_length, latest.period_length)}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -153,6 +153,7 @@ function PeriodPage() {
           type="button"
           role="switch"
           aria-checked={!!profile?.share_cycle}
+          aria-label="Share a simple summary with your partner"
           onClick={() => toggleShare.mutate(!profile?.share_cycle)}
           className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
             profile?.share_cycle ? "bg-primary" : "bg-muted"

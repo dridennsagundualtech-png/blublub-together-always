@@ -89,7 +89,7 @@ export function War({ game, seat, players, nameOf }: GameViewProps) {
             <div key={p} className="grid place-items-center gap-2">
               <div className="grid h-28 w-20 place-items-center rounded-2xl bg-secondary shadow-soft">
                 {s.flip ? (
-                  <span className="text-3xl font-extrabold text-primary">
+                  <span className="text-3xl font-extrabold text-primary-ink">
                     {rankLabel(s.flip[p] ?? 0)}
                   </span>
                 ) : (

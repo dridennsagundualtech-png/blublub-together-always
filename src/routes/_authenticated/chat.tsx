@@ -217,7 +217,7 @@ function ChatPage() {
                 }`}
               >
                 {!mine ? (
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                     {nameOf(m.created_by)}
                   </p>
                 ) : null}
@@ -266,7 +266,7 @@ function ChatPage() {
           onClick={() => (recording ? stopRecording() : void startRecording())}
           disabled={sendVoice.isPending}
           className={`press grid size-12 shrink-0 place-items-center rounded-full shadow-soft disabled:opacity-60 ${
-            recording ? "bg-destructive text-destructive-foreground" : "bg-card text-primary"
+            recording ? "bg-destructive text-destructive-foreground" : "bg-card text-primary-ink"
           }`}
         >
           {recording ? <Square className="size-5" /> : <Mic className="size-5" />}

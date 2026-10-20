@@ -68,7 +68,7 @@ function DistanceHearts({ km }: { km: number }) {
 
   return (
     <div className="card-soft mt-3 flex flex-col items-center gap-2 px-4 py-3">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
         Closeness
       </p>
       <div className="flex items-center gap-1.5" aria-label={`${filled} of 5 hearts`}>
@@ -79,7 +79,7 @@ function DistanceHearts({ km }: { km: number }) {
               key={i}
               className={
                 on
-                  ? "size-6 fill-primary text-primary"
+                  ? "size-6 fill-primary-ink text-primary-ink"
                   : "size-6 text-muted-foreground/40"
               }
               strokeWidth={on ? 0 : 1.75}
@@ -87,7 +87,7 @@ function DistanceHearts({ km }: { km: number }) {
           );
         })}
       </div>
-      <p className="text-xs font-bold text-primary">{label}</p>
+      <p className="text-xs font-bold text-primary-ink">{label}</p>
     </div>
   );
 }
@@ -188,7 +188,7 @@ function MapPage() {
                   <span
                     className={`grid size-10 place-items-center rounded-full ${
                       sharing && loc
-                        ? "bg-primary/15 text-primary"
+                        ? "bg-primary/15 text-primary-ink"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
@@ -223,7 +223,7 @@ function MapPage() {
                           m.display_name ?? "Partner",
                         )
                       }
-                      className="press grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"
+                      className="press grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary-ink"
                     >
                       <Navigation className="size-4" />
                     </button>

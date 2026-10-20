@@ -24,7 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { usePremiumAccess } from "@/lib/admin";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, TextArea, TextInput } from "@/components/ui-kit";
+import { Card, Field, PrimaryButton, SheetFrame, TextArea, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -271,7 +271,7 @@ function PhotosPage() {
           onClick={() => setSortOpen(true)}
           className={cn(
             "press grid size-11 shrink-0 place-items-center rounded-full border border-border bg-card shadow-soft",
-            (sortOrder === "oldest" || dateFilter) && "border-primary text-primary",
+            (sortOrder === "oldest" || dateFilter) && "border-primary text-primary-ink",
           )}
         >
           <ArrowUpDown className="size-5" />
@@ -289,7 +289,7 @@ function PhotosPage() {
       {/* Active filter chip */}
       {dateFilter ? (
         <div className="mb-3 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary-ink">
             <CalendarDays className="size-3.5" />
             {dateFilter}
           </span>
@@ -305,7 +305,7 @@ function PhotosPage() {
 
       {all.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-          <span className="grid size-16 place-items-center rounded-full bg-primary/10 text-primary">
+          <span className="grid size-16 place-items-center rounded-full bg-primary/10 text-primary-ink">
             <Images className="size-7" />
           </span>
           <div>
@@ -322,7 +322,7 @@ function PhotosPage() {
             <button
               type="button"
               onClick={() => setDateFilter("")}
-              className="press text-sm font-bold text-primary underline"
+              className="press text-sm font-bold text-primary-ink underline"
             >
               Clear date filter
             </button>
@@ -338,7 +338,7 @@ function PhotosPage() {
             <li key={post.key} className="card-soft overflow-hidden p-0">
               {/* Instagram-style post header */}
               <div className="flex items-center gap-3 px-3 py-2.5">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-sm font-extrabold text-primary">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-sm font-extrabold text-primary-ink">
                   {(post.kind === "carousel"
                     ? post.albumName
                     : post.photo.caption || post.photo.body || "M"
@@ -353,7 +353,7 @@ function PhotosPage() {
                       ? post.albumName
                       : post.photo.caption || (post.photo.body ? "Note" : "Memory")}
                   </p>
-                  <p className="truncate text-[11px] text-muted-foreground">
+                  <p className="truncate text-xs text-muted-foreground">
                     {post.kind === "carousel"
                       ? `${post.photos[0]?.taken_on ?? ""} · ${post.photos.length} photos`
                       : post.photo.taken_on}
@@ -363,7 +363,7 @@ function PhotosPage() {
                   </p>
                 </div>
                 {post.kind === "single" && post.photo.is_pinned ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-foreground">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-accent-foreground">
                     <Pin className="size-3" />
                   </span>
                 ) : null}
@@ -456,7 +456,7 @@ function PhotosPage() {
                 {(post.kind === "carousel"
                   ? post.photos[0]?.location
                   : post.photo.location) ? (
-                  <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
+                  <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary-ink">
                     <MapPin className="size-3.5" />
                     {post.kind === "carousel"
                       ? post.photos[0]?.location
@@ -536,7 +536,7 @@ function PhotosPage() {
                       </span>
                     ) : null}
                     {count > 1 ? (
-                      <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                      <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
                         <Images className="size-3" />
                         {count}
                       </span>
@@ -557,244 +557,228 @@ function PhotosPage() {
 
       {/* Sort & date filter sheet */}
       {sortOpen ? (
-        <div className="fixed inset-0 z-[70] flex items-end" role="dialog" aria-label="Sort and filter">
-          <button
-            type="button"
-            aria-label="Close sort"
-            onClick={() => setSortOpen(false)}
-            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
-          />
-          <div className="relative w-full rounded-t-3xl bg-card p-4 shadow-float">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="font-display text-lg font-extrabold">Sort &amp; find</p>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setSortOpen(false)}
-                className="press grid size-9 place-items-center rounded-full bg-muted"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              Order
-            </p>
-            <div className="mb-4 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setSortOrder("newest");
-                  setSortOpen(false);
-                }}
-                className={cn(
-                  "press flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold",
-                  sortOrder === "newest"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border",
-                )}
-              >
-                <ArrowUpDown className="size-4" />
-                Newest first
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSortOrder("oldest");
-                  setSortOpen(false);
-                }}
-                className={cn(
-                  "press flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold",
-                  sortOrder === "oldest"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border",
-                )}
-              >
-                <ArrowDownAZ className="size-4" />
-                Oldest first
-              </button>
-            </div>
-
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              Jump to a date
-            </p>
-            <Field label="Date">
-              <TextInput
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-              />
-            </Field>
-            <div className="mt-3 flex gap-2">
-              <PrimaryButton
-                onClick={() => setSortOpen(false)}
-                className="flex-1"
-              >
-                {dateFilter ? `Show ${dateFilter}` : "Done"}
-              </PrimaryButton>
-              {dateFilter ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDateFilter("");
-                    setSortOpen(false);
-                  }}
-                  className="press rounded-2xl border border-border px-4 text-sm font-bold"
-                >
-                  Clear
-                </button>
-              ) : null}
-            </div>
+        <SheetFrame label="Sort and filter" onClose={() => setSortOpen(false)} className="rounded-t-3xl bg-card p-4 shadow-float">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="font-display text-lg font-extrabold">Sort &amp; find</p>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setSortOpen(false)}
+              className="press grid size-9 place-items-center rounded-full bg-muted"
+            >
+              <X className="size-4" />
+            </button>
           </div>
-        </div>
+
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Order
+          </p>
+          <div className="mb-4 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSortOrder("newest");
+                setSortOpen(false);
+              }}
+              className={cn(
+                "press flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold",
+                sortOrder === "newest"
+                  ? "border-primary bg-primary/10 text-primary-ink"
+                  : "border-border",
+              )}
+            >
+              <ArrowUpDown className="size-4" />
+              Newest first
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSortOrder("oldest");
+                setSortOpen(false);
+              }}
+              className={cn(
+                "press flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold",
+                sortOrder === "oldest"
+                  ? "border-primary bg-primary/10 text-primary-ink"
+                  : "border-border",
+              )}
+            >
+              <ArrowDownAZ className="size-4" />
+              Oldest first
+            </button>
+          </div>
+
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Jump to a date
+          </p>
+          <Field label="Date">
+            <TextInput
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+            />
+          </Field>
+          <div className="mt-3 flex gap-2">
+            <PrimaryButton
+              onClick={() => setSortOpen(false)}
+              className="flex-1"
+            >
+              {dateFilter ? `Show ${dateFilter}` : "Done"}
+            </PrimaryButton>
+            {dateFilter ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setDateFilter("");
+                  setSortOpen(false);
+                }}
+                className="press rounded-2xl border border-border px-4 text-sm font-bold"
+              >
+                Clear
+              </button>
+            ) : null}
+          </div>
+        </SheetFrame>
       ) : null}
 
       {/* Upload sheet */}
       {uploadOpen ? (
-        <div className="fixed inset-0 z-[70] flex items-end" role="dialog" aria-label="Add photos">
-          <button
-            type="button"
-            aria-label="Close upload"
-            onClick={() => setUploadOpen(false)}
-            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
-          />
-          <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-card p-4 shadow-float">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="font-display text-lg font-extrabold">Add memories</p>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setUploadOpen(false)}
-                className="press grid size-9 place-items-center rounded-full bg-muted"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
-                {(["photo", "text"] as const).map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    onClick={() => setAddKind(k)}
-                    className={cn(
-                      "press rounded-xl py-2 text-xs font-bold",
-                      addKind === k ? "bg-card shadow-soft" : "text-muted-foreground",
-                    )}
-                  >
-                    {k === "photo" ? "Photo" : "Text post"}
-                  </button>
-                ))}
-              </div>
-              {addKind === "text" ? (
-                <Field label="What's on your mind?">
-                  <TextArea
-                    value={postBody}
-                    onChange={(e) => setPostBody(e.target.value)}
-                    maxLength={2000}
-                    placeholder="Just thinking about you today…"
-                  />
-                </Field>
-              ) : null}
-              <button
-                type="button"
-                hidden={addKind === "text"}
-                onClick={() => fileRef.current?.click()}
-                className="press flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-background py-6 text-sm font-bold text-muted-foreground"
-              >
-                <ImagePlus className="size-5" />
-                {files.length === 0
-                  ? maxBatch > 1
-                    ? `Choose up to ${maxBatch} photos`
-                    : "Choose a photo"
-                  : `${files.length} photo${files.length > 1 ? "s" : ""} selected`}
-              </button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                multiple={maxBatch > 1}
-                className="hidden"
-                onChange={(e) => {
-                  const picked = Array.from(e.target.files ?? []);
-                  if (picked.length > maxBatch) {
-                    toast.error(
-                      isPremium
-                        ? `You can upload ${maxBatch} at a time.`
-                        : `Free spaces upload ${FREE_BATCH} at a time — Premium adds ${PREMIUM_EXTRA} more.`,
-                    );
-                  }
-                  setFiles(picked.slice(0, maxBatch));
-                }}
-              />
-              <Field label="Caption">
-                <TextInput
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  maxLength={200}
-                  placeholder="That perfect afternoon"
-                />
-              </Field>
-              <Field label="Where was this?">
-                <TextInput
-                  value={place}
-                  onChange={(e) => setPlace(e.target.value)}
-                  maxLength={120}
-                  placeholder="Kyoto, the little ramen place"
-                />
-              </Field>
-              {addKind === "text" ? null : (
-              <Field label="Album (optional)">
-                <TextInput
-                  value={album}
-                  onChange={(e) => setAlbum(e.target.value)}
-                  maxLength={60}
-                  list="album-names"
-                  placeholder="Japan trip"
-                />
-                <datalist id="album-names">
-                  {albumNames
-                    .filter((n) => n !== UNSORTED)
-                    .map((n) => (
-                      <option key={n} value={n} />
-                    ))}
-                </datalist>
-              </Field>
-              )}
-              <Field label="Date">
-                <TextInput
-                  type="date"
-                  value={takenOn}
-                  onChange={(e) => setTakenOn(e.target.value)}
-                />
-              </Field>
-              {addKind === "text" ? (
-                <PrimaryButton
-                  disabled={!postBody.trim() || addTextPost.isPending}
-                  onClick={() => addTextPost.mutate()}
-                >
-                  {addTextPost.isPending ? "Posting…" : "Post to feed"}
-                </PrimaryButton>
-              ) : (
-                <PrimaryButton
-                  disabled={files.length === 0 || upload.isPending}
-                  onClick={() => upload.mutate()}
-                >
-                  {upload.isPending ? "Uploading…" : "Add to memories"}
-                </PrimaryButton>
-              )}
-              {!isPremium ? (
-                <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-                  <Sparkles className="size-3.5" />
-                  Premium unlocks {PREMIUM_EXTRA} extra photos per upload.
-                </p>
-              ) : null}
-              <p className="text-center text-xs text-muted-foreground">
-                Photos are resized before upload to keep things light.
-              </p>
-            </div>
+        <SheetFrame label="Add photos" onClose={() => setUploadOpen(false)} className="max-h-[85vh] overflow-y-auto rounded-t-3xl bg-card p-4 shadow-float">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="font-display text-lg font-extrabold">Add memories</p>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setUploadOpen(false)}
+              className="press grid size-9 place-items-center rounded-full bg-muted"
+            >
+              <X className="size-4" />
+            </button>
           </div>
-        </div>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
+              {(["photo", "text"] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setAddKind(k)}
+                  className={cn(
+                    "press rounded-xl py-2 text-xs font-bold",
+                    addKind === k ? "bg-card shadow-soft" : "text-muted-foreground",
+                  )}
+                >
+                  {k === "photo" ? "Photo" : "Text post"}
+                </button>
+              ))}
+            </div>
+            {addKind === "text" ? (
+              <Field label="What's on your mind?">
+                <TextArea
+                  value={postBody}
+                  onChange={(e) => setPostBody(e.target.value)}
+                  maxLength={2000}
+                  placeholder="Just thinking about you today…"
+                />
+              </Field>
+            ) : null}
+            <button
+              type="button"
+              hidden={addKind === "text"}
+              onClick={() => fileRef.current?.click()}
+              className="press flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-background py-6 text-sm font-bold text-muted-foreground"
+            >
+              <ImagePlus className="size-5" />
+              {files.length === 0
+                ? maxBatch > 1
+                  ? `Choose up to ${maxBatch} photos`
+                  : "Choose a photo"
+                : `${files.length} photo${files.length > 1 ? "s" : ""} selected`}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple={maxBatch > 1}
+              className="hidden"
+              onChange={(e) => {
+                const picked = Array.from(e.target.files ?? []);
+                if (picked.length > maxBatch) {
+                  toast.error(
+                    isPremium
+                      ? `You can upload ${maxBatch} at a time.`
+                      : `Free spaces upload ${FREE_BATCH} at a time — Premium adds ${PREMIUM_EXTRA} more.`,
+                  );
+                }
+                setFiles(picked.slice(0, maxBatch));
+              }}
+            />
+            <Field label="Caption">
+              <TextInput
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                maxLength={200}
+                placeholder="That perfect afternoon"
+              />
+            </Field>
+            <Field label="Where was this?">
+              <TextInput
+                value={place}
+                onChange={(e) => setPlace(e.target.value)}
+                maxLength={120}
+                placeholder="Kyoto, the little ramen place"
+              />
+            </Field>
+            {addKind === "text" ? null : (
+            <Field label="Album (optional)">
+              <TextInput
+                value={album}
+                onChange={(e) => setAlbum(e.target.value)}
+                maxLength={60}
+                list="album-names"
+                placeholder="Japan trip"
+              />
+              <datalist id="album-names">
+                {albumNames
+                  .filter((n) => n !== UNSORTED)
+                  .map((n) => (
+                    <option key={n} value={n} />
+                  ))}
+              </datalist>
+            </Field>
+            )}
+            <Field label="Date">
+              <TextInput
+                type="date"
+                value={takenOn}
+                onChange={(e) => setTakenOn(e.target.value)}
+              />
+            </Field>
+            {addKind === "text" ? (
+              <PrimaryButton
+                disabled={!postBody.trim() || addTextPost.isPending}
+                onClick={() => addTextPost.mutate()}
+              >
+                {addTextPost.isPending ? "Posting…" : "Post to feed"}
+              </PrimaryButton>
+            ) : (
+              <PrimaryButton
+                disabled={files.length === 0 || upload.isPending}
+                onClick={() => upload.mutate()}
+              >
+                {upload.isPending ? "Uploading…" : "Add to memories"}
+              </PrimaryButton>
+            )}
+            {!isPremium ? (
+              <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+                <Sparkles className="size-3.5" />
+                Premium unlocks {PREMIUM_EXTRA} extra photos per upload.
+              </p>
+            ) : null}
+            <p className="text-center text-xs text-muted-foreground">
+              Photos are resized before upload to keep things light.
+            </p>
+          </div>
+        </SheetFrame>
       ) : null}
 
       {open ? (
@@ -940,7 +924,7 @@ function AlbumCarousel({
       ) : null}
 
       {photos.length > 1 ? (
-        <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white backdrop-blur-sm">
+        <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-xs font-bold tabular-nums text-white backdrop-blur-sm">
           {index + 1}/{photos.length}
         </span>
       ) : null}
@@ -973,7 +957,7 @@ function PhotoGrid({
             />
           ) : null}
           {p.location ? (
-            <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/60 to-transparent px-1.5 pb-1 pt-4 text-left text-[10px] font-bold text-white">
+            <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/60 to-transparent px-1.5 pb-1 pt-4 text-left text-xs font-bold text-white">
               {p.location}
             </span>
           ) : null}
@@ -1138,7 +1122,7 @@ function PhotoDetail({
                   </p>
                 ) : null}
                 {photo.location ? (
-                  <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
+                  <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary-ink">
                     <MapPin className="size-3.5" />
                     {photo.location}
                   </p>
@@ -1207,7 +1191,7 @@ function PhotoComments({ photoId }: { photoId: string }) {
 
   return (
     <div className="mt-3 border-t border-border pt-3">
-      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
         <MessageCircle className="size-3.5" />
         {comments?.length
           ? `${comments.length} comment${comments.length > 1 ? "s" : ""}`
@@ -1219,7 +1203,7 @@ function PhotoComments({ photoId }: { photoId: string }) {
           {comments.map((c) => (
             <li key={c.id} className="flex items-start gap-2 rounded-2xl bg-muted/60 px-3 py-2">
               <span className="min-w-0 flex-1">
-                <span className="block text-xs font-bold text-primary">{nameOf(c.created_by)}</span>
+                <span className="block text-xs font-bold text-primary-ink">{nameOf(c.created_by)}</span>
                 <span className="block whitespace-pre-wrap break-words text-sm">{c.body}</span>
               </span>
               {c.created_by === user?.id ? (
@@ -1321,7 +1305,7 @@ function ReactionBar({ postId }: { postId: string }) {
             onClick={() => toggle.mutate(r.kind)}
             className={cn(
               "press flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm",
-              mine ? "border-primary bg-primary/10 font-bold text-primary" : "border-border",
+              mine ? "border-primary bg-primary/10 font-bold text-primary-ink" : "border-border",
             )}
           >
             <span>{r.emoji}</span>

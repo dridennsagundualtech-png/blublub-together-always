@@ -85,7 +85,7 @@ function AuthPage() {
             We sent a confirmation link to {sentTo}. Tap it, then come back and sign in.
           </p>
           <button
-            className="press mt-5 text-sm font-bold text-primary"
+            className="press mt-5 text-sm font-bold text-primary-ink"
             onClick={() => {
               setSentTo(null);
               setMode("signin");
@@ -108,7 +108,7 @@ function AuthPage() {
             We sent a password reset link to {resetSentTo}. Tap it to choose a new password.
           </p>
           <button
-            className="press mt-5 text-sm font-bold text-primary"
+            className="press mt-5 text-sm font-bold text-primary-ink"
             onClick={() => {
               setResetSentTo(null);
               setMode("signin");
@@ -212,7 +212,7 @@ function AuthPage() {
             <p className="text-center">
               <button
                 type="button"
-                className="text-xs font-bold text-primary"
+                className="text-xs font-bold text-primary-ink"
                 onClick={() => {
                   formRef.current?.reset();
                   setMode("forgot");
@@ -232,7 +232,7 @@ function AuthPage() {
               : "New here?"}{" "}
           <button
             type="button"
-            className="font-bold text-primary"
+            className="font-bold text-primary-ink"
             onClick={() => {
               formRef.current?.reset();
               setMode(mode === "signin" ? "signup" : "signin");

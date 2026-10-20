@@ -218,7 +218,7 @@ export function RoomStage({
             <span className="room-sway block text-4xl drop-shadow">🌱</span>
           )}
         </button>
-        <span className="pointer-events-none mt-1 whitespace-nowrap rounded-full bg-card/90 px-2 py-0.5 text-[10px] font-bold text-muted-foreground shadow-sm">
+        <span className="pointer-events-none mt-1 whitespace-nowrap rounded-full bg-card/90 px-2 py-0.5 text-xs font-bold text-muted-foreground shadow-sm">
           {seedLabel ?? stage.label}
         </span>
       </div>
@@ -399,7 +399,7 @@ export function RoomStage({
               <span className="px-1 text-sm font-black">‹</span>
             )}
           </button>
-          <p className="pointer-events-none min-w-0 truncate rounded-full bg-card/90 px-2.5 py-0.5 text-center text-[10px] font-bold text-foreground shadow-sm">
+          <p className="pointer-events-none min-w-0 truncate rounded-full bg-card/90 px-2.5 py-0.5 text-center text-xs font-bold text-foreground shadow-sm">
             {roomNav.label}
           </p>
           <button

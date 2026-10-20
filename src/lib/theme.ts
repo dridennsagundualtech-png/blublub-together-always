@@ -215,7 +215,6 @@ export function gradientEnabledFor(map: ThemeMap, pathname: string): boolean {
 export function applyColors(map: ThemeMap, pathname?: string) {
   const root = document.documentElement;
   root.style.setProperty("--primary", map.main);
-  root.style.setProperty("--ring", map.main);
   root.style.setProperty("--sidebar-primary", map.main);
   root.style.setProperty("--chart-1", map.main);
 

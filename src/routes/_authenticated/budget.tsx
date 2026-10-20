@@ -234,7 +234,7 @@ function BudgetContent() {
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           Running balance
         </p>
-        <p className="mt-1 text-3xl font-extrabold text-primary">
+        <p className="mt-1 text-3xl font-extrabold text-primary-ink">
           <Money value={Math.abs(balance)} />
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -482,7 +482,7 @@ function BudgetGoals({
               </div>
               <p
                 className={`mt-2 text-xs font-semibold ${
-                  pct >= 100 ? "text-destructive" : pct >= 80 ? "text-primary" : "text-muted-foreground"
+                  pct >= 100 ? "text-destructive" : pct >= 80 ? "text-primary-ink" : "text-muted-foreground"
                 }`}
               >
                 {pct >= 100 ? (
@@ -758,7 +758,7 @@ function Bills({ coupleId, bills }: { coupleId: string | null; bills: BillRow[] 
                         : ""}
                 </p>
                 {b.last_paid_on ? (
-                  <p className="text-[10px] text-muted-foreground">Last paid {b.last_paid_on}</p>
+                  <p className="text-xs text-muted-foreground">Last paid {b.last_paid_on}</p>
                 ) : null}
               </div>
               <span className="text-sm font-bold">

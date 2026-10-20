@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/games/$kind")({
           We couldn't load that game. Please try again.
         </p>
         <p className="break-words text-xs text-muted-foreground/80">{error?.message}</p>
-        <Link to="/games/arcade" className="press inline-block text-xs font-bold text-primary">
+        <Link to="/games/arcade" className="press inline-block text-xs font-bold text-primary-ink">
           Back to games
         </Link>
       </div>

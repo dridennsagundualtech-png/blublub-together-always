@@ -204,7 +204,7 @@ function ClassicRoulette() {
             <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Tonight you're craving
             </p>
-            <p className="mt-2 text-2xl font-extrabold text-primary">{craving}</p>
+            <p className="mt-2 text-2xl font-extrabold text-primary-ink">{craving}</p>
             <p className="mt-2 text-xs text-muted-foreground">
               A general craving on purpose — cook it or find it, whatever's around you.
             </p>

@@ -146,7 +146,7 @@ function ResetPasswordPage() {
               Open the link from your email again, or request a fresh one from the sign-in screen.
             </p>
             <button
-              className="press mt-4 text-sm font-bold text-primary"
+              className="press mt-4 text-sm font-bold text-primary-ink"
               onClick={() => navigate({ to: "/auth" })}
             >
               Back to sign in

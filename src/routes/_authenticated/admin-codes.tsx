@@ -34,7 +34,7 @@ function status(row: CodeRow) {
   if (row.used_at) return { label: "Used", tone: "text-muted-foreground" };
   if (new Date(row.expires_at).getTime() < Date.now())
     return { label: "Expired", tone: "text-destructive" };
-  return { label: "Active", tone: "text-primary" };
+  return { label: "Active", tone: "text-primary-ink" };
 }
 
 function AdminCodesPage() {
