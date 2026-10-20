@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Bell, MapPin, Palette, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
+import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput, Switch } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { SignInPanel } from "@/components/SignInPanel";
 import { compressImage } from "@/lib/image";
@@ -230,23 +230,7 @@ function ProfilePage() {
               Only you control this. Off by default; your partner sees you only while it&apos;s on.
             </p>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={!!profile?.share_location}
-            aria-label="Share my location"
-            disabled={toggleLocation.isPending}
-            onClick={() => toggleLocation.mutate(!profile?.share_location)}
-            className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
-              profile?.share_location ? "bg-primary" : "bg-muted"
-            }`}
-          >
-            <span
-              className={`block size-6 rounded-full bg-card shadow-soft transition-transform ${
-                profile?.share_location ? "translate-x-5" : "translate-x-0.5"
-              }`}
-            />
-          </button>
+          <Switch checked={!!profile?.share_location} onChange={(next) => toggleLocation.mutate(next)} label="Share my location" disabled={toggleLocation.isPending} />
         </div>
       </Card>
 

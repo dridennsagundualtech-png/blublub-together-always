@@ -1,55 +1,9 @@
-import catImg from "@/assets/cat.png";
-import catSleep from "@/assets/cat-sleep.png";
-import catWave from "@/assets/cat-wave.png";
-import catPeek from "@/assets/cat-peek.png";
-import catLove from "@/assets/cat-love.png";
-import catCheer from "@/assets/cat-cheer.png";
-import sealImg from "@/assets/seal.png";
-import sealSleep from "@/assets/seal-sleep.png";
-import sealWave from "@/assets/seal-wave.png";
-import sealPeek from "@/assets/seal-peek.png";
-import sealLove from "@/assets/seal-love.png";
-import sealCheer from "@/assets/seal-cheer.png";
-import penguinImg from "@/assets/penguin.png";
-import penguinSleep from "@/assets/penguin-sleep.png";
-import penguinWave from "@/assets/penguin-wave.png";
-import penguinCurious from "@/assets/penguin-curious.png";
-import penguinLove from "@/assets/penguin-love.png";
-import penguinCheer from "@/assets/penguin-cheer.png";
+import { memo } from "react";
 import { cn } from "@/lib/utils";
+import { OVERLAY_PALETTE, PALETTES, SPRITES } from "@/components/pixel-critters";
 
-const SOURCES = {
-  cat: {
-    default: catImg,
-    sleep: catSleep,
-    wave: catWave,
-    peek: catPeek,
-    curious: catPeek,
-    love: catLove,
-    cheer: catCheer,
-  },
-  seal: {
-    default: sealImg,
-    sleep: sealSleep,
-    wave: sealWave,
-    peek: sealPeek,
-    curious: sealPeek,
-    love: sealLove,
-    cheer: sealCheer,
-  },
-  penguin: {
-    default: penguinImg,
-    sleep: penguinSleep,
-    wave: penguinWave,
-    peek: penguinCurious,
-    curious: penguinCurious,
-    love: penguinLove,
-    cheer: penguinCheer,
-  },
-} as const;
-
-export type Critter = keyof typeof SOURCES;
-export type Pose = keyof (typeof SOURCES)["cat"];
+export type Critter = keyof typeof SPRITES;
+export type Pose = keyof (typeof SPRITES)["cat"];
 
 const POSES: Pose[] = ["default", "wave", "peek", "sleep", "curious", "love", "cheer"];
 const CRITTERS: Critter[] = ["cat", "seal", "penguin"];
@@ -136,8 +90,25 @@ export function critterFor(seed: string): Critter {
 
 
 
-/** A small decorative critter illustration. Purely ornamental. */
-export function Doodle({
+/** One <rect> per horizontal run of same-coloured pixels. */
+function runs(critter: Critter, pose: Pose) {
+  const palette: Record<string, string> = { ...PALETTES[critter], ...OVERLAY_PALETTE };
+  const rects: { x: number; y: number; w: number; fill: string }[] = [];
+  SPRITES[critter][pose].forEach((row, y) => {
+    let x = 0;
+    while (x < row.length) {
+      const ch = row[x]!;
+      let w = 1;
+      while (row[x + w] === ch) w += 1;
+      if (ch !== ".") rects.push({ x, y, w, fill: palette[ch] ?? "transparent" });
+      x += w;
+    }
+  });
+  return rects;
+}
+
+/** A small decorative pixel critter. Purely ornamental. */
+export const Doodle = memo(function Doodle({
   critter,
   pose = "default",
   className,
@@ -149,15 +120,18 @@ export function Doodle({
   size?: number;
 }) {
   return (
-    <img
-      src={SOURCES[critter][pose] ?? SOURCES[critter].default}
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
+    <svg
+      viewBox="0 0 24 24"
       width={size}
       height={size}
-      style={{ width: size, height: size }}
-      className={cn("pointer-events-none select-none", className)}
-    />
+      aria-hidden="true"
+      focusable="false"
+      shapeRendering="crispEdges"
+      className={cn("pointer-events-none shrink-0 select-none", className)}
+    >
+      {runs(critter, pose).map((r) => (
+        <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w} height={1} fill={r.fill} />
+      ))}
+    </svg>
   );
-}
+});

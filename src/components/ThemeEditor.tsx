@@ -4,7 +4,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Palette, RotateCcw, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, PrimaryButton } from "@/components/ui-kit";
+import { Card, PrimaryButton, Switch } from "@/components/ui-kit";
 import { useCouple, useCoupleId } from "@/lib/session";
 import {
   applyColors,
@@ -281,22 +281,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
           <p className="text-xs font-bold">Gradient boxes</p>
           <p className="text-xs text-muted-foreground">Cards & panels on chosen screens</p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={map.boxesGradient}
-          aria-label="Gradient boxes"
-          onClick={() => setMap((m) => ({ ...m, boxesGradient: !m.boxesGradient }))}
-          className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
-            map.boxesGradient ? "bg-primary" : "bg-muted"
-          }`}
-        >
-          <span
-            className={`block size-6 rounded-full bg-card shadow-soft transition-transform ${
-              map.boxesGradient ? "translate-x-5" : "translate-x-0.5"
-            }`}
-          />
-        </button>
+        <Switch checked={map.boxesGradient} onChange={(next) => setMap((m) => ({ ...m, boxesGradient: next }))} label="Gradient boxes" />
       </div>
 
       {map.boxesGradient ? (

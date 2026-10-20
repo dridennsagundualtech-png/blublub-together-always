@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
+import { Card, Field, PrimaryButton, SectionTitle, TextInput, Switch } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useProfile, useRefreshSession, usePartner } from "@/lib/session";
 
@@ -149,22 +149,7 @@ function PeriodPage() {
         <span className="pr-3 text-sm font-semibold">
           Share a simple summary with {partner?.display_name ?? "your partner"}
         </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={!!profile?.share_cycle}
-          aria-label="Share a simple summary with your partner"
-          onClick={() => toggleShare.mutate(!profile?.share_cycle)}
-          className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
-            profile?.share_cycle ? "bg-primary" : "bg-muted"
-          }`}
-        >
-          <span
-            className={`block size-6 rounded-full bg-card shadow-soft transition-transform ${
-              profile?.share_cycle ? "translate-x-5" : "translate-x-0.5"
-            }`}
-          />
-        </button>
+        <Switch checked={!!profile?.share_cycle} onChange={(next) => toggleShare.mutate(next)} label="Share a simple summary with your partner" />
       </Card>
 
       {shared ? (

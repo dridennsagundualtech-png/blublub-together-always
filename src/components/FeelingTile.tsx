@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
 import { timeAgo } from "@/lib/location";
+import { Doodle } from "@/components/Doodles";
 
 export type FeelingRow = { feeling: string | null; created_at: string } | null | undefined;
 
@@ -21,9 +22,7 @@ export function FeelingTile({
 
   const body = (
     <>
-      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        {who}
-      </span>
+      {who ? <span className="text-xs font-bold text-muted-foreground">{who}</span> : null}
       {picks.length > 0 ? (
         <span className="flex flex-wrap items-center justify-center gap-2">
           {picks.slice(0, 2).map((f) => (
@@ -38,9 +37,7 @@ export function FeelingTile({
           ))}
         </span>
       ) : (
-        <span className={`grid place-items-center ${compact ? "h-24 text-5xl" : "h-40 text-7xl"}`}>
-          🫧
-        </span>
+        <Doodle critter="seal" pose="sleep" size={compact ? 88 : 128} />
       )}
       <span className="text-sm font-bold leading-snug">
         {picks.length > 0

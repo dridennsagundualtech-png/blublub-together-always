@@ -26,15 +26,13 @@ import { Route as AuthenticatedDiaryRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedFoodRouteImport } from './routes/_authenticated/food'
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
 import { Route as AuthenticatedMemoryBookRouteImport } from './routes/_authenticated/memory-book'
-import { Route as AuthenticatedMoreRouteImport } from './routes/_authenticated/more'
-import { Route as AuthenticatedNestRouteImport } from './routes/_authenticated/nest'
 import { Route as AuthenticatedPeriodRouteImport } from './routes/_authenticated/period'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 import { Route as AuthenticatedSpicyRouteImport } from './routes/_authenticated/spicy'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
-import { Route as AuthenticatedWellbeingRouteImport } from './routes/_authenticated/wellbeing'
+import { Route as AuthenticatedUsRouteImport } from './routes/_authenticated/us'
 import { Route as AuthenticatedGamesIndexRouteImport } from './routes/_authenticated/games.index'
 import { Route as AuthenticatedGamesKindRouteImport } from './routes/_authenticated/games.$kind'
 import { Route as AuthenticatedGamesArcadeRouteImport } from './routes/_authenticated/games.arcade'
@@ -124,16 +122,6 @@ const AuthenticatedMemoryBookRoute = AuthenticatedMemoryBookRouteImport.update({
   path: '/memory-book',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedMoreRoute = AuthenticatedMoreRouteImport.update({
-  id: '/more',
-  path: '/more',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedNestRoute = AuthenticatedNestRouteImport.update({
-  id: '/nest',
-  path: '/nest',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedPeriodRoute = AuthenticatedPeriodRouteImport.update({
   id: '/period',
   path: '/period',
@@ -164,9 +152,9 @@ const AuthenticatedTodosRoute = AuthenticatedTodosRouteImport.update({
   path: '/todos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedWellbeingRoute = AuthenticatedWellbeingRouteImport.update({
-  id: '/wellbeing',
-  path: '/wellbeing',
+const AuthenticatedUsRoute = AuthenticatedUsRouteImport.update({
+  id: '/us',
+  path: '/us',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedGamesIndexRoute = AuthenticatedGamesIndexRouteImport.update({
@@ -203,15 +191,13 @@ export interface FileRoutesByFullPath {
   '/food': typeof AuthenticatedFoodRoute
   '/map': typeof AuthenticatedMapRoute
   '/memory-book': typeof AuthenticatedMemoryBookRoute
-  '/more': typeof AuthenticatedMoreRoute
-  '/nest': typeof AuthenticatedNestRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
-  '/wellbeing': typeof AuthenticatedWellbeingRoute
+  '/us': typeof AuthenticatedUsRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games/arcade': typeof AuthenticatedGamesArcadeRoute
   '/games/': typeof AuthenticatedGamesIndexRoute
@@ -232,15 +218,13 @@ export interface FileRoutesByTo {
   '/food': typeof AuthenticatedFoodRoute
   '/map': typeof AuthenticatedMapRoute
   '/memory-book': typeof AuthenticatedMemoryBookRoute
-  '/more': typeof AuthenticatedMoreRoute
-  '/nest': typeof AuthenticatedNestRoute
   '/period': typeof AuthenticatedPeriodRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/spicy': typeof AuthenticatedSpicyRoute
   '/todos': typeof AuthenticatedTodosRoute
-  '/wellbeing': typeof AuthenticatedWellbeingRoute
+  '/us': typeof AuthenticatedUsRoute
   '/': typeof AuthenticatedIndexRoute
   '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games/arcade': typeof AuthenticatedGamesArcadeRoute
@@ -264,15 +248,13 @@ export interface FileRoutesById {
   '/_authenticated/food': typeof AuthenticatedFoodRoute
   '/_authenticated/map': typeof AuthenticatedMapRoute
   '/_authenticated/memory-book': typeof AuthenticatedMemoryBookRoute
-  '/_authenticated/more': typeof AuthenticatedMoreRoute
-  '/_authenticated/nest': typeof AuthenticatedNestRoute
   '/_authenticated/period': typeof AuthenticatedPeriodRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/spicy': typeof AuthenticatedSpicyRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
-  '/_authenticated/wellbeing': typeof AuthenticatedWellbeingRoute
+  '/_authenticated/us': typeof AuthenticatedUsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/games/$kind': typeof AuthenticatedGamesKindRoute
   '/_authenticated/games/arcade': typeof AuthenticatedGamesArcadeRoute
@@ -297,15 +279,13 @@ export interface FileRouteTypes {
     | '/food'
     | '/map'
     | '/memory-book'
-    | '/more'
-    | '/nest'
     | '/period'
     | '/photos'
     | '/profile'
     | '/questions'
     | '/spicy'
     | '/todos'
-    | '/wellbeing'
+    | '/us'
     | '/games/$kind'
     | '/games/arcade'
     | '/games/'
@@ -326,15 +306,13 @@ export interface FileRouteTypes {
     | '/food'
     | '/map'
     | '/memory-book'
-    | '/more'
-    | '/nest'
     | '/period'
     | '/photos'
     | '/profile'
     | '/questions'
     | '/spicy'
     | '/todos'
-    | '/wellbeing'
+    | '/us'
     | '/'
     | '/games/$kind'
     | '/games/arcade'
@@ -357,15 +335,13 @@ export interface FileRouteTypes {
     | '/_authenticated/food'
     | '/_authenticated/map'
     | '/_authenticated/memory-book'
-    | '/_authenticated/more'
-    | '/_authenticated/nest'
     | '/_authenticated/period'
     | '/_authenticated/photos'
     | '/_authenticated/profile'
     | '/_authenticated/questions'
     | '/_authenticated/spicy'
     | '/_authenticated/todos'
-    | '/_authenticated/wellbeing'
+    | '/_authenticated/us'
     | '/_authenticated/'
     | '/_authenticated/games/$kind'
     | '/_authenticated/games/arcade'
@@ -499,20 +475,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemoryBookRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/more': {
-      id: '/_authenticated/more'
-      path: '/more'
-      fullPath: '/more'
-      preLoaderRoute: typeof AuthenticatedMoreRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/nest': {
-      id: '/_authenticated/nest'
-      path: '/nest'
-      fullPath: '/nest'
-      preLoaderRoute: typeof AuthenticatedNestRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/period': {
       id: '/_authenticated/period'
       path: '/period'
@@ -555,11 +517,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTodosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/wellbeing': {
-      id: '/_authenticated/wellbeing'
-      path: '/wellbeing'
-      fullPath: '/wellbeing'
-      preLoaderRoute: typeof AuthenticatedWellbeingRouteImport
+    '/_authenticated/us': {
+      id: '/_authenticated/us'
+      path: '/us'
+      fullPath: '/us'
+      preLoaderRoute: typeof AuthenticatedUsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/games/': {
@@ -600,15 +562,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFoodRoute: typeof AuthenticatedFoodRoute
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
   AuthenticatedMemoryBookRoute: typeof AuthenticatedMemoryBookRoute
-  AuthenticatedMoreRoute: typeof AuthenticatedMoreRoute
-  AuthenticatedNestRoute: typeof AuthenticatedNestRoute
   AuthenticatedPeriodRoute: typeof AuthenticatedPeriodRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedSpicyRoute: typeof AuthenticatedSpicyRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
-  AuthenticatedWellbeingRoute: typeof AuthenticatedWellbeingRoute
+  AuthenticatedUsRoute: typeof AuthenticatedUsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedGamesKindRoute: typeof AuthenticatedGamesKindRoute
   AuthenticatedGamesArcadeRoute: typeof AuthenticatedGamesArcadeRoute
@@ -629,15 +589,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFoodRoute: AuthenticatedFoodRoute,
   AuthenticatedMapRoute: AuthenticatedMapRoute,
   AuthenticatedMemoryBookRoute: AuthenticatedMemoryBookRoute,
-  AuthenticatedMoreRoute: AuthenticatedMoreRoute,
-  AuthenticatedNestRoute: AuthenticatedNestRoute,
   AuthenticatedPeriodRoute: AuthenticatedPeriodRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedSpicyRoute: AuthenticatedSpicyRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
-  AuthenticatedWellbeingRoute: AuthenticatedWellbeingRoute,
+  AuthenticatedUsRoute: AuthenticatedUsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedGamesKindRoute: AuthenticatedGamesKindRoute,
   AuthenticatedGamesArcadeRoute: AuthenticatedGamesArcadeRoute,

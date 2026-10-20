@@ -1,88 +1,113 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { BookHeart, ListChecks, Plus, Sparkles, Wallet } from "lucide-react";
+import {
+  BookHeart,
+  BookOpen,
+  Droplets,
+  HandHeart,
+  HeartHandshake,
+  HelpCircle,
+  Images,
+  ListChecks,
+  MapPin,
+  Palette,
+  Plus,
+  Sparkles,
+  UserCog,
+  UtensilsCrossed,
+  Wallet,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import {
   Field,
+  LinkRow,
   Money,
+  RowGroup,
   PrimaryButton,
   SelectInput,
   Sheet,
   TextArea,
   TextInput,
+  Switch,
 } from "@/components/ui-kit";
-import { streakFromDates, todayISO } from "@/lib/badges";
+import { streakFromDates, todayISO, useBadges } from "@/lib/badges";
 import { usePremiumAccess } from "@/lib/admin";
-import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
+import { useSoundSetting } from "@/hooks/use-sound";
+import { useAuthUser, useCoupleId, useMembers, usePartner, useProfile } from "@/lib/session";
+import { useLocations, timeAgo } from "@/lib/location";
+import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
 
-export const Route = createFileRoute("/_authenticated/nest")({
+export const Route = createFileRoute("/_authenticated/us")({
   head: () => ({
     meta: [
-      { title: "Our Nest — BLUBLUB" },
+      { title: "Us — BLUBLUB" },
       {
         name: "description",
-        content: "Diary, to-dos, bucket list and budget — the whole nest in one place.",
+        content: "Feelings, plans, money, memories and settings for the two of you.",
       },
-      { property: "og:title", content: "Our Nest — BLUBLUB" },
+      { property: "og:title", content: "Us — BLUBLUB" },
       {
         property: "og:description",
-        content: "Diary, to-dos, bucket list and budget — the whole nest in one place.",
+        content: "Feelings, plans, money, memories and settings for the two of you.",
       },
     ],
   }),
-  component: NestPage,
+  component: UsPage,
 });
 
 type QuickKind = null | "choose" | "diary" | "todo" | "bucket" | "expense";
-type FilterId = "all" | "diary" | "todo" | "bucket" | "budget";
 
 const MOODS = ["🩷", "😊", "🥹", "😴", "🔥", "😤", "🌧️", "✨"];
 const CATEGORIES = ["Food", "Home", "Travel", "Gifts", "Health", "Fun", "Other"] as const;
 
-const FILTERS: { id: FilterId; label: string; icon: typeof BookHeart }[] = [
-  { id: "all", label: "All", icon: Sparkles },
-  { id: "diary", label: "Diary", icon: BookHeart },
-  { id: "todo", label: "To-Dos", icon: ListChecks },
-  { id: "bucket", label: "Dreams", icon: Sparkles },
-  { id: "budget", label: "Money", icon: Wallet },
-];
+function addDays(iso: string, n: number) {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
 
-function SummaryTile({
-  tint,
-  icon,
-  label,
-  value,
-  detail,
-}: {
-  tint: string;
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-  detail?: string;
-}) {
-  return (
-    <div className={`grad-box card-soft rounded-[1.25rem] ${tint} p-4`}>
-      <div className="flex items-center gap-2">
-        <span className="grid size-7 place-items-center rounded-full bg-card/70">{icon}</span>
-        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-          {label}
-        </p>
-      </div>
-      <p className="mt-2 font-display text-base font-bold text-foreground">{value}</p>
-      {detail ? <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p> : null}
-    </div>
+function phaseFor(start: string, cycleLength: number, periodLength: number) {
+  const day =
+    Math.floor(
+      (Date.parse(`${todayISO()}T00:00:00`) - Date.parse(`${start}T00:00:00`)) / 86_400_000,
+    ) % cycleLength;
+  if (day < periodLength) return "Period";
+  if (day < cycleLength / 2 - 2) return "Follicular";
+  if (day <= cycleLength / 2 + 1) return "Ovulation";
+  return "Luteal";
+}
+
+function daysUntil(iso: string) {
+  return Math.round(
+    (Date.parse(`${iso}T00:00:00`) - Date.parse(`${todayISO()}T00:00:00`)) / 86_400_000,
   );
 }
 
-function NestPage() {
+function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const R = 6371;
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function UsPage() {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
-  const [quick, setQuick] = useState<QuickKind>(null);
-  const [filter, setFilter] = useState<FilterId>("all");
+  const { data: profile } = useProfile();
+  const partner = usePartner();
+  const { data: locations } = useLocations();
+  const { data: badges } = useBadges();
   const premium = usePremiumAccess();
+  const sound = useSoundSetting();
+  const [quick, setQuick] = useState<QuickKind>(null);
+  const partnerName = partner?.display_name ?? "your partner";
 
   const { data: diary } = useQuery({
     queryKey: ["nest-diary", coupleId],
@@ -127,7 +152,7 @@ function NestPage() {
 
   const { data: expenses } = useQuery({
     queryKey: ["nest-expenses", coupleId],
-    enabled: !!coupleId,
+    enabled: !!coupleId && premium,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("expenses")
@@ -135,6 +160,34 @@ function NestPage() {
         .eq("couple_id", coupleId!);
       if (error) throw error;
       return data ?? [];
+    },
+  });
+
+  const { data: cooldowns } = useQuery({
+    queryKey: ["cooldowns", coupleId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cooldowns")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: cycles } = useQuery({
+    queryKey: ["cycle-logs", coupleId, user?.id],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cycle_logs")
+        .select("*")
+        .eq("couple_id", coupleId!)
+        .order("start_date", { ascending: false });
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -148,122 +201,180 @@ function NestPage() {
     return e.paid_by === user?.id ? sum + half : sum - half;
   }, 0);
 
-  const showDiary = filter === "all" || filter === "diary";
-  const showTodo = filter === "all" || filter === "todo";
-  const showBucket = filter === "all" || filter === "bucket";
-  const showBudget = filter === "all" || filter === "budget";
+  const latestCool = cooldowns?.find((c) => c.created_by === user?.id || c.shared);
+  const coolMoods = decodeFeeling(latestCool?.feeling ?? "")
+    .keys.map((k) => FEELING_BY_KEY.get(k)?.label)
+    .filter(Boolean) as string[];
+  const coolStatus = latestCool
+    ? `${latestCool.created_by === user?.id ? "You" : (partner?.display_name ?? "Partner")}${
+        coolMoods.length ? ` · ${coolMoods.slice(0, 2).join(", ")}` : " shared a note"
+      } · ${timeAgo(latestCool.created_at)}`
+    : "Pause, name the feeling, reconnect";
+
+  const sharedCycle = (cycles ?? []).find((c) => c.user_id !== user?.id);
+  const cycleSrc = sharedCycle ?? (cycles ?? []).find((c) => c.user_id === user?.id);
+  const nextStart = cycleSrc ? addDays(cycleSrc.start_date, cycleSrc.cycle_length) : null;
+  const cycleStatus =
+    cycleSrc && nextStart
+      ? `${phaseFor(cycleSrc.start_date, cycleSrc.cycle_length, cycleSrc.period_length)} · next in ${Math.max(0, daysUntil(nextStart))} days`
+      : "Gentle, private tracking";
+
+  const mine = locations?.find((l) => l.user_id === user?.id);
+  const theirs = locations?.find((l) => l.user_id && l.user_id === partner?.id);
+  const km = mine && theirs ? distanceKm(mine, theirs) : null;
+  const distStatus =
+    km === null
+      ? !profile?.share_location
+        ? "Location sharing is off"
+        : `Waiting for ${partnerName}`
+      : km < 0.1
+        ? "You're together right now"
+        : km < 1
+          ? `${Math.round(km * 1000)} m apart`
+          : `${km.toFixed(km < 10 ? 1 : 0)} km apart`;
 
   return (
-    <AppLayout title="Our Nest" subtitle="Everything we keep together" critter="cat">
-      <p className="mb-3 font-display text-lg font-bold text-foreground">Right now</p>
-      <div className="grid gap-3">
-        <SummaryTile
-          tint="tile-lilac"
-          icon={<BookHeart className="size-3.5 text-primary-ink" />}
-          label="Diary"
-          value={lastEntry ? (lastEntry.title || lastEntry.body).slice(0, 60) : "No entries yet"}
-          detail={diaryStreak > 0 ? `${diaryStreak}-day streak` : "Write something small today"}
-        />
-        <div className="grid grid-cols-2 gap-3">
-          <SummaryTile
-            tint="tile-pink"
-            icon={<ListChecks className="size-3.5 text-primary-ink" />}
-            label="To-Dos"
-            value={openTodos === 0 ? "All done" : `${openTodos} left to do`}
-          />
-          <SummaryTile
-            tint="tile-peach"
-            icon={<Sparkles className="size-3.5 text-primary-ink" />}
-            label="Bucket List"
-            value={`${bucketDone}/${bucketTotal} done`}
-          />
-        </div>
-        <SummaryTile
+    <AppLayout title="Us" subtitle="Everything we keep together" critter="seal" critterPose="love">
+      <RowGroup title="Feelings & care">
+        <LinkRow
+          to="/cooldown"
+          icon={<HeartHandshake className="size-5" />}
           tint="tile-sky"
-          icon={<Wallet className="size-3.5 text-primary-ink" />}
-          label="Budget"
-          value={
+          title="Cool-down"
+          status={coolStatus}
+        />
+        <LinkRow
+          to="/period"
+          icon={<Droplets className="size-5" />}
+          tint="tile-peach"
+          title="Cycle"
+          status={cycleStatus}
+        />
+        <LinkRow
+          to="/commitments"
+          icon={<HandHeart className="size-5" />}
+          tint="tile-lilac"
+          title="Promises"
+          status="Little promises you keep together"
+        />
+        <LinkRow
+          to="/map"
+          icon={<MapPin className="size-5" />}
+          tint="tile-cream"
+          title="Where we are"
+          status={distStatus}
+        />
+      </RowGroup>
+
+      <RowGroup title="Plans & lists">
+        <LinkRow
+          to="/todos"
+          icon={<ListChecks className="size-5" />}
+          tint="tile-pink"
+          title="To-dos & goals"
+          status={openTodos === 0 ? "All done" : `${openTodos} left to do`}
+        />
+        <LinkRow
+          to="/bucket"
+          icon={<Sparkles className="size-5" />}
+          tint="tile-peach"
+          title="Bucket list"
+          status={
+            bucketTotal === 0 ? "Dream something up together" : `${bucketDone} of ${bucketTotal} done`
+          }
+        />
+        <LinkRow
+          to="/food"
+          icon={<UtensilsCrossed className="size-5" />}
+          tint="tile-cream"
+          title="Food roulette"
+          status="Can't decide what to eat? Spin for it"
+        />
+      </RowGroup>
+
+      <RowGroup title="Money">
+        <LinkRow
+          to="/budget"
+          icon={<Wallet className="size-5" />}
+          tint="tile-sky"
+          title="Budget"
+          status={
             !premium ? (
-              "Premium space"
+              "Premium · shared expenses, goals and savings"
             ) : Math.abs(balance) < 0.01 ? (
               "All square"
+            ) : balance > 0 ? (
+              <>
+                {partner?.display_name ?? "Your partner"} owes you <Money value={balance} />
+              </>
             ) : (
               <>
-                <Money value={Math.abs(balance)} /> {balance > 0 ? "owed to you" : "you owe"}
+                You owe {partnerName} <Money value={-balance} />
               </>
             )
           }
+          dot={badges?.budget}
         />
-      </div>
+      </RowGroup>
 
-      <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
-        <div className="relative text-center">
-          <p className="font-display text-2xl font-bold">Nest tools</p>
-          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-primary-foreground/80">
-            Diary, lists, dreams and money — kept in one cozy place
-          </p>
-        </div>
-
-        <Link
+      <RowGroup title="Memories">
+        <LinkRow
+          to="/questions"
+          icon={<HelpCircle className="size-5" />}
+          tint="tile-lilac"
+          title="Daily question"
+          status="One a day, answered together"
+          dot={badges?.question}
+        />
+        <LinkRow
           to="/diary"
-          className="featured-gradient press relative mt-5 block overflow-hidden rounded-[1.35rem] p-5 text-primary-foreground"
-        >
-          <p className="text-xs font-bold uppercase tracking-widest opacity-80">Featured</p>
-          <p className="mt-1 font-display text-xl font-bold">Shared Diary</p>
-          <p className="mt-1 max-w-[14rem] text-xs opacity-90">
-            {lastEntry
-              ? `Latest: ${(lastEntry.title || lastEntry.body).slice(0, 42)}`
-              : "Write a small note for each other"}
-          </p>
-          <span className="mt-4 inline-flex rounded-full bg-card px-4 py-1.5 text-xs font-bold text-card-foreground">
-            Open
-          </span>
-          <BookHeart className="absolute bottom-4 right-4 size-14 opacity-20" />
-        </Link>
+          icon={<BookHeart className="size-5" />}
+          tint="tile-pink"
+          title="Diary"
+          status={
+            !lastEntry
+              ? "Write something small today"
+              : diaryStreak > 1
+                ? `${diaryStreak}-day streak`
+                : `Last: ${(lastEntry.title || lastEntry.body).slice(0, 40)}`
+          }
+        />
+        <LinkRow
+          to="/photos"
+          icon={<Images className="size-5" />}
+          tint="tile-sky"
+          title="Photos"
+          status="Your shared gallery"
+        />
+        <LinkRow
+          to="/memory-book"
+          icon={<BookOpen className="size-5" />}
+          tint="tile-peach"
+          title="Memory book"
+          status="Turn your memories into a PDF keepsake"
+        />
+      </RowGroup>
 
-        <div className="relative mt-3 grid grid-cols-2 gap-3">
-          <Link
-            to="/todos"
-            className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-pink p-4 text-foreground"
-          >
-            <ListChecks className="size-7 text-primary-ink opacity-80" />
-            <div>
-              <p className="font-display text-base font-bold">To-Dos</p>
-              <p className="text-xs text-muted-foreground">
-                {openTodos === 0 ? "All clear" : `${openTodos} open`}
-              </p>
-            </div>
-          </Link>
-          <Link
-            to="/bucket"
-            className="grad-box press flex min-h-[130px] flex-col justify-between rounded-[1.25rem] tile-peach p-4 text-foreground"
-          >
-            <Sparkles className="size-7 text-primary-ink opacity-80" />
-            <div>
-              <p className="font-display text-base font-bold">Bucket List</p>
-              <p className="text-xs text-muted-foreground">
-                {bucketDone}/{bucketTotal} done
-              </p>
-            </div>
-          </Link>
-          <Link
-            to="/budget"
-            className="grad-box press col-span-2 flex min-h-[100px] flex-col justify-between rounded-[1.25rem] tile-cream p-4 text-foreground"
-          >
-            <Wallet className="size-6 text-primary-ink opacity-80" />
-            <div>
-              <p className="font-display text-base font-bold">Budget</p>
-              <p className="text-xs text-muted-foreground">
-                {!premium
-                  ? "Premium space"
-                  : Math.abs(balance) < 0.01
-                    ? "All square"
-                    : "Shared expenses & goals"}
-              </p>
-            </div>
-          </Link>
-        </div>
-      </div>
+      <RowGroup title="Settings">
+        <LinkRow
+          to="/appearance"
+          icon={<Palette className="size-5" />}
+          tint="tile-lilac"
+          title="Appearance"
+          status="Our colours"
+        />
+        <LinkRow
+          to="/profile"
+          icon={<UserCog className="size-5" />}
+          tint="tile-cream"
+          title="Profile & settings"
+          status="You, your partner and your space"
+        />
+        <li className="flex min-h-16 items-center justify-between gap-3 px-4 py-3">
+          <span className="text-sm font-bold">Sound effects</span>
+          <Switch checked={sound.enabled} onChange={(next) => sound.setEnabled(next)} label="Sound effects" />
+        </li>
+      </RowGroup>
 
       <button
         type="button"
@@ -277,10 +388,28 @@ function NestPage() {
       {quick === "choose" ? (
         <Sheet title="What do you want to add?" onClose={() => setQuick(null)}>
           <div className="grid gap-3">
-            <ChoiceRow icon={<BookHeart className="size-5" />} title="Diary entry" onClick={() => setQuick("diary")} />
-            <ChoiceRow icon={<ListChecks className="size-5" />} title="To-do" onClick={() => setQuick("todo")} />
-            <ChoiceRow icon={<Sparkles className="size-5" />} title="Bucket list item" onClick={() => setQuick("bucket")} />
-            <ChoiceRow icon={<Wallet className="size-5" />} title="Expense" onClick={() => setQuick("expense")} />
+            <ChoiceRow
+              icon={<BookHeart className="size-5" />}
+              title="Diary entry"
+              onClick={() => setQuick("diary")}
+            />
+            <ChoiceRow
+              icon={<ListChecks className="size-5" />}
+              title="To-do"
+              onClick={() => setQuick("todo")}
+            />
+            <ChoiceRow
+              icon={<Sparkles className="size-5" />}
+              title="Bucket list item"
+              onClick={() => setQuick("bucket")}
+            />
+            {premium ? (
+              <ChoiceRow
+                icon={<Wallet className="size-5" />}
+                title="Expense"
+                onClick={() => setQuick("expense")}
+              />
+            ) : null}
           </div>
         </Sheet>
       ) : null}

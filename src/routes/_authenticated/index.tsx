@@ -1,18 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  CalendarDays,
-  Gamepad2,
-  Heart,
-  Images,
-  MapPin,
-  MessageCircle,
-} from "lucide-react";
+import { CalendarDays, ChevronRight, Heart, Images, MessageCircle } from "lucide-react";
+import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
 import { FeelingTile } from "@/components/FeelingTile";
 import { NotificationBell } from "@/components/NotificationBell";
+import { LinkRow, RowGroup } from "@/components/ui-kit";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
 import {
@@ -160,178 +155,138 @@ function HomePage() {
       .map((d) => ({ title: d.title, date: d.date })),
   ].sort((a, b) => a.date.localeCompare(b.date))[0];
 
-  const name = profile?.display_name ?? "there";
+  const name = profile?.display_name;
+  const partnerName = partner?.display_name ?? "Your partner";
+
+  const together = [
+    days !== null ? `Day ${days} together` : null,
+    untilAnniversary === 0
+      ? "Happy anniversary!"
+      : untilAnniversary !== null && untilAnniversary <= 60
+        ? `${untilAnniversary} ${untilAnniversary === 1 ? "day" : "days"} to your anniversary`
+        : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
-    <AppLayout title="BLUBLUB" subtitle={partner ? `With ${partner.display_name}` : "Your space"}>
-      <div className="flex items-start justify-between gap-3 pb-4 pt-1">
+    <AppLayout
+      title="Today"
+      subtitle={partner ? `You & ${partner.display_name}` : "Your space"}
+      critter="cat"
+      critterPose="wave"
+    >
+      <div className="flex items-start justify-between gap-3 pb-5 pt-1">
         <div className="min-w-0 flex-1">
-          <p className="font-display text-[1.65rem] font-bold leading-tight tracking-tight text-foreground">
-            {greetingForHour()}, {name}
+          <p className="font-display text-[1.65rem] font-bold leading-tight">
+            {greetingForHour()}
+            {name ? `, ${name}` : ""}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {days !== null ? `Day ${days} together — make it count` : "We wish you a good day"}
-          </p>
+          {together ? <p className="mt-1 text-sm text-muted-foreground">{together}</p> : null}
         </div>
         <NotificationBell className="shrink-0" />
       </div>
 
-      {/* 2 feature tiles — theme tokens */}
-      <div className="grid grid-cols-2 gap-3">
-        <Link
-          to="/questions"
-          className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] bg-primary p-4 text-primary-foreground"
-        >
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest opacity-80">Daily</p>
-            <p className="mt-1 font-display text-lg font-bold leading-snug">Question</p>
-            <p className="mt-1 text-xs opacity-90">{questionHint}</p>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <Doodle critter="cat" pose="wave" size={44} className="opacity-90" />
-            <span className="rounded-full bg-card px-3 py-1.5 text-xs font-bold text-card-foreground">
-              {questionCta}
-            </span>
-          </div>
-          {badges?.question ? (
-            <span className="absolute right-3 top-3 size-2 rounded-full bg-card">
-              <span className="sr-only">New</span>
-            </span>
-          ) : null}
-        </Link>
-
-        <Link
-          to="/photos"
-          className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] tile-peach p-4 text-foreground"
-        >
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Album
-            </p>
-            <p className="mt-1 font-display text-lg font-bold leading-snug">Memories</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {latestPhoto ? "See your latest" : "Add a moment"}
-            </p>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            {latestPhoto?.url ? (
-              <img
-                src={latestPhoto.url}
-                alt=""
-                className="size-11 rounded-xl object-cover ring-2 ring-card/60"
-              />
-            ) : (
-              <Images className="size-8 text-primary-ink opacity-80" />
-            )}
-            <span className="rounded-full bg-card/90 px-3 py-1.5 text-xs font-bold text-foreground">
-              Open
-            </span>
-          </div>
-        </Link>
-      </div>
-
-      {/* How they feel */}
-      <p className="mb-1 mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        How they feel
-      </p>
-      <div className="grad-box surface-quiet rounded-[1.25rem] py-2">
-        <FeelingTile
-          who={partner?.display_name ?? "Partner"}
-          row={theirFeel ?? null}
-          linkTo="/cooldown"
-        />
-      </div>
-
-      {/* Day / anniversary */}
-      {(days !== null || untilAnniversary !== null) && (
-        <div className="mt-3 flex gap-3">
-          {days !== null ? (
-            <div className="grad-box surface-quiet flex-1 rounded-[1.25rem] px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Together
-              </p>
-              <p className="font-display text-xl font-bold text-foreground">Day {days}</p>
-            </div>
-          ) : null}
-          {untilAnniversary !== null ? (
-            <div className="grad-box tile-lilac flex-1 rounded-[1.25rem] px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Anniversary
-              </p>
-              <p className="font-display text-xl font-bold text-primary-ink">
-                {untilAnniversary === 0 ? "Today" : `${untilAnniversary}d`}
-              </p>
-            </div>
-          ) : null}
+      {/* The one thing to do today */}
+      <Link
+        to="/questions"
+        className="grad-box press relative flex items-center gap-3 overflow-hidden rounded-[1.5rem] bg-primary p-5 text-primary-foreground shadow-float"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xl font-bold leading-snug">Today&apos;s question</p>
+          <p className="mt-1 text-sm">{questionHint}</p>
+          <span className="mt-4 inline-flex min-h-11 items-center rounded-full bg-card px-5 text-sm font-bold text-card-foreground">
+            {questionCta}
+          </span>
         </div>
-      )}
+        <Doodle
+          critter="cat"
+          pose={bothAnswered ? "love" : partnerAnswered ? "curious" : iAnswered ? "sleep" : "wave"}
+          size={96}
+        />
+        {badges?.question ? (
+          <span className="absolute right-4 top-4 size-2.5 rounded-full bg-card">
+            <span className="sr-only">New</span>
+          </span>
+        ) : null}
+      </Link>
 
-      <div className="mb-2 mt-7 flex items-end justify-between">
-        <h2 className="font-display text-xl font-bold text-foreground">For you both</h2>
-        <Link to="/more" className="text-xs font-semibold text-primary-ink">
-          See all
-        </Link>
-      </div>
+      <RowGroup title={partner ? `How ${partner.display_name} feels` : "How they feel"}>
+        <li>
+          <FeelingTile who="" row={theirFeel ?? null} linkTo="/cooldown" compact />
+        </li>
+      </RowGroup>
 
-      <div className="grid grid-cols-2 gap-3 pb-2">
-        <Link
-          to="/games"
-          className="grad-box press flex min-h-[150px] flex-col justify-between rounded-[1.25rem] tile-cream p-4"
-        >
-          <Gamepad2 className="size-7 text-primary-ink" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Games</p>
-            <p className="text-xs text-muted-foreground">Play together</p>
-          </div>
-        </Link>
-        <Link
-          to="/chat"
-          className="grad-box press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] tile-pink p-4"
-        >
-          <MessageCircle className="size-7 text-primary-ink" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Chat</p>
-            <p className="text-xs text-muted-foreground">Private messages</p>
-          </div>
-          {badges?.unreadChat ? (
-            <span className="absolute right-3 top-3 size-2 rounded-full bg-destructive">
-              <span className="sr-only">New</span>
-            </span>
-          ) : null}
-        </Link>
-        <Link
+      <RowGroup title="Coming up">
+        {badges?.unreadChat ? (
+          <LinkRow
+            to="/chat"
+            icon={<MessageCircle className="size-5" />}
+            tint="tile-pink"
+            title={`New message from ${partnerName}`}
+            status="Tap to read"
+            dot
+          />
+        ) : null}
+        <LinkRow
           to="/calendar"
-          className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] tile-lilac p-4"
-        >
-          <CalendarDays className="size-6 text-primary-ink" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Calendar</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {nextSpecial ? nextSpecial.title : "Plans & dates"}
-            </p>
-          </div>
-        </Link>
-        <Link
-          to="/map"
-          className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] tile-sky p-4"
-        >
-          <MapPin className="size-6 text-primary-ink" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Where we are</p>
-            <p className="text-xs text-muted-foreground">Shared location</p>
-          </div>
-        </Link>
-      </div>
+          icon={<CalendarDays className="size-5" />}
+          tint="tile-lilac"
+          title={nextSpecial ? nextSpecial.title : "Nothing planned yet"}
+          status={nextSpecial ? whenLabel(nextSpecial.date) : "Plan a date together"}
+        />
+      </RowGroup>
+
+      {latestPhoto?.url ? (
+        <section className="mt-7">
+          <h2 className="mb-2 px-1 font-display text-lg font-bold">Latest memory</h2>
+          <Link to="/photos" className="card-soft press block overflow-hidden">
+            <img
+              src={latestPhoto.url}
+              alt={latestPhoto.caption || "Your latest memory"}
+              className="aspect-[4/3] w-full object-cover"
+            />
+            <span className="flex min-h-14 items-center justify-between gap-3 px-4 py-3">
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-bold">
+                  {latestPhoto.caption || "A moment together"}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {format(parseISO(latestPhoto.taken_on), "d MMMM yyyy")}
+                </span>
+              </span>
+              <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            </span>
+          </Link>
+        </section>
+      ) : (
+        <RowGroup title="Memories">
+          <LinkRow
+            to="/photos"
+            icon={<Images className="size-5" />}
+            tint="tile-sky"
+            title="Add your first memory"
+            status="A photo, a caption, a date"
+          />
+        </RowGroup>
+      )}
 
       {!partner ? (
         <Link
           to="/profile"
-          className="press mt-4 flex items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground"
+          className="press mt-7 flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground"
         >
           <Heart className="size-4" />
-          Pair with partner
+          Pair with your partner
         </Link>
       ) : null}
     </AppLayout>
   );
+}
+
+function whenLabel(iso: string) {
+  const diff = differenceInCalendarDays(parseISO(iso), new Date());
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Tomorrow";
+  return `${format(parseISO(iso), "EEE d MMM")} · in ${diff} days`;
 }

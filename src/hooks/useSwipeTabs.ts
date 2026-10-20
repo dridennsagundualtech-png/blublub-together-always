@@ -5,11 +5,9 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 export const MAIN_TAB_ROUTES = [
   "/",
   "/calendar",
-  "/wellbeing",
-  "/games",
-  "/nest",
   "/chat",
-  "/more",
+  "/games",
+  "/us",
 ] as const;
 
 export const TAB_DIR_KEY = "blublub-tab-dir";

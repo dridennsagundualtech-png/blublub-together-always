@@ -1,26 +1,16 @@
 import { useMemo } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  Home,
-  CalendarDays,
-  HeartPulse,
-  Egg,
-  MessageCircle,
-  Menu,
-  Gamepad2,
-} from "lucide-react";
+import { CalendarDays, Heart, Home, MessageCircle, Sofa } from "lucide-react";
 import { playChirp } from "@/hooks/use-sound";
 import { cn } from "@/lib/utils";
 import { MAIN_TAB_ROUTES, TAB_DIR_KEY } from "@/hooks/useSwipeTabs";
 
 const ITEMS = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/calendar", label: "Cal", icon: CalendarDays },
-  { to: "/wellbeing", label: "Care", icon: HeartPulse },
-  { to: "/games", label: "Play", icon: Gamepad2 },
-  { to: "/nest", label: "Nest", icon: Egg },
+  { to: "/", label: "Today", icon: Home },
+  { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/chat", label: "Chat", icon: MessageCircle },
-  { to: "/more", label: "More", icon: Menu },
+  { to: "/games", label: "Our Room", icon: Sofa },
+  { to: "/us", label: "Us", icon: Heart },
 ] as const;
 
 function tabIndexForPath(pathname: string): number {

@@ -71,16 +71,15 @@ export const THEME_SCREENS: { id: string; label: string; match: string[] }[] = [
   { id: "home", label: "Home", match: ["/"] },
   { id: "chat", label: "Chat", match: ["/chat"] },
   { id: "calendar", label: "Calendar", match: ["/calendar"] },
-  { id: "nest", label: "Our Nest", match: ["/nest", "/diary", "/todos", "/bucket", "/budget"] },
+  { id: "nest", label: "Us", match: ["/us", "/diary", "/todos", "/bucket", "/budget"] },
   { id: "games", label: "Games", match: ["/games", "/spicy"] },
   {
     id: "wellbeing",
     label: "Wellbeing",
-    match: ["/wellbeing", "/cooldown", "/period", "/map", "/commitments"],
+    match: ["/cooldown", "/period", "/map", "/commitments"],
   },
   { id: "photos", label: "Memories", match: ["/photos", "/memory-book"] },
   { id: "questions", label: "Questions", match: ["/questions"] },
-  { id: "more", label: "More", match: ["/more"] },
   { id: "profile", label: "Profile & settings", match: ["/profile", "/appearance"] },
 ];
 

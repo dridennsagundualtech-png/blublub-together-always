@@ -309,8 +309,8 @@ export function useAppNotifications() {
           title: `${partnerName} updated how they feel`,
           body: f.need
             ? `Needs: ${f.need}`
-            : f.feeling?.slice(0, 80) || "Open Care to see more",
-          href: "/wellbeing",
+            : f.feeling?.slice(0, 80) || "Open Cool-down to see more",
+          href: "/cooldown",
           at: f.created_at,
         });
       }

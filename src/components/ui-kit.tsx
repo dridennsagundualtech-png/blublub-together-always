@@ -1,7 +1,8 @@
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
 import { useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Flame, Heart, Plus, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ChevronRight, Flame, Heart, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playChirp } from "@/hooks/use-sound";
 
@@ -369,5 +370,95 @@ export function AddPanel({
         </button>
       )}
     </div>
+  );
+}
+
+export type Tint = "tile-pink" | "tile-lilac" | "tile-peach" | "tile-sky" | "tile-cream";
+
+/** A tappable row: icon, name, and what's going on with it right now. */
+export function LinkRow({
+  to,
+  icon,
+  tint,
+  title,
+  status,
+  dot,
+}: {
+  to: string;
+  icon: ReactNode;
+  tint: Tint;
+  title: string;
+  status: ReactNode;
+  dot?: boolean | undefined;
+}) {
+  return (
+    <li>
+      <Link to={to} className="press flex min-h-16 items-center gap-3 px-4 py-3">
+        <span
+          className={cn("grid size-11 shrink-0 place-items-center rounded-2xl text-primary-ink", tint)}
+        >
+          {icon}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold">{title}</span>
+          <span className="block truncate text-xs text-muted-foreground">{status}</span>
+        </span>
+        {dot ? (
+          <span className="size-2.5 shrink-0 rounded-full bg-destructive">
+            <span className="sr-only">New</span>
+          </span>
+        ) : null}
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+      </Link>
+    </li>
+  );
+}
+
+/** A titled card of LinkRows. */
+export function RowGroup({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="mt-7 first:mt-1">
+      <h2 className="mb-2 px-1 font-display text-lg font-bold">{title}</h2>
+      <ul className="card-soft divide-y divide-border/60 overflow-hidden">{children}</ul>
+    </section>
+  );
+}
+
+/** On/off switch with a 44px tap area; the track passes 3:1 against the card in both states. */
+export function Switch({
+  checked,
+  onChange,
+  label,
+  disabled,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  label: string;
+  disabled?: boolean | undefined;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className="press -my-2 grid min-h-11 shrink-0 place-items-center rounded-full disabled:opacity-60"
+    >
+      <span
+        className={cn(
+          "block h-7 w-12 rounded-full p-0.5 transition-colors",
+          checked ? "bg-primary-ink" : "bg-muted-foreground/45",
+        )}
+      >
+        <span
+          className={cn(
+            "block size-6 rounded-full bg-card shadow-soft transition-transform",
+            checked && "translate-x-5",
+          )}
+        />
+      </span>
+    </button>
   );
 }
