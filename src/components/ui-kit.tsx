@@ -264,11 +264,14 @@ export function SheetFrame({
   onClose,
   className,
   children,
+  full,
 }: {
   label: string;
   onClose: () => void;
   className?: string;
   children: ReactNode;
+  /** Cover the whole screen instead of sliding up from the bottom. */
+  full?: boolean;
 }) {
   // Sheets open from plain buttons (no Radix trigger), so remember the opener ourselves.
   const opener = useRef(typeof document === "undefined" ? null : (document.activeElement as HTMLElement | null));
@@ -287,7 +290,11 @@ export function SheetFrame({
             e.preventDefault();
             opener.current?.focus();
           }}
-          className={cn(className, "fixed inset-x-0 bottom-0 z-[80] outline-none")}
+          className={cn(
+            className,
+            full ? "fixed inset-0" : "fixed inset-x-0 bottom-0",
+            "z-[80] outline-none",
+          )}
         >
           <DialogPrimitive.Title className="sr-only">{label}</DialogPrimitive.Title>
           {children}

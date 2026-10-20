@@ -25,6 +25,7 @@ import {
   useMarkNotificationsSeen,
 } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
+import { SheetFrame } from "@/components/ui-kit";
 
 function iconFor(kind: NotifKind) {
   switch (kind) {
@@ -163,14 +164,11 @@ export function NotificationBell({ className }: { className?: string }) {
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
-          <button
-            type="button"
-            aria-label="Close notifications"
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setOpen(false)}
-          />
-          <div className="relative z-10 flex max-h-[80vh] w-full max-w-lg flex-col rounded-t-3xl bg-card shadow-float sm:rounded-3xl">
+        <SheetFrame
+          label="Updates"
+          onClose={() => setOpen(false)}
+          className="mx-auto flex max-h-[80vh] max-w-lg flex-col rounded-t-3xl bg-card pb-[env(safe-area-inset-bottom)] shadow-float"
+        >
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div>
                 <p className="font-display text-lg font-bold">Updates</p>
@@ -182,7 +180,7 @@ export function NotificationBell({ className }: { className?: string }) {
                 type="button"
                 aria-label="Close"
                 onClick={() => setOpen(false)}
-                className="press grid size-9 place-items-center rounded-full bg-muted"
+                className="press grid size-11 place-items-center rounded-full bg-muted"
               >
                 <X className="size-4" />
               </button>
@@ -196,7 +194,7 @@ export function NotificationBell({ className }: { className?: string }) {
                     You&apos;re all caught up
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    New posts, messages, feelings, and nest updates will show here.
+                    New photos, messages, feelings and plans will show up here.
                   </p>
                 </div>
               ) : (
@@ -213,8 +211,7 @@ export function NotificationBell({ className }: { className?: string }) {
                 </ul>
               )}
             </div>
-          </div>
-        </div>
+        </SheetFrame>
       ) : null}
     </>
   );
