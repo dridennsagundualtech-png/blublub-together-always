@@ -98,7 +98,7 @@ function ResetPasswordPage() {
         {ready ? (
           <form onSubmit={submit} className="card-soft space-y-3 p-5">
             <label className="block">
-              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <span className="text-xs font-bold text-muted-foreground">
                 New password
               </span>
               <input
@@ -115,7 +115,7 @@ function ResetPasswordPage() {
               />
             </label>
             <label className="block">
-              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <span className="text-xs font-bold text-muted-foreground">
                 Confirm password
               </span>
               <input

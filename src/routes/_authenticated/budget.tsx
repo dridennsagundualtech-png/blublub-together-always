@@ -231,7 +231,7 @@ function BudgetContent() {
   return (
     <>
       <Card className="text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-bold text-muted-foreground">
           Running balance
         </p>
         <p className="mt-1 text-3xl font-extrabold text-primary-ink">

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Heart } from "lucide-react";
 import { Doodle, type Critter, type Pose } from "@/components/Doodles";
 import { Card } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
@@ -104,7 +105,7 @@ export function Memory({ game, me, seat, players, nameOf }: GameViewProps) {
                 {shown ? (
                   <Doodle critter={f.critter} pose={f.pose} size={40} />
                 ) : (
-                  <span className="text-lg font-extrabold text-muted-foreground">🩷</span>
+                  <Heart className="size-5 text-primary-ink" fill="currentColor" aria-hidden />
                 )}
               </button>
             );

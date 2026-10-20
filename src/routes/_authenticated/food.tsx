@@ -201,7 +201,7 @@ function ClassicRoulette() {
       <Card>
         {done ? (
           <div className="text-center">
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            <p className="text-xs font-bold text-muted-foreground">
               Tonight you're craving
             </p>
             <p className="mt-2 text-2xl font-extrabold text-primary-ink">{craving}</p>
@@ -372,7 +372,7 @@ function CustomRoulette() {
               />
             ) : null}
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide opacity-70">Tonight it's</p>
+              <p className="text-xs font-bold opacity-70">Tonight it's</p>
               <p className="mt-1 text-xl font-extrabold">{result.label}</p>
             </div>
           </div>

@@ -363,7 +363,7 @@ function PhotosPage() {
                   </p>
                 </div>
                 {post.kind === "single" && post.photo.is_pinned ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-accent-foreground">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
                     <Pin className="size-3" />
                   </span>
                 ) : null}
@@ -570,7 +570,7 @@ function PhotosPage() {
             </button>
           </div>
 
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mb-2 text-xs font-bold text-muted-foreground">
             Order
           </p>
           <div className="mb-4 grid grid-cols-2 gap-2">
@@ -608,7 +608,7 @@ function PhotosPage() {
             </button>
           </div>
 
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="mb-2 text-xs font-bold text-muted-foreground">
             Jump to a date
           </p>
           <Field label="Date">
@@ -1191,7 +1191,7 @@ function PhotoComments({ photoId }: { photoId: string }) {
 
   return (
     <div className="mt-3 border-t border-border pt-3">
-      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
         <MessageCircle className="size-3.5" />
         {comments?.length
           ? `${comments.length} comment${comments.length > 1 ? "s" : ""}`

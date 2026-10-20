@@ -11,12 +11,12 @@ export type DerivedDate = {
   kind: DerivedKind;
 };
 
-export const DERIVED_META: Record<DerivedKind, { label: string; emoji: string; dot: string }> = {
-  anniversary: { label: "Anniversary", emoji: "💗", dot: "bg-pink-400" },
-  date: { label: "Date night", emoji: "🌙", dot: "bg-violet-400" },
-  bill: { label: "Bill due", emoji: "💸", dot: "bg-amber-400" },
-  bucket: { label: "Bucket list", emoji: "🎯", dot: "bg-emerald-400" },
-  cycle: { label: "Cycle", emoji: "🌸", dot: "bg-rose-400" },
+export const DERIVED_META: Record<DerivedKind, { label: string }> = {
+  anniversary: { label: "Anniversary" },
+  date: { label: "Date night" },
+  bill: { label: "Bill due" },
+  bucket: { label: "Bucket list" },
+  cycle: { label: "Cycle" },
 };
 
 function addDays(iso: string, days: number) {

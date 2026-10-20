@@ -13,64 +13,8 @@ import { Toaster } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { applyAppearance, loadAppearanceLocal } from "@/lib/theme";
 
-function applySavedTheme() {
-  try {
-    const raw = localStorage.getItem("blublub-theme-v2");
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    const root = document.documentElement;
-
-    // New simple shape: { main, soft, purple, blue }
-    if (parsed.main) {
-      root.style.setProperty("--primary", parsed.main);
-      root.style.setProperty("--ring", parsed.main);
-      root.style.setProperty("--sidebar-primary", parsed.main);
-      root.style.setProperty("--chart-1", parsed.main);
-
-      root.style.setProperty("--petal", parsed.soft);
-      root.style.setProperty("--peach", parsed.soft);
-      root.style.setProperty("--secondary", parsed.soft);
-      root.style.setProperty("--chart-5", parsed.soft);
-
-      root.style.setProperty("--accent", parsed.purple);
-      root.style.setProperty("--lavender", parsed.purple);
-      root.style.setProperty("--sidebar-accent", parsed.purple);
-      root.style.setProperty("--chart-2", parsed.purple);
-      root.style.setProperty("--grad-featured-from", parsed.purple);
-      root.style.setProperty("--grad-featured-to", parsed.main);
-      root.style.setProperty("--grad-hero-from", parsed.main);
-      root.style.setProperty("--grad-hero-to", parsed.purple);
-
-      root.style.setProperty("--sky", parsed.blue);
-      root.style.setProperty("--icy", parsed.blue === "#A2D2FF" ? "#BDE0FE" : parsed.blue);
-      root.style.setProperty("--chart-3", parsed.blue);
-      return;
-    }
-
-    // Old complex shape with colors object
-    if (parsed.colors) {
-      const c = parsed.colors;
-      if (c.primary) {
-        root.style.setProperty("--primary", c.primary);
-        root.style.setProperty("--ring", c.primary);
-        root.style.setProperty("--sidebar-primary", c.primary);
-      }
-      if (c.lavender) {
-        root.style.setProperty("--lavender", c.lavender);
-        root.style.setProperty("--accent", c.lavender);
-      }
-      if (c.petal) {
-        root.style.setProperty("--petal", c.petal);
-        root.style.setProperty("--peach", c.petal);
-      }
-      if (c.sky) root.style.setProperty("--sky", c.sky);
-      if (c.icy) root.style.setProperty("--icy", c.icy);
-    }
-  } catch {
-    // ignore
-  }
-}
 
 function NotFoundComponent() {
   return (
@@ -195,9 +139,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
 
-  // Apply saved theme colors on every page load
+  // Apply this phone's saved appearance on load; AppLayout swaps in the couple's shared one.
   useEffect(() => {
-    applySavedTheme();
+    applyAppearance(loadAppearanceLocal());
   }, []);
 
   useEffect(() => {

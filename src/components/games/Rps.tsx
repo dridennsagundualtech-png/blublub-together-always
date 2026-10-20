@@ -131,7 +131,7 @@ export function Rps({ game, seat, players, nameOf }: GameViewProps) {
 
       {s.last ? (
         <Card className="mt-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          <p className="text-xs font-bold text-muted-foreground">
             Last round
           </p>
           <div className="mt-2 flex items-center justify-center gap-4">

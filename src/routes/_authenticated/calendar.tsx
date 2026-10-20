@@ -263,7 +263,7 @@ function CalendarPage() {
           })}
         </div>
       ) : (
-        <div className="grad-box mb-5 rounded-[1.5rem] bg-card p-3">
+        <div className="mb-5 rounded-[1.5rem] bg-card p-3">
           <div className="mb-2 flex items-center justify-between">
             <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)} className="press grid size-11 place-items-center rounded-full">
               <ChevronLeft className="size-4 text-muted-foreground" />
@@ -317,7 +317,7 @@ function CalendarPage() {
       </p>
 
       {selectedEvents.length === 0 ? (
-        <div className="grad-box mb-4 rounded-[1.25rem] bg-muted px-4 py-6 text-center text-sm text-muted-foreground">
+        <div className="mb-4 rounded-[1.25rem] bg-muted px-4 py-6 text-center text-sm text-muted-foreground">
           Nothing planned on this day yet.
         </div>
       ) : (
@@ -329,7 +329,7 @@ function CalendarPage() {
                 {e.time!.slice(0, 5)}
               </div>
               <div
-                className={`grad-box min-w-0 flex-1 rounded-[1.15rem] px-4 py-3 ${EVENT_COLORS[i % EVENT_COLORS.length]}`}
+                className={`min-w-0 flex-1 rounded-[1.15rem] px-4 py-3 ${EVENT_COLORS[i % EVENT_COLORS.length]}`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-bold leading-snug">{e.title}</p>
@@ -351,7 +351,7 @@ function CalendarPage() {
           {untimed.map((e, i) => (
             <div
               key={e.id}
-              className={`grad-box flex items-center justify-between gap-3 rounded-[1.15rem] px-4 py-3 ${EVENT_COLORS[(i + timed.length) % EVENT_COLORS.length]}`}
+              className={`flex items-center justify-between gap-3 rounded-[1.15rem] px-4 py-3 ${EVENT_COLORS[(i + timed.length) % EVENT_COLORS.length]}`}
             >
               <div className="min-w-0">
                 <p className="text-sm font-bold">{e.title}</p>
@@ -385,7 +385,7 @@ function CalendarPage() {
                 <button
                   type="button"
                   onClick={() => selectDay(e.date)}
-                  className={`grad-box press flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left ${
+                  className={`press flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left ${
                     i % 2 === 0 ? "bg-lavender text-primary-foreground" : "bg-lavender-soft text-lavender-foreground"
                   }`}
                 >
@@ -484,7 +484,7 @@ function ChoiceRow({
     <button
       type="button"
       onClick={onClick}
-      className="grad-box press flex w-full items-center gap-3 rounded-[1.15rem] bg-muted p-4 text-left"
+      className="press flex w-full items-center gap-3 rounded-[1.15rem] bg-muted p-4 text-left"
     >
       <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-lavender-soft text-primary-ink">
         {icon}

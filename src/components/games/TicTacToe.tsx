@@ -72,7 +72,11 @@ export function TicTacToe({ game, me, seat, players, nameOf }: GameViewProps) {
           ))}
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          You are {seat === 0 ? "penguin 🐧" : "seal 🦭"}
+          <span className="inline-flex items-center gap-1.5">
+            You&apos;re the
+            <Doodle critter={seat === 0 ? "penguin" : "seal"} size={24} />
+            {seat === 0 ? "penguin" : "seal"}
+          </span>
         </p>
       </Card>
     </>

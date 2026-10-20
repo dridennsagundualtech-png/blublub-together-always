@@ -190,7 +190,7 @@ function HomePage() {
       {/* The one thing to do today */}
       <Link
         to="/questions"
-        className="grad-box press relative flex items-center gap-3 overflow-hidden rounded-[1.5rem] bg-primary p-5 text-primary-foreground shadow-float"
+        className="press relative flex items-center gap-3 overflow-hidden rounded-[1.5rem] bg-primary p-5 text-primary-foreground shadow-float"
       >
         <div className="min-w-0 flex-1">
           <p className="font-display text-xl font-bold leading-snug">Today&apos;s question</p>

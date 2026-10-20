@@ -5,9 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * BLUBLUB – fully editable design system
- * All visual tokens are CSS variables and can be overridden at runtime
- * by the Theme Editor (localStorage key: blublub-theme-v2).
+ * BLUBLUB design tokens. Themes (data-theme on <html>) swap the surface colours;
+ * the couple's accent sets --primary at runtime (src/lib/theme.ts).
  *
  * Exact source palette:
  *   Pink Orchid  #CDB4DB
@@ -87,7 +86,6 @@
   --card-radius: 1.25rem;            /* cards / tiles */
   --panel-radius: 1.75rem;           /* big dark panels */
   --shadow-strength: 0.32;           /* 0–1, multiplies soft shadow */
-  --shadow-enabled: 1;               /* 0 = flat, 1 = soft shadows on boxes */
 
   /* Exact palette (overridable) */
   --blush: #FFAFCC;
@@ -110,13 +108,13 @@
      only 1.7:1 on white. Same hue, darker, ≥4.5:1 on every tile. */
   --primary-ink: #943860;
 
-  --secondary: #FFC8DD;
+  --secondary: var(--petal);
   --secondary-foreground: #3F2A3A;
 
   --muted: #FFF0F6;
   --muted-foreground: #77596A;
 
-  --accent: #CDB4DB;
+  --accent: var(--lavender);
   --accent-foreground: #3F2A3A;
 
   --destructive: #E85A7A;
@@ -133,13 +131,13 @@
   --lavender: #CDB4DB;
   --lavender-soft: #EDE0F5;
   --lavender-foreground: #4A3A5A;
-  --peach: #FFC8DD;
+  --peach: var(--petal);
 
-  --chart-1: #FFAFCC;
-  --chart-2: #CDB4DB;
-  --chart-3: #A2D2FF;
-  --chart-4: #BDE0FE;
-  --chart-5: #FFC8DD;
+  --chart-1: var(--primary);
+  --chart-2: var(--lavender);
+  --chart-3: var(--sky);
+  --chart-4: var(--icy);
+  --chart-5: var(--petal);
 
   --sidebar: #FFF7FB;
   --sidebar-foreground: #3F2A3A;
@@ -150,7 +148,7 @@
   --sidebar-border: #F5D6E4;
   --sidebar-ring: #FFAFCC;
 
-  /* Gradients – fully editable direction + stops */
+  /* Gradients follow the theme colours */
   --grad-hero-from: var(--primary);
   --grad-hero-to: var(--lavender);
   --grad-hero-angle: 140deg;
@@ -158,20 +156,46 @@
   --grad-stat-from: var(--accent);
   --grad-stat-to: var(--lavender);
   --grad-stat-angle: 135deg;
+}
 
-  --grad-featured-from: var(--lavender);
-  --grad-featured-to: var(--primary);
-  --grad-featured-angle: 135deg;
+/* Light themes: surfaces only. Checked: text ≥4.5:1 on every surface for every accent. */
+:root[data-theme="lilac"] {
+  --background: #FAF7FE;
+  --muted: #F3EEFB;
+  --border: #E5DBF3;
+  --input: #E5DBF3;
+  --petal: #E8DFF5;
+  --lavender: #C9B6E4;
+  --lavender-soft: #EEE6F8;
+  --sky: #C5D6FF;
+  --icy: #DCE5FF;
+  --cream: #FBF6FF;
+}
 
-  --grad-panel-from: #2A1F3D;
-  --grad-panel-to: #1A1528;
-  --grad-panel-angle: 180deg;
+:root[data-theme="ocean"] {
+  --background: #F4F9FE;
+  --muted: #E9F2FB;
+  --border: #D3E3F3;
+  --input: #D3E3F3;
+  --petal: #D6EEF8;
+  --lavender: #C3D3EE;
+  --lavender-soft: #E3EBF8;
+  --sky: #A2D2FF;
+  --icy: #CFE6FD;
+  --cream: #F2F8FD;
+}
 
-  /* When 1, soft boxes/cards around the app use gradients */
-  --boxes-use-gradient: 0;
-  --box-grad-from: var(--card);
-  --box-grad-to: color-mix(in oklab, var(--primary) 18%, white);
-  --box-grad-angle: 145deg;
+:root[data-theme="peach"] {
+  --background: #FFF8F3;
+  --muted: #FFF0E8;
+  --border: #F6DCCD;
+  --input: #F6DCCD;
+  --petal: #FFE0D2;
+  --lavender: #F1C6CF;
+  --lavender-soft: #FBE6EA;
+  --sky: #FFD3B0;
+  --icy: #FFE6D1;
+  --cream: #FFF4EA;
 }
 
 @supports (color: oklch(from red l c h)) {
@@ -192,7 +216,6 @@
   --primary-foreground: #2A1A24;
   --primary-ink: var(--primary);
 
-  --secondary: #5A3A4A;
   --secondary-foreground: #F8EAF2;
 
   --muted: #2E2436;
@@ -215,10 +238,11 @@
   --lavender: #CDB4DB;
   --lavender-soft: #4A3A5A;
   --lavender-foreground: #F0E6F8;
-  --peach: #FFC8DD;
   --sky: #A2D2FF;
   --icy: #BDE0FE;
-  --petal: #FFC8DD;
+  --petal: #5A3A4A;
+  --tile-peach-mix: 40%;
+  --tile-sky-mix: 20%;
 
   --sidebar: #1F1828;
   --sidebar-foreground: #F8EAF2;
@@ -228,9 +252,6 @@
   --sidebar-accent-foreground: #2A1A24;
   --sidebar-border: rgba(255, 255, 255, 0.10);
   --sidebar-ring: #FFAFCC;
-
-  --grad-panel-from: #2A1F3D;
-  --grad-panel-to: #1A1528;
 }
 
 @layer base {
@@ -273,55 +294,6 @@
   background-image: none;
   box-shadow: var(--shadow-soft);
   border: none;
-}
-
-@utility card-raised {
-  border-radius: var(--card-radius);
-  background-color: var(--color-card);
-  background-image: none;
-  box-shadow: var(--shadow-float);
-  border: none;
-}
-
-@utility card-outline {
-  border-radius: var(--card-radius);
-  background-color: var(--color-card);
-  background-image: none;
-  box-shadow: none;
-  border: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
-}
-
-/* Toggle via --boxes-use-gradient: 1 */
-html.boxes-gradient .card-soft,
-html.boxes-gradient .card-raised,
-html.boxes-gradient .card-outline,
-html.boxes-gradient .surface-quiet {
-  background-color: transparent;
-  background-image: linear-gradient(
-    var(--box-grad-angle),
-    var(--box-grad-from),
-    var(--box-grad-to)
-  );
-}
-
-/* Tiles that use inline background colors opt in with .grad-box */
-html.boxes-gradient .grad-box {
-  background-image: linear-gradient(
-    var(--box-grad-angle),
-    var(--box-grad-from),
-    var(--box-grad-to)
-  ) !important;
-}
-
-
-
-@utility panel-dark {
-  border-radius: var(--panel-radius);
-  background-image: linear-gradient(var(--grad-panel-angle), var(--grad-panel-from), var(--grad-panel-to));
-  color: var(--color-primary-foreground);
-  overflow: hidden;
-  position: relative;
-  box-shadow: var(--shadow-float);
 }
 
 @utility list-row {
@@ -419,16 +391,6 @@ a[href]:active.bg-primary {
     color-mix(in oklab, var(--grad-stat-from) 70%, var(--card)) 0%,
     color-mix(in oklab, var(--grad-stat-to) 16%, var(--card)) 100%
   );
-  --gradient-lilac: linear-gradient(
-    140deg,
-    color-mix(in oklab, var(--lavender) 24%, var(--card)) 0%,
-    color-mix(in oklab, var(--primary) 14%, var(--card)) 100%
-  );
-  --gradient-featured: linear-gradient(
-    var(--grad-featured-angle),
-    var(--grad-featured-from),
-    var(--grad-featured-to)
-  );
   --page-wash:
     radial-gradient(
       120% 55% at 8% -8%,
@@ -457,11 +419,6 @@ a[href]:active.bg-primary {
 
 @utility hero-gradient { background-image: var(--gradient-hero); }
 @utility stat-gradient { background-image: var(--gradient-stat); }
-@utility lilac-gradient { background-image: var(--gradient-lilac); }
-@utility featured-gradient {
-  background-image: var(--gradient-featured);
-  box-shadow: var(--shadow-float);
-}
 
 @utility page-wash {
   background-image: var(--page-wash);
@@ -479,22 +436,17 @@ a[href]:active.bg-primary {
   border-radius: var(--card-radius);
 }
 @utility tile-peach {
-  background-color: color-mix(in oklab, var(--petal) 55%, var(--card));
+  background-color: color-mix(in oklab, var(--petal) var(--tile-peach-mix, 55%), var(--card));
   border-radius: var(--card-radius);
 }
 @utility tile-sky {
-  background-color: color-mix(in oklab, var(--sky) 55%, var(--card));
+  background-color: color-mix(in oklab, var(--sky) var(--tile-sky-mix, 55%), var(--card));
   border-radius: var(--card-radius);
 }
 @utility tile-cream {
   background-color: color-mix(in oklab, var(--cream) 80%, var(--card));
   border-radius: var(--card-radius);
 }
-@utility tile-icy {
-  background-color: color-mix(in oklab, var(--icy) 60%, var(--card));
-  border-radius: var(--card-radius);
-}
-
 @utility streak-chip {
   display: inline-flex;
   align-items: center;
@@ -616,22 +568,6 @@ a[href]:active.bg-primary {
   }
 }
 
-/* keep old utility names working if referenced elsewhere */
-@keyframes dice-tumble {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-14deg) scale(1.06); }
-  50% { transform: rotate(10deg) scale(0.95); }
-  75% { transform: rotate(-6deg) scale(1.04); }
-  100% { transform: rotate(0deg) scale(1); }
-}
-@keyframes dice-settle {
-  0% { transform: scale(0.82) rotate(-8deg); opacity: 0.4; }
-  60% { transform: scale(1.08) rotate(3deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-@utility dice-rolling { animation: dice-tumble 0.45s ease-in-out infinite; }
-@utility dice-settled { animation: dice-settle 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
-
 @keyframes room-float {
   0%, 100% { transform: translate(-50%, -50%); }
   50% { transform: translate(-50%, calc(-50% - 5px)); }
@@ -640,37 +576,14 @@ a[href]:active.bg-primary {
   0%, 100% { transform: rotate(-2.5deg); }
   50% { transform: rotate(2.5deg); }
 }
-@keyframes room-pop {
-  0% { opacity: 0; transform: translate(-50%, 6px) scale(0.9); }
-  15% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  80% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -14px) scale(0.98); }
-}
 .room-float { animation: room-float 4.2s ease-in-out infinite; }
 .room-sway { animation: room-sway 3.4s ease-in-out infinite; transform-origin: 50% 90%; }
-.room-pop { animation: room-pop 2.2s ease-out forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .room-float, .room-sway { animation: none; }
 }
 
 #lovable-badge { display: none !important; }
-
-@utility post-card {
-  border-radius: var(--card-radius);
-  background-color: transparent;
-  box-shadow: none;
-  border: none;
-  overflow: hidden;
-}
-
-@utility section-label {
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted-foreground);
-}
 
 @utility chip {
   display: inline-flex;
@@ -691,69 +604,7 @@ a[href]:active.bg-primary {
 }
 .animate-pulse { animation: soft-pulse 1.4s ease-in-out infinite; }
 
-@utility feed-gap {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-@utility media-bleed {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  background: var(--color-muted);
-}
-
-
-/* —— Gradient motion (developer mode can enable per box) —— */
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes shine-sweep {
-  0% { transform: translateX(-130%); }
-  100% { transform: translateX(130%); }
-}
-
-@utility gradient-flow {
-  background-size: 220% 220%;
-  animation: gradient-shift 8s ease infinite;
-}
-
-/* Shine overlay — element must be position relative + overflow hidden */
-@utility gradient-shine {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.gradient-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 42%,
-    rgba(255, 255, 255, 0.38) 50%,
-    transparent 58%
-  );
-  transform: translateX(-130%);
-  animation: shine-sweep 2.8s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Keep text/icons above shine */
-.gradient-shine > * {
-  position: relative;
-  z-index: 2;
-}
-
-
-/* Colored tiles / boxes get the same soft elevation */
-.grad-box,
+/* Colored tiles get the same soft elevation */
 .tile-pink,
 .tile-lilac,
 .tile-peach,
@@ -762,41 +613,7 @@ a[href]:active.bg-primary {
   box-shadow: var(--shadow-tile);
 }
 
-/* Master switch: Appearance can set --shadow-enabled: 0 */
-html.shadows-off .card-soft,
-html.shadows-off .card-raised,
-html.shadows-off .card-outline,
-html.shadows-off .surface-quiet,
-html.shadows-off .panel-dark,
-html.shadows-off .featured-gradient,
-html.shadows-off .grad-box,
-html.shadows-off .tile-pink,
-html.shadows-off .tile-lilac,
-html.shadows-off .tile-peach,
-html.shadows-off .tile-sky,
-html.shadows-off .tile-cream {
-  box-shadow: none !important;
-}
-
-
-/* Per-box shadow force (developer mode) */
-.box-shadow-force-on {
-  box-shadow: var(--shadow-soft) !important;
-}
-.box-shadow-force-off {
-  box-shadow: none !important;
-}
-
-
-/* Box with custom picture — keep content readable */
-.box-has-image {
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-}
-
-
-/* —— GymMane-inspired page transitions (fade + slide + scale + soft blur) —— */
+/* —— Page transitions (fade + slide) —— */
 
 @keyframes page-gym-in-from-right {
   0% {
@@ -833,19 +650,9 @@ html.shadows-off .tile-cream {
   animation: page-gym-in-from-left 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* keep older names as aliases */
-.page-slide-from-right {
-  animation: page-gym-in-from-right 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.page-slide-from-left {
-  animation: page-gym-in-from-left 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .page-gym-from-right,
-  .page-gym-from-left,
-  .page-slide-from-right,
-  .page-slide-from-left {
+  .page-gym-from-left {
     animation: none;
   }
 }

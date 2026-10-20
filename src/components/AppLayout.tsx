@@ -8,13 +8,7 @@ import { useBadges } from "@/lib/badges";
 import { useAuthUser, useCouple, useCoupleId, useProfile } from "@/lib/session";
 import { useLocationPublisher } from "@/lib/location";
 import { useCommitmentReminders } from "@/lib/commitments";
-import {
-  applyColors,
-  normalizeTheme,
-  stampAndApplyBoxOverrides,
-  THEME_STORAGE_KEY as STORAGE_KEY,
-} from "@/lib/theme";
-import { DevThemeHost } from "@/components/DevThemeHost";
+import { applyAppearance, readAppearance, saveAppearanceLocal } from "@/lib/theme";
 import { TAB_DIR_KEY, useSwipeTabs } from "@/hooks/useSwipeTabs";
 
 export function AppLayout({
@@ -43,26 +37,14 @@ export function AppLayout({
   const swipe = useSwipeTabs();
   const [slideClass, setSlideClass] = useState("");
 
+  // The couple's shared appearance wins over this phone's copy once it loads.
+  const sharedTheme = (couple as { theme?: unknown } | null | undefined)?.theme;
   useEffect(() => {
-    const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
-    if (fromCouple) {
-      const next = normalizeTheme(fromCouple);
-      applyColors(next, pathname);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      requestAnimationFrame(() => stampAndApplyBoxOverrides(next, pathname));
-      return;
-    }
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const next = normalizeTheme(JSON.parse(raw));
-        applyColors(next, pathname);
-        requestAnimationFrame(() => stampAndApplyBoxOverrides(next, pathname));
-      }
-    } catch {
-      // ignore
-    }
-  }, [couple, pathname]);
+    if (!sharedTheme) return;
+    const next = readAppearance(sharedTheme);
+    applyAppearance(next);
+    saveAppearanceLocal(next);
+  }, [sharedTheme]);
 
   // Page slide animation when route changes (from swipe or tab)
   useEffect(() => {
@@ -137,8 +119,6 @@ export function AppLayout({
           )}
         </div>
       </div>
-
-      <DevThemeHost />
 
       <BottomNav
         badges={{

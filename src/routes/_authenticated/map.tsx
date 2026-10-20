@@ -68,7 +68,7 @@ function DistanceHearts({ km }: { km: number }) {
 
   return (
     <div className="card-soft mt-3 flex flex-col items-center gap-2 px-4 py-3">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-xs font-bold text-muted-foreground">
         Closeness
       </p>
       <div className="flex items-center gap-1.5" aria-label={`${filled} of 5 hearts`}>

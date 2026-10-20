@@ -124,7 +124,7 @@ function CooldownPage() {
       </div>
 
       <Card className="mt-4">
-        <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+        <p className="text-xs font-extrabold text-muted-foreground">
           My feelings
         </p>
         <p className="mt-1 text-xs text-muted-foreground">

@@ -217,7 +217,7 @@ function ChatPage() {
                 }`}
               >
                 {!mine ? (
-                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  <p className="text-xs font-bold text-muted-foreground">
                     {nameOf(m.created_by)}
                   </p>
                 ) : null}

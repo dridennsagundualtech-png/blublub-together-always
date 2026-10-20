@@ -65,7 +65,7 @@ export function DiceRoller({
       >
         {dice.map((d, i) => (
           <div key={d.label} className="min-w-0">
-            <p className="mb-1.5 truncate text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-1.5 truncate text-xs font-extrabold text-muted-foreground">
               {d.label}
             </p>
             <div className="dice-scene mx-auto aspect-square w-full max-w-[7.5rem]">
@@ -143,7 +143,7 @@ function RoundTimer() {
 
   return (
     <div className="mt-5 rounded-3xl border border-border bg-card/70 p-4">
-      <p className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+      <p className="inline-flex items-center gap-1.5 text-xs font-extrabold text-muted-foreground">
         <Timer className="size-3.5" /> Round timer
       </p>
 

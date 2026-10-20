@@ -124,7 +124,7 @@ export function ResultCard({
       </p>
       {game.task ? (
         <div className="mt-4 rounded-2xl bg-accent px-4 py-3 text-accent-foreground">
-          <p className="text-xs font-bold uppercase tracking-wide opacity-70">
+          <p className="text-xs font-bold opacity-70">
             {game.is_draw ? "The task on the line was" : "The loser's task"}
           </p>
           <p className="mt-1 text-base font-extrabold">{game.task}</p>

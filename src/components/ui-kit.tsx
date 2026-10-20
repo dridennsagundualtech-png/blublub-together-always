@@ -41,7 +41,7 @@ export function SectionTitle({
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+      <span className="text-xs font-bold text-muted-foreground">
         {label}
       </span>
       <div className="mt-1">{children}</div>
@@ -449,7 +449,7 @@ export function Switch({
       <span
         className={cn(
           "block h-7 w-12 rounded-full p-0.5 transition-colors",
-          checked ? "bg-primary-ink" : "bg-muted-foreground/45",
+          checked ? "bg-primary-ink" : "bg-muted-foreground/70",
         )}
       >
         <span

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronRight, Dices, Grid3x3, Hand, Layers, Utensils, Sparkles, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Dices, Grid3x3, Hand, Layers, Utensils, Sparkles, Heart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui-kit";
 import { useBadges, useMarkSeen } from "@/lib/badges";
@@ -64,7 +64,7 @@ function ArcadePage() {
         to="/games"
         className="press card-soft mb-1 flex items-center gap-3 p-3 text-sm font-bold"
       >
-        <span className="text-lg">🏠</span> Back to Our Room
+        <ChevronLeft className="size-4" aria-hidden /> Back to Our Room
       </Link>
 
       <SectionTitle>Lifetime scoreboard</SectionTitle>

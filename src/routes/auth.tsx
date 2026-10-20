@@ -137,7 +137,7 @@ function AuthPage() {
         <form ref={formRef} onSubmit={submit} className="card-soft space-y-3 p-5">
           {mode === "signup" ? (
             <label className="block">
-              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <span className="text-xs font-bold text-muted-foreground">
                 Your name
               </span>
               <input
@@ -153,7 +153,7 @@ function AuthPage() {
           ) : null}
 
           <label className="block">
-            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            <span className="text-xs font-bold text-muted-foreground">
               Email
             </span>
             <input
@@ -172,7 +172,7 @@ function AuthPage() {
 
           {mode !== "forgot" ? (
             <label className="block">
-              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <span className="text-xs font-bold text-muted-foreground">
                 Password
               </span>
               <input

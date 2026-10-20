@@ -160,7 +160,7 @@ function QuestionsPage() {
   return (
     <AppLayout title="Daily question" subtitle="One a day, just for you two" critter="cat">
       <Card className="text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Today</p>
+        <p className="text-xs font-bold text-muted-foreground">Today</p>
         {streak ? (
           <div className="mt-2">
             <StreakChip days={streak} />
@@ -191,11 +191,11 @@ function QuestionsPage() {
           <SectionTitle>Answers</SectionTitle>
           <ul className="space-y-3">
             <li className="card-soft p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">You</p>
+              <p className="text-xs font-bold text-muted-foreground">You</p>
               <p className="mt-1 whitespace-pre-wrap text-sm">{mine.body}</p>
             </li>
             <li className="card-soft p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <p className="text-xs font-bold text-muted-foreground">
                 {theirs ? nameOf(theirs.created_by) : "Your partner"}
               </p>
               <p className="mt-1 whitespace-pre-wrap text-sm">
@@ -338,7 +338,7 @@ function QuestionArchive({ today }: { today: string }) {
               <ul className="space-y-3">
                 {answeredDates.map((date) => (
                   <li key={date} className="card-soft p-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <p className="text-xs font-bold text-muted-foreground">
                       {fmt(date)}
                     </p>
                     <p className="mt-1 text-sm font-extrabold">
@@ -406,7 +406,7 @@ function MissedDay({
 
   return (
     <li className="card-soft p-4">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="text-xs font-bold text-muted-foreground">{label}</p>
       <p className="mt-1 text-sm font-extrabold">{prompt}</p>
       {partnerAnswered ? (
         <p className="mt-1 text-xs text-primary-ink">Your partner already answered this one 💌</p>

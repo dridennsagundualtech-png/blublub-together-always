@@ -17,7 +17,7 @@ export function TaskBar({
   return (
     <div className="card-soft flex items-center gap-3 p-4">
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        <p className="text-xs font-bold text-muted-foreground">
           Loser's task
         </p>
         <p className="truncate text-sm font-extrabold">{game.task}</p>
