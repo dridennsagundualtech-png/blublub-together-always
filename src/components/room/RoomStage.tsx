@@ -444,7 +444,7 @@ export function RoomStage({
             onDoneEditing();
           }}
           style={{ zIndex: 320 }}
-          className="press absolute right-3 top-[calc(env(safe-area-inset-top)+0.75rem)] inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-extrabold text-primary-foreground shadow-float"
+          className="min-h-11 press absolute right-3 top-[calc(env(safe-area-inset-top)+0.75rem)] inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-extrabold text-primary-foreground shadow-float"
           aria-label="Finish decorating"
         >
           <Check className="size-4" /> Done

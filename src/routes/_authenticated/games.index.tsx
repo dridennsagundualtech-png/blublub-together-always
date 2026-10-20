@@ -186,7 +186,7 @@ function RoomPage() {
           setMenuOpen((v) => !v);
         }}
         className={cn(
-          "press inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-2 text-xs font-bold shadow-float",
+          "min-h-11 press inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-2 text-xs font-bold shadow-float",
           menuOpen && "ring-2 ring-primary/50",
         )}
       >
@@ -390,7 +390,7 @@ function RoomPage() {
                 );
               }}
               className={cn(
-                "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                "min-h-11 press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
                 seedColor === c ? "bg-primary text-primary-foreground" : "bg-card",
               )}
             >
@@ -436,7 +436,7 @@ function RoomPage() {
           {(room?.seed_room_id ?? roomPages[0]?.id ?? "main") !== resolvedPageId ? (
             <button
               type="button"
-              className="press mb-2 w-full rounded-full bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+              className="min-h-11 press mb-2 w-full rounded-full bg-primary py-2.5 text-xs font-bold text-primary-foreground"
               onClick={() => {
                 actions.moveSeedToRoom.mutate(resolvedPageId, {
                   onSuccess: () => toast("Seed moved to this room 🌱"),
@@ -503,7 +503,7 @@ function RoomPage() {
               setSelectedId(null);
             }}
             className={cn(
-              "press shrink-0 rounded-full px-3 py-1.5 text-xs font-bold",
+              "min-h-11 press shrink-0 rounded-full px-3 py-1.5 text-xs font-bold",
               resolvedPageId === p.id
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground",
@@ -519,7 +519,7 @@ function RoomPage() {
               playChirp("tap");
               setAddRoomOpen(true);
             }}
-            className="press flex shrink-0 items-center gap-1 rounded-full border border-dashed border-primary/50 px-3 py-1.5 text-xs font-bold text-primary-ink"
+            className="min-h-11 press flex shrink-0 items-center gap-1 rounded-full border border-dashed border-primary/50 px-3 py-1.5 text-xs font-bold text-primary-ink"
           >
             <Plus className="size-3.5" />
             Room
@@ -625,7 +625,7 @@ function RoomPage() {
                 type="button"
                 onClick={() => setCategory(c)}
                 className={cn(
-                  "press shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-bold",
+                  "min-h-11 press shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-bold",
                   category === c ? "bg-primary text-primary-foreground" : "bg-card",
                 )}
               >
@@ -722,7 +722,7 @@ function RoomPage() {
                         <div className="mb-3 mt-2 flex gap-2">
             <button
               type="button"
-              className="press flex-1 rounded-full bg-muted py-2 text-xs font-bold"
+              className="min-h-11 press flex-1 rounded-full bg-muted py-2 text-xs font-bold"
               onClick={() => {
                 for (const m of ROOM_MASCOTS) {
                   actions.setMascotVisible.mutate({ key: m.key, visible: false });
@@ -734,7 +734,7 @@ function RoomPage() {
             </button>
             <button
               type="button"
-              className="press flex-1 rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground"
+              className="min-h-11 press flex-1 rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground"
               onClick={() => {
                 for (const m of ROOM_MASCOTS) {
                   actions.setMascotVisible.mutate({ key: m.key, visible: true });
@@ -800,7 +800,7 @@ function RoomPage() {
                 type="button"
                 onClick={() => setBgCategory(c)}
                 className={cn(
-                  "press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
+                  "min-h-11 press rounded-full border border-border px-3 py-1.5 text-xs font-bold capitalize",
                   bgCategory === c ? "bg-primary text-primary-foreground" : "bg-card",
                 )}
               >

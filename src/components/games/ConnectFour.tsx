@@ -80,7 +80,7 @@ export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) 
               type="button"
               aria-label={`Drop in column ${c + 1}`}
               onClick={() => drop(c)}
-              className="press rounded-xl bg-muted py-1 text-xs font-extrabold text-muted-foreground"
+              className="min-h-11 press rounded-xl bg-muted py-1 text-xs font-extrabold text-muted-foreground"
             >
               ↓
             </button>

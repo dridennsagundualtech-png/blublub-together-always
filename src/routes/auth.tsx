@@ -212,7 +212,7 @@ function AuthPage() {
             <p className="text-center">
               <button
                 type="button"
-                className="text-xs font-bold text-primary-ink"
+                className="inline-flex min-h-11 items-center px-3 text-xs font-bold text-primary-ink"
                 onClick={() => {
                   formRef.current?.reset();
                   setMode("forgot");
@@ -232,7 +232,7 @@ function AuthPage() {
               : "New here?"}{" "}
           <button
             type="button"
-            className="font-bold text-primary-ink"
+            className="inline-flex min-h-11 items-center font-bold text-primary-ink"
             onClick={() => {
               formRef.current?.reset();
               setMode(mode === "signin" ? "signup" : "signin");

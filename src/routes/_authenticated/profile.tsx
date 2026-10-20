@@ -252,7 +252,7 @@ function ProfilePage() {
                 ),
               );
             }}
-            className="press shrink-0 rounded-full bg-accent px-3 py-2 text-xs font-bold text-accent-foreground"
+            className="min-h-11 press shrink-0 rounded-full bg-accent px-3 py-2 text-xs font-bold text-accent-foreground"
           >
             {canNotify() && typeof Notification !== "undefined" && Notification.permission === "granted"
               ? "Enabled"

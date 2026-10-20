@@ -136,7 +136,7 @@ function MapPage() {
             <button
               type="button"
               onClick={() => setFocusId(me.id + ":" + Date.now())}
-              className="press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-xs font-bold"
+              className="min-h-11 press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-xs font-bold"
             >
               <Crosshair className="size-3.5" />
               Center on me
@@ -146,7 +146,7 @@ function MapPage() {
             <button
               type="button"
               onClick={() => setFocusId(them.id + ":" + Date.now())}
-              className="press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-xs font-bold"
+              className="min-h-11 press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-xs font-bold"
             >
               <Navigation className="size-3.5" />
               Center on {partner?.display_name ?? "partner"}
@@ -156,7 +156,7 @@ function MapPage() {
             <button
               type="button"
               onClick={() => openExternalMaps(them.lat, them.lng, them.label)}
-              className="press inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
+              className="min-h-11 press inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
             >
               <ExternalLink className="size-3.5" />
               Navigate there

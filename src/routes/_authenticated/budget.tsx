@@ -22,6 +22,7 @@ import { PremiumGate } from "@/components/PremiumGate";
 import {
   AddPanel,
   Card,
+  EmptyState,
   StatCard,
   Field,
   Money,
@@ -373,7 +374,7 @@ function BudgetContent() {
 
       <SectionTitle>Recent expenses</SectionTitle>
       {rows.length === 0 ? (
-        <Card className="text-sm text-muted-foreground">Nothing logged yet.</Card>
+        <EmptyState title="Nothing logged yet" text="Add your first shared expense and the balance appears here." critter="penguin" />
       ) : (
         <ul className="space-y-2 pb-4">
           {rows.slice(0, 40).map((e) => (
@@ -767,7 +768,7 @@ function Bills({ coupleId, bills }: { coupleId: string | null; bills: BillRow[] 
               <button
                 type="button"
                 onClick={() => markPaid.mutate(b)}
-                className="press rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground"
+                className="min-h-11 press rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground"
               >
                 Paid
               </button>

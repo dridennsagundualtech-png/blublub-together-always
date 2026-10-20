@@ -160,7 +160,7 @@ function ArcadePage() {
           <button
             type="button"
             onClick={() => setShowHistory((v) => !v)}
-            className="press rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
+            className="min-h-11 press rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
           >
             {showHistory ? "Hide" : `Show (${history.length})`}
           </button>

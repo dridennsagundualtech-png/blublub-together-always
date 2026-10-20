@@ -24,7 +24,7 @@ import {
   TextInput,
 } from "@/components/ui-kit";
 import { todayISO, useMarkSeen } from "@/lib/badges";
-import { useAuthUser, useCoupleId, useProfile } from "@/lib/session";
+import { useAuthUser, useCoupleId } from "@/lib/session";
 import { DERIVED_META, useDerivedDates } from "@/lib/calendar-sources";
 
 const WEEKDAYS_SHORT = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
@@ -86,7 +86,6 @@ function CalendarPage() {
   useMarkSeen("calendar");
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
-  const { data: profile } = useProfile();
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(todayISO());
@@ -201,9 +200,7 @@ function CalendarPage() {
     setView({ year: d.getFullYear(), month: d.getMonth() });
   };
 
-  const name = profile?.display_name ?? "there";
-  const h = new Date().getHours();
-  const greet = h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening";
+  const shown = showMonth ? new Date(view.year, view.month, 1) : parseISODate(date);
 
   // Timeline hours for selected day (only show if timed events exist)
   const timed = selectedEvents.filter((e) => e.time);
@@ -211,15 +208,10 @@ function CalendarPage() {
 
   return (
     <AppLayout title="Calendar" subtitle="Dates & plans" critter="penguin">
-      {/* Greeting row */}
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <p className="font-display text-[1.5rem] font-bold leading-tight text-foreground">
-            {greet},
-            <br />
-            {name}
-          </p>
-        </div>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-display text-[1.5rem] font-bold leading-tight text-foreground">
+          {MONTH_NAMES[shown.getMonth()]} {shown.getFullYear()}
+        </h2>
         <button
           type="button"
           onClick={() => setShowMonth((v) => !v)}

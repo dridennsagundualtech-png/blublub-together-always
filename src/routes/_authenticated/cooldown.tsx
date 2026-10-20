@@ -165,7 +165,7 @@ function CooldownPage() {
             playChirp("tap");
             setDetailOpen((v) => !v);
           }}
-          className="press mt-4 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
+          className="min-h-11 press mt-4 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
         >
           {detailOpen ? "Hide the guided questions" : "Want to say more? Open the guided questions"}
           <ChevronDown className={`size-4 transition-transform ${detailOpen ? "rotate-180" : ""}`} />
@@ -230,7 +230,7 @@ function CooldownPage() {
           playChirp("tap");
           setArchiveOpen((v) => !v);
         }}
-        className="press mt-6 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
+        className="min-h-11 press mt-6 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
       >
         {archiveOpen ? "Hide past reflections" : `Past reflections (${(entries ?? []).length})`}
         <ChevronDown className={`size-4 transition-transform ${archiveOpen ? "rotate-180" : ""}`} />
@@ -296,7 +296,7 @@ function CooldownPage() {
                   <button
                     type="button"
                     onClick={() => shareOne.mutate(c.id)}
-                    className="press mt-3 inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground"
+                    className="min-h-11 press mt-3 inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground"
                   >
                     <Share2 className="size-3.5" />
                     Share with partner

@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useDailyLovePoint } from "@/lib/love-points";
 import { AppLayout } from "@/components/AppLayout";
+import { Doodle } from "@/components/Doodles";
 import { Card, PrimaryButton, SectionTitle, StreakChip, TextArea } from "@/components/ui-kit";
 import { todayISO, useAnswerStreak, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
@@ -130,6 +131,20 @@ function QuestionsPage() {
   const theirs = answers?.find((a) => a.created_by !== user?.id) ?? null;
   const revealed = !!mine && !!theirs;
 
+  // The one celebrated moment: the first time today's answers open up, they pop in.
+  const [celebrate, setCelebrate] = useState(false);
+  useEffect(() => {
+    if (!revealed) return;
+    const key = `blublub-revealed-${today}`;
+    try {
+      if (localStorage.getItem(key) === "1") return;
+      localStorage.setItem(key, "1");
+    } catch {
+      return;
+    }
+    setCelebrate(true);
+  }, [revealed, today]);
+
   const awardPoint = useDailyLovePoint();
 
   const submit = useMutation({
@@ -188,18 +203,35 @@ function QuestionsPage() {
         </Card>
       ) : (
         <>
-          <SectionTitle>Answers</SectionTitle>
+          <SectionTitle
+            action={
+              <Doodle
+                critter="cat"
+                pose={revealed ? "love" : "sleep"}
+                size={48}
+                className={celebrate ? "reveal-hop" : ""}
+              />
+            }
+          >
+            Answers
+          </SectionTitle>
           <ul className="space-y-3">
             <li className="card-soft p-4">
               <p className="text-xs font-bold text-muted-foreground">You</p>
               <p className="mt-1 whitespace-pre-wrap text-sm">{mine.body}</p>
             </li>
-            <li className="card-soft p-4">
+            <li className={celebrate ? "card-soft reveal-pop p-4" : "card-soft p-4"} aria-live="polite">
               <p className="text-xs font-bold text-muted-foreground">
                 {theirs ? nameOf(theirs.created_by) : "Your partner"}
               </p>
-              <p className="mt-1 whitespace-pre-wrap text-sm">
-                {revealed ? theirs!.body : "Hidden until they answer too 🤫"}
+              <p
+                className={
+                  revealed
+                    ? "mt-1 whitespace-pre-wrap text-sm"
+                    : "mt-1 text-sm text-muted-foreground"
+                }
+              >
+                {revealed ? theirs!.body : "Hidden until they answer too. No peeking!"}
               </p>
             </li>
           </ul>
@@ -300,7 +332,7 @@ function QuestionArchive({ today }: { today: string }) {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="press rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
+            className="min-h-11 press rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
           >
             {open ? "Hide" : "Open"}
           </button>
@@ -432,7 +464,7 @@ function MissedDay({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="press mt-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
+          className="min-h-11 press mt-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold"
         >
           Answer late
         </button>

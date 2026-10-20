@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
-import { AddPanel, Card, Field, PrimaryButton, SectionTitle, StreakChip, TextArea, TextInput } from "@/components/ui-kit";
+import { AddPanel, Card, EmptyState, Field, PrimaryButton, SectionTitle, StreakChip, TextArea, TextInput } from "@/components/ui-kit";
 import { streakFromDates, todayISO, useMarkSeen } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
@@ -118,7 +118,7 @@ function DiaryPage() {
 
       <SectionTitle action={streak ? <StreakChip days={streak} /> : undefined}>Entries</SectionTitle>
       {!entries || entries.length === 0 ? (
-        <Card className="text-sm text-muted-foreground">No entries yet.</Card>
+        <EmptyState title="No entries yet" text="Write something small about today — your partner sees it too." />
       ) : (
         <ul className="space-y-3">
           {entries.map((e) => (

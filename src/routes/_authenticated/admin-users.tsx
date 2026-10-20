@@ -42,7 +42,7 @@ function Toggle({
       type="button"
       disabled={disabled}
       onClick={onToggle}
-      className={`press rounded-full px-3 py-1.5 text-xs font-extrabold disabled:opacity-50 ${
+      className={`min-h-11 press rounded-full px-3 py-1.5 text-xs font-extrabold disabled:opacity-50 ${
         on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
       }`}
     >
@@ -80,7 +80,7 @@ function GrantRow({
           type="button"
           disabled={busy || !Number(days)}
           onClick={() => onDays(Number(days))}
-          className="press ml-auto rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-foreground disabled:opacity-50"
+          className="min-h-11 press ml-auto rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-foreground disabled:opacity-50"
         >
           Give premium
         </button>
@@ -99,7 +99,7 @@ function GrantRow({
           type="button"
           disabled={busy || !Number(pts)}
           onClick={() => onPoints(Number(pts))}
-          className="press ml-auto rounded-full bg-secondary px-3 py-1.5 text-xs font-extrabold disabled:opacity-50"
+          className="min-h-11 press ml-auto rounded-full bg-secondary px-3 py-1.5 text-xs font-extrabold disabled:opacity-50"
         >
           Send points
         </button>

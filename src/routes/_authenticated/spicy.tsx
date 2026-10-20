@@ -144,7 +144,7 @@ function DiceGame() {
               playChirp("tap");
               setTab(t.id);
             }}
-            className={`press rounded-2xl py-2 text-xs font-extrabold ${
+            className={`min-h-11 press rounded-2xl py-2 text-xs font-extrabold ${
               tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
             }`}
           >

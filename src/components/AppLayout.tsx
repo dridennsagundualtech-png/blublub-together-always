@@ -92,7 +92,7 @@ export function AppLayout({
         </div>
       </header>
 
-      <div className={`page-transition-root mx-auto max-w-lg px-5 ${slideClass}`}>
+      <main className={`page-transition-root mx-auto max-w-lg px-5 ${slideClass}`}>
         {!user ? (
           <Link
             to="/profile"
@@ -118,7 +118,7 @@ export function AppLayout({
             children
           )}
         </div>
-      </div>
+      </main>
 
       <BottomNav
         badges={{

@@ -148,7 +148,7 @@ function FoodPage() {
               playChirp("tap");
               setTab(t.id);
             }}
-            className={`press rounded-2xl py-2 text-xs font-extrabold ${
+            className={`min-h-11 press rounded-2xl py-2 text-xs font-extrabold ${
               tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
             }`}
           >
@@ -418,7 +418,7 @@ function CustomRoulette() {
             playChirp("tap");
             setPickerOpen((v) => !v);
           }}
-          className="press mt-3 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
+          className="min-h-11 press mt-3 flex w-full items-center justify-between rounded-2xl bg-secondary px-4 py-2.5 text-xs font-extrabold text-secondary-foreground"
         >
           <span className="inline-flex items-center gap-2">
             <ImageIcon className="size-4" />

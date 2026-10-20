@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { CalendarDays, Heart, Home, MessageCircle, Sofa } from "lucide-react";
 import { playChirp } from "@/hooks/use-sound";
 import { cn } from "@/lib/utils";
-import { MAIN_TAB_ROUTES, TAB_DIR_KEY } from "@/hooks/useSwipeTabs";
+import { TAB_DIR_KEY, activeTabFor, tabIndexForPath } from "@/hooks/useSwipeTabs";
 
 const ITEMS = [
   { to: "/", label: "Today", icon: Home },
@@ -13,30 +13,12 @@ const ITEMS = [
   { to: "/us", label: "Us", icon: Heart },
 ] as const;
 
-function tabIndexForPath(pathname: string): number {
-  if (pathname === "/") return 0;
-  let best = -1;
-  let bestLen = 0;
-  for (let i = 0; i < MAIN_TAB_ROUTES.length; i++) {
-    const r = MAIN_TAB_ROUTES[i]!;
-    if (r === "/") continue;
-    if ((pathname === r || pathname.startsWith(`${r}/`)) && r.length > bestLen) {
-      best = i;
-      bestLen = r.length;
-    }
-  }
-  return best;
-}
-
 /**
  * Bottom nav with GymMane-style liquid pill under the active tab.
  */
 export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>> }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const activeIdx = useMemo(() => {
-    const idx = tabIndexForPath(pathname);
-    return idx >= 0 ? idx : 0;
-  }, [pathname]);
+  const activeIdx = useMemo(() => activeTabFor(pathname), [pathname]);
 
   const count = ITEMS.length;
   const pillWidth = 100 / count;
@@ -56,58 +38,58 @@ export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>
         />
 
         <ul className="relative z-[1] flex items-center justify-between">
-          {ITEMS.map(({ to, label, icon: Icon }, i) => (
-            <li key={to} className="flex-1">
-              <Link
-                to={to}
-                onClick={() => {
-                  playChirp("tap");
-                  const from = tabIndexForPath(pathname);
-                  const dir = i >= from ? "left" : "right";
-                  try {
-                    sessionStorage.setItem(TAB_DIR_KEY, dir);
-                  } catch {
-                    /* ignore */
-                  }
-                }}
-                activeOptions={{ exact: to === "/" }}
-                activeProps={{ className: "text-primary-ink" }}
-                inactiveProps={{ className: "text-muted-foreground" }}
-                className="press flex flex-col items-center gap-0.5 py-1.5"
-              >
-                {({ isActive }) => (
-                  <>
-                    <span
-                      className={cn(
-                        "relative grid size-8 place-items-center transition-transform duration-300 ease-out",
-                        isActive && "nav-icon-lift",
-                      )}
-                    >
-                      <Icon
-                        className="size-5"
-                        strokeWidth={isActive ? 2.4 : 1.75}
-                        fill={isActive ? "currentColor" : "none"}
-                        fillOpacity={isActive ? 0.22 : 0}
-                      />
-                      {badges?.[to] ? (
-                        <span className="absolute right-0 top-0 size-1.5 rounded-full bg-destructive">
-                          <span className="sr-only">New</span>
-                        </span>
-                      ) : null}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-xs leading-none transition-all duration-300",
-                        isActive ? "font-bold" : "font-medium",
-                      )}
-                    >
-                      {label}
-                    </span>
-                  </>
-                )}
-              </Link>
-            </li>
-          ))}
+          {ITEMS.map(({ to, label, icon: Icon }, i) => {
+            const isActive = i === activeIdx;
+            return (
+              <li key={to} className="flex-1">
+                <Link
+                  to={to}
+                  onClick={() => {
+                    playChirp("tap");
+                    const from = tabIndexForPath(pathname);
+                    const dir = i >= from ? "left" : "right";
+                    try {
+                      sessionStorage.setItem(TAB_DIR_KEY, dir);
+                    } catch {
+                      /* ignore */
+                    }
+                  }}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "press flex flex-col items-center gap-0.5 py-1.5",
+                    isActive ? "text-primary-ink" : "text-muted-foreground",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "relative grid size-8 place-items-center transition-transform duration-300 ease-out",
+                      isActive && "nav-icon-lift",
+                    )}
+                  >
+                    <Icon
+                      className="size-5"
+                      strokeWidth={isActive ? 2.4 : 1.75}
+                      fill={isActive ? "currentColor" : "none"}
+                      fillOpacity={isActive ? 0.22 : 0}
+                    />
+                    {badges?.[to] ? (
+                      <span className="absolute right-0 top-0 size-1.5 rounded-full bg-destructive">
+                        <span className="sr-only">New</span>
+                      </span>
+                    ) : null}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-xs leading-none transition-all duration-300",
+                      isActive ? "font-bold" : "font-medium",
+                    )}
+                  >
+                    {label}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </nav>

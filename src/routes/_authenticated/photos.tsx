@@ -256,7 +256,7 @@ function PhotosPage() {
                 setOpenAlbum(null);
               }}
               className={cn(
-                "press flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-xs font-bold capitalize",
+                "min-h-11 press flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-xs font-bold capitalize",
                 tab === t ? "bg-card shadow-soft" : "text-muted-foreground",
               )}
             >
@@ -663,7 +663,7 @@ function PhotosPage() {
                   type="button"
                   onClick={() => setAddKind(k)}
                   className={cn(
-                    "press rounded-xl py-2 text-xs font-bold",
+                    "min-h-11 press rounded-xl py-2 text-xs font-bold",
                     addKind === k ? "bg-card shadow-soft" : "text-muted-foreground",
                   )}
                 >

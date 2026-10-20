@@ -2,7 +2,8 @@ import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "rea
 import { useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, Flame, Heart, Plus, X } from "lucide-react";
+import { ChevronRight, Flame, Plus, X } from "lucide-react";
+import { Doodle, type Critter } from "@/components/Doodles";
 import { cn } from "@/lib/utils";
 import { playChirp } from "@/hooks/use-sound";
 
@@ -133,14 +134,16 @@ export function EmptyState({
   text,
   title,
   action,
+  critter = "seal",
 }: {
   text: string;
   title?: string;
   action?: ReactNode;
+  critter?: Critter;
 }) {
   return (
-    <div className="surface-quiet flex flex-col items-center gap-2 px-5 py-10 text-center">
-      <div className="grid size-14 place-items-center rounded-full bg-primary/10 text-primary-ink"><Heart className="size-6" /></div>
+    <div className="surface-quiet flex flex-col items-center gap-2 px-5 py-8 text-center">
+      <Doodle critter={critter} pose="peek" size={72} />
       {title ? <p className="font-display text-base font-extrabold">{title}</p> : null}
       <p className="max-w-xs text-sm text-muted-foreground">{text}</p>
       {action}

@@ -38,7 +38,7 @@ function isBlockedTarget(target: EventTarget | null): boolean {
   );
 }
 
-function tabIndexForPath(pathname: string): number {
+export function tabIndexForPath(pathname: string): number {
   if (pathname === "/") return 0;
   let best = -1;
   let bestLen = 0;
@@ -51,6 +51,13 @@ function tabIndexForPath(pathname: string): number {
     }
   }
   return best;
+}
+
+/** Tab to highlight: a main tab itself, else the tab its page lives under (most live in Us). */
+export function activeTabFor(pathname: string): number {
+  const idx = tabIndexForPath(pathname);
+  if (idx >= 0) return idx;
+  return MAIN_TAB_ROUTES.indexOf(pathname.startsWith("/spicy") ? "/games" : "/us");
 }
 
 type Start = { x: number; y: number; blocked: boolean };

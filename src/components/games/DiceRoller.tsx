@@ -170,7 +170,7 @@ function RoundTimer() {
               setLeft(s);
               setRunning(false);
             }}
-            className={`press rounded-full px-3 py-1.5 text-xs font-bold ${
+            className={`min-h-11 press rounded-full px-3 py-1.5 text-xs font-bold ${
               total === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}
           >

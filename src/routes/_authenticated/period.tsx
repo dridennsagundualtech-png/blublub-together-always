@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, Field, PrimaryButton, SectionTitle, TextInput, Switch } from "@/components/ui-kit";
+import { Card, EmptyState, Field, PrimaryButton, SectionTitle, TextInput, Switch } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { useAuthUser, useCoupleId, useProfile, useRefreshSession, usePartner } from "@/lib/session";
 
@@ -172,7 +172,7 @@ function PeriodPage() {
 
       <SectionTitle>Your history</SectionTitle>
       {myLogs.length === 0 ? (
-        <Card className="text-sm text-muted-foreground">No logs yet.</Card>
+        <EmptyState title="No logs yet" text="Log the first day of a period to see predictions here." critter="cat" />
       ) : (
         <ul className="space-y-2">
           {myLogs.map((l) => (
