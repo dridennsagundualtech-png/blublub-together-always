@@ -15,7 +15,62 @@ export type BoxOverride = {
   image?: string;
 };
 
+/** App-wide styles. They change shapes, fonts, materials and motion — never the couple's colours. */
+export const SKINS = [
+  {
+    id: "classic",
+    name: "Classic",
+    blurb: "Soft and rounded — the BLUBLUB you know",
+    premium: false,
+  },
+  {
+    id: "pixel",
+    name: "Pixel",
+    blurb: "Pixel frames, pixel font and sprite-style motion",
+    premium: true,
+  },
+  {
+    id: "jelly",
+    name: "Jelly",
+    blurb: "Glossy candy shapes that squish when you tap",
+    premium: true,
+  },
+  {
+    id: "glass",
+    name: "Glass",
+    blurb: "Frosted see-through cards over your colours",
+    premium: true,
+  },
+  {
+    id: "scrapbook",
+    name: "Scrapbook",
+    blurb: "Paper, washi tape, polaroids, handwritten titles",
+    premium: true,
+  },
+  {
+    id: "cyberpunk",
+    name: "Cyberpunk",
+    blurb: "Dark city, neon edges, cut corners, scanlines",
+    premium: true,
+  },
+  {
+    id: "steampunk",
+    name: "Steampunk",
+    blurb: "Brass trim, rivets, parchment and old-print type",
+    premium: true,
+  },
+  {
+    id: "nature",
+    name: "Nature",
+    blurb: "Leaf-shaped cards, soft serif titles, faint leaves",
+    premium: true,
+  },
+] as const;
+export type SkinId = (typeof SKINS)[number]["id"];
+
 export type ThemeMap = {
+  /** App-wide style (shared by the couple, like the colours). */
+  skin: SkinId;
   main: string;
   soft: string;
   purple: string;
@@ -46,6 +101,7 @@ export type ThemePreset = {
 };
 
 export const THEME_DEFAULTS: ThemeMap = {
+  skin: "classic",
   main: "#FFAFCC",
   soft: "#FFC8DD",
   purple: "#CDB4DB",
@@ -214,6 +270,7 @@ export function gradientEnabledFor(map: ThemeMap, pathname: string): boolean {
 
 export function applyColors(map: ThemeMap, pathname?: string) {
   const root = document.documentElement;
+  root.dataset["skin"] = map.skin ?? "classic";
   root.style.setProperty("--primary", map.main);
   root.style.setProperty("--ring", map.main);
   root.style.setProperty("--sidebar-primary", map.main);
@@ -407,6 +464,7 @@ export function normalizeTheme(raw: unknown): ThemeMap {
     }
   }
   return {
+    skin: SKINS.some((k) => k.id === o["skin"]) ? (o["skin"] as SkinId) : "classic",
     main: str("main") || THEME_DEFAULTS.main,
     soft: str("soft") || THEME_DEFAULTS.soft,
     purple: str("purple") || THEME_DEFAULTS.purple,

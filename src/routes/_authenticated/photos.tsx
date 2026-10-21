@@ -28,6 +28,7 @@ import { Card, Field, PrimaryButton, TextArea, TextInput } from "@/components/ui
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
 import { cn } from "@/lib/utils";
+import { ReactionGlyph, StyleIcon } from "@/components/pixel-art";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
 
 const FREE_BATCH = 1;
@@ -48,6 +49,8 @@ export const Route = createFileRoute("/_authenticated/photos")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { view?: "feed" } =>
+    search["view"] === "feed" ? { view: "feed" } : {},
   component: PhotosPage,
 });
 
@@ -78,7 +81,8 @@ function PhotosPage() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [addKind, setAddKind] = useState<"photo" | "text">("photo");
   const [postBody, setPostBody] = useState("");
-  const [tab, setTab] = useState<"albums" | "feed">("albums");
+  const { view } = Route.useSearch();
+  const [tab, setTab] = useState<"albums" | "feed">(view === "feed" ? "feed" : "albums");
   const [openAlbum, setOpenAlbum] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [dateFilter, setDateFilter] = useState("");
@@ -246,21 +250,31 @@ function PhotosPage() {
   return (
     <AppLayout title="Memories" subtitle="Your shared gallery" critter="seal">
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex flex-1 gap-1 rounded-full bg-muted p-1">
+        <div
+          className="flex flex-1 gap-1 rounded-full bg-muted p-1"
+          role="tablist"
+          aria-label="Memories view"
+        >
           {(["albums", "feed"] as const).map((t) => (
             <button
               key={t}
               type="button"
+              role="tab"
+              aria-selected={tab === t}
               onClick={() => {
                 setTab(t);
                 setOpenAlbum(null);
               }}
               className={cn(
-                "press flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-xs font-bold capitalize",
+                "press flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-xs font-bold capitalize",
                 tab === t ? "bg-card shadow-soft" : "text-muted-foreground",
               )}
             >
-              {t === "albums" ? <Images className="size-4" /> : <Rows3 className="size-4" />}
+              {t === "albums" ? (
+                <StyleIcon pixel="album" icon={Images} className="size-4" />
+              ) : (
+                <StyleIcon pixel="images" icon={Rows3} className="size-4" />
+              )}
               {t}
             </button>
           ))}
@@ -274,7 +288,7 @@ function PhotosPage() {
             (sortOrder === "oldest" || dateFilter) && "border-primary text-primary",
           )}
         >
-          <ArrowUpDown className="size-5" />
+          <StyleIcon pixel="sort" icon={ArrowUpDown} />
         </button>
         <button
           type="button"
@@ -282,7 +296,7 @@ function PhotosPage() {
           onClick={() => setUploadOpen(true)}
           className="press grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-float"
         >
-          <Plus className="size-5" />
+          <StyleIcon pixel="plus" icon={Plus} />
         </button>
       </div>
 
@@ -303,7 +317,19 @@ function PhotosPage() {
         </div>
       ) : null}
 
-      {all.length === 0 ? (
+      {photos === undefined ? (
+        <ul className="space-y-5" aria-label="Loading memories">
+          {[0, 1].map((i) => (
+            <li key={i} className="card-soft overflow-hidden p-0">
+              <div className="flex items-center gap-3 px-3 py-2.5">
+                <span className="size-9 animate-pulse rounded-full bg-muted" />
+                <span className="h-4 w-1/2 animate-pulse rounded-full bg-muted" />
+              </div>
+              <div className="aspect-[4/5] w-full animate-pulse bg-muted" />
+            </li>
+          ))}
+        </ul>
+      ) : all.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 px-6 py-10 text-center">
           <span className="grid size-16 place-items-center rounded-full bg-primary/10 text-primary">
             <Images className="size-7" />
@@ -333,150 +359,16 @@ function PhotosPage() {
           )}
         </Card>
       ) : tab === "feed" ? (
-        <ul className="space-y-4">
+        <ul className="space-y-5">
           {buildFeedPosts(all, sortOrder).map((post) => (
-            <li key={post.key} className="card-soft overflow-hidden p-0">
-              {/* Instagram-style post header */}
-              <div className="flex items-center gap-3 px-3 py-2.5">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-sm font-extrabold text-primary">
-                  {(post.kind === "carousel"
-                    ? post.albumName
-                    : post.photo.caption || post.photo.body || "M"
-                  )
-                    .trim()
-                    .charAt(0)
-                    .toUpperCase() || "♥"}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold leading-tight">
-                    {post.kind === "carousel"
-                      ? post.albumName
-                      : post.photo.caption || (post.photo.body ? "Note" : "Memory")}
-                  </p>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {post.kind === "carousel"
-                      ? `${post.photos[0]?.taken_on ?? ""} · ${post.photos.length} photos`
-                      : post.photo.taken_on}
-                    {post.kind === "single" && post.photo.location
-                      ? ` · ${post.photo.location}`
-                      : ""}
-                  </p>
-                </div>
-                {post.kind === "single" && post.photo.is_pinned ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-foreground">
-                    <Pin className="size-3" />
-                  </span>
-                ) : null}
-              </div>
-
-              {post.kind === "carousel" ? (
-                <AlbumCarousel photos={post.photos} onOpen={setOpen} />
-              ) : post.photo.url ? (
-                <img
-                  src={post.photo.url}
-                  alt={post.photo.caption ?? "Shared memory"}
-                  loading="lazy"
-                  className="aspect-[4/5] w-full object-cover"
-                />
-              ) : post.photo.body ? (
-                <div className="bg-gradient-to-br from-primary/10 via-accent/30 to-peach/40 px-5 py-10">
-                  <p className="whitespace-pre-wrap break-words text-center text-base font-medium leading-relaxed">
-                    {post.photo.body}
-                  </p>
-                </div>
-              ) : null}
-
-              <div className="p-4 pt-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    {post.kind === "carousel" && post.photos[0]?.caption ? (
-                      <p className="text-sm">
-                        <span className="font-bold">{post.albumName} </span>
-                        {post.photos[0].caption}
-                      </p>
-                    ) : post.kind === "single" && post.photo.caption && post.photo.url ? (
-                      <p className="text-sm">
-                        <span className="font-bold">Memory </span>
-                        {post.photo.caption}
-                      </p>
-                    ) : null}
-                    {post.kind === "single" && post.photo.body && post.photo.url ? (
-                      <p className="mt-1 whitespace-pre-wrap break-words text-sm">{post.photo.body}</p>
-                    ) : null}
-                    {post.kind === "carousel" ? (
-                      <p className="mt-1 text-xs font-semibold text-muted-foreground">
-                        Album · {post.photos.length} photos
-                      </p>
-                    ) : post.photo.album ? (
-                      <p className="mt-1 text-xs font-semibold text-muted-foreground">
-                        Album · {post.photo.album}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  {post.kind === "single" ? (
-                    <div className="flex shrink-0 gap-1">
-                      <button
-                        type="button"
-                        aria-label={post.photo.is_pinned ? "Unpin post" : "Pin post"}
-                        onClick={() => pin.mutate(post.photo)}
-                        className={cn(
-                          "press grid size-9 place-items-center rounded-full border border-border",
-                          post.photo.is_pinned
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground",
-                        )}
-                      >
-                        <Pin className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Edit post"
-                        onClick={() => setOpen(post.photo)}
-                        className="press grid size-9 place-items-center rounded-full border border-border text-muted-foreground"
-                      >
-                        <Pencil className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Delete post"
-                        disabled={removePost.isPending}
-                        onClick={() => {
-                          if (window.confirm("Delete this post for both of you?"))
-                            removePost.mutate(post.photo);
-                        }}
-                        className="press grid size-9 place-items-center rounded-full border border-border text-destructive disabled:opacity-50"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-
-                {(post.kind === "carousel"
-                  ? post.photos[0]?.location
-                  : post.photo.location) ? (
-                  <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
-                    <MapPin className="size-3.5" />
-                    {post.kind === "carousel"
-                      ? post.photos[0]?.location
-                      : post.photo.location}
-                  </p>
-                ) : null}
-
-                <ReactionBar
-                  postId={
-                    post.kind === "carousel" ? (post.photos[0]?.id ?? "") : post.photo.id
-                  }
-                />
-                <PhotoComments
-                  photoId={
-                    post.kind === "carousel" ? (post.photos[0]?.id ?? "") : post.photo.id
-                  }
-                />
-
-              </div>
-            </li>
+            <FeedPostCard
+              key={post.key}
+              post={post}
+              onOpen={setOpen}
+              onPin={(photo) => pin.mutate(photo)}
+              onDelete={(photo) => removePost.mutate(photo)}
+              deleting={removePost.isPending}
+            />
           ))}
         </ul>
       ) : openAlbum ? (
@@ -873,20 +765,156 @@ function buildFeedPosts(
   return posts;
 }
 
+const shortDate = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+/** One feed post in the pixel style. In an album post, reactions and comments belong to
+ *  the picture you've swiped to, so every picture has its own. */
+function FeedPostCard({
+  post,
+  onOpen,
+  onPin,
+  onDelete,
+  deleting,
+}: {
+  post: FeedPost;
+  onOpen: (p: PhotoWithUrl) => void;
+  onPin: (p: PhotoWithUrl) => void;
+  onDelete: (p: PhotoWithUrl) => void;
+  deleting: boolean;
+}) {
+  const photos = post.kind === "carousel" ? post.photos : [post.photo];
+  const [index, setIndex] = useState(0);
+  const active = photos[Math.min(index, photos.length - 1)]!;
+  const title =
+    post.kind === "carousel"
+      ? post.albumName
+      : post.photo.caption || (post.photo.body ? "Note" : "Memory");
+  const many = photos.length > 1;
+
+  return (
+    <li className="card-soft overflow-hidden p-0">
+      <div className="flex items-center gap-3 px-3 py-2.5">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-sm font-extrabold text-primary">
+          {title.trim().charAt(0).toUpperCase() || "M"}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold leading-tight">{title}</p>
+          <p className="truncate text-[11px] text-muted-foreground">
+            {shortDate(active.taken_on)}
+            {many ? ` · ${photos.length} photos` : ""}
+          </p>
+        </div>
+        {active.is_pinned ? (
+          <span className="text-primary" aria-label="Pinned">
+            <StyleIcon pixel="bookmark" icon={Pin} className="size-4" />
+          </span>
+        ) : null}
+      </div>
+
+      {post.kind === "carousel" ? (
+        <AlbumCarousel photos={post.photos} onOpen={onOpen} onIndexChange={setIndex} />
+      ) : post.photo.url ? (
+        <button type="button" className="block w-full" onClick={() => onOpen(post.photo)}>
+          <img
+            src={post.photo.url}
+            alt={post.photo.caption ?? "Shared memory"}
+            loading="lazy"
+            className="aspect-[4/5] w-full object-cover"
+          />
+        </button>
+      ) : post.photo.body ? (
+        <div className="tile-peach px-5 py-10">
+          <p className="whitespace-pre-wrap break-words text-center text-base font-medium leading-relaxed">
+            {post.photo.body}
+          </p>
+        </div>
+      ) : null}
+
+      <div className="p-3">
+        {active.caption && active.url && post.kind === "carousel" ? (
+          <p className="text-sm">{active.caption}</p>
+        ) : null}
+        {active.body && active.url ? (
+          <p className="mt-1 whitespace-pre-wrap break-words text-sm">{active.body}</p>
+        ) : null}
+        {active.location ? (
+          <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
+            <StyleIcon pixel="mapPin" icon={MapPin} className="size-3.5" />
+            {active.location}
+          </p>
+        ) : null}
+
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <ReactionBar key={`r-${active.id}`} postId={active.id} />
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              aria-label={active.is_pinned ? "Unpin" : "Pin"}
+              onClick={() => onPin(active)}
+              className={cn(
+                "press grid size-9 place-items-center rounded-full border border-border",
+                active.is_pinned
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card text-muted-foreground",
+              )}
+            >
+              <StyleIcon pixel="bookmark" icon={Pin} className="size-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Edit"
+              onClick={() => onOpen(active)}
+              className="press grid size-9 place-items-center rounded-full border border-border bg-card text-muted-foreground"
+            >
+              <StyleIcon pixel="pencil" icon={Pencil} className="size-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Delete"
+              disabled={deleting}
+              onClick={() => {
+                if (window.confirm("Delete this picture for both of you?")) onDelete(active);
+              }}
+              className="press grid size-9 place-items-center rounded-full border border-border bg-card text-destructive disabled:opacity-50"
+            >
+              <StyleIcon pixel="trash" icon={Trash2} className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        <PhotoComments
+          key={`c-${active.id}`}
+          photoId={active.id}
+          label={many ? `Photo ${index + 1} of ${photos.length}` : undefined}
+        />
+      </div>
+    </li>
+  );
+}
+
 function AlbumCarousel({
   photos,
   onOpen,
+  onIndexChange,
 }: {
   photos: PhotoWithUrl[];
   onOpen: (p: PhotoWithUrl) => void;
+  onIndexChange?: (i: number) => void;
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
   const [index, setIndex] = useState(0);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
-    setIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+    const i = emblaApi.selectedScrollSnap();
+    setIndex(i);
+    onIndexChange?.(i);
+  }, [emblaApi, onIndexChange]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -940,7 +968,7 @@ function AlbumCarousel({
       ) : null}
 
       {photos.length > 1 ? (
-        <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white backdrop-blur-sm">
+        <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white">
           {index + 1}/{photos.length}
         </span>
       ) : null}
@@ -1153,7 +1181,7 @@ function PhotoDetail({
   );
 }
 
-function PhotoComments({ photoId }: { photoId: string }) {
+function PhotoComments({ photoId, label }: { photoId: string; label?: string | undefined }) {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
   const { data: members } = useMembers();
@@ -1206,12 +1234,13 @@ function PhotoComments({ photoId }: { photoId: string }) {
     members?.find((m) => m.id === id)?.display_name ?? (id === user?.id ? "You" : "Partner");
 
   return (
-    <div className="mt-3 border-t border-border pt-3">
-      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-        <MessageCircle className="size-3.5" />
+    <div className="mt-4 border-t border-border pt-3">
+      <p className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+        <StyleIcon pixel="comment" icon={MessageCircle} className="size-4" />
         {comments?.length
           ? `${comments.length} comment${comments.length > 1 ? "s" : ""}`
           : "Comments"}
+        {label ? <span className="ml-auto text-xs">{label}</span> : null}
       </p>
 
       {comments && comments.length > 0 ? (
@@ -1227,9 +1256,9 @@ function PhotoComments({ photoId }: { photoId: string }) {
                   type="button"
                   aria-label="Delete comment"
                   onClick={() => remove.mutate(c.id)}
-                  className="press mt-0.5 shrink-0 text-muted-foreground"
+                  className="press -m-2 grid size-9 shrink-0 place-items-center text-muted-foreground"
                 >
-                  <Trash2 className="size-3.5" />
+                  <StyleIcon pixel="trash" icon={Trash2} className="size-3.5" />
                 </button>
               ) : null}
             </li>
@@ -1238,26 +1267,27 @@ function PhotoComments({ photoId }: { photoId: string }) {
       ) : null}
 
       <form
-        className="mt-2 flex items-center gap-2"
+        className="mt-3 flex items-center gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           add.mutate();
         }}
       >
-        <TextInput
+        <input
           value={body}
           onChange={(e) => setBody(e.target.value)}
           maxLength={300}
           placeholder="Say something sweet…"
-          className="!py-2 text-sm"
+          aria-label="Write a comment"
+          className="min-w-0 flex-1 rounded-full border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         <button
           type="submit"
           disabled={!body.trim() || add.isPending}
           aria-label="Post comment"
-          className="press grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"
+          className="press grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"
         >
-          <Send className="size-4" />
+          <StyleIcon pixel="send" icon={Send} className="size-4" />
         </button>
       </form>
     </div>
@@ -1265,9 +1295,9 @@ function PhotoComments({ photoId }: { photoId: string }) {
 }
 
 const REACTIONS = [
-  { kind: "heart", emoji: "💗", label: "Heart" },
-  { kind: "laugh", emoji: "😆", label: "Laugh" },
-  { kind: "hug", emoji: "🤗", label: "Hug" },
+  { kind: "heart", label: "Heart" },
+  { kind: "laugh", label: "Laugh" },
+  { kind: "hug", label: "Hug" },
 ] as const;
 
 function ReactionBar({ postId }: { postId: string }) {
@@ -1309,7 +1339,7 @@ function ReactionBar({ postId }: { postId: string }) {
   });
 
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2">
       {REACTIONS.map((r) => {
         const list = (rows ?? []).filter((x) => x.kind === r.kind);
         const mine = list.some((x) => x.user_id === user?.id);
@@ -1317,14 +1347,17 @@ function ReactionBar({ postId }: { postId: string }) {
           <button
             key={r.kind}
             type="button"
-            aria-label={r.label}
+            aria-label={`${r.label}${list.length ? ` (${list.length})` : ""}`}
+            aria-pressed={mine}
             onClick={() => toggle.mutate(r.kind)}
             className={cn(
-              "press flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm",
-              mine ? "border-primary bg-primary/10 font-bold text-primary" : "border-border",
+              "press flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-sm",
+              mine
+                ? "border-primary bg-primary/10 font-bold text-primary"
+                : "border-border bg-card",
             )}
           >
-            <span>{r.emoji}</span>
+            <ReactionGlyph key={mine ? "on" : "off"} kind={r.kind} popped={mine} />
             {list.length > 0 ? <span className="text-xs">{list.length}</span> : null}
           </button>
         );

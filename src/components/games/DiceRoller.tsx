@@ -5,7 +5,30 @@ import { playChirp } from "@/hooks/use-sound";
 
 export type DieDef = { label: string; sides: string[]; tone: string };
 
-/** Animated multi-die roller with an optional shared countdown timer. */
+const THROW: Keyframe[] = [
+  { transform: "translateY(0) scale(1)" },
+  { transform: "translateY(6%) scale(1.04, 0.94)", offset: 0.12 },
+  { transform: "translateY(-62%) scale(0.96, 1.04)", offset: 0.38 },
+  { transform: "translateY(0) scale(1.06, 0.92)", offset: 0.66 },
+  { transform: "translateY(-14%) scale(0.98, 1.02)", offset: 0.78 },
+  { transform: "translateY(0) scale(1.02, 0.98)", offset: 0.9 },
+  { transform: "translateY(0) scale(1)" },
+];
+const SHADOW: Keyframe[] = [
+  { transform: "scale(1)", opacity: 1 },
+  { transform: "scale(1)", opacity: 1, offset: 0.12 },
+  { transform: "scale(0.55)", opacity: 0.45, offset: 0.38 },
+  { transform: "scale(1.05)", opacity: 1, offset: 0.66 },
+  { transform: "scale(0.85)", opacity: 0.8, offset: 0.78 },
+  { transform: "scale(1)", opacity: 1 },
+];
+const ROLL_MS = 1350;
+const STAGGER_MS = 120;
+
+const reducedMotion = () =>
+  typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/** Real 3D dice: thrown, tumbling, landing face-up on the result. Optional shared countdown timer. */
 export function DiceRoller({
   dice,
   withTimer = false,
@@ -17,44 +40,64 @@ export function DiceRoller({
   cta?: string;
   footnote?: string;
 }) {
-  const [faces, setFaces] = useState<number[]>(() => dice.map(() => 0));
-  const [rolled, setRolled] = useState(false);
+  const [results, setResults] = useState<number[] | null>(null);
+  const [reveal, setReveal] = useState(false);
   const [rolling, setRolling] = useState(false);
-  const [nonce, setNonce] = useState(0);
+  const [rot, setRot] = useState(() => dice.map(() => ({ x: -12, y: 18 })));
+  const throwRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const shadowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
-    return () => {
-      timers.current.forEach((id) => window.clearInterval(id));
-      timers.current.forEach((id) => window.clearTimeout(id));
-    };
+    return () => timers.current.forEach((id) => window.clearTimeout(id));
   }, []);
 
   function roll() {
     if (rolling) return;
     playChirp("pop");
-    setRolling(true);
-    setRolled(false);
+    const next = dice.map((d) => Math.floor(Math.random() * d.sides.length));
+    setResults(next);
 
-    // Fast face scramble (feels like sides flashing past)
-    const spin = window.setInterval(() => {
-      setFaces(dice.map((d) => Math.floor(Math.random() * d.sides.length)));
-    }, 55);
-    timers.current.push(spin);
-
-    // Stagger final settle per die for a cascade
-    const duration = 1400;
-    const settle = window.setTimeout(() => {
-      window.clearInterval(spin);
-      const final = dice.map((d) => Math.floor(Math.random() * d.sides.length));
-      setFaces(final);
-      setRolling(false);
-      setRolled(true);
-      setNonce((n) => n + 1);
+    if (reducedMotion()) {
+      setReveal(true);
       playChirp("success");
-    }, duration);
-    timers.current.push(settle);
+      return;
+    }
+
+    setReveal(false);
+    setRolling(true);
+    // Whole turns on both axes: a real tumble that lands front-up with the same slight tilt.
+    setRot((prev) =>
+      prev.map((r, i) => ({
+        x: r.x + 360 * (2 + (i % 2)) * (i % 2 ? -1 : 1),
+        y: r.y + 360 * (2 + ((i + 1) % 2)) * (i % 3 ? 1 : -1),
+      })),
+    );
+    dice.forEach((_, i) => {
+      const opts = {
+        duration: ROLL_MS,
+        delay: i * STAGGER_MS,
+        easing: "cubic-bezier(0.3, 0.7, 0.4, 1)",
+      };
+      throwRefs.current[i]?.animate(THROW, opts);
+      shadowRefs.current[i]?.animate(SHADOW, opts);
+    });
+    // The result goes on the front face once it has spun out of view.
+    timers.current.push(window.setTimeout(() => setReveal(true), 160));
+    timers.current.push(
+      window.setTimeout(
+        () => {
+          setRolling(false);
+          navigator.vibrate?.(25);
+          playChirp("success");
+        },
+        ROLL_MS + (dice.length - 1) * STAGGER_MS,
+      ),
+    );
   }
+
+  const size = dice.length > 2 ? "5.5rem" : dice.length === 2 ? "7rem" : "8rem";
+  const landed = !!results && reveal && !rolling;
 
   return (
     <Card className="text-center">
@@ -63,39 +106,76 @@ export function DiceRoller({
           dice.length > 2 ? "grid-cols-3" : dice.length === 2 ? "grid-cols-2" : "grid-cols-1"
         }`}
       >
-        {dice.map((d, i) => (
-          <div key={d.label} className="min-w-0">
-            <p className="mb-1.5 truncate text-[10px] font-extrabold uppercase tracking-wide text-muted-foreground">
-              {d.label}
-            </p>
-            <div className="dice-scene mx-auto aspect-square w-full max-w-[7.5rem]">
+        {dice.map((d, i) => {
+          const res = results?.[i] ?? 0;
+          // The other five faces show other options, so it reads as a real die while it spins.
+          const other = (k: number) => d.sides[(res + k) % d.sides.length];
+          const faceCls = `die-face ${d.tone}`;
+          return (
+            <div key={d.label} className="min-w-0">
+              <p className="mb-1 truncate text-[10px] font-extrabold uppercase tracking-wide text-muted-foreground">
+                {d.label}
+              </p>
               <div
-                key={`${d.label}-${nonce}-${rolling ? "r" : "s"}`}
-                className={`dice-body ${d.tone} ${
-                  rolling ? "dice-is-rolling" : rolled ? "dice-is-settled" : ""
-                }`}
-                style={
-                  {
-                    // stagger so dice don't spin in perfect sync
-                    "--dice-delay": `${i * 70}ms`,
-                    "--dice-spin-x": i % 2 === 0 ? 1 : -1,
-                    "--dice-spin-y": i % 3 === 0 ? -1 : 1,
-                  } as CSSProperties
-                }
+                className={`die-stage ${landed ? "die-landed" : ""}`}
+                style={{ "--die": size, "--die-delay": `${i * STAGGER_MS}ms` } as CSSProperties}
               >
-                <span
-                  className={`dice-face-text ${rolling ? "dice-text-blur" : ""}`}
+                <div
+                  className="die-shadow"
+                  ref={(el) => {
+                    shadowRefs.current[i] = el;
+                  }}
+                  aria-hidden
+                />
+                <div
+                  className="die-throw"
+                  ref={(el) => {
+                    throwRefs.current[i] = el;
+                  }}
                 >
-                  {rolled || rolling ? d.sides[faces[i] ?? 0] : "?"}
-                </span>
-                {/* faux edge highlights for a cube feel */}
-                <span className="dice-edge dice-edge-tl" aria-hidden />
-                <span className="dice-edge dice-edge-br" aria-hidden />
+                  <div
+                    className="die-cube"
+                    style={{
+                      transform: `rotateX(${rot[i]?.x ?? 0}deg) rotateY(${rot[i]?.y ?? 0}deg)`,
+                    }}
+                  >
+                    <span className={`${faceCls} die-face-front`}>
+                      {results && reveal ? d.sides[res] : "?"}
+                    </span>
+                    <span className={`${faceCls} die-face-back`} aria-hidden>
+                      {other(1)}
+                    </span>
+                    <span className={`${faceCls} die-face-right`} aria-hidden>
+                      {other(2)}
+                    </span>
+                    <span className={`${faceCls} die-face-left`} aria-hidden>
+                      {other(3)}
+                    </span>
+                    <span className={`${faceCls} die-face-top`} aria-hidden>
+                      {other(4)}
+                    </span>
+                    <span className={`${faceCls} die-face-bottom`} aria-hidden>
+                      {other(5)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      <p className="sr-only" aria-live="polite">
+        {landed ? dice.map((d, i) => d.sides[results![i] ?? 0]).join(", ") : ""}
+      </p>
+      {landed ? (
+        <p
+          key={results!.join("-")}
+          className="dice-result mt-3 text-sm font-extrabold text-foreground"
+        >
+          {dice.map((d, i) => d.sides[results![i] ?? 0]).join(" · ")}
+        </p>
+      ) : null}
 
       <div className="mt-5">
         <PrimaryButton disabled={rolling} onClick={roll}>

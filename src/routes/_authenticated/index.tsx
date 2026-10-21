@@ -1,17 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  CalendarDays,
-  Gamepad2,
-  Heart,
-  Images,
-  MapPin,
-  MessageCircle,
-} from "lucide-react";
+import type { ReactNode } from "react";
+import { ChevronRight, Heart, Images, MapPin, UtensilsCrossed } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Doodle } from "@/components/Doodles";
-import { FeelingTile } from "@/components/FeelingTile";
+import type { FeelingRow } from "@/components/FeelingTile";
+import { ProgressBar, ProgressRing } from "@/components/ui-kit";
+import { FEELING_BY_KEY, decodeFeeling } from "@/lib/feelings";
+import { timeAgo } from "@/lib/location";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
@@ -160,169 +157,220 @@ function HomePage() {
       .map((d) => ({ title: d.title, date: d.date })),
   ].sort((a, b) => a.date.localeCompare(b.date))[0];
 
-  const name = profile?.display_name ?? "there";
+  const { data: lists } = useQuery({
+    queryKey: ["home-lists", coupleId],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const [todos, bucket] = await Promise.all([
+        supabase.from("todos").select("done").eq("couple_id", coupleId!),
+        supabase.from("bucket_list").select("done").eq("couple_id", coupleId!),
+      ]);
+      if (todos.error) throw todos.error;
+      if (bucket.error) throw bucket.error;
+      return { todos: todos.data ?? [], bucket: bucket.data ?? [] };
+    },
+  });
+
+  const name = profile?.display_name;
+  const partnerName = partner?.display_name ?? "your partner";
+  const answeredCount = (iAnswered ? 1 : 0) + (partnerAnswered ? 1 : 0);
+  const todoDone = (lists?.todos ?? []).filter((t) => t.done).length;
+  const todoTotal = lists?.todos.length ?? 0;
+  const bucketDone = (lists?.bucket ?? []).filter((b) => b.done).length;
+  const bucketTotal = lists?.bucket.length ?? 0;
+  const anniversaryPct =
+    untilAnniversary === null ? 0 : Math.round(((365 - untilAnniversary) / 365) * 100);
 
   return (
     <AppLayout title="BLUBLUB" subtitle={partner ? `With ${partner.display_name}` : "Your space"}>
-      <div className="flex items-start justify-between gap-3 pb-4 pt-1">
+      {/* Greeting */}
+      <div className="flex items-center justify-between gap-3 pb-5 pt-1">
         <div className="min-w-0 flex-1">
-          <p className="font-display text-[1.65rem] font-bold leading-tight tracking-tight text-foreground">
-            {greetingForHour()}, {name}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {days !== null ? `Day ${days} together — make it count` : "We wish you a good day"}
+          <p className="text-sm text-muted-foreground">{greetingForHour()}</p>
+          <p className="truncate font-display text-[1.65rem] font-bold leading-tight tracking-tight text-foreground">
+            {name ?? "Hello!"}
           </p>
         </div>
         <NotificationBell className="shrink-0" />
       </div>
 
-      {/* 2 feature tiles — theme tokens */}
-      <div className="grid grid-cols-2 gap-3">
-        <Link
-          to="/questions"
-          className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] bg-primary p-4 text-primary-foreground"
-        >
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Daily</p>
-            <p className="mt-1 font-display text-lg font-bold leading-snug">Question</p>
-            <p className="mt-1 text-[11px] opacity-90">{questionHint}</p>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <Doodle critter="cat" pose="wave" size={44} className="opacity-90" />
-            <span className="rounded-full bg-card px-3 py-1.5 text-[11px] font-bold text-card-foreground">
-              {questionCta}
-            </span>
-          </div>
-          {badges?.question ? (
-            <span className="absolute right-3 top-3 size-2 rounded-full bg-card" />
-          ) : null}
-        </Link>
+      {/* Hero: the one thing to do today */}
+      <Link
+        to="/questions"
+        className="press relative flex items-center gap-4 overflow-hidden rounded-[1.5rem] bg-primary p-5 text-primary-foreground shadow-float"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-lg font-bold leading-snug">Today&apos;s question</p>
+          <p className="mt-1 text-sm opacity-90">{questionHint}</p>
+          <span className="mt-4 inline-flex rounded-full bg-card px-4 py-2 text-xs font-bold text-card-foreground">
+            {questionCta}
+          </span>
+        </div>
+        <ProgressRing
+          value={(answeredCount / 2) * 100}
+          size={76}
+          stroke={7}
+          label={`${answeredCount}/2`}
+          trackClassName="stroke-card/40"
+          barClassName="stroke-card"
+        />
+        {badges?.question ? (
+          <span className="absolute right-3 top-3 size-2 rounded-full bg-card" />
+        ) : null}
+      </Link>
 
+      {/* Together — its own card */}
+      {days !== null || untilAnniversary !== null ? (
         <Link
-          to="/photos"
-          className="grad-box press relative flex min-h-[168px] flex-col justify-between overflow-hidden rounded-[1.25rem] tile-peach p-4 text-foreground"
+          to="/calendar"
+          className="card-soft press mt-4 grid grid-cols-2 divide-x divide-border/60"
+          data-theme-box="home-together"
         >
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Album
-            </p>
-            <p className="mt-1 font-display text-lg font-bold leading-snug">Memories</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {latestPhoto ? "See your latest" : "Add a moment"}
-            </p>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            {latestPhoto?.url ? (
-              <img
-                src={latestPhoto.url}
-                alt=""
-                className="size-11 rounded-xl object-cover ring-2 ring-card/60"
-              />
-            ) : (
-              <Images className="size-8 text-primary opacity-80" />
-            )}
-            <span className="rounded-full bg-card/90 px-3 py-1.5 text-[11px] font-bold text-foreground">
-              Open
+          <span className="px-4 py-3">
+            <span className="block text-xs font-semibold text-muted-foreground">Together</span>
+            <span className="block font-display text-xl font-bold text-foreground">
+              {days !== null ? `Day ${days}` : "—"}
             </span>
-          </div>
+          </span>
+          <span className="flex items-center justify-between gap-2 px-4 py-3">
+            <span>
+              <span className="block text-xs font-semibold text-muted-foreground">Anniversary</span>
+              <span className="block font-display text-xl font-bold text-foreground">
+                {untilAnniversary === null
+                  ? "—"
+                  : untilAnniversary === 0
+                    ? "Today!"
+                    : `${untilAnniversary} days`}
+              </span>
+            </span>
+            {untilAnniversary !== null ? (
+              <ProgressRing value={anniversaryPct} size={40} stroke={5} label="" />
+            ) : null}
+          </span>
+        </Link>
+      ) : null}
+
+      {/* How they feel — big, same size as the Memories preview */}
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h2 className="font-display text-lg font-bold text-foreground">How {partnerName} feels</h2>
+        <Link to="/cooldown" className="text-xs font-semibold text-primary">
+          Share yours
         </Link>
       </div>
+      <Link
+        to="/cooldown"
+        className="card-soft press relative block overflow-hidden"
+        data-theme-box="home-feeling"
+      >
+        <FeelingArt row={theirFeel ?? null} />
+        <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 px-4 pb-3 pt-8">
+          <span className="min-w-0">
+            <span className="block truncate text-base font-bold text-foreground">
+              {feelingLabel(theirFeel ?? null)}
+            </span>
+            <span className="block text-xs text-muted-foreground">
+              {theirFeel
+                ? timeAgo(theirFeel.created_at)
+                : `When ${partnerName} shares, it shows here`}
+            </span>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+        </span>
+      </Link>
 
-      {/* How they feel */}
-      <p className="mb-1 mt-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-        How they feel
-      </p>
-      <div className="grad-box surface-quiet rounded-[1.25rem] py-2">
-        <FeelingTile
-          who={partner?.display_name ?? "Partner"}
-          row={theirFeel ?? null}
-          linkTo="/cooldown"
+      {/* In progress */}
+      <h2 className="mb-3 mt-7 font-display text-lg font-bold text-foreground">In progress</h2>
+      <div className="grid grid-cols-2 gap-3">
+        <ProgressCard
+          to="/todos"
+          tint="tile-sky"
+          label="To-dos"
+          title={todoTotal === 0 ? "Nothing yet" : `${todoDone} of ${todoTotal} done`}
+          detail={
+            todoTotal - todoDone === 1 ? "1 left to do" : `${todoTotal - todoDone} left to do`
+          }
+          value={todoTotal ? (todoDone / todoTotal) * 100 : 0}
+        />
+        <ProgressCard
+          to="/bucket"
+          tint="tile-peach"
+          label="Bucket list"
+          title={bucketTotal === 0 ? "Dream something up" : `${bucketDone} of ${bucketTotal} done`}
+          detail="Someday, together"
+          value={bucketTotal ? (bucketDone / bucketTotal) * 100 : 0}
         />
       </div>
 
-      {/* Day / anniversary */}
-      {(days !== null || untilAnniversary !== null) && (
-        <div className="mt-3 flex gap-3">
-          {days !== null ? (
-            <div className="grad-box surface-quiet flex-1 rounded-[1.25rem] px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Together
-              </p>
-              <p className="font-display text-xl font-bold text-foreground">Day {days}</p>
-            </div>
-          ) : null}
-          {untilAnniversary !== null ? (
-            <div className="grad-box tile-lilac flex-1 rounded-[1.25rem] px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Anniversary
-              </p>
-              <p className="font-display text-xl font-bold text-primary">
-                {untilAnniversary === 0 ? "Today" : `${untilAnniversary}d`}
-              </p>
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      <div className="mb-2 mt-7 flex items-end justify-between">
-        <h2 className="font-display text-xl font-bold text-foreground">For you both</h2>
-        <Link to="/more" className="text-xs font-semibold text-primary">
-          See all
+      {/* Memories — the latest photo, big */}
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h2 className="font-display text-lg font-bold text-foreground">Memories</h2>
+        <Link
+          to="/photos"
+          search={{ view: "feed" }}
+          className="press inline-flex min-h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground shadow-soft"
+        >
+          <Images className="size-4" />
+          Feed
+          <ChevronRight className="size-3.5" />
         </Link>
       </div>
+      <Link
+        to="/photos"
+        search={{ view: "feed" }}
+        className="card-soft press relative block overflow-hidden"
+        data-theme-box="home-memory"
+      >
+        {latestPhoto?.url ? (
+          <>
+            <img
+              src={latestPhoto.url}
+              alt={latestPhoto.caption || "Your latest memory"}
+              className="aspect-[4/3] w-full object-cover"
+            />
+            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-4 pb-3 pt-10 text-white">
+              <span className="block truncate text-sm font-bold">
+                {latestPhoto.caption || "Your latest memory"}
+              </span>
+              <span className="block text-xs opacity-90">
+                {new Date(`${latestPhoto.taken_on}T00:00:00`).toLocaleDateString(undefined, {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            </span>
+          </>
+        ) : (
+          <span className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 tile-peach">
+            <Images className="size-8 text-primary" />
+            <span className="text-sm font-bold text-foreground">Add your first memory</span>
+          </span>
+        )}
+      </Link>
 
-      <div className="grid grid-cols-2 gap-3 pb-2">
-        <Link
-          to="/games"
-          className="grad-box press flex min-h-[150px] flex-col justify-between rounded-[1.25rem] tile-cream p-4"
-        >
-          <Gamepad2 className="size-7 text-primary" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Games</p>
-            <p className="text-[11px] text-muted-foreground">Play together</p>
-          </div>
-        </Link>
-        <Link
-          to="/chat"
-          className="grad-box press relative flex min-h-[150px] flex-col justify-between rounded-[1.25rem] tile-pink p-4"
-        >
-          <MessageCircle className="size-7 text-primary" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Chat</p>
-            <p className="text-[11px] text-muted-foreground">Private messages</p>
-          </div>
-          {badges?.unreadChat ? (
-            <span className="absolute right-3 top-3 size-2 rounded-full bg-destructive" />
-          ) : null}
-        </Link>
-        <Link
-          to="/calendar"
-          className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] tile-lilac p-4"
-        >
-          <CalendarDays className="size-6 text-primary" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Calendar</p>
-            <p className="truncate text-[11px] text-muted-foreground">
-              {nextSpecial ? nextSpecial.title : "Plans & dates"}
-            </p>
-          </div>
-        </Link>
-        <Link
+      {/* For you both */}
+      <h2 className="mb-3 mt-7 font-display text-lg font-bold text-foreground">For you both</h2>
+      <ul className="space-y-3">
+        <HomeRow
+          to="/food"
+          tint="tile-peach"
+          icon={<UtensilsCrossed className="size-5" />}
+          title="Food roulette"
+          detail="Can't decide what to eat? Spin for it"
+        />
+        <HomeRow
           to="/map"
-          className="grad-box press flex min-h-[120px] flex-col justify-between rounded-[1.25rem] tile-sky p-4"
-        >
-          <MapPin className="size-6 text-primary" />
-          <div>
-            <p className="font-display text-base font-bold text-foreground">Where we are</p>
-            <p className="text-[11px] text-muted-foreground">Shared location</p>
-          </div>
-        </Link>
-      </div>
+          tint="tile-sky"
+          icon={<MapPin className="size-5" />}
+          title="Where we are"
+          detail="Shared location"
+        />
+      </ul>
 
       {!partner ? (
         <Link
           to="/profile"
-          className="press mt-4 flex items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground"
+          className="press mt-6 flex items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground"
         >
           <Heart className="size-4" />
           Pair with partner
@@ -330,4 +378,98 @@ function HomePage() {
       ) : null}
     </AppLayout>
   );
+}
+
+/** Small tinted card with a bar, like the reference's "In Progress" row. */
+function ProgressCard({
+  to,
+  tint,
+  label,
+  title,
+  detail,
+  value,
+}: {
+  to: string;
+  tint: string;
+  label: string;
+  title: string;
+  detail: string;
+  value: number;
+}) {
+  return (
+    <Link to={to} className={`press flex min-w-0 flex-col gap-1 p-4 ${tint}`}>
+      <span className="text-xs font-semibold text-muted-foreground">{label}</span>
+      <span className="font-display text-base font-bold leading-snug text-foreground">{title}</span>
+      <span className="truncate text-xs text-muted-foreground">{detail}</span>
+      <span className="mt-2">
+        <ProgressBar value={value} />
+      </span>
+    </Link>
+  );
+}
+
+/** White row with a tinted icon tile, like the reference's "Task Groups" list. */
+function HomeRow({
+  to,
+  tint,
+  icon,
+  title,
+  detail,
+}: {
+  to: string;
+  tint: string;
+  icon: ReactNode;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <li>
+      <Link to={to} className="card-soft press flex items-center gap-3 p-3 pr-4">
+        <span
+          className={`grid size-12 shrink-0 place-items-center overflow-hidden rounded-2xl text-primary ${tint}`}
+        >
+          {icon}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-foreground">{title}</span>
+          <span className="block truncate text-xs text-muted-foreground">{detail}</span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+      </Link>
+    </li>
+  );
+}
+
+/** The partner's pixel feeling picture(s), large, on a soft tile — 4:3 like the Memories card. */
+function FeelingArt({ row }: { row: FeelingRow }) {
+  const picks = decodeFeeling(row?.feeling ?? "")
+    .keys.map((k) => FEELING_BY_KEY.get(k))
+    .filter(Boolean)
+    .slice(0, 2);
+  return (
+    <span className="flex aspect-[4/3] w-full items-center justify-center gap-2 px-6 pb-14 pt-4 tile-lilac">
+      {picks.length ? (
+        picks.map((f) => (
+          <img
+            key={f!.key}
+            src={f!.url}
+            alt={f!.label}
+            className={`${picks.length > 1 ? "w-[42%]" : "w-[58%]"} max-h-full object-contain`}
+            style={{ imageRendering: "pixelated" }}
+          />
+        ))
+      ) : (
+        <Doodle critter="seal" pose="sleep" size={128} />
+      )}
+    </span>
+  );
+}
+
+function feelingLabel(row: FeelingRow) {
+  if (!row) return "Nothing shared yet";
+  const decoded = decodeFeeling(row.feeling ?? "");
+  const labels = decoded.keys.map((k) => FEELING_BY_KEY.get(k)?.label).filter(Boolean);
+  return labels.length
+    ? labels.slice(0, 2).join(", ")
+    : decoded.text.slice(0, 40) || "Shared a note";
 }

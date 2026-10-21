@@ -251,34 +251,42 @@ function ChatPage() {
           e.preventDefault();
           if (text.trim()) send.mutate();
         }}
-        className="fixed inset-x-0 z-40 mx-auto flex max-w-lg items-center gap-2 px-4 bottom-[calc(3.6rem+env(safe-area-inset-bottom))]"
+        className="fixed inset-x-0 bottom-[calc(4.1rem+env(safe-area-inset-bottom))] z-40 border-t border-border/40 bg-background/90 backdrop-blur-lg"
       >
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={recording ? "Recording…" : "Say something sweet…"}
-          maxLength={2000}
-          className="flex-1 rounded-full border border-border bg-card px-4 py-3 text-base shadow-soft outline-none focus:ring-2 focus:ring-ring"
-        />
-        <button
-          type="button"
-          aria-label={recording ? "Stop recording" : "Record a voice note"}
-          onClick={() => (recording ? stopRecording() : void startRecording())}
-          disabled={sendVoice.isPending}
-          className={`press grid size-12 shrink-0 place-items-center rounded-full shadow-soft disabled:opacity-60 ${
-            recording ? "bg-destructive text-destructive-foreground" : "bg-card text-primary"
-          }`}
-        >
-          {recording ? <Square className="size-5" /> : <Mic className="size-5" />}
-        </button>
-        <button
-          type="submit"
-          aria-label="Send"
-          disabled={!text.trim() || send.isPending}
-          className="press grid size-12 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-soft disabled:opacity-60"
-        >
-          <Send className="size-5" />
-        </button>
+        <div className="mx-auto flex max-w-lg items-center gap-2 px-4 py-2">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={recording ? "Recording…" : "Say something sweet…"}
+            maxLength={2000}
+            aria-label="Message"
+            className="min-w-0 flex-1 rounded-full bg-card px-4 py-3 text-base shadow-soft outline-none focus:ring-2 focus:ring-ring"
+          />
+          {text.trim() ? (
+            <button
+              type="submit"
+              aria-label="Send"
+              disabled={send.isPending}
+              className="press grid size-12 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-soft disabled:opacity-60"
+            >
+              <Send className="size-5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              aria-label={recording ? "Stop recording" : "Record a voice note"}
+              onClick={() => (recording ? stopRecording() : void startRecording())}
+              disabled={sendVoice.isPending}
+              className={`press grid size-12 shrink-0 place-items-center rounded-full shadow-soft disabled:opacity-60 ${
+                recording
+                  ? "animate-pulse bg-destructive text-destructive-foreground"
+                  : "bg-primary text-primary-foreground"
+              }`}
+            >
+              {recording ? <Square className="size-5" /> : <Mic className="size-5" />}
+            </button>
+          )}
+        </div>
       </form>
 
     </AppLayout>

@@ -334,3 +334,57 @@ export function AddPanel({
     </div>
   );
 }
+
+/** Circular progress (0–100) with the value in the middle — the reference's progress ring. */
+export function ProgressRing({
+  value,
+  size = 56,
+  stroke = 6,
+  label,
+  className,
+  trackClassName = "stroke-muted",
+  barClassName = "stroke-primary",
+}: {
+  value: number;
+  size?: number;
+  stroke?: number;
+  label?: ReactNode;
+  className?: string;
+  trackClassName?: string;
+  barClassName?: string;
+}) {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const pct = Math.min(100, Math.max(0, value));
+  return (
+    <span
+      className={cn("relative grid shrink-0 place-items-center", className)}
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={`${Math.round(pct)}%`}
+    >
+      <svg width={size} height={size} className="-rotate-90" aria-hidden>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          strokeWidth={stroke}
+          className={trackClassName}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - pct / 100)}
+          className={cn("transition-[stroke-dashoffset] duration-700", barClassName)}
+        />
+      </svg>
+      <span className="absolute text-xs font-extrabold">{label ?? `${Math.round(pct)}%`}</span>
+    </span>
+  );
+}

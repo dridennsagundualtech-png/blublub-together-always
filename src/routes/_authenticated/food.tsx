@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, ChevronDown, Image as ImageIcon, Plus, RotateCcw, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
@@ -57,6 +57,43 @@ function Wheel({
   const n = options.length;
   const slice = 360 / n;
   const R = 130;
+  const wheelRef = useRef<SVGSVGElement>(null);
+  const pointerRef = useRef<HTMLDivElement>(null);
+
+  // While it spins, read the wheel's actual angle each frame and click once per slice
+  // that passes the pointer — so the ticks slow down exactly as the wheel does.
+  useEffect(() => {
+    if (!spinning) return;
+    let raf = 0;
+    let lastSlice = -1;
+    let lastTick = 0;
+    const loop = (now: number) => {
+      const el = wheelRef.current;
+      if (el) {
+        const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+        const deg = ((Math.atan2(m.b, m.a) * 180) / Math.PI + 360) % 360;
+        const at = Math.floor(deg / slice);
+        if (at !== lastSlice) {
+          if (lastSlice !== -1 && now - lastTick > 35) {
+            playChirp("tick");
+            pointerRef.current?.animate(
+              [
+                { transform: "rotate(0deg)" },
+                { transform: "rotate(-22deg)" },
+                { transform: "rotate(0deg)" },
+              ],
+              { duration: 110, easing: "ease-out" },
+            );
+            lastTick = now;
+          }
+          lastSlice = at;
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [spinning, slice]);
   const toXY = (deg: number, r: number) => {
     const rad = ((deg - 90) * Math.PI) / 180;
     return [160 + r * Math.cos(rad), 160 + r * Math.sin(rad)] as const;
@@ -64,8 +101,13 @@ function Wheel({
 
   return (
     <div className="relative mx-auto size-72">
-      <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 text-2xl leading-none">▼</div>
+      <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2">
+        <div ref={pointerRef} className="origin-top text-2xl leading-none">
+          ▼
+        </div>
+      </div>
       <svg
+        ref={wheelRef}
         viewBox="0 0 320 320"
         className="size-72 drop-shadow-sm"
         style={{
@@ -185,7 +227,8 @@ function ClassicRoulette() {
       setSpinning(false);
       setResults((r) => r.map((v, i) => (i === stage ? options[pick]! : v)));
       setStage((s) => s + 1);
-      playChirp("success");
+      playChirp("win");
+      navigator.vibrate?.(30);
     }, 4100);
   }
 
@@ -339,7 +382,8 @@ function CustomRoulette() {
     setTimeout(() => {
       setSpinning(false);
       setResult(options[pick]!);
-      playChirp("success");
+      playChirp("win");
+      navigator.vibrate?.(30);
     }, 4100);
   }
 

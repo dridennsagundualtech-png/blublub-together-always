@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode, type CSSProperties } from "react";
 import { toast } from "sonner";
 import { Doodle } from "@/components/Doodles";
 import { Card, Field, PrimaryButton, TextInput } from "@/components/ui-kit";
@@ -108,8 +108,10 @@ export function ResultCard({
   me: string | null;
 }) {
   const iLost = !game.is_draw && !!game.winner_id && game.winner_id !== me;
+  const iWon = !game.is_draw && !!game.winner_id && game.winner_id === me;
   return (
-    <div className="card-soft relative overflow-hidden p-6 text-center">
+    <div className="card-soft rise-in relative overflow-hidden p-6 text-center">
+      {iWon ? <Confetti /> : null}
       <Doodle
         critter={iLost ? "seal" : "penguin"}
         pose={iLost ? "sleep" : "wave"}
@@ -131,5 +133,36 @@ export function ResultCard({
         </div>
       ) : null}
     </div>
+  );
+}
+
+const CONFETTI_COLORS = [
+  "var(--color-primary)",
+  "var(--color-lavender)",
+  "var(--color-sky)",
+  "var(--color-honey)",
+  "var(--color-mint)",
+];
+
+/** A small burst of pixel squares for a win. */
+function Confetti() {
+  return (
+    <span className="confetti" aria-hidden>
+      {Array.from({ length: 16 }, (_, i) => (
+        <i
+          key={i}
+          style={
+            {
+              left: `${(i * 37) % 100}%`,
+              "--c": CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+              "--d": `${(i % 5) * 0.08}s`,
+              "--t": `${1.3 + (i % 4) * 0.2}s`,
+              "--x": `${((i * 53) % 80) - 40}px`,
+              "--r": `${180 + ((i * 97) % 360)}deg`,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </span>
   );
 }

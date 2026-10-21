@@ -16,7 +16,9 @@ import penguinWave from "@/assets/penguin-wave.png";
 import penguinCurious from "@/assets/penguin-curious.png";
 import penguinLove from "@/assets/penguin-love.png";
 import penguinCheer from "@/assets/penguin-cheer.png";
+import { memo } from "react";
 import { cn } from "@/lib/utils";
+import { OVERLAY_PALETTE, PALETTES, SPRITES } from "@/components/pixel-critters";
 
 const SOURCES = {
   cat: {
@@ -148,16 +150,70 @@ export function Doodle({
   className?: string;
   size?: number;
 }) {
+  // Both are rendered; the app style decides which one shows (see .doodle-* in styles.css).
   return (
-    <img
-      src={SOURCES[critter][pose] ?? SOURCES[critter].default}
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      width={size}
-      height={size}
-      style={{ width: size, height: size }}
-      className={cn("pointer-events-none select-none", className)}
-    />
+    <>
+      <img
+        src={critterSrc(critter, pose)}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={size}
+        height={size}
+        style={{ width: size, height: size }}
+        className={cn("doodle-classic pointer-events-none select-none", className)}
+      />
+      <PixelCritter critter={critter} pose={pose} size={size} className={className} />
+    </>
   );
 }
+
+/** The picture of a critter in a pose (falls back to its default pose). */
+export const critterSrc = (critter: Critter, pose: Pose) =>
+  SOURCES[critter][pose] ?? SOURCES[critter].default;
+
+/** One <rect> per horizontal run of same-coloured pixels (24x24). */
+export function pixelRuns(critter: Critter, pose: Pose) {
+  const palette: Record<string, string> = { ...PALETTES[critter], ...OVERLAY_PALETTE };
+  const rects: { x: number; y: number; w: number; fill: string }[] = [];
+  SPRITES[critter][pose].forEach((row, y) => {
+    let x = 0;
+    while (x < row.length) {
+      const ch = row[x]!;
+      let w = 1;
+      while (row[x + w] === ch) w += 1;
+      if (ch !== ".") rects.push({ x, y, w, fill: palette[ch] ?? "transparent" });
+      x += w;
+    }
+  });
+  return rects;
+}
+
+/** The same critter as 24×24 pixel art, used by the Pixel app style. */
+const PixelCritter = memo(function PixelCritter({
+  critter,
+  pose,
+  size,
+  className,
+}: {
+  critter: Critter;
+  pose: Pose;
+  size: number;
+  className?: string | undefined;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      aria-hidden="true"
+      focusable="false"
+      shapeRendering="crispEdges"
+      className={cn("doodle-pixel pointer-events-none shrink-0 select-none", className)}
+    >
+      {pixelRuns(critter, pose).map((r) => (
+        <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w} height={1} fill={r.fill} />
+      ))}
+    </svg>
+  );
+});

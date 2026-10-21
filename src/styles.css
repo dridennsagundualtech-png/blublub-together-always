@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "./skins.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -20,6 +21,7 @@
 @theme inline {
   --font-display: "Baloo 2", ui-rounded, system-ui, sans-serif;
   --font-sans: "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-pixel: "Pixelify Sans", ui-monospace, monospace;
 
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 3px);
@@ -487,130 +489,6 @@ a[href]:active.bg-primary {
   border: 1px solid var(--color-border);
 }
 
-/* —— Dice corner: 3D tumble roll —— */
-.dice-scene {
-  perspective: 700px;
-  perspective-origin: 50% 40%;
-}
-
-.dice-body {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 1.1rem;
-  box-shadow:
-    0 10px 22px -10px color-mix(in oklab, var(--primary) 35%, transparent),
-    inset 0 1px 0 color-mix(in oklab, white 55%, transparent);
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-}
-
-.dice-face-text {
-  position: relative;
-  z-index: 1;
-  max-width: 92%;
-  padding: 0.25rem;
-  font-size: 0.8rem;
-  font-weight: 800;
-  line-height: 1.15;
-  text-align: center;
-  transition: filter 80ms linear, opacity 80ms linear;
-}
-
-.dice-text-blur {
-  filter: blur(0.6px);
-  opacity: 0.85;
-}
-
-.dice-edge {
-  pointer-events: none;
-  position: absolute;
-  border-radius: inherit;
-  inset: 0;
-}
-.dice-edge-tl {
-  box-shadow: inset 2px 2px 0 color-mix(in oklab, white 40%, transparent);
-}
-.dice-edge-br {
-  box-shadow: inset -2px -3px 0 color-mix(in oklab, black 12%, transparent);
-}
-
-@keyframes dice-roll-3d {
-  0% {
-    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateY(0) scale(1);
-  }
-  15% {
-    transform: rotateX(calc(var(--dice-spin-x, 1) * 90deg)) rotateY(calc(var(--dice-spin-y, 1) * 40deg)) rotateZ(-20deg) translateY(-8%) scale(1.05);
-  }
-  35% {
-    transform: rotateX(calc(var(--dice-spin-x, 1) * 200deg)) rotateY(calc(var(--dice-spin-y, 1) * 160deg)) rotateZ(15deg) translateY(-14%) scale(1.08);
-  }
-  55% {
-    transform: rotateX(calc(var(--dice-spin-x, 1) * 320deg)) rotateY(calc(var(--dice-spin-y, 1) * 280deg)) rotateZ(-10deg) translateY(-6%) scale(1.02);
-  }
-  75% {
-    transform: rotateX(calc(var(--dice-spin-x, 1) * 400deg)) rotateY(calc(var(--dice-spin-y, 1) * 360deg)) rotateZ(6deg) translateY(-2%) scale(1.04);
-  }
-  100% {
-    transform: rotateX(calc(var(--dice-spin-x, 1) * 450deg)) rotateY(calc(var(--dice-spin-y, 1) * 420deg)) rotateZ(0deg) translateY(0) scale(1);
-  }
-}
-
-@keyframes dice-land {
-  0% {
-    transform: rotateX(18deg) rotateY(-12deg) scale(0.88);
-    filter: brightness(1.08);
-  }
-  40% {
-    transform: rotateX(-6deg) rotateY(4deg) scale(1.06);
-  }
-  70% {
-    transform: rotateX(3deg) rotateY(-2deg) scale(0.98);
-  }
-  100% {
-    transform: rotateX(0deg) rotateY(0deg) scale(1);
-    filter: none;
-  }
-}
-
-.dice-is-rolling {
-  animation: dice-roll-3d 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
-  animation-delay: var(--dice-delay, 0ms);
-}
-
-.dice-is-settled {
-  animation: dice-land 0.55s cubic-bezier(0.2, 1.2, 0.3, 1) both;
-  animation-delay: var(--dice-delay, 0ms);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dice-is-rolling,
-  .dice-is-settled {
-    animation: none;
-  }
-  .dice-text-blur {
-    filter: none;
-  }
-}
-
-/* keep old utility names working if referenced elsewhere */
-@keyframes dice-tumble {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-14deg) scale(1.06); }
-  50% { transform: rotate(10deg) scale(0.95); }
-  75% { transform: rotate(-6deg) scale(1.04); }
-  100% { transform: rotate(0deg) scale(1); }
-}
-@keyframes dice-settle {
-  0% { transform: scale(0.82) rotate(-8deg); opacity: 0.4; }
-  60% { transform: scale(1.08) rotate(3deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-@utility dice-rolling { animation: dice-tumble 0.45s ease-in-out infinite; }
-@utility dice-settled { animation: dice-settle 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
-
 @keyframes room-float {
   0%, 100% { transform: translate(-50%, -50%); }
   50% { transform: translate(-50%, calc(-50% - 5px)); }
@@ -776,9 +654,6 @@ html.shadows-off .tile-cream {
 
 
 /* —— GymMane-inspired page transitions (fade + slide + scale + soft blur) —— */
-.page-transition-root {
-  will-change: transform, opacity, filter;
-}
 
 @keyframes page-gym-in-from-right {
   0% {
@@ -848,4 +723,327 @@ html.shadows-off .tile-cream {
 ::view-transition-new(root) {
   animation-duration: 0.32s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ================= Game corner motion ================= */
+
+/* —— 3D dice: six faces, thrown, tumbling, landing on the result —— */
+.die-stage {
+  position: relative;
+  width: var(--die, 6rem);
+  height: calc(var(--die, 6rem) * 1.35);
+  margin: 0 auto;
+  perspective: 900px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.die-throw {
+  width: var(--die, 6rem);
+  height: var(--die, 6rem);
+  margin-bottom: calc(var(--die, 6rem) * 0.18);
+  transform-style: preserve-3d;
+}
+.die-cube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 1.35s cubic-bezier(0.18, 0.75, 0.25, 1);
+  transition-delay: var(--die-delay, 0ms);
+}
+.die-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0.35rem;
+  /* Sharp corners so the six faces meet like a solid cube, not flying paper. */
+  border-radius: 0;
+  font-size: calc(var(--die, 6rem) * 0.135);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--color-foreground);
+  border: 2px solid color-mix(in oklab, var(--color-foreground) 12%, transparent);
+  box-shadow:
+    inset 0 2px 0 color-mix(in oklab, white 55%, transparent),
+    inset 0 -3px 0 color-mix(in oklab, black 10%, transparent);
+  backface-visibility: hidden;
+}
+.die-face-front {
+  transform: translateZ(calc(var(--die, 6rem) / 2));
+}
+.die-face-back {
+  transform: rotateY(180deg) translateZ(calc(var(--die, 6rem) / 2));
+}
+.die-face-right {
+  transform: rotateY(90deg) translateZ(calc(var(--die, 6rem) / 2));
+}
+.die-face-left {
+  transform: rotateY(-90deg) translateZ(calc(var(--die, 6rem) / 2));
+}
+.die-face-top {
+  transform: rotateX(90deg) translateZ(calc(var(--die, 6rem) / 2));
+}
+.die-face-bottom {
+  transform: rotateX(-90deg) translateZ(calc(var(--die, 6rem) / 2));
+}
+/* Light from above: sides a little darker, top a little lighter, so it reads as a solid block. */
+.die-face-right,
+.die-face-left {
+  filter: brightness(0.9);
+}
+.die-face-top {
+  filter: brightness(1.05);
+}
+.die-face-bottom,
+.die-face-back {
+  filter: brightness(0.82);
+}
+.die-shadow {
+  position: absolute;
+  bottom: calc(var(--die, 6rem) * 0.04);
+  left: 50%;
+  width: 78%;
+  height: calc(var(--die, 6rem) * 0.16);
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--color-foreground) 28%, transparent),
+    transparent
+  );
+}
+.die-landed .die-face-front {
+  animation: die-glow 0.9s ease-out both;
+}
+@keyframes die-glow {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-primary) 70%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+.dice-result {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* —— Board games —— */
+@keyframes piece-pop {
+  0% {
+    transform: scale(0) rotate(-25deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.18) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+.piece-pop {
+  animation: piece-pop 0.38s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+/* Connect Four: the piece falls down its column (--drop = rows to fall) and bounces */
+@keyframes piece-drop {
+  0% {
+    transform: translateY(calc(var(--drop, 1) * -112%));
+  }
+  70% {
+    transform: translateY(0);
+  }
+  82% {
+    transform: translateY(-12%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+.piece-drop {
+  animation: piece-drop calc(0.22s + var(--drop, 1) * 0.06s) cubic-bezier(0.55, 0, 0.75, 0.4) both;
+}
+
+@keyframes win-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-primary) 0%, transparent);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-primary) 80%, transparent);
+    transform: scale(1.05);
+  }
+}
+.win-glow {
+  animation: win-glow 1.1s ease-in-out 3;
+}
+
+/* Memory + War: real card flips */
+.flip-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.3, 1.2, 0.5, 1);
+}
+.flip-card.is-flipped {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  backface-visibility: hidden;
+}
+.flip-face-front {
+  transform: rotateY(180deg);
+}
+.flip-scene {
+  perspective: 700px;
+}
+@keyframes match-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.match-pop {
+  animation: match-pop 0.45s ease-out 0.35s both;
+}
+
+/* Rock Paper Scissors: the two throws clash in from each side */
+@keyframes clash-left {
+  0% {
+    transform: translateX(-120%) rotate(-20deg);
+    opacity: 0;
+  }
+  70% {
+    transform: translateX(8%) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+}
+@keyframes clash-right {
+  0% {
+    transform: translateX(120%) rotate(20deg);
+    opacity: 0;
+  }
+  70% {
+    transform: translateX(-8%) rotate(-6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+}
+.clash-left {
+  animation: clash-left 0.5s cubic-bezier(0.3, 1.2, 0.5, 1) both;
+}
+.clash-right {
+  animation: clash-right 0.5s cubic-bezier(0.3, 1.2, 0.5, 1) both;
+}
+.lift-win {
+  transform: translateY(-8px);
+  transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1) 0.45s;
+}
+
+/* Shared */
+@keyframes rise-in {
+  0% {
+    transform: translateY(10px) scale(0.97);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.rise-in {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Win confetti: a handful of pixel squares */
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.confetti i {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  background: var(--c, var(--color-primary));
+  animation: confetti-fall var(--t, 1.6s) cubic-bezier(0.25, 0.6, 0.5, 1) var(--d, 0s) both;
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x, 0px), 260px) rotate(var(--r, 360deg));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .die-landed .die-face-front,
+  .piece-pop,
+  .piece-drop,
+  .win-glow,
+  .match-pop,
+  .clash-left,
+  .clash-right,
+  .rise-in,
+  .dice-result,
+  .confetti i {
+    animation: none;
+  }
+  .die-cube,
+  .flip-card,
+  .lift-win {
+    transition: none;
+  }
+  .confetti {
+    display: none;
+  }
+}
+
+/* A small hop when you react (stepped in the Pixel style, see skins.css) */
+@keyframes react-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35) translateY(-2px);
+  }
+  60% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.react-pop {
+  animation: react-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .react-pop {
+    animation: none;
+  }
 }

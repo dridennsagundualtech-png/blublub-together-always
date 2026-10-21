@@ -85,24 +85,44 @@ export function War({ game, seat, players, nameOf }: GameViewProps) {
 
       <Card className="mt-4 text-center">
         <div className="flex items-center justify-center gap-6">
-          {[0, 1].map((p) => (
-            <div key={p} className="grid place-items-center gap-2">
-              <div className="grid h-28 w-20 place-items-center rounded-2xl bg-secondary shadow-soft">
-                {s.flip ? (
-                  <span className="text-3xl font-extrabold text-primary">
-                    {rankLabel(s.flip[p] ?? 0)}
-                  </span>
-                ) : (
-                  <Doodle critter={back.critter} pose={back.pose} size={48} />
-                )}
+          {[0, 1].map((p) => {
+            const mine = s.flip?.[p] ?? 0;
+            const theirs = s.flip?.[p === 0 ? 1 : 0] ?? 0;
+            const wins = !!s.flip && mine > theirs;
+            return (
+              <div key={p} className="grid place-items-center gap-2">
+                <div className={`flip-scene h-28 w-20 rounded-2xl ${wins ? "lift-win" : ""}`}>
+                  <div className={`flip-card rounded-2xl ${s.flip ? "is-flipped" : ""}`}>
+                    <div className="flip-face rounded-2xl bg-secondary shadow-soft">
+                      <Doodle critter={back.critter} pose={back.pose} size={48} />
+                    </div>
+                    <div
+                      className={`flip-face flip-face-front rounded-2xl bg-card shadow-soft ${
+                        wins ? "ring-2 ring-primary" : ""
+                      }`}
+                    >
+                      <span className="text-3xl font-extrabold text-primary">
+                        {s.flip ? rankLabel(mine) : ""}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs font-bold">{nameOf(players[p])}</p>
+                <p className="text-xs text-muted-foreground">{s.scores[p] ?? 0} won</p>
               </div>
-              <p className="text-xs font-bold">{nameOf(players[p])}</p>
-              <p className="text-xs text-muted-foreground">{s.scores[p] ?? 0} won</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {s.note ? <p className="mt-4 text-sm font-bold">{s.note}</p> : null}
+        {s.note ? (
+          <p
+            key={s.round}
+            className="rise-in mt-4 text-sm font-bold"
+            style={{ animationDelay: "0.4s" }}
+          >
+            {s.note}
+          </p>
+        ) : null}
 
         <div className="mt-4">
           {s.flip ? (

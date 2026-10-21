@@ -91,21 +91,25 @@ export function Memory({ game, me, seat, players, nameOf }: GameViewProps) {
           {s.deck.map((face, i) => {
             const shown = s.flipped.includes(i) || s.matched.includes(i);
             const f = FACES[face]!;
+            const matched = s.matched.includes(i);
             return (
               <button
                 key={i}
                 type="button"
                 aria-label={shown ? `${f.critter} card` : "Face-down card"}
                 onClick={() => flip(i)}
-                className={`press grid aspect-square place-items-center rounded-2xl transition-colors ${
-                  shown ? "bg-accent" : "bg-muted"
-                } ${s.matched.includes(i) ? "opacity-60" : ""}`}
+                className={`press flip-scene aspect-square rounded-2xl ${matched ? "match-pop" : ""}`}
               >
-                {shown ? (
-                  <Doodle critter={f.critter} pose={f.pose} size={40} />
-                ) : (
-                  <span className="text-lg font-extrabold text-muted-foreground">🩷</span>
-                )}
+                <span className={`flip-card rounded-2xl ${shown ? "is-flipped" : ""}`}>
+                  <span className="flip-face rounded-2xl bg-muted">
+                    <span className="text-lg font-extrabold text-muted-foreground">🩷</span>
+                  </span>
+                  <span
+                    className={`flip-face flip-face-front rounded-2xl bg-accent ${matched ? "opacity-60" : ""}`}
+                  >
+                    <Doodle critter={f.critter} pose={f.pose} size={40} />
+                  </span>
+                </span>
               </button>
             );
           })}

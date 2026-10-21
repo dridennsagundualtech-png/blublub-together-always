@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Doodle } from "@/components/Doodles";
 import { Card } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
@@ -33,6 +34,13 @@ export function TicTacToe({ game, me, seat, players, nameOf }: GameViewProps) {
   const state = game.state as { board: (number | null)[] };
   const board = state.board ?? Array(9).fill(null);
   const myTurn = game.turn === me;
+  const winLine = new Set(
+    LINES.find(
+      ([a, b, c]) => board[a!] != null && board[a!] === board[b!] && board[a!] === board[c!],
+    ) ?? [],
+  );
+
+  const placedAtOpen = useRef(board.map((c) => c != null));
 
   function play(i: number) {
     if (!myTurn || board[i] != null || update.isPending) return;
@@ -63,10 +71,21 @@ export function TicTacToe({ game, me, seat, players, nameOf }: GameViewProps) {
               type="button"
               aria-label={`Square ${i + 1}`}
               onClick={() => play(i)}
-              className="press grid aspect-square place-items-center rounded-2xl bg-muted"
+              className={`press grid aspect-square place-items-center rounded-2xl bg-muted ${
+                winLine.has(i) ? "win-glow" : ""
+              }`}
             >
               {cell == null ? null : (
-                <Doodle critter={cell === 0 ? "penguin" : "seal"} pose={cell === 0 ? "default" : "wave"} size={44} />
+                <span
+                  key={`${i}-${cell}`}
+                  className={placedAtOpen.current[i] ? undefined : "piece-pop"}
+                >
+                  <Doodle
+                    critter={cell === 0 ? "penguin" : "seal"}
+                    pose={winLine.has(i) ? "cheer" : cell === 0 ? "default" : "wave"}
+                    size={44}
+                  />
+                </span>
               )}
             </button>
           ))}

@@ -119,8 +119,8 @@ export function Rps({ game, seat, players, nameOf }: GameViewProps) {
             type="button"
             disabled={!!myPick}
             onClick={() => pick(t.key)}
-            className={`press card-soft grid place-items-center gap-1 p-3 ${
-              myPick === t.key ? "ring-2 ring-primary" : ""
+            className={`press card-soft grid place-items-center gap-1 p-3 transition-opacity ${
+              myPick === t.key ? "match-pop ring-2 ring-primary" : ""
             } ${myPick && myPick !== t.key ? "opacity-50" : ""}`}
           >
             <Doodle critter={t.critter} pose="default" size={48} />
@@ -134,12 +134,22 @@ export function Rps({ game, seat, players, nameOf }: GameViewProps) {
           <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Last round
           </p>
-          <div className="mt-2 flex items-center justify-center gap-4">
-            <Doodle critter={s.last.picks[0] as Critter} size={40} />
+          <div key={s.round} className="mt-2 flex items-center justify-center gap-4">
+            <span className="clash-left">
+              <Doodle critter={s.last.picks[0] as Critter} size={48} />
+            </span>
             <span className="text-xs font-bold">vs</span>
-            <Doodle critter={s.last.picks[1] as Critter} size={40} />
+            <span className="clash-right">
+              <Doodle critter={s.last.picks[1] as Critter} size={48} />
+            </span>
           </div>
-          <p className="mt-1 text-sm font-bold">{s.last.result}</p>
+          <p
+            key={`r-${s.round}`}
+            className="rise-in mt-1 text-sm font-bold"
+            style={{ animationDelay: "0.35s" }}
+          >
+            {s.last.result}
+          </p>
         </Card>
       ) : null}
     </>

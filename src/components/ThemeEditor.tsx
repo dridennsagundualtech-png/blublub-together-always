@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { Palette, RotateCcw, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, PrimaryButton } from "@/components/ui-kit";
+import { StylePicker } from "@/components/StylePicker";
+import { PremiumGate } from "@/components/PremiumGate";
+import { usePremiumAccess } from "@/lib/admin";
 import { useCouple, useCoupleId } from "@/lib/session";
 import {
   applyColors,
@@ -16,6 +19,8 @@ import {
   allPresets,
   saveUserPresets,
   loadUserPresets,
+  SKINS,
+  type SkinId,
   type ThemeMap,
   type ThemePreset,
 } from "@/lib/theme";
@@ -69,6 +74,37 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
   const [loaded, setLoaded] = useState(false);
   const [presets, setPresets] = useState<ThemePreset[]>(() => allPresets());
   const [presetName, setPresetName] = useState("");
+  const premium = usePremiumAccess();
+  const [preview, setPreview] = useState<{ skin: SkinId; left: number } | null>(null);
+  const [upsell, setUpsell] = useState<SkinId | null>(null);
+
+  // Non-premium: a style plays for 10 seconds, then the app returns to the saved style.
+  useEffect(() => {
+    if (!preview) return;
+    if (preview.left <= 0) {
+      setPreview(null);
+      applyColors(map, pathname);
+      setUpsell(preview.skin);
+      return;
+    }
+    const t = window.setTimeout(() => setPreview((p) => p && { ...p, left: p.left - 1 }), 1000);
+    return () => window.clearTimeout(t);
+  }, [preview, map, pathname]);
+
+  function pickSkin(id: SkinId) {
+    if (id === map.skin && !preview) return;
+    setUpsell(null);
+    const meta = SKINS.find((k) => k.id === id);
+    if (meta?.premium && !premium) {
+      applyColors({ ...map, skin: id }, pathname);
+      setPreview({ skin: id, left: 10 });
+      return;
+    }
+    setPreview(null);
+    const next = { ...map, skin: id };
+    setMap(next);
+    void saveShared(next, `${meta?.name ?? "New"} style on for both of you`);
+  }
 
   useEffect(() => {
     if (loaded) return;
@@ -97,7 +133,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
     applyColors(map, pathname);
   }, [map, loaded, pathname]);
 
-  async function saveShared(next: ThemeMap) {
+  async function saveShared(next: ThemeMap, done = "Colors shared with both of you 🩷") {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     applyColors(next, pathname);
     if (!coupleId) {
@@ -112,7 +148,7 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
         .eq("id", coupleId);
       if (error) throw error;
       void qc.invalidateQueries({ queryKey: ["couple", coupleId] });
-      toast.success("Colors shared with both of you 🩷");
+      toast.success(done);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes("theme") || msg.includes("column")) {
@@ -130,7 +166,8 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
   }
 
   function reset() {
-    const next = { ...DEFAULTS };
+    // Reset the colours only — keep the style and every box picture.
+    const next = { ...DEFAULTS, skin: map.skin, boxOverrides: map.boxOverrides };
     setMap(next);
     void saveShared(next);
   }
@@ -138,445 +175,478 @@ export function ThemeEditor({ compact = false }: { compact?: boolean }) {
   const activeLabel = SLOT_META.find((s) => s.id === active)?.title ?? active;
 
   return (
-    <Card className={compact ? "mt-0" : "mt-4"}>
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Palette className="size-5 text-primary" />
-          <p className="text-sm font-bold">Our app colors</p>
+    <>
+      <StylePicker
+        value={preview?.skin ?? map.skin}
+        premium={premium}
+        previewing={preview}
+        onPick={pickSkin}
+      />
+      {upsell ? (
+        <div className="mb-4">
+          <PremiumGate
+            unlocked={false}
+            title={`${SKINS.find((k) => k.id === upsell)?.name ?? "This"} style is Premium`}
+            blurb="Liked it? Premium unlocks every app style for both of you."
+          >
+            {null}
+          </PremiumGate>
         </div>
-        <button
-          type="button"
-          onClick={reset}
-          className="press flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground"
-        >
-          <RotateCcw className="size-3" />
-          Reset
-        </button>
-      </div>
+      ) : null}
+      <Card className={compact ? "mt-0" : "mt-4"}>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Palette className="size-5 text-primary" />
+            <p className="text-sm font-bold">Our app colors</p>
+          </div>
+          <button
+            type="button"
+            onClick={reset}
+            className="press flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground"
+          >
+            <RotateCcw className="size-3" />
+            Reset
+          </button>
+        </div>
 
-      <div className="mb-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2">
-        <Users className="size-4 shrink-0 text-primary" />
-        <p className="text-[11px] font-semibold leading-snug text-foreground">
-          Shared with both of you — pick colors & gradients together.
-        </p>
-      </div>
+        <div className="mb-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2">
+          <Users className="size-4 shrink-0 text-primary" />
+          <p className="text-[11px] font-semibold leading-snug text-foreground">
+            Shared with both of you — pick colors & gradients together.
+          </p>
+        </div>
 
-      <div className="mb-4 overflow-hidden rounded-[1.25rem] border border-border bg-background p-3">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-          Live preview
-        </p>
-        <div className="flex gap-2">
-          <div
-            className="flex h-10 flex-1 items-center justify-center rounded-full text-xs font-bold shadow-soft"
-            style={{ backgroundColor: map.main, color: "#3F2A3A" }}
-          >
-            Button
+        <div className="mb-4 overflow-hidden rounded-[1.25rem] border border-border bg-background p-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            Live preview
+          </p>
+          <div className="flex gap-2">
+            <div
+              className="flex h-10 flex-1 items-center justify-center rounded-full text-xs font-bold shadow-soft"
+              style={{ backgroundColor: map.main, color: "#3F2A3A" }}
+            >
+              Button
+            </div>
+            <div
+              className="flex h-10 flex-1 items-center justify-center rounded-2xl text-xs font-bold"
+              style={{ backgroundColor: map.soft, color: "#3F2A3A" }}
+            >
+              Soft card
+            </div>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <div
+              className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
+              style={{ backgroundColor: map.purple, color: "#3F2A3A" }}
+            >
+              <span className="text-[9px] font-bold opacity-70">Tile</span>
+              <span className="text-xs font-bold">Accent</span>
+            </div>
+            <div
+              className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
+              style={{ backgroundColor: map.blue, color: "#3F2A3A" }}
+            >
+              <span className="text-[9px] font-bold opacity-70">Tile</span>
+              <span className="text-xs font-bold">Calm</span>
+            </div>
           </div>
           <div
-            className="flex h-10 flex-1 items-center justify-center rounded-2xl text-xs font-bold"
-            style={{ backgroundColor: map.soft, color: "#3F2A3A" }}
-          >
-            Soft card
-          </div>
-        </div>
-        <div className="mt-2 flex gap-2">
-          <div
-            className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
-            style={{ backgroundColor: map.purple, color: "#3F2A3A" }}
-          >
-            <span className="text-[9px] font-bold opacity-70">Tile</span>
-            <span className="text-xs font-bold">Accent</span>
-          </div>
-          <div
-            className="flex h-14 flex-1 flex-col justify-between rounded-2xl p-2"
-            style={{ backgroundColor: map.blue, color: "#3F2A3A" }}
-          >
-            <span className="text-[9px] font-bold opacity-70">Tile</span>
-            <span className="text-xs font-bold">Calm</span>
-          </div>
-        </div>
-        <div
-          className="mt-2 flex h-14 items-center justify-between rounded-2xl px-3"
-          style={{
-            background: `linear-gradient(135deg, ${map.gradFrom}, ${map.gradTo})`,
-            color: "#3F2A3A",
-          }}
-        >
-          <div>
-            <p className="text-[9px] font-bold uppercase tracking-wide opacity-70">Gradient</p>
-            <p className="text-xs font-bold">Featured card</p>
-          </div>
-          <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold">Open</span>
-        </div>
-        {map.boxesGradient ? (
-          <div
-            className="mt-2 flex h-10 items-center justify-center rounded-2xl text-xs font-bold"
+            className="mt-2 flex h-14 items-center justify-between rounded-2xl px-3"
             style={{
-              background: `linear-gradient(145deg, ${map.boxGradFrom}, ${map.boxGradTo})`,
+              background: `linear-gradient(135deg, ${map.gradFrom}, ${map.gradTo})`,
               color: "#3F2A3A",
             }}
           >
-            All boxes use this gradient
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wide opacity-70">Gradient</p>
+              <p className="text-xs font-bold">Featured card</p>
+            </div>
+            <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold">
+              Open
+            </span>
           </div>
-        ) : null}
-      </div>
+          {map.boxesGradient ? (
+            <div
+              className="mt-2 flex h-10 items-center justify-center rounded-2xl text-xs font-bold"
+              style={{
+                background: `linear-gradient(145deg, ${map.boxGradFrom}, ${map.boxGradTo})`,
+                color: "#3F2A3A",
+              }}
+            >
+              All boxes use this gradient
+            </div>
+          ) : null}
+        </div>
 
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-        Solid colors
-      </p>
-      <div className="mb-3 grid grid-cols-2 gap-2">
-        {SLOT_META.filter((s) => !s.id.startsWith("grad") && !s.id.startsWith("box")).map((s) => (
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+          Solid colors
+        </p>
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          {SLOT_META.filter((s) => !s.id.startsWith("grad") && !s.id.startsWith("box")).map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setActive(s.id)}
+              className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition-colors ${
+                active === s.id ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
+              }`}
+            >
+              <span
+                className="size-8 shrink-0 rounded-xl shadow-soft"
+                style={{ backgroundColor: map[s.id as keyof ThemeMap] as string }}
+              />
+              <span>
+                <span className="block text-xs font-bold">{s.title}</span>
+                <span className="block text-[10px] text-muted-foreground">{s.hint}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+          Featured gradient
+        </p>
+        <div className="mb-2 grid grid-cols-2 gap-2">
           <button
-            key={s.id}
             type="button"
-            onClick={() => setActive(s.id)}
-            className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition-colors ${
-              active === s.id ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
+            onClick={() => setActive("gradFrom")}
+            className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
+              active === "gradFrom"
+                ? "border-foreground bg-muted"
+                : "border-transparent bg-muted/50"
+            }`}
+          >
+            <span className="size-8 rounded-xl" style={{ backgroundColor: map.gradFrom }} />
+            <span className="text-xs font-bold">Start</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActive("gradTo")}
+            className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
+              active === "gradTo" ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
+            }`}
+          >
+            <span className="size-8 rounded-xl" style={{ backgroundColor: map.gradTo }} />
+            <span className="text-xs font-bold">End</span>
+          </button>
+        </div>
+        <div
+          className="mb-3 h-8 w-full rounded-full"
+          style={{ background: `linear-gradient(90deg, ${map.gradFrom}, ${map.gradTo})` }}
+        />
+
+        <div className="mb-3 flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2.5">
+          <div>
+            <p className="text-xs font-bold">Gradient boxes</p>
+            <p className="text-[10px] text-muted-foreground">Cards & panels on chosen screens</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={map.boxesGradient}
+            onClick={() => setMap((m) => ({ ...m, boxesGradient: !m.boxesGradient }))}
+            className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
+              map.boxesGradient ? "bg-primary" : "bg-muted"
             }`}
           >
             <span
-              className="size-8 shrink-0 rounded-xl shadow-soft"
-              style={{ backgroundColor: map[s.id as keyof ThemeMap] as string }}
+              className={`block size-6 rounded-full bg-card shadow-soft transition-transform ${
+                map.boxesGradient ? "translate-x-5" : "translate-x-0.5"
+              }`}
             />
-            <span>
-              <span className="block text-xs font-bold">{s.title}</span>
-              <span className="block text-[10px] text-muted-foreground">{s.hint}</span>
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-        Featured gradient
-      </p>
-      <div className="mb-2 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => setActive("gradFrom")}
-          className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
-            active === "gradFrom" ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
-          }`}
-        >
-          <span className="size-8 rounded-xl" style={{ backgroundColor: map.gradFrom }} />
-          <span className="text-xs font-bold">Start</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActive("gradTo")}
-          className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
-            active === "gradTo" ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
-          }`}
-        >
-          <span className="size-8 rounded-xl" style={{ backgroundColor: map.gradTo }} />
-          <span className="text-xs font-bold">End</span>
-        </button>
-      </div>
-      <div
-        className="mb-3 h-8 w-full rounded-full"
-        style={{ background: `linear-gradient(90deg, ${map.gradFrom}, ${map.gradTo})` }}
-      />
-
-      <div className="mb-3 flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2.5">
-        <div>
-          <p className="text-xs font-bold">Gradient boxes</p>
-          <p className="text-[10px] text-muted-foreground">Cards & panels on chosen screens</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={map.boxesGradient}
-          onClick={() => setMap((m) => ({ ...m, boxesGradient: !m.boxesGradient }))}
-          className={`press h-7 w-12 shrink-0 rounded-full transition-colors ${
-            map.boxesGradient ? "bg-primary" : "bg-muted"
-          }`}
-        >
-          <span
-            className={`block size-6 rounded-full bg-card shadow-soft transition-transform ${
-              map.boxesGradient ? "translate-x-5" : "translate-x-0.5"
-            }`}
-          />
-        </button>
-      </div>
-
-      {map.boxesGradient ? (
-        <div className="mb-3 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setActive("boxGradFrom")}
-            className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
-              active === "boxGradFrom" ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
-            }`}
-          >
-            <span className="size-8 rounded-xl" style={{ backgroundColor: map.boxGradFrom }} />
-            <span className="text-xs font-bold">Box start</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActive("boxGradTo")}
-            className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
-              active === "boxGradTo" ? "border-foreground bg-muted" : "border-transparent bg-muted/50"
-            }`}
-          >
-            <span className="size-8 rounded-xl" style={{ backgroundColor: map.boxGradTo }} />
-            <span className="text-xs font-bold">Box end</span>
           </button>
         </div>
-      ) : null}
 
-      {map.boxesGradient ? (
-        <div className="mb-4 rounded-2xl bg-muted/40 p-3">
+        {map.boxesGradient ? (
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setActive("boxGradFrom")}
+              className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
+                active === "boxGradFrom"
+                  ? "border-foreground bg-muted"
+                  : "border-transparent bg-muted/50"
+              }`}
+            >
+              <span className="size-8 rounded-xl" style={{ backgroundColor: map.boxGradFrom }} />
+              <span className="text-xs font-bold">Box start</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActive("boxGradTo")}
+              className={`press flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left ${
+                active === "boxGradTo"
+                  ? "border-foreground bg-muted"
+                  : "border-transparent bg-muted/50"
+              }`}
+            >
+              <span className="size-8 rounded-xl" style={{ backgroundColor: map.boxGradTo }} />
+              <span className="text-xs font-bold">Box end</span>
+            </button>
+          </div>
+        ) : null}
+
+        {map.boxesGradient ? (
+          <div className="mb-4 rounded-2xl bg-muted/40 p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                Screens with gradient boxes
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setMap((m) => ({
+                    ...m,
+                    gradientScreens: m.gradientScreens.length ? [] : THEME_SCREENS.map((s) => s.id),
+                  }))
+                }
+                className="press rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary"
+              >
+                {map.gradientScreens.length ? "All screens" : "Pick screens"}
+              </button>
+            </div>
+            {map.gradientScreens.length ? (
+              <div className="grid grid-cols-2 gap-2">
+                {THEME_SCREENS.map((s) => {
+                  const on = map.gradientScreens.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() =>
+                        setMap((m) => {
+                          const next = on
+                            ? m.gradientScreens.filter((id) => id !== s.id)
+                            : [...m.gradientScreens, s.id];
+                          return { ...m, gradientScreens: next.length ? next : [s.id] };
+                        })
+                      }
+                      className={`press rounded-2xl border-2 px-3 py-2 text-left text-xs font-bold transition-colors ${
+                        on
+                          ? "border-foreground bg-card"
+                          : "border-transparent bg-card/50 text-muted-foreground"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">
+                Every screen uses the gradient. Tap “Pick screens” to choose.
+              </p>
+            )}
+          </div>
+        ) : null}
+
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+          Tap a color for “{SLOT_META.find((s) => s.id === active)?.title ?? active}”
+        </p>
+
+        <div className="grid grid-cols-5 gap-2">
+          {COLORS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => pick(c.hex)}
+              className="press flex flex-col items-center gap-1"
+            >
+              <span
+                className={`grid size-11 place-items-center rounded-2xl text-base shadow-soft transition-transform ${
+                  (map as unknown as Record<string, string | boolean>)[active] === c.hex
+                    ? "scale-110 ring-2 ring-foreground ring-offset-2"
+                    : ""
+                }`}
+                style={{ backgroundColor: c.hex }}
+              >
+                {c.emoji}
+              </span>
+              <span className="text-[8px] font-semibold leading-tight text-muted-foreground">
+                {c.label}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-4 rounded-[1.25rem] border border-border bg-card p-3">
+          <p className="mb-1 text-sm font-bold">Theme presets</p>
+          <p className="mb-3 text-[11px] text-muted-foreground">
+            Recommended looks, or save the one you&apos;re using now
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {presets.map((p) => (
+              <div key={p.id} className="rounded-2xl border border-border bg-background p-2">
+                <div
+                  className="mb-2 h-8 rounded-xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${p.theme.gradFrom}, ${p.theme.gradTo})`,
+                  }}
+                />
+                <p className="truncate text-[11px] font-bold">{p.name}</p>
+                <div className="mt-1.5 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // A preset changes colours; it never removes box pictures or the style.
+                      const preset = normalizeTheme(p.theme);
+                      const next = {
+                        ...preset,
+                        skin: map.skin,
+                        boxOverrides: { ...map.boxOverrides, ...preset.boxOverrides },
+                      };
+                      setMap(next);
+                      applyColors(next, pathname);
+                      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+                      toast.success(`Applied “${p.name}”`);
+                    }}
+                    className="press flex-1 rounded-full bg-primary py-1 text-[10px] font-bold text-primary-foreground"
+                  >
+                    Use
+                  </button>
+                  {!p.builtin ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = loadUserPresets().filter((x) => x.id !== p.id);
+                        saveUserPresets(next);
+                        setPresets(allPresets());
+                        toast.message("Preset deleted");
+                      }}
+                      className="press rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-muted-foreground"
+                    >
+                      Del
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex gap-2">
+            <input
+              value={presetName}
+              onChange={(e) => setPresetName(e.target.value)}
+              placeholder="Name this look…"
+              className="min-w-0 flex-1 rounded-full border border-border bg-background px-3 py-2 text-xs"
+              maxLength={32}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const name = presetName.trim() || "My look";
+                const id = `user-${Date.now()}`;
+                const custom = [
+                  ...loadUserPresets(),
+                  { id, name, theme: map, builtin: false as const },
+                ];
+                saveUserPresets(custom);
+                setPresets(allPresets());
+                setPresetName("");
+                toast.success("Preset saved");
+              }}
+              className="press shrink-0 rounded-full bg-foreground px-3 py-2 text-[11px] font-bold text-background"
+            >
+              Save current
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-[1.25rem] border border-border bg-card p-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              Screens with gradient boxes
-            </p>
+            <div>
+              <p className="text-sm font-bold">Soft shadows</p>
+              <p className="text-[11px] text-muted-foreground">
+                Elevation on cards & tiles across the whole app
+              </p>
+            </div>
             <button
               type="button"
               onClick={() =>
                 setMap((m) => ({
                   ...m,
-                  gradientScreens: m.gradientScreens.length ? [] : THEME_SCREENS.map((s) => s.id),
+                  shadowsEnabled: m.shadowsEnabled === false ? true : false,
                 }))
               }
-              className="press rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary"
+              className={`press shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold ${
+                map.shadowsEnabled !== false
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
             >
-              {map.gradientScreens.length ? "All screens" : "Pick screens"}
+              {map.shadowsEnabled === false ? "Off" : "On"}
             </button>
           </div>
-          {map.gradientScreens.length ? (
-            <div className="grid grid-cols-2 gap-2">
-              {THEME_SCREENS.map((s) => {
-                const on = map.gradientScreens.includes(s.id);
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() =>
-                      setMap((m) => {
-                        const next = on
-                          ? m.gradientScreens.filter((id) => id !== s.id)
-                          : [...m.gradientScreens, s.id];
-                        return { ...m, gradientScreens: next.length ? next : [s.id] };
-                      })
-                    }
-                    className={`press rounded-2xl border-2 px-3 py-2 text-left text-xs font-bold transition-colors ${
-                      on ? "border-foreground bg-card" : "border-transparent bg-card/50 text-muted-foreground"
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-[11px] text-muted-foreground">
-              Every screen uses the gradient. Tap “Pick screens” to choose.
-            </p>
-          )}
-        </div>
-      ) : null}
-
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-        Tap a color for “{SLOT_META.find((s) => s.id === active)?.title ?? active}”
-      </p>
-
-      <div className="grid grid-cols-5 gap-2">
-        {COLORS.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => pick(c.hex)}
-            className="press flex flex-col items-center gap-1"
-          >
-            <span
-              className={`grid size-11 place-items-center rounded-2xl text-base shadow-soft transition-transform ${
-                (map as unknown as Record<string, string | boolean>)[active] === c.hex
-                  ? "scale-110 ring-2 ring-foreground ring-offset-2"
-                  : ""
-              }`}
-              style={{ backgroundColor: c.hex }}
-            >
-              {c.emoji}
-            </span>
-            <span className="text-[8px] font-semibold leading-tight text-muted-foreground">
-              {c.label}
-            </span>
-          </button>
-        ))}
-      </div>
-
-
-
-      <div className="mb-4 rounded-[1.25rem] border border-border bg-card p-3">
-        <p className="mb-1 text-sm font-bold">Theme presets</p>
-        <p className="mb-3 text-[11px] text-muted-foreground">
-          Recommended looks, or save the one you&apos;re using now
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          {presets.map((p) => (
-            <div
-              key={p.id}
-              className="rounded-2xl border border-border bg-background p-2"
-            >
-              <div
-                className="mb-2 h-8 rounded-xl"
-                style={{
-                  background: `linear-gradient(135deg, ${p.theme.gradFrom}, ${p.theme.gradTo})`,
-                }}
+          {map.shadowsEnabled !== false ? (
+            <label className="block text-[11px] font-semibold text-muted-foreground">
+              Strength
+              <input
+                type="range"
+                min={0.1}
+                max={0.7}
+                step={0.05}
+                value={map.shadowStrength ?? 0.32}
+                onChange={(e) =>
+                  setMap((m) => ({
+                    ...m,
+                    shadowStrength: Number(e.target.value),
+                  }))
+                }
+                className="mt-1 w-full"
               />
-              <p className="truncate text-[11px] font-bold">{p.name}</p>
-              <div className="mt-1.5 flex gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = normalizeTheme(p.theme);
-                    setMap(next);
-                    applyColors(next, pathname);
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-                    toast.success(`Applied “${p.name}”`);
-                  }}
-                  className="press flex-1 rounded-full bg-primary py-1 text-[10px] font-bold text-primary-foreground"
-                >
-                  Use
-                </button>
-                {!p.builtin ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = loadUserPresets().filter((x) => x.id !== p.id);
-                      saveUserPresets(next);
-                      setPresets(allPresets());
-                      toast.message("Preset deleted");
-                    }}
-                    className="press rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-muted-foreground"
-                  >
-                    Del
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 flex gap-2">
-          <input
-            value={presetName}
-            onChange={(e) => setPresetName(e.target.value)}
-            placeholder="Name this look…"
-            className="min-w-0 flex-1 rounded-full border border-border bg-background px-3 py-2 text-xs"
-            maxLength={32}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              const name = presetName.trim() || "My look";
-              const id = `user-${Date.now()}`;
-              const custom = [
-                ...loadUserPresets(),
-                { id, name, theme: map, builtin: false as const },
-              ];
-              saveUserPresets(custom);
-              setPresets(allPresets());
-              setPresetName("");
-              toast.success("Preset saved");
-            }}
-            className="press shrink-0 rounded-full bg-foreground px-3 py-2 text-[11px] font-bold text-background"
-          >
-            Save current
-          </button>
-        </div>
-      </div>
+            </label>
+          ) : null}
 
-      <div className="mt-4 rounded-[1.25rem] border border-border bg-card p-3">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <div>
-            <p className="text-sm font-bold">Soft shadows</p>
-            <p className="text-[11px] text-muted-foreground">
-              Elevation on cards & tiles across the whole app
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() =>
-              setMap((m) => ({
-                ...m,
-                shadowsEnabled: m.shadowsEnabled === false ? true : false,
-              }))
-            }
-            className={`press shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold ${
-              map.shadowsEnabled !== false
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {map.shadowsEnabled === false ? "Off" : "On"}
-          </button>
-        </div>
-        {map.shadowsEnabled !== false ? (
-          <label className="block text-[11px] font-semibold text-muted-foreground">
-            Strength
+          <label className="mt-3 block text-[11px] font-semibold text-muted-foreground">
+            Edge sharpness (whole app)
             <input
               type="range"
-              min={0.1}
-              max={0.7}
+              min={0.35}
+              max={2.2}
               step={0.05}
-              value={map.shadowStrength ?? 0.32}
+              value={map.cornerRadius ?? 1.25}
               onChange={(e) =>
                 setMap((m) => ({
                   ...m,
-                  shadowStrength: Number(e.target.value),
+                  cornerRadius: Number(e.target.value),
                 }))
               }
               className="mt-1 w-full"
             />
+            <span className="text-[10px]">
+              Sharper ← → Rounder ({(map.cornerRadius ?? 1.25).toFixed(2)})
+            </span>
           </label>
-        ) : null}
-
-        <label className="mt-3 block text-[11px] font-semibold text-muted-foreground">
-          Edge sharpness (whole app)
-          <input
-            type="range"
-            min={0.35}
-            max={2.2}
-            step={0.05}
-            value={map.cornerRadius ?? 1.25}
-            onChange={(e) =>
-              setMap((m) => ({
-                ...m,
-                cornerRadius: Number(e.target.value),
-              }))
-            }
-            className="mt-1 w-full"
-          />
-          <span className="text-[10px]">Sharper ← → Rounder ({(map.cornerRadius ?? 1.25).toFixed(2)})</span>
-        </label>
-
-      </div>
-
-      <div className="mt-5 rounded-[1.25rem] border border-border bg-muted/40 p-3">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-sm font-bold">Developer mode</p>
-            <p className="text-[11px] text-muted-foreground">
-              On any screen, tap a box to set its own color or gradient
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              const on = localStorage.getItem(DEV_MODE_KEY) === "1";
-              localStorage.setItem(DEV_MODE_KEY, on ? "0" : "1");
-              window.dispatchEvent(new Event("blublub-dev-mode"));
-              toast.message(on ? "Developer mode off" : "Developer mode on — open any page and tap a box");
-            }}
-            className="press shrink-0 rounded-full bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground"
-          >
-            Toggle
-          </button>
         </div>
-      </div>
 
-      <PrimaryButton className="mt-4" disabled={saving} onClick={() => void saveShared(map)}>
-        {saving ? "Saving…" : "Save for both of us"}
-      </PrimaryButton>
-    </Card>
+        <div className="mt-5 rounded-[1.25rem] border border-border bg-muted/40 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-bold">Developer mode</p>
+              <p className="text-[11px] text-muted-foreground">
+                On any screen, tap a box to set its own color or gradient
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const on = localStorage.getItem(DEV_MODE_KEY) === "1";
+                localStorage.setItem(DEV_MODE_KEY, on ? "0" : "1");
+                window.dispatchEvent(new Event("blublub-dev-mode"));
+                toast.message(
+                  on ? "Developer mode off" : "Developer mode on — open any page and tap a box",
+                );
+              }}
+              className="press shrink-0 rounded-full bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground"
+            >
+              Toggle
+            </button>
+          </div>
+        </div>
+
+        <PrimaryButton className="mt-4" disabled={saving} onClick={() => void saveShared(map)}>
+          {saving ? "Saving…" : "Save for both of us"}
+        </PrimaryButton>
+      </Card>
+    </>
   );
 }

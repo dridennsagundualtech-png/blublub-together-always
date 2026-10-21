@@ -1,3 +1,4 @@
+import { useRef, type CSSProperties } from "react";
 import { Doodle } from "@/components/Doodles";
 import { Card } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
@@ -17,7 +18,8 @@ export function newConnect4(): C4State {
 const at = (board: (number | null)[], r: number, c: number) =>
   r < 0 || r >= ROWS || c < 0 || c >= COLS ? undefined : board[r * COLS + c];
 
-function hasFour(board: (number | null)[], seat: number): boolean {
+/** The four winning cells for `seat`, or null. */
+function fourCells(board: (number | null)[], seat: number): number[] | null {
   const dirs = [
     [0, 1],
     [1, 0],
@@ -30,11 +32,11 @@ function hasFour(board: (number | null)[], seat: number): boolean {
       for (const [dr, dc] of dirs) {
         let n = 1;
         while (n < 4 && at(board, r + dr! * n, c + dc! * n) === seat) n += 1;
-        if (n === 4) return true;
+        if (n === 4) return [0, 1, 2, 3].map((k) => (r + dr! * k) * COLS + (c + dc! * k));
       }
     }
   }
-  return false;
+  return null;
 }
 
 export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) {
@@ -43,6 +45,9 @@ export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) 
   const board = s.board ?? Array(COLS * ROWS).fill(null);
   const myTurn = game.turn === me;
   const other = seat === 0 ? 1 : 0;
+  const winning = new Set(fourCells(board, 0) ?? fourCells(board, 1) ?? []);
+  // Pieces already on the board when you open the game don't replay their drop.
+  const placedAtOpen = useRef(board.map((c) => c != null));
 
   function drop(col: number) {
     if (!myTurn || update.isPending) return;
@@ -58,7 +63,7 @@ export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) 
     const next = [...board];
     next[row * COLS + col] = seat;
     const patch: Record<string, unknown> = { state: { board: next } };
-    if (hasFour(next, seat)) Object.assign(patch, finishPatch(players[seat] ?? null));
+    if (fourCells(next, seat)) Object.assign(patch, finishPatch(players[seat] ?? null));
     else if (next.every((c) => c != null)) Object.assign(patch, finishPatch(null));
     else patch['turn'] = players[other];
     update.mutate({ id: game.id, patch: patch as never });
@@ -72,7 +77,7 @@ export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) 
         onResignTo={players[other]}
       />
 
-      <Card className="mt-4">
+      <Card className="mt-4 overflow-hidden">
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: COLS }).map((_, c) => (
             <button
@@ -92,14 +97,23 @@ export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) 
               tabIndex={-1}
               aria-hidden="true"
               onClick={() => drop(i % COLS)}
-              className="grid aspect-square place-items-center rounded-full bg-secondary"
+              className={`grid aspect-square place-items-center rounded-full bg-secondary ${
+                winning.has(i) ? "win-glow" : ""
+              }`}
             >
               {cell == null ? null : (
-                <Doodle
-                  critter={cell === 0 ? "penguin" : "seal"}
-                  pose={cell === 0 ? "default" : "wave"}
-                  size={30}
-                />
+                // Keyed by what's in the cell, so a new piece mounts and falls down its column.
+                <span
+                  key={`${i}-${cell}`}
+                  className={placedAtOpen.current[i] ? undefined : "piece-drop"}
+                  style={{ "--drop": Math.floor(i / COLS) + 1 } as CSSProperties}
+                >
+                  <Doodle
+                    critter={cell === 0 ? "penguin" : "seal"}
+                    pose={cell === 0 ? "default" : "wave"}
+                    size={30}
+                  />
+                </span>
               )}
             </button>
           ))}
