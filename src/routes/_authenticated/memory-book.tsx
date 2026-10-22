@@ -61,13 +61,25 @@ const sizeMB = (f: File) => `${(f.size / 1024 / 1024).toFixed(1)} MB`;
 const minutes = (s: number) =>
   `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
 
-function download(file: File) {
-  const url = URL.createObjectURL(file);
+const userAgent = () => (typeof navigator === "undefined" ? "" : navigator.userAgent);
+const isIOS = () => /iPhone|iPad|iPod/.test(userAgent());
+// Messenger, Instagram & co. open links in their own browser (an Android "wv"), which can't save files.
+const inAppBrowser = () =>
+  /FBAN|FBAV|FB_IAB|Instagram|Messenger|Line\/|; wv\)/.test(userAgent()) ||
+  (typeof window !== "undefined" && window.self !== window.top);
+
+/** Saves a file. Pass `url` to reuse a link that stays alive (the video's own). */
+function download(file: File, url?: string) {
+  const href = url ?? URL.createObjectURL(file);
   const a = document.createElement("a");
-  a.href = url;
+  a.href = href;
   a.download = file.name;
+  document.body.append(a);
   a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  a.remove();
+  // Android asks "Download file?" first, so the link must still work when you answer.
+  if (!url) setTimeout(() => URL.revokeObjectURL(href), 5 * 60_000);
+  toast("Downloading… you'll find it in your Downloads.");
 }
 
 // Sharing needs a fresh tap, so Share only shows once the file exists.
@@ -315,13 +327,17 @@ function MemoryBookPage() {
                       Share
                     </PrimaryButton>
                   ) : null}
-                  <PrimaryButton onClick={() => download(video.file)}>Download</PrimaryButton>
+                  <PrimaryButton onClick={() => download(video.file, video.url)}>
+                    Download
+                  </PrimaryButton>
                 </div>
-                {canShare(video.file) ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    To keep it in your Photos, tap Share, then Save video.
-                  </p>
-                ) : null}
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {inAppBrowser()
+                    ? "BLUBLUB is open inside another app (like Messenger), which can't save videos. Open it in Chrome or Safari to save it: tap the ⋮ menu, then Open in browser."
+                    : isIOS() && canShare(video.file)
+                      ? "To keep it in your Photos, tap Share, then Save video."
+                      : "Download saves it to your Downloads folder."}
+                </p>
               </>
             ) : null}
           </Card>
@@ -375,7 +391,7 @@ function MemoryBookPage() {
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <PrimaryButton
                   disabled={save.isPending}
-                  onClick={() => save.mutate(undefined, { onSuccess: download })}
+                  onClick={() => save.mutate(undefined, { onSuccess: (file) => download(file) })}
                 >
                   {save.isPending && saving
                     ? `Saving page ${Math.min(saving.done + 1, saving.total)} of ${saving.total}…`

@@ -4,22 +4,18 @@
  * built-in font can't draw emoji).
  *
  * Layout units are PDF points on an A4 page (595 × 842). A page is a list of draw steps;
- * `renderPage` paints them on a canvas at any scale.
+ * `renderPage` paints them on a canvas at any scale, in the app style (style-paint.ts): its
+ * paper, fonts, colours and photo frames.
  */
 import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
+import { paintPhoto, paintStage, prepareLook, rgba, traits, type Look } from "@/lib/style-paint";
 
 export const PAGE_W = 595.28;
 export const PAGE_H = 841.89;
 const M = 48;
 const CONTENT_W = PAGE_W - M * 2;
 const FOOTER = 28;
-
-const INK = "#3F2A3A";
-const MUTED = "#8A6B7A";
-const PAPER = "#FFFBFD";
-const FONT_TITLE = '"Baloo 2", ui-rounded, system-ui, sans-serif';
-const FONT_BODY = '"Nunito", ui-rounded, system-ui, sans-serif';
 
 type Step =
   | {
@@ -32,11 +28,11 @@ type Step =
       align?: CanvasTextAlign;
     }
   | { t: "rect"; x: number; y: number; w: number; h: number; color: string; r?: number }
-  | { t: "photo"; x: number; y: number; w: number; h: number; photo: number; r?: number };
+  | { t: "photo"; x: number; y: number; w: number; h: number; photo: number; seed: number };
 export type BookPage = Step[];
 
 export type BookPhoto = { blob: Blob; w: number; h: number };
-export type Book = { pages: BookPage[]; photos: BookPhoto[]; accent: string; title: string };
+export type Book = { pages: BookPage[]; photos: BookPhoto[]; look: Look; title: string };
 
 /** Canvas → JPEG Blob without canvas.toBlob: that callback is throttled to ~1s each while the
  *  app is in the background (seen: 180 photos went from 40s to 100s+). toDataURL isn't. */
@@ -178,30 +174,31 @@ export async function prepareBook(opts: {
     }
   });
 
-  // The app's own fonts must be ready before measuring text.
-  await Promise.all([
-    document.fonts.load(`700 30px ${FONT_TITLE}`),
-    document.fonts.load(`400 12px ${FONT_BODY}`),
-    document.fonts.load(`700 12px ${FONT_BODY}`),
-  ]).catch(() => undefined);
-
-  const accent =
-    getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#FFAFCC";
+  // The app style (and its fonts, ready before measuring text) decides how the book looks.
+  const look = await prepareLook();
+  const FONT_TITLE = look.display;
+  const FONT_BODY = look.body;
+  const INK = rgba(traits(look).page);
+  const MUTED = rgba(traits(look).page, 0.65);
+  const accent = look.primary;
   const bookPhotos: BookPhoto[] = [];
   const photoIndex = shrunk.map((s) => (s ? bookPhotos.push(s) - 1 : -1));
   const measure = document.createElement("canvas").getContext("2d")!;
   const pg = new Pager();
 
   // Cover: the newest photo in the range, the title, your names, the dates.
+  // Plain-paper styles get a colour band behind the photo; the others have their own page.
   const coverIdx = [...photoIndex].reverse().find((i) => i >= 0);
-  pg.page.push({ t: "rect", x: 0, y: 0, w: PAGE_W, h: 300, color: accent });
+  if (["classic", "pixel", "jelly", "glass"].includes(look.skin)) {
+    pg.page.push({ t: "rect", x: 0, y: 0, w: PAGE_W, h: 300, color: accent });
+  }
   if (coverIdx !== undefined) {
     const ph = bookPhotos[coverIdx]!;
     const box = 300;
     const s = Math.min(box / ph.w, box / ph.h);
     const w = ph.w * s;
     const h = ph.h * s;
-    pg.page.push({ t: "photo", x: (PAGE_W - w) / 2, y: 150, w, h, photo: coverIdx, r: 16 });
+    pg.page.push({ t: "photo", x: (PAGE_W - w) / 2, y: 150, w, h, photo: coverIdx, seed: 1 });
   }
   const titleY = coverIdx !== undefined ? 520 : 380;
   pg.page.push({
@@ -293,7 +290,15 @@ export async function prepareBook(opts: {
         const w = ph.w * s;
         const h = ph.h * s;
         pg.need(h + 34);
-        pg.page.push({ t: "photo", x: M + (CONTENT_W - w) / 2, y: pg.y, w, h, photo: idx, r: 10 });
+        pg.page.push({
+          t: "photo",
+          x: M + (CONTENT_W - w) / 2,
+          y: pg.y,
+          w,
+          h,
+          photo: idx,
+          seed: i,
+        });
         pg.y += h + 18;
         const capLines = wrap(measure, caption, `400 11px ${FONT_BODY}`, CONTENT_W);
         writeLines(capLines, `400 11px ${FONT_BODY}`, MUTED, 15);
@@ -334,7 +339,7 @@ export async function prepareBook(opts: {
   return {
     pages: pg.pages,
     photos: bookPhotos,
-    accent,
+    look,
     title: `blublub-memory-book-${from}-to-${to}`,
   };
 }
@@ -359,8 +364,7 @@ export async function renderPage(book: Book, index: number, scale: number) {
   canvas.height = Math.round(PAGE_H * scale);
   const ctx = canvas.getContext("2d")!;
   ctx.scale(scale, scale);
-  ctx.fillStyle = PAPER;
-  ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+  paintStage(ctx, book.look, PAGE_W, PAGE_H, 0, { page: true });
   ctx.textBaseline = "alphabetic";
   for (const step of book.pages[index] ?? []) {
     if (step.t === "rect") {
@@ -376,11 +380,7 @@ export async function renderPage(book: Book, index: number, scale: number) {
       const ph = book.photos[step.photo];
       if (!ph) continue;
       const bmp = await createImageBitmap(ph.blob);
-      ctx.save();
-      roundRect(ctx, step.x, step.y, step.w, step.h, step.r);
-      ctx.clip();
-      ctx.drawImage(bmp, step.x, step.y, step.w, step.h);
-      ctx.restore();
+      paintPhoto(ctx, book.look, bmp, step.x, step.y, step.w, step.h, { seed: step.seed, u: 1.2 });
       bmp.close();
     }
   }

@@ -85,18 +85,21 @@ function Sample({ id }: { id: SkinId }) {
     ),
     scrapbook: (
       <>
-        <g transform="rotate(-3 42 32)">
-          <rect x="14" y="14" width="56" height="36" rx="2" style={{ fill: CARD }} />
-          <rect x="32" y="9" width="22" height="8" style={{ fill: P, opacity: 0.6 }} />
-          {text("Caveat", 42, 39, "Aa", 17)}
+        <rect x="0" y="0" width="132" height="64" fill="#cfae84" />
+        <g transform="rotate(-2 42 32)">
+          <rect x="14" y="14" width="56" height="36" rx="1" fill="#fbf3e3" />
+          {["M14 14h9l-9 9z", "M70 14h-9l9 9z", "M14 50h9l-9-9z", "M70 50h-9l9-9z"].map((d) => (
+            <path key={d} d={d} style={{ fill: P }} stroke="#3b2a1a" strokeWidth="0.6" />
+          ))}
+          {text("Caveat", 42, 39, "Aa", 17, "#3b2a1a")}
         </g>
-        <rect x="78" y="22" width="40" height="20" rx="5" style={{ fill: P }} />
+        <rect x="78" y="22" width="40" height="20" rx="4" style={{ fill: P }} />
         <rect
           x="81"
           y="25"
           width="34"
           height="14"
-          rx="3"
+          rx="2"
           fill="none"
           stroke="white"
           strokeDasharray="3 2"
@@ -106,11 +109,35 @@ function Sample({ id }: { id: SkinId }) {
     ),
     cyberpunk: (
       <>
-        <rect x="0" y="0" width="132" height="64" fill="#0b0912" />
-        <path d="M22 14h48v28l-8 8H14V22z" fill="#15111e" style={{ stroke: P }} />
-        {text("Orbitron", 42, 37, "Aa", 12, "#f3ecff")}
-        <path d="M84 22h34v14l-6 6H78V28z" style={{ fill: P }} />
-        {text("Orbitron", 98, 36, "GO", 8, "#2a1a24")}
+        <rect x="0" y="0" width="132" height="64" fill="#070b1d" />
+        <rect
+          x="14"
+          y="14"
+          width="56"
+          height="36"
+          rx="8"
+          fill="#0d1330"
+          stroke="#6ee8ff"
+          strokeWidth="1.5"
+          style={{ filter: "drop-shadow(0 0 3px #6ee8ff)" }}
+        />
+        {text("Orbitron", 42, 37, "Aa", 12, "#eaf6ff")}
+        <defs>
+          <linearGradient id="neon-go" x1="0" x2="1">
+            <stop offset="0" stopColor="#6ee8ff" />
+            <stop offset="1" stopColor="#c59cff" />
+          </linearGradient>
+        </defs>
+        <rect
+          x="78"
+          y="22"
+          width="40"
+          height="20"
+          rx="10"
+          fill="url(#neon-go)"
+          style={{ filter: "drop-shadow(0 0 4px #c59cff)" }}
+        />
+        {text("Orbitron", 98, 36, "GO", 8, "#06102a")}
       </>
     ),
     steampunk: (
@@ -144,16 +171,21 @@ function Sample({ id }: { id: SkinId }) {
     ),
     nature: (
       <>
+        <path d="M0 52c30-8 60-6 90-1s32 3 42 1V64H0z" fill="#6f9a6a" opacity="0.35" />
+        <path d="M104 52c1-8 1-14-1-20h6c-2 6-2 12-1 20z" fill="#7a5a3c" />
+        <circle cx="106" cy="22" r="12" fill="#6f9a6a" opacity="0.8" />
+        <circle cx="98" cy="28" r="8" fill="#8fb87f" opacity="0.8" />
+        <path d="M104 52c-4 4-9 6-14 7M108 52c4 4 9 6 14 7" stroke="#7a5a3c" fill="none" />
         <path
-          d="M30 14h40v24a12 12 0 0 1-12 12H14V26a12 12 0 0 1 12-12z"
+          d="M30 14h36v20a10 10 0 0 1-10 10H14V24a10 10 0 0 1 10-10z"
           style={{ fill: CARD }}
           stroke="#6f9a6a"
           strokeOpacity="0.4"
         />
-        <path d="M58 20c5-6 12-6 15-5-2 6-9 10-15 5z" fill="#6f9a6a" opacity="0.6" />
-        {text("Fraunces", 42, 37, "Aa")}
-        <path d="M86 22h32v12a8 8 0 0 1-8 8H78V30a8 8 0 0 1 8-8z" style={{ fill: P }} />
-        {text("Fraunces", 98, 36, "Go", 10)}
+        <path d="M22 14q1-5 3-7M26 14q0-4-2-6M30 14q1-5 4-7" stroke="#5f8a58" fill="none" />
+        <circle cx="35" cy="7" r="2.4" fill="#f4a6c1" />
+        {text("Fraunces", 40, 34, "Aa")}
+        <path d="M80 50c6-8 12-9 18-8" stroke="#6f9a6a" strokeOpacity="0.5" fill="none" />
       </>
     ),
   };

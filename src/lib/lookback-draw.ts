@@ -3,104 +3,35 @@
  * made of the same frames, so what you watch is what you get. Sizes are in a 360×640 frame
  * (a phone screen in CSS pixels) and scale to any canvas size.
  */
-import { critterSrc, pixelRuns, type Critter, type Pose } from "@/components/Doodles";
+import { pixelRuns, type Critter, type Pose } from "@/components/Doodles";
 import { emojiRuns } from "@/components/pixel-art";
 import { mapLimit, wrap } from "@/lib/memory-book";
 import { SLIDE_MS, type Slide } from "@/lib/lookback-story";
+import {
+  accentOnPanel,
+  canvasOf,
+  drawCover,
+  paintOverlay,
+  paintPanel,
+  paintPhoto,
+  paintStage,
+  rgba,
+  roundRect,
+  traits,
+  type Look,
+  type RGB,
+} from "@/lib/style-paint";
+
+export { prepareLook, type Look } from "@/lib/style-paint";
 
 export const W = 360;
 export const H = 640;
 const FADE_MS = 300;
-const INK = "#2b2233";
+const INK: RGB = [43, 34, 51];
 const PAD = 28;
 
-/** The app style the slides are drawn in: fonts, colours and critters. */
-export type Look = {
-  pixel: boolean;
-  display: string;
-  body: string;
-  primary: string;
-  deep: string;
-  soft: [string, string];
-  critters: Map<string, CanvasImageSource>;
-};
 export type Picture = { img: HTMLCanvasElement; blur: HTMLCanvasElement };
 export type Pictures = Map<string, Picture>;
-
-const CRITTERS: [Critter, Pose][] = [
-  ["cat", "cheer"],
-  ["seal", "love"],
-  ["penguin", "curious"],
-  ["cat", "wave"],
-  ["penguin", "love"],
-];
-
-const canvasOf = (w: number, h: number) => {
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  return c;
-};
-
-/** Any CSS colour (var(), color-mix…) as rgb() the canvas understands. */
-function resolveColor(css: string) {
-  const el = document.createElement("div");
-  el.style.cssText = `position:absolute;visibility:hidden;background:${css}`;
-  document.body.append(el);
-  const computed = getComputedStyle(el).backgroundColor;
-  el.remove();
-  const ctx = canvasOf(1, 1).getContext("2d", { willReadFrequently: true })!;
-  ctx.fillStyle = computed;
-  ctx.fillRect(0, 0, 1, 1);
-  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-  return `rgb(${r}, ${g}, ${b})`;
-}
-
-function fontOf(tag: string, className: string) {
-  const el = document.createElement(tag);
-  el.className = className;
-  el.style.cssText = "position:absolute;visibility:hidden";
-  document.body.append(el);
-  const family = getComputedStyle(el).fontFamily;
-  el.remove();
-  return family;
-}
-
-async function loadImage(src: string) {
-  const img = new Image();
-  img.src = src;
-  await img.decode();
-  return img;
-}
-
-/** Reads the current app style (and waits for its fonts) so the slides match the app. */
-export async function prepareLook(): Promise<Look> {
-  const display = fontOf("h2", "font-display");
-  const body = fontOf("p", "");
-  const look: Look = {
-    pixel: document.documentElement.dataset["skin"] === "pixel",
-    display,
-    body,
-    primary: resolveColor("var(--color-primary)"),
-    deep: resolveColor("color-mix(in oklab, var(--color-primary) 45%, black)"),
-    soft: [
-      resolveColor("color-mix(in oklab, var(--color-primary) 70%, black)"),
-      resolveColor("color-mix(in oklab, var(--color-primary) 35%, black)"),
-    ],
-    critters: new Map(),
-  };
-  await Promise.all([
-    ...["800", "700", "600"].flatMap((w) =>
-      [display, body].map((f) => document.fonts.load(`${w} 32px ${f}`, "Aa1💗").catch(() => [])),
-    ),
-    ...(look.pixel
-      ? []
-      : CRITTERS.map(async ([c, p]) => {
-          look.critters.set(`${c}-${p}`, await loadImage(critterSrc(c, p)));
-        })),
-  ]);
-  return look;
-}
 
 /** Fetches a photo, shrinks it (longest side 900px) and makes its soft blurred background.
  *  ponytail: every picture stays in memory for the video; decode on demand if long stories run out. */
@@ -214,7 +145,9 @@ type Style = {
   weight: 600 | 700 | 800;
   display?: boolean;
   lh?: number;
+  /** A fixed colour; otherwise the stack's text colour at `alpha`. */
   color?: string;
+  alpha?: number;
   tracking?: number;
   upper?: boolean;
 };
@@ -288,6 +221,9 @@ const centred = (h: number, critter = true) =>
 const stackHeight = (blocks: Block[]) =>
   blocks.reduce((h, b, i) => h + b.height + (i ? b.gap : 0), 0);
 
+type Ink = { color: RGB; glow: string | null };
+const ON_PHOTO: Ink = { color: [255, 255, 255], glow: null };
+
 /** Draws blocks top to bottom from `top`, each with its own entrance. */
 function drawStack(
   ctx: CanvasRenderingContext2D,
@@ -295,7 +231,9 @@ function drawStack(
   x: number,
   top: number,
   align: CanvasTextAlign,
+  ink: Ink,
 ) {
+  const light = ink.color[0] + ink.color[1] + ink.color[2] > 600;
   let y = top;
   blocks.forEach((b, i) => {
     if (i) y += b.gap;
@@ -307,7 +245,15 @@ function drawStack(
       ctx.scale(b.anim.s, b.anim.s);
       ctx.font = b.font;
       ctx.letterSpacing = `${b.style.tracking ?? 0}px`;
-      ctx.fillStyle = b.style.color ?? "#fff";
+      ctx.fillStyle = b.style.color ?? rgba(ink.color, b.style.alpha ?? 1);
+      // Neon styles glow; light text on colour gets a soft shadow so it reads on pale parts.
+      if (ink.glow) {
+        ctx.shadowColor = ink.glow;
+        ctx.shadowBlur = 10;
+      } else if (light && !b.style.color) {
+        ctx.shadowColor = "rgba(0, 0, 0, 0.22)";
+        ctx.shadowBlur = 6;
+      }
       ctx.textAlign = align;
       ctx.textBaseline = "middle";
       b.lines.forEach((line, j) => ctx.fillText(line, 0, -b.height / 2 + j * lh + lh / 2));
@@ -318,54 +264,7 @@ function drawStack(
   return y;
 }
 
-const white = (a: number) => `rgba(255, 255, 255, ${a})`;
-
 // ── Pictures & decorations ──────────────────────────────────────────────
-
-function drawCover(
-  ctx: CanvasRenderingContext2D,
-  img: CanvasImageSource & { width: number; height: number },
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-) {
-  const s = Math.max(w / img.width, h / img.height);
-  const dw = img.width * s;
-  const dh = img.height * s;
-  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
-}
-
-function roundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number | number[],
-) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-}
-
-function gradient(ctx: CanvasRenderingContext2D, look: Look, soft = false) {
-  const [from, to] = soft ? look.soft : [look.primary, look.deep];
-  // linear-gradient(160deg, …) like the app's CSS.
-  const a = (160 * Math.PI) / 180;
-  const dx = Math.sin(a);
-  const dy = -Math.cos(a);
-  const len = Math.abs(W * dx) + Math.abs(H * dy);
-  const g = ctx.createLinearGradient(
-    W / 2 - (dx * len) / 2,
-    H / 2 - (dy * len) / 2,
-    W / 2 + (dx * len) / 2,
-    H / 2 + (dy * len) / 2,
-  );
-  g.addColorStop(0, from);
-  g.addColorStop(1, to);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-}
 
 /** A photo filling the slide: zooming slowly behind text ("dim"), or blurred as a soft background. */
 function backdrop(
@@ -376,7 +275,7 @@ function backdrop(
   t: number,
   motion: boolean,
 ) {
-  if (!pic) return gradient(ctx, look);
+  if (!pic) return paintStage(ctx, look, W, H, t);
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, W, H);
   if (mode === "blur") {
@@ -385,20 +284,28 @@ function backdrop(
     ctx.globalAlpha = 1;
     ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
     ctx.fillRect(0, 0, W, H);
-    return;
+  } else {
+    const p = motion ? outCubic(clamp01(t / 5000)) : 0;
+    ctx.save();
+    ctx.translate(W / 2 + 0.02 * W * p, H / 2 - 0.015 * H * p);
+    ctx.scale(1.02 + 0.1 * p, 1.02 + 0.1 * p);
+    drawCover(ctx, pic.img, -W / 2, -H / 2, W, H);
+    ctx.restore();
+    const g = ctx.createLinearGradient(0, H, 0, 0);
+    g.addColorStop(0, "rgba(0, 0, 0, 0.8)");
+    g.addColorStop(0.5, "rgba(0, 0, 0, 0.25)");
+    g.addColorStop(1, "rgba(0, 0, 0, 0.3)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
   }
-  const p = motion ? outCubic(clamp01(t / 5000)) : 0;
-  ctx.save();
-  ctx.translate(W / 2 + 0.02 * W * p, H / 2 - 0.015 * H * p);
-  ctx.scale(1.02 + 0.1 * p, 1.02 + 0.1 * p);
-  drawCover(ctx, pic.img, -W / 2, -H / 2, W, H);
-  ctx.restore();
-  const g = ctx.createLinearGradient(0, H, 0, 0);
-  g.addColorStop(0, "rgba(0, 0, 0, 0.8)");
-  g.addColorStop(0.5, "rgba(0, 0, 0, 0.25)");
-  g.addColorStop(1, "rgba(0, 0, 0, 0.3)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
+  // The style's tint over the photo: night blue for Cyberpunk, a frosty haze for Glass.
+  if (look.skin === "cyberpunk") {
+    ctx.fillStyle = "rgba(7, 11, 29, 0.35)";
+    ctx.fillRect(0, 0, W, H);
+  } else if (look.skin === "glass" && mode === "blur") {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+    ctx.fillRect(0, 0, W, H);
+  }
 }
 
 function drawPixels(
@@ -482,6 +389,26 @@ function hearts(ctx: CanvasRenderingContext2D, look: Look, t: number, motion: bo
   }
 }
 
+/** A photo fitted into a box, slowly zooming, in the style's frame. */
+function framedPhoto(
+  ctx: CanvasRenderingContext2D,
+  look: Look,
+  picture: Picture,
+  box: { y: number; w: number; h: number },
+  zoom: { t: number; ms: number; dir: number; motion: boolean },
+  opts: { seed: number; top?: boolean },
+) {
+  const fit = Math.min(box.w / picture.img.width, box.h / picture.img.height);
+  const dw = picture.img.width * fit;
+  const dh = picture.img.height * fit;
+  const k = zoom.motion ? outCubic(clamp01(zoom.t / zoom.ms)) : 0;
+  ctx.save();
+  ctx.translate(W / 2 + zoom.dir * 0.02 * dw * k, box.y + box.h / 2 - 0.015 * dh * k);
+  ctx.scale(1.02 + 0.08 * k, 1.02 + 0.08 * k);
+  paintPhoto(ctx, look, picture.img, -dw / 2, -dh / 2, dw, dh, opts);
+  ctx.restore();
+}
+
 // ── Slides ──────────────────────────────────────────────────────────────
 
 function drawSlide(
@@ -492,19 +419,39 @@ function drawSlide(
   t: number,
   motion: boolean,
 ) {
+  const tr = traits(look);
+  const onStage: Ink = { color: tr.text, glow: tr.glow };
   const cw = W - PAD * 2;
   const pic = (url: string | null) => (url ? pics.get(url) : undefined);
-  const r = look.pixel ? 0 : 1; // Pixel style: square corners everywhere
+  const stage = (soft = false) => paintStage(ctx, look, W, H, t, { soft });
+
+  /** Text straight on the background, or on the style's card when it has one. */
+  const card = (
+    blocks: Block[],
+    x: number,
+    top: number,
+    align: CanvasTextAlign,
+    width: number,
+    seed = 0,
+  ) => {
+    if (!tr.panel) return drawStack(ctx, blocks, x, top, align, onStage);
+    const h = stackHeight(blocks);
+    const left = align === "center" ? x - width / 2 - 18 : x - 18;
+    ctx.save();
+    ctx.globalAlpha *= blocks[0]?.anim.a ?? 1;
+    paintPanel(ctx, look, left, top - 22, width + 36, h + 44, { seed });
+    ctx.restore();
+    return drawStack(ctx, blocks, x, top, align, { color: tr.panelText, glow: tr.glow });
+  };
 
   switch (slide.kind) {
     case "intro": {
-      backdrop(ctx, look, pic(slide.cover), "dim", t, motion);
-      const blocks = [
+      const blocks = () => [
         block(
           ctx,
           look,
           "Your story",
-          { size: 14, weight: 700, color: white(0.75), tracking: 2.8, upper: true },
+          { size: 14, weight: 700, alpha: 0.75, tracking: 2.8, upper: true },
           cw,
           rise(t, 0.2, motion),
         ),
@@ -521,23 +468,43 @@ function drawSlide(
           ctx,
           look,
           slide.range,
-          { size: 16, weight: 600, color: white(0.85) },
+          { size: 16, weight: 600, alpha: 0.85 },
           cw,
           rise(t, 0.8, motion),
           { gap: 12 },
         ),
       ];
-      drawStack(ctx, blocks, PAD, H * 0.82 - stackHeight(blocks), "left");
+      if (tr.photoOnStage) {
+        // Paper, parchment or meadow styles: the cover photo framed on the page, names on a card.
+        stage();
+        const cover = pic(slide.cover);
+        if (cover) {
+          framedPhoto(
+            ctx,
+            look,
+            cover,
+            { y: 80, w: W - 90, h: H * 0.4 },
+            { t, ms: 5000, dir: 1, motion },
+            { seed: 1 },
+          );
+        }
+        const b = blocks();
+        card(b, PAD, H * 0.86 - stackHeight(b), "left", cw, 1);
+        return;
+      }
+      backdrop(ctx, look, pic(slide.cover), "dim", t, motion);
+      const b = blocks();
+      drawStack(ctx, b, PAD, H * 0.82 - stackHeight(b), "left", { ...ON_PHOTO, glow: tr.glow });
       return;
     }
     case "days": {
-      gradient(ctx, look);
+      stage();
       const blocks = [
         block(
           ctx,
           look,
           "Today is day",
-          { size: 18, weight: 700, color: white(0.85) },
+          { size: 18, weight: 700, alpha: 0.85 },
           cw,
           rise(t, 0.1, motion),
         ),
@@ -557,24 +524,23 @@ function drawSlide(
           ctx,
           look,
           `Together since ${slide.since}`,
-          { size: 14, weight: 600, color: white(0.75) },
+          { size: 14, weight: 600, alpha: 0.75 },
           cw,
           rise(t, 1.6, motion),
           { gap: 24 },
         ),
       ];
-      drawStack(ctx, blocks, W / 2, centred(stackHeight(blocks)), "center");
+      card(blocks, W / 2, centred(stackHeight(blocks)), "center", cw);
       bottomCritter(ctx, look, "cat", "cheer", t, motion);
       return;
     }
     case "chapter": {
-      backdrop(ctx, look, pic(slide.cover), "blur", t, motion);
       const blocks = [
         block(
           ctx,
           look,
           slide.year,
-          { size: 16, weight: 700, color: white(0.8) },
+          { size: 16, weight: 700, alpha: 0.8 },
           cw,
           rise(t, 0.1, motion),
         ),
@@ -591,13 +557,20 @@ function drawSlide(
           ctx,
           look,
           slide.memories === 1 ? "1 memory" : `${slide.memories} memories`,
-          { size: 14, weight: 600, color: white(0.85) },
+          { size: 14, weight: 600, alpha: 0.85 },
           cw,
           rise(t, 0.6, motion),
           { gap: 12 },
         ),
       ];
-      drawStack(ctx, blocks, W / 2, centred(stackHeight(blocks), false), "center");
+      const top = centred(stackHeight(blocks), false);
+      if (tr.photoOnStage) {
+        stage();
+        card(blocks, W / 2, top, "center", cw * 0.8, 2);
+      } else {
+        backdrop(ctx, look, pic(slide.cover), "blur", t, motion);
+        drawStack(ctx, blocks, W / 2, top, "center", { ...ON_PHOTO, glow: tr.glow });
+      }
       return;
     }
     case "photo":
@@ -605,38 +578,23 @@ function drawSlide(
       const p = slide.photo;
       const top = slide.kind === "top";
       const picture = pic(p.url);
-      backdrop(ctx, look, picture, "blur", t, motion);
+      const seed = slide.kind === "photo" ? slide.index : 7;
+      if (tr.photoOnStage) stage();
+      else backdrop(ctx, look, picture, "blur", t, motion);
       if (picture) {
         // The whole photo, fitted between the top bar and the caption, slowly zooming.
-        const boxW = W - 32;
-        const boxH = H * 0.62;
-        const fit = Math.min(boxW / picture.img.width, boxH / picture.img.height);
-        const dw = picture.img.width * fit;
-        const dh = picture.img.height * fit;
-        const k = motion ? outCubic(clamp01(t / SLIDE_MS[slide.kind])) : 0;
-        const kx = slide.kind === "photo" && slide.index % 2 ? -0.02 : 0.02;
-        const radius = 16 * r;
-        ctx.save();
-        ctx.translate(W / 2 + kx * dw * k, H * 0.14 + boxH / 2 - 0.015 * dh * k);
-        ctx.scale(1.02 + 0.1 * k, 1.02 + 0.1 * k);
-        ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
-        ctx.shadowBlur = 50;
-        ctx.shadowOffsetY = 25;
-        roundRect(ctx, -dw / 2, -dh / 2, dw, dh, radius);
-        ctx.fillStyle = "#000";
-        ctx.fill();
-        ctx.shadowColor = "transparent";
-        ctx.save();
-        ctx.clip();
-        ctx.drawImage(picture.img, -dw / 2, -dh / 2, dw, dh);
-        ctx.restore();
-        if (top) {
-          roundRect(ctx, -dw / 2 - 2, -dh / 2 - 2, dw + 4, dh + 4, radius + 2 * r);
-          ctx.strokeStyle = white(0.8);
-          ctx.lineWidth = 4;
-          ctx.stroke();
-        }
-        ctx.restore();
+        framedPhoto(
+          ctx,
+          look,
+          picture,
+          {
+            y: H * 0.14,
+            w: W - (tr.photoOnStage ? 64 : 32),
+            h: H * (tr.photoOnStage ? 0.56 : 0.62),
+          },
+          { t, ms: SLIDE_MS[slide.kind], dir: seed % 2 ? -1 : 1, motion },
+          { seed, top },
+        );
       }
       if (top) hearts(ctx, look, t, motion);
       const extra =
@@ -650,7 +608,7 @@ function drawSlide(
                 ctx,
                 look,
                 "Your most-loved memory",
-                { size: 14, weight: 700, color: white(0.8), tracking: 2.1, upper: true },
+                { size: 14, weight: 700, alpha: 0.8, tracking: 2.1, upper: true },
                 cw,
                 rise(t, 0.2, motion),
               ),
@@ -673,31 +631,36 @@ function drawSlide(
           ctx,
           look,
           `${niceDate(p.date)}${extra}`,
-          { size: 14, weight: 600, color: white(0.75) },
+          { size: 14, weight: 600, alpha: 0.75 },
           cw,
           rise(t, 0.5, motion),
           { gap: 6 },
         ),
       ];
       const h = stackHeight(blocks);
+      if (tr.photoOnStage) {
+        // The caption on a little card under the print.
+        card(blocks, PAD, H - 40 - h, "left", cw, seed + 1);
+        return;
+      }
       const shade = ctx.createLinearGradient(0, H - h - 96, 0, H);
       shade.addColorStop(0, "rgba(0, 0, 0, 0)");
       shade.addColorStop(1, "rgba(0, 0, 0, 0.7)");
       ctx.fillStyle = shade;
       ctx.fillRect(0, H - h - 96, W, h + 96);
-      drawStack(ctx, blocks, PAD, H - 32 - h, "left");
+      drawStack(ctx, blocks, PAD, H - 32 - h, "left", { ...ON_PHOTO, glow: tr.glow });
       return;
     }
     case "diary": {
       const e = slide.entry;
-      gradient(ctx, look, true);
+      stage(true);
       const body = rise(t, 0.4, motion);
       const blocks = [
         block(
           ctx,
           look,
           "From the diary",
-          { size: 14, weight: 700, color: white(0.75), tracking: 2.1, upper: true },
+          { size: 14, weight: 700, alpha: 0.75, tracking: 2.1, upper: true },
           cw,
           rise(t, 0.1, motion),
         ),
@@ -725,7 +688,7 @@ function drawSlide(
           ctx,
           look,
           `“${e.body.trim()}”`,
-          { size: 20, weight: 600, lh: 1.375, color: white(0.95) },
+          { size: 20, weight: 600, lh: 1.375, alpha: 0.95 },
           cw,
           body,
           { gap: 12, clamp: 8 },
@@ -734,19 +697,19 @@ function drawSlide(
           ctx,
           look,
           `— ${e.who}, ${niceDate(e.date)}`,
-          { size: 14, weight: 700, color: white(0.75) },
+          { size: 14, weight: 700, alpha: 0.75 },
           cw,
           rise(t, 0.9, motion),
           { gap: 20 },
         ),
       ];
-      drawStack(ctx, blocks, PAD, centred(stackHeight(blocks)), "left");
+      card(blocks, PAD, centred(stackHeight(blocks)), "left", cw, 3);
       bottomCritter(ctx, look, "seal", "love", t, motion);
       return;
     }
     case "question": {
       const q = slide.question;
-      gradient(ctx, look);
+      stage();
       const w = W - 48;
       const head = rise(t, 0.1, motion);
       const blocks = [
@@ -754,7 +717,7 @@ function drawSlide(
           ctx,
           look,
           "You both answered",
-          { size: 14, weight: 700, color: white(0.75), tracking: 2.1, upper: true },
+          { size: 14, weight: 700, alpha: 0.75, tracking: 2.1, upper: true },
           w,
           head,
         ),
@@ -764,26 +727,24 @@ function drawSlide(
           clamp: 4,
         }),
       ];
-      // Answer bubbles: white, one from each side, tails towards their side.
+      // Answer bubbles, one from each side: the style's card, or white speech bubbles.
       const maxW = w * 0.85;
+      const bubbleInk: Ink = tr.panel
+        ? { color: tr.panelText, glow: tr.glow }
+        : { color: INK, glow: null };
       const bubbles = q.answers.map((a, i) => {
         const name = block(
           ctx,
           look,
           a.who,
-          { size: 12, weight: 700, color: look.deep },
+          { size: 12, weight: 700, color: tr.panel ? accentOnPanel(look) : look.deep },
           maxW - 40,
           NO_ANIM,
         );
-        const text = block(
-          ctx,
-          look,
-          a.body,
-          { size: 16, weight: 600, color: INK },
-          maxW - 40,
-          NO_ANIM,
-          { gap: 2, clamp: 4 },
-        );
+        const text = block(ctx, look, a.body, { size: 16, weight: 600 }, maxW - 40, NO_ANIM, {
+          gap: 2,
+          clamp: 4,
+        });
         ctx.font = text.font;
         const textW = Math.max(0, ...text.lines.map((l) => ctx.measureText(l).width));
         ctx.font = name.font;
@@ -797,7 +758,8 @@ function drawSlide(
         };
       });
       const total = stackHeight(blocks) + bubbles.reduce((n, b) => n + 16 + b.h, 0);
-      let y = drawStack(ctx, blocks, 24, centred(total), "left");
+      let y = drawStack(ctx, blocks, 24, centred(total), "left", onStage);
+      const r = look.pixel ? 0 : 1;
       for (const b of bubbles) {
         y += 16;
         const d = 900 + b.i * 1100;
@@ -809,21 +771,25 @@ function drawSlide(
           ctx.globalAlpha *= clamp01(p * 1.5);
           ctx.translate(x + b.w / 2 + (b.i ? 40 : -40) * (1 - e2), y + b.h / 2);
           ctx.scale(0.9 + 0.1 * e2, 0.9 + 0.1 * e2);
-          ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-          ctx.shadowBlur = 25;
-          ctx.shadowOffsetY = 12;
-          roundRect(
-            ctx,
-            -b.w / 2,
-            -b.h / 2,
-            b.w,
-            b.h,
-            b.i ? [24 * r, 24 * r, 6 * r, 24 * r] : [24 * r, 24 * r, 24 * r, 6 * r],
-          );
-          ctx.fillStyle = "#fff";
-          ctx.fill();
-          ctx.shadowColor = "transparent";
-          drawStack(ctx, [b.name, b.text], -b.w / 2 + 20, -b.h / 2 + 14, "left");
+          if (tr.panel) {
+            paintPanel(ctx, look, -b.w / 2, -b.h / 2, b.w, b.h, { seed: b.i, u: 0.8 });
+          } else {
+            ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+            ctx.shadowBlur = 25;
+            ctx.shadowOffsetY = 12;
+            roundRect(
+              ctx,
+              -b.w / 2,
+              -b.h / 2,
+              b.w,
+              b.h,
+              b.i ? [24 * r, 24 * r, 6 * r, 24 * r] : [24 * r, 24 * r, 24 * r, 6 * r],
+            );
+            ctx.fillStyle = "#fff";
+            ctx.fill();
+            ctx.shadowColor = "transparent";
+          }
+          drawStack(ctx, [b.name, b.text], -b.w / 2 + 20, -b.h / 2 + 14, "left", bubbleInk);
           ctx.restore();
         }
         y += b.h;
@@ -832,7 +798,7 @@ function drawSlide(
       return;
     }
     case "numbers": {
-      gradient(ctx, look);
+      stage();
       const w = W - 64;
       const blocks = [
         block(
@@ -856,17 +822,17 @@ function drawSlide(
             a,
             { gap: 24 },
           ),
-          block(ctx, look, it.label, { size: 16, weight: 700, color: white(0.85) }, w, a, {
+          block(ctx, look, it.label, { size: 16, weight: 700, alpha: 0.85 }, w, a, {
             gap: 4,
           }),
         );
       });
-      drawStack(ctx, blocks, 32, centred(stackHeight(blocks)), "left");
+      card(blocks, 32, centred(stackHeight(blocks)), "left", w, 4);
       bottomCritter(ctx, look, "cat", "wave", t, motion);
       return;
     }
     case "outro": {
-      gradient(ctx, look);
+      stage();
       hearts(ctx, look, t, motion);
       const blocks = [
         block(
@@ -882,13 +848,13 @@ function drawSlide(
           ctx,
           look,
           `${slide.names.join(" & ")} 💗`,
-          { size: 18, weight: 700, color: white(0.85) },
+          { size: 18, weight: 700, alpha: 0.85 },
           cw,
           rise(t, 0.7, motion),
           { gap: 16 },
         ),
       ];
-      const y = drawStack(ctx, blocks, W / 2, H * 0.26, "center");
+      const y = card(blocks, W / 2, H * 0.24, "center", cw, 5) + (tr.panel ? 22 : 0);
       const a = rise(t, 1.1, motion);
       ctx.save();
       ctx.globalAlpha *= a.a;
@@ -935,6 +901,7 @@ function paint(
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, W, H);
   drawSlide(ctx, look, pics, slide, t, motion);
+  paintOverlay(ctx, look, W, H);
   ctx.restore();
 }
 

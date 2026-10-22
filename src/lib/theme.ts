@@ -44,13 +44,13 @@ export const SKINS = [
   {
     id: "scrapbook",
     name: "Scrapbook",
-    blurb: "Paper, washi tape, polaroids, handwritten titles",
+    blurb: "Kraft paper, striped photo corners, handwritten notes",
     premium: true,
   },
   {
     id: "cyberpunk",
     name: "Cyberpunk",
-    blurb: "Dark city, neon edges, cut corners, scanlines",
+    blurb: "Light-blue and purple neon glowing in the dark",
     premium: true,
   },
   {
@@ -62,7 +62,7 @@ export const SKINS = [
   {
     id: "nature",
     name: "Nature",
-    blurb: "Leaf-shaped cards, soft serif titles, faint leaves",
+    blurb: "Trees and roots, grass, wildflowers and a gentle wind",
     premium: true,
   },
 ] as const;

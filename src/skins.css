@@ -359,16 +359,34 @@
 }
 
 /* ===================== Scrapbook =====================
- * Paper, washi tape and polaroids; handwritten titles. */
+ * A photo album: kraft-paper pages, cream paper cards held on by striped fabric photo corners
+ * (in the couple's colours), white-bordered prints and handwritten titles. */
+:root[data-skin="scrapbook"] {
+  /* Kraft paper is the page colour, so the header, tab bar and chat bar are paper too */
+  --background: #d6b994;
+  --kraft: var(--background);
+  --paper: color-mix(in oklab, var(--color-card) 72%, #f5ead3);
+  --ink: #3b2a1a;
+  /* Pencil-brown small print, readable on kraft as well as on the cream cards */
+  --muted-foreground: #5a4436;
+}
 :root[data-skin="scrapbook"] .page-wash {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0.09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.24  0 0 0 0 0.14  0 0 0 0.16 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   background-size: 180px 180px;
+  background-repeat: repeat;
+}
+:root[data-skin="scrapbook"] header.sticky {
+  border-bottom: 1.5px dashed color-mix(in oklab, var(--ink) 25%, transparent);
 }
 :root[data-skin="scrapbook"] :is(h1, h2, h3, .font-display) {
   font-family: "Caveat", var(--font-display);
   font-weight: 700;
   font-size: 1.22em;
   letter-spacing: 0;
+}
+/* Cards are sheets of cream paper; coloured tiles stay coloured paper */
+:root[data-skin="scrapbook"] :is(.card-soft, .card-raised, .card-outline, .surface-quiet) {
+  background-color: var(--paper);
 }
 :root[data-skin="scrapbook"]
   :is(
@@ -386,90 +404,147 @@
     .tile-cream,
     .tile-icy
   ) {
-  border-radius: 4px;
+  border-radius: 3px;
   border-color: transparent;
   box-shadow:
-    0 1px 1px color-mix(in oklab, #3b2a1a 12%, transparent),
-    0 8px 14px -8px color-mix(in oklab, #3b2a1a 35%, transparent) !important;
+    0 1px 1px color-mix(in oklab, var(--ink) 14%, transparent),
+    0 10px 16px -10px color-mix(in oklab, var(--ink) 45%, transparent) !important;
 }
-/* A strip of washi tape on each paper card */
+/* Striped fabric photo corners holding every paper card down */
 :root[data-skin="scrapbook"]
   :is(.card-soft, .surface-quiet):not(.fixed):not(.absolute):not(.sticky) {
   position: relative;
 }
 :root[data-skin="scrapbook"] :is(.card-soft, .surface-quiet)::before {
+  --corner: 28px;
   content: "";
   position: absolute;
-  top: -7px;
-  left: 50%;
-  width: 66px;
-  height: 18px;
-  translate: -50% 0;
-  rotate: -3deg;
-  background: repeating-linear-gradient(
-    45deg,
-    color-mix(in oklab, var(--color-primary) 60%, transparent) 0 7px,
-    color-mix(in oklab, var(--color-primary) 35%, transparent) 7px 14px
-  );
-  opacity: 0.85;
+  inset: 0;
   z-index: 3;
   pointer-events: none;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-primary) 0 3px,
+    #fff8ec 3px 5px,
+    var(--ink) 5px 6px,
+    var(--color-primary) 6px 9px,
+    #f2c14e 9px 11px
+  );
+  -webkit-mask:
+    linear-gradient(135deg, #000 calc(50% - 0.5px), transparent 50%) top left / var(--corner)
+      var(--corner) no-repeat,
+    linear-gradient(225deg, #000 calc(50% - 0.5px), transparent 50%) top right / var(--corner)
+      var(--corner) no-repeat,
+    linear-gradient(45deg, #000 calc(50% - 0.5px), transparent 50%) bottom left / var(--corner)
+      var(--corner) no-repeat,
+    linear-gradient(315deg, #000 calc(50% - 0.5px), transparent 50%) bottom right / var(--corner)
+      var(--corner) no-repeat;
+  mask:
+    linear-gradient(135deg, #000 calc(50% - 0.5px), transparent 50%) top left / var(--corner)
+      var(--corner) no-repeat,
+    linear-gradient(225deg, #000 calc(50% - 0.5px), transparent 50%) top right / var(--corner)
+      var(--corner) no-repeat,
+    linear-gradient(45deg, #000 calc(50% - 0.5px), transparent 50%) bottom left / var(--corner)
+      var(--corner) no-repeat,
+    linear-gradient(315deg, #000 calc(50% - 0.5px), transparent 50%) bottom right / var(--corner)
+      var(--corner) no-repeat;
 }
-/* Big photos become tilted polaroids */
+/* Every other card gets a different ribbon, like a box of mixed corners */
+:root[data-skin="scrapbook"] :is(.card-soft, .surface-quiet):nth-of-type(even)::before {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-lavender) 0 3px,
+    #fff8ec 3px 5px,
+    var(--color-sky) 5px 8px,
+    #fff8ec 8px 10px
+  );
+}
+:root[data-skin="scrapbook"] :is(.card-soft, .surface-quiet):nth-of-type(3n)::before {
+  background: repeating-linear-gradient(45deg, #c9a27a 0 4px, #a57d55 4px 5px, #d8b994 5px 9px);
+}
+/* Pink-on-kraft is too faint: links and accent text go a shade darker, like ink */
+:root[data-skin="scrapbook"] .text-primary {
+  color: color-mix(in oklab, var(--color-primary) 20%, var(--ink));
+}
+/* Photos are prints with a white border, glued down a little crooked */
 :root[data-skin="scrapbook"] img[class*="aspect-"] {
-  border: 7px solid white;
-  border-bottom-width: 22px;
-  rotate: -1.2deg;
-  box-shadow: 0 6px 14px -6px color-mix(in oklab, #3b2a1a 45%, transparent);
+  border: 6px solid #fffdf8;
+  rotate: -0.8deg;
+  box-shadow: 0 6px 12px -6px color-mix(in oklab, var(--ink) 50%, transparent);
 }
-/* Buttons look like stitched stickers */
+/* Buttons look like stitched paper labels */
 :root[data-skin="scrapbook"] :is(button, a):is([class*="bg-primary"], [class*="bg-gradient"]) {
-  border-radius: 10px;
+  border-radius: 6px;
   outline: 2px dashed color-mix(in oklab, white 75%, transparent);
   outline-offset: -5px;
-  box-shadow: 0 3px 0 color-mix(in oklab, #3b2a1a 18%, transparent) !important;
+  box-shadow: 0 3px 0 color-mix(in oklab, var(--ink) 22%, transparent) !important;
 }
 :root[data-skin="scrapbook"]
   :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select) {
-  border-radius: 4px;
+  border-radius: 3px;
   border-style: dashed;
+  background-color: var(--paper);
 }
 
 /* ===================== Cyberpunk =====================
- * Dark city: cut corners, neon edges in the couple's colours, scanlines. */
+ * Neon night: a deep blue-black city with light-blue and light-purple neon that glows.
+ * This style brings its own colours (!important beats the couple's colours, which applyColors
+ * sets inline); every other style uses the couple's colours again. */
 :root[data-skin="cyberpunk"] {
-  --background: #0b0912;
-  --foreground: #f3ecff;
-  --card: #15111e;
-  --card-foreground: #f3ecff;
-  --popover: #15111e;
-  --popover-foreground: #f3ecff;
-  --muted: #1e1829;
-  --muted-foreground: #b6a8c8;
-  --secondary-foreground: #f3ecff;
-  --cream: #1a1424;
-  --lavender-soft: #2a2238;
-  --lavender-foreground: #f0e6f8;
-  --border: color-mix(in oklab, var(--primary) 40%, transparent);
-  --input: color-mix(in oklab, var(--primary) 45%, transparent);
+  --neon-blue: #6ee8ff;
+  --neon-purple: #c59cff;
+  --primary: var(--neon-blue) !important;
+  --ring: var(--neon-blue) !important;
+  --sidebar-primary: var(--neon-blue) !important;
+  --chart-1: var(--neon-blue) !important;
+  --accent: var(--neon-purple) !important;
+  --lavender: var(--neon-purple) !important;
+  --sidebar-accent: var(--neon-purple) !important;
+  --chart-2: var(--neon-purple) !important;
+  --petal: var(--neon-purple) !important;
+  --peach: var(--neon-purple) !important;
+  --chart-5: var(--neon-purple) !important;
+  --secondary: #241d55 !important;
+  --sky: var(--neon-blue) !important;
+  --icy: var(--neon-blue) !important;
+  --chart-3: #8fb8ff !important;
+  --chart-4: #e3b8ff !important;
+  --grad-featured-from: var(--neon-blue) !important;
+  --grad-featured-to: var(--neon-purple) !important;
+  --grad-hero-from: var(--neon-blue) !important;
+  --grad-hero-to: var(--neon-purple) !important;
+  --grad-panel-from: var(--neon-blue) !important;
+  --grad-panel-to: var(--neon-purple) !important;
+  --box-grad-from: var(--neon-blue) !important;
+  --box-grad-to: var(--neon-purple) !important;
+  --background: #070b1d;
+  --foreground: #eaf6ff;
+  --card: #0d1330;
+  --card-foreground: #eaf6ff;
+  --popover: #0d1330;
+  --popover-foreground: #eaf6ff;
+  --primary-foreground: #06102a;
+  --accent-foreground: #120a2a;
+  --secondary-foreground: #eaf6ff;
+  --muted: #141b40;
+  --muted-foreground: #a9b8e6;
+  --cream: #10173a;
+  --lavender-soft: #1d1748;
+  --lavender-foreground: #f1e6ff;
+  --border: color-mix(in oklab, var(--neon-blue) 30%, transparent);
+  --input: color-mix(in oklab, var(--neon-blue) 40%, transparent);
 }
-:root[data-skin="cyberpunk"] .tile-pink {
-  background-color: color-mix(in oklab, var(--color-primary) 16%, var(--color-card));
+:root[data-skin="cyberpunk"] .tile-pink,
+:root[data-skin="cyberpunk"] .tile-sky,
+:root[data-skin="cyberpunk"] .tile-icy {
+  background-color: color-mix(in oklab, var(--neon-blue) 12%, var(--color-card));
 }
-:root[data-skin="cyberpunk"] .tile-lilac {
-  background-color: color-mix(in oklab, var(--color-lavender) 16%, var(--color-card));
-}
+:root[data-skin="cyberpunk"] .tile-lilac,
 :root[data-skin="cyberpunk"] .tile-peach {
-  background-color: color-mix(in oklab, var(--color-petal) 14%, var(--color-card));
-}
-:root[data-skin="cyberpunk"] .tile-sky {
-  background-color: color-mix(in oklab, var(--color-sky) 16%, var(--color-card));
+  background-color: color-mix(in oklab, var(--neon-purple) 14%, var(--color-card));
 }
 :root[data-skin="cyberpunk"] .tile-cream {
-  background-color: color-mix(in oklab, var(--color-cream) 70%, var(--color-card));
-}
-:root[data-skin="cyberpunk"] .tile-icy {
-  background-color: color-mix(in oklab, var(--color-icy) 16%, var(--color-card));
+  background-color: var(--color-cream);
 }
 :root[data-skin="cyberpunk"] body,
 :root[data-skin="cyberpunk"] .font-sans {
@@ -480,21 +555,42 @@
   font-family: "Rajdhani", var(--font-sans);
   font-weight: 700;
 }
+/* Titles glow like neon tubes */
 :root[data-skin="cyberpunk"] :is(h1, h2, h3) {
   font-family: "Orbitron", var(--font-display);
   letter-spacing: 0.04em;
-  text-shadow: 0 0 10px color-mix(in oklab, var(--color-primary) 70%, transparent);
+  text-shadow:
+    0 0 6px color-mix(in oklab, var(--neon-blue) 80%, transparent),
+    0 0 18px color-mix(in oklab, var(--neon-purple) 55%, transparent);
 }
+/* Night sky: a purple glow at the top, a blue glow at the bottom, a faint grid */
 :root[data-skin="cyberpunk"] .page-wash {
   background-image:
-    linear-gradient(color-mix(in oklab, var(--color-primary) 9%, transparent) 1px, transparent 1px),
+    radial-gradient(
+      120% 55% at 0% 0%,
+      color-mix(in oklab, var(--neon-purple) 20%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      110% 50% at 100% 100%,
+      color-mix(in oklab, var(--neon-blue) 16%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(color-mix(in oklab, var(--neon-blue) 6%, transparent) 1px, transparent 1px),
     linear-gradient(
       90deg,
-      color-mix(in oklab, var(--color-primary) 9%, transparent) 1px,
+      color-mix(in oklab, var(--neon-blue) 6%, transparent) 1px,
       transparent 1px
     );
-  background-size: 32px 32px;
+  background-size:
+    100% 100lvh,
+    100% 100lvh,
+    32px 32px,
+    32px 32px;
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
+  background-attachment: fixed, fixed, scroll, scroll;
 }
+/* Cards: dark glass with a glowing light-blue edge (purple on purple tiles) */
 :root[data-skin="cyberpunk"]
   :is(
     .card-soft,
@@ -511,36 +607,28 @@
     .tile-cream,
     .tile-icy
   ) {
-  border-radius: 0;
-  border: 1px solid color-mix(in oklab, var(--color-primary) 75%, transparent);
-  box-shadow: inset 0 0 22px -8px color-mix(in oklab, var(--color-primary) 70%, transparent) !important;
+  --glow: var(--neon-blue);
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--glow) 60%, transparent);
+  box-shadow:
+    0 0 16px -5px color-mix(in oklab, var(--glow) 70%, transparent),
+    inset 0 0 22px -12px color-mix(in oklab, var(--glow) 80%, transparent) !important;
 }
-:root[data-skin="cyberpunk"]
-  :is(
-    .card-soft,
-    .card-raised,
-    .card-outline,
-    .surface-quiet,
-    .panel-dark,
-    .featured-gradient,
-    .grad-box,
-    .tile-pink,
-    .tile-lilac,
-    .tile-peach,
-    .tile-sky,
-    .tile-cream,
-    .tile-icy
-  ):not(:has(.fixed)) {
-  clip-path: polygon(
-    14px 0,
-    100% 0,
-    100% calc(100% - 14px),
-    calc(100% - 14px) 100%,
-    0 100%,
-    0 14px
-  );
+:root[data-skin="cyberpunk"] :is(.tile-lilac, .tile-peach) {
+  --glow: var(--neon-purple);
 }
-:root[data-skin="cyberpunk"] :is(button, a):is([class*="bg-primary"], [class*="bg-gradient"]),
+/* Solid buttons: a light-blue to light-purple neon bar (tinted bg-primary/10 chips stay as they are) */
+:root[data-skin="cyberpunk"] :is(button, a):is([class~="bg-primary"], [class*="bg-gradient"]) {
+  background-image: linear-gradient(100deg, var(--neon-blue), var(--neon-purple));
+  color: #06102a;
+  box-shadow:
+    0 0 14px -2px color-mix(in oklab, var(--neon-blue) 75%, transparent),
+    0 0 26px -6px color-mix(in oklab, var(--neon-purple) 70%, transparent) !important;
+}
+:root[data-skin="cyberpunk"] button:is([class~="bg-primary"], [class*="bg-gradient"]) {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 :root[data-skin="cyberpunk"]
   button:is(
     [class*="bg-card"],
@@ -549,37 +637,33 @@
     [class*="bg-accent"],
     [class*="bg-destructive"]
   ) {
-  border-radius: 0;
-  clip-path: polygon(
-    10px 0,
-    100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    0 100%,
-    0 10px
-  );
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, white 35%, transparent),
-    inset 0 0 16px -4px color-mix(in oklab, white 45%, transparent) !important;
+    inset 0 0 0 1px color-mix(in oklab, var(--neon-blue) 55%, transparent),
+    0 0 12px -6px var(--neon-blue) !important;
 }
 :root[data-skin="cyberpunk"]
   :is(button, a, [role="button"], summary, .press):not(:disabled):active {
-  transform: translateX(1px);
-  filter: brightness(1.35) saturate(1.3);
+  filter: brightness(1.3) saturate(1.2);
 }
 :root[data-skin="cyberpunk"]
   :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select) {
-  border-radius: 0;
   background-color: var(--color-muted);
 }
+:root[data-skin="cyberpunk"]
+  :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select):focus-visible {
+  box-shadow:
+    0 0 0 1px var(--neon-blue),
+    0 0 14px -2px var(--neon-blue);
+}
+/* The tab bar sits under a glowing blue-to-purple tube */
 :root[data-skin="cyberpunk"] nav.fixed {
-  border-top: 1px solid var(--color-primary);
-  box-shadow: 0 -6px 20px -10px var(--color-primary);
+  border-top: 0;
+  box-shadow:
+    0 -1px 0 color-mix(in oklab, var(--neon-blue) 80%, transparent),
+    0 -8px 22px -12px var(--neon-purple);
 }
 :root[data-skin="cyberpunk"] .nav-liquid-pill {
-  border-radius: 0;
+  box-shadow: 0 0 14px -3px var(--neon-blue);
 }
 /* The calendar still has fixed light-theme colours from its old template; map them for the dark style */
 :root[data-skin="cyberpunk"] .text-\[\#3F414E\] {
@@ -603,7 +687,7 @@
   pointer-events: none;
   background: repeating-linear-gradient(
     0deg,
-    color-mix(in oklab, white 4%, transparent) 0 1px,
+    color-mix(in oklab, white 3%, transparent) 0 1px,
     transparent 1px 3px
   );
 }
@@ -731,7 +815,9 @@
 }
 
 /* ===================== Nature =====================
- * Leaf-shaped cards, soft serif titles, faint leaves in the background. */
+ * Outdoors: a tree with its roots in the ground, rolling grass and wildflowers at the bottom of
+ * every screen and a gentle wind drifting across; smooth stone-shaped cards with grass growing
+ * on top; soft serif titles. */
 :root[data-skin="nature"] {
   --leaf: #6f9a6a;
 }
@@ -740,15 +826,53 @@
   font-weight: 600;
   letter-spacing: 0;
 }
+/* The scene sits behind the screen: isolation keeps it above the page colour, under the content */
 :root[data-skin="nature"] .page-wash {
-  background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><g fill='%236f9a6a' opacity='0.11'><path d='M30 40c14-18 36-18 44-14-6 16-26 30-44 14z'/><path d='M96 96c10-16 30-18 36-14-6 14-22 26-36 14z'/><path d='M100 26c6-10 20-12 24-9-4 9-14 16-24 9z'/><path d='M20 110c8-12 24-14 30-11-5 11-17 19-30 11z'/></g></svg>"),
-    var(--page-wash);
-  background-size:
-    140px 140px,
-    100% 100lvh;
-  background-repeat: repeat, no-repeat;
+  isolation: isolate;
 }
+:root[data-skin="nature"] .page-wash::before,
+:root[data-skin="nature"] .page-wash::after {
+  content: "";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+/* The tree (roots below the ground line), hills, grass and flowers */
+:root[data-skin="nature"] .page-wash::before {
+  height: 340px;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300' viewBox='0 0 200 300'><g opacity='.52'><g stroke='%237a5a3c' stroke-linecap='round' fill='none'><path d='M96 200C84 214 66 222 44 228C34 231 24 236 16 244' stroke-width='3.5'/><path d='M100 202C98 222 92 240 82 258C78 266 72 272 66 280' stroke-width='3'/><path d='M106 200C120 214 140 222 162 226C172 228 182 234 190 242' stroke-width='3.5'/><path d='M104 204C112 226 126 240 142 254' stroke-width='2.5'/><path d='M60 225C56 236 52 244 44 252M150 225C158 236 160 246 168 256M86 236C78 248 70 254 60 260' stroke-width='1.6'/></g><path d='M92 202C95 176 95 150 90 126H110C106 150 106 176 110 202Z' fill='%237a5a3c'/><path d='M98 152C88 140 78 132 66 122M104 144C116 132 128 124 140 116' stroke='%237a5a3c' stroke-width='5' stroke-linecap='round' fill='none'/><g fill='%236f9a6a'><circle cx='100' cy='78' r='46'/><circle cx='58' cy='100' r='32'/><circle cx='144' cy='100' r='34'/><circle cx='100' cy='118' r='34'/><circle cx='72' cy='58' r='28'/><circle cx='128' cy='56' r='28'/></g><g fill='%238fb87f'><circle cx='84' cy='66' r='16'/><circle cx='134' cy='88' r='13'/><circle cx='62' cy='96' r='10'/></g></g></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180' viewBox='0 0 240 180'><path d='M0 30C60 14 120 22 180 30S230 36 240 30V180H0Z' fill='%238fb87f' opacity='.34'/><path d='M0 44C50 34 100 34 150 42S220 50 240 44V180H0Z' fill='%236f9a6a' opacity='.4'/><path d='M8 44q1-9 4-14M12 44q-1-7-4-11M40 40q2-10 6-15M44 40q0-8-3-12M78 38q1-9 5-13M83 38q-2-7-5-10M118 41q2-9 5-14M122 41q-1-8-4-12M160 42q1-9 4-13M165 42q-2-7-5-11M200 45q2-10 6-14M205 45q-1-8-4-11M232 44q1-8 4-12' stroke='%235f8a58' stroke-width='1.5' stroke-linecap='round' fill='none' opacity='.55'/><g opacity='.75'><path d='M30 40v-10M96 38v-12M178 42v-9M214 44v-11' stroke='%235f8a58' stroke-width='1.2'/><circle cx='30' cy='29' r='3.2' fill='%23f4a6c1'/><circle cx='30' cy='29' r='1.2' fill='%23f6d365'/><circle cx='96' cy='25' r='3.2' fill='%23ffffff'/><circle cx='96' cy='25' r='1.2' fill='%23f6d365'/><circle cx='178' cy='32' r='3' fill='%23c9a7f2'/><circle cx='178' cy='32' r='1.1' fill='%23f6d365'/><circle cx='214' cy='32' r='3.2' fill='%23f6d365'/><circle cx='214' cy='32' r='1.2' fill='%23e8a33d'/></g></svg>");
+  background-repeat: no-repeat, repeat-x;
+  background-size:
+    200px 300px,
+    240px 180px;
+  background-position:
+    right max(8px, calc(50% - 360px)) bottom 40px,
+    left bottom;
+}
+/* Wind: swirls and a few petals drifting slowly across the whole screen */
+:root[data-skin="nature"] .page-wash::after {
+  top: 0;
+  left: -320px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='220' viewBox='0 0 320 220'><g fill='none' stroke='%236f9a6a' stroke-width='1.4' stroke-linecap='round' opacity='.32'><path d='M10 60C60 40 110 70 160 52C190 41 200 22 184 18C170 15 166 32 178 36'/><path d='M120 150C170 132 230 160 300 140'/><path d='M30 180C70 168 100 182 140 172'/></g><g opacity='.5'><ellipse cx='240' cy='70' rx='4' ry='2' fill='%23f4a6c1' transform='rotate(-30 240 70)'/><ellipse cx='70' cy='120' rx='3.5' ry='1.8' fill='%238fb87f' transform='rotate(20 70 120)'/><ellipse cx='280' cy='190' rx='3' ry='1.6' fill='%23f6d365' transform='rotate(-15 280 190)'/></g></svg>");
+  background-size: 320px 220px;
+  animation: nature-wind 30s linear infinite;
+}
+@keyframes nature-wind {
+  to {
+    translate: 320px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-skin="nature"] .page-wash::after {
+    animation: none;
+  }
+}
+/* Cards: smooth river stones */
 :root[data-skin="nature"]
   :is(
     .card-soft,
@@ -765,10 +889,32 @@
     .tile-cream,
     .tile-icy
   ) {
-  border-radius: 30px 12px 30px 12px;
+  border-radius: 26px 18px 24px 16px / 20px 24px 18px 22px;
   border: 1px solid color-mix(in oklab, var(--leaf) 30%, transparent);
   box-shadow: 0 10px 22px -16px color-mix(in oklab, #2f4a2c 55%, transparent) !important;
 }
+/* A tuft of grass with a flower growing on top of the plain cards */
+:root[data-skin="nature"] :is(.card-soft, .surface-quiet):not(.fixed):not(.absolute):not(.sticky) {
+  position: relative;
+}
+:root[data-skin="nature"] :is(.card-soft, .surface-quiet)::before {
+  content: "";
+  position: absolute;
+  top: -16px;
+  left: 20px;
+  width: 46px;
+  height: 18px;
+  z-index: 1;
+  pointer-events: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='46' height='18' viewBox='0 0 46 18'><path d='M6 18q1-8 4-13M10 18q0-6-3-10M14 18q2-9 6-14M19 18q-1-6-4-9M24 18q1-7 4-11M30 18q1-9 5-13M34 18q-1-6-4-9' stroke='%235f8a58' stroke-width='1.6' stroke-linecap='round' fill='none'/><path d='M38 18v-9' stroke='%235f8a58' stroke-width='1.2'/><circle cx='38' cy='7' r='3.4' fill='%23f4a6c1'/><circle cx='38' cy='7' r='1.3' fill='%23f6d365'/></svg>")
+    no-repeat;
+}
+:root[data-skin="nature"] :is(.card-soft, .surface-quiet):nth-of-type(even)::before {
+  right: 22px;
+  left: auto;
+  scale: -1 1;
+}
+/* Buttons are leaf-shaped */
 :root[data-skin="nature"] :is(button, a):is([class*="bg-primary"], [class*="bg-gradient"]),
 :root[data-skin="nature"]
   button:is(
@@ -788,7 +934,7 @@
   border-radius: 18px 6px 18px 6px;
   border-color: color-mix(in oklab, var(--leaf) 35%, transparent);
 }
-/* A gentle sway when tapped, like a leaf */
+/* A gentle sway when tapped, like a branch in the wind */
 :root[data-skin="nature"] :is(button, a, [role="button"], summary, .press):not(:disabled):active {
   transform: scale(0.97) rotate(-1.2deg);
 }
