@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronDown, HeartHandshake, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,13 @@ import { Card, EmptyState, Field, PrimaryButton, SectionTitle, TextArea } from "
 import { playChirp } from "@/hooks/use-sound";
 import { useAuthUser, useCoupleId, useMembers, usePartner } from "@/lib/session";
 import { useDailyLovePoint } from "@/lib/love-points";
-import { FEELINGS, FEELING_BY_KEY, decodeFeeling, encodeFeeling } from "@/lib/feelings";
+import {
+  FEELINGS,
+  FEELING_BY_KEY,
+  decodeFeeling,
+  encodeFeeling,
+  type FeelingOption,
+} from "@/lib/feelings";
 import { FeelingTile } from "@/components/FeelingTile";
 
 
@@ -33,6 +39,8 @@ export const Route = createFileRoute("/_authenticated/cooldown")({
   component: CooldownPage,
 });
 
+const HOLD_MS = 380;
+
 function CooldownPage() {
   const coupleId = useCoupleId();
   const { data: user } = useAuthUser();
@@ -46,6 +54,25 @@ function CooldownPage() {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [need, setNeed] = useState("");
   const [responsibility, setResponsibility] = useState("");
+  // Press and hold a feeling to see it big; letting go closes it without picking it.
+  const [peek, setPeek] = useState<FeelingOption | null>(null);
+  const hold = useRef<{ timer: number; shown: boolean } | null>(null);
+
+  function startHold(f: FeelingOption) {
+    const h = { timer: 0, shown: false };
+    h.timer = window.setTimeout(() => {
+      h.shown = true;
+      setPeek(f);
+      navigator.vibrate?.(10);
+    }, HOLD_MS);
+    hold.current = h;
+  }
+  function endHold() {
+    const h = hold.current;
+    if (!h) return;
+    window.clearTimeout(h.timer);
+    if (h.shown) setPeek(null);
+  }
 
   const { data: entries } = useQuery({
     queryKey: ["cooldowns", coupleId],
@@ -128,7 +155,7 @@ function CooldownPage() {
           My feelings
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Tap whatever fits right now — pick as many as you like.
+          Tap whatever fits right now — pick as many as you like. Hold one to see it bigger.
         </p>
         <div className="mt-3 grid grid-cols-4 gap-2">
           {FEELINGS.map((f) => {
@@ -138,10 +165,18 @@ function CooldownPage() {
                 key={f.key}
                 type="button"
                 onClick={() => {
+                  const peeked = hold.current?.shown;
+                  hold.current = null;
+                  if (peeked) return; // that was a hold to look, not a tap to pick
                   playChirp("tap");
                   setMoods((m) => (on ? m.filter((k) => k !== f.key) : [...m, f.key]));
                 }}
-                className={`press flex flex-col items-center gap-1 rounded-2xl p-2 ${
+                onPointerDown={() => startHold(f)}
+                onPointerUp={endHold}
+                onPointerLeave={endHold}
+                onPointerCancel={endHold}
+                onContextMenu={(e) => e.preventDefault()}
+                className={`press flex select-none flex-col items-center gap-1 rounded-2xl p-2 ${
                   on ? "bg-accent ring-2 ring-primary" : "bg-secondary/60"
                 }`}
                 aria-pressed={on}
@@ -150,14 +185,37 @@ function CooldownPage() {
                   src={f.url}
                   alt=""
                   loading="lazy"
+                  draggable={false}
                   className="size-12 object-contain"
-                  style={{ imageRendering: "pixelated" }}
+                  style={{ imageRendering: "pixelated", WebkitTouchCallout: "none" }}
                 />
                 <span className="text-[10px] font-bold leading-tight">{f.label}</span>
               </button>
             );
           })}
         </div>
+
+        {peek ? (
+          <div
+            className="pointer-events-none fixed inset-0 z-[80] grid place-items-center bg-black/25 p-6"
+            aria-live="polite"
+          >
+            <div className="rise-in flex w-full max-w-[18rem] flex-col items-center gap-2 rounded-3xl bg-card p-4 shadow-float">
+              <span className="tile-lilac grid aspect-square w-full place-items-center rounded-2xl">
+                <img
+                  src={peek.url}
+                  alt={peek.label}
+                  className="w-[88%]"
+                  style={{ imageRendering: "pixelated" }}
+                />
+              </span>
+              <p className="text-base font-extrabold">{peek.label}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {moods.includes(peek.key) ? "Picked · let go to close" : "Let go to close · tap to pick"}
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         <button
           type="button"

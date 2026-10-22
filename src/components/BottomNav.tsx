@@ -5,8 +5,6 @@ import {
   CalendarDays,
   HeartPulse,
   Egg,
-  MessageCircle,
-  Menu,
   Gamepad2,
 } from "lucide-react";
 import { playChirp } from "@/hooks/use-sound";
@@ -19,8 +17,6 @@ const ITEMS = [
   { to: "/wellbeing", label: "Care", icon: HeartPulse },
   { to: "/games", label: "Play", icon: Gamepad2 },
   { to: "/nest", label: "Nest", icon: Egg },
-  { to: "/chat", label: "Chat", icon: MessageCircle },
-  { to: "/more", label: "More", icon: Menu },
 ] as const;
 
 function tabIndexForPath(pathname: string): number {
@@ -43,10 +39,8 @@ function tabIndexForPath(pathname: string): number {
  */
 export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>> }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const activeIdx = useMemo(() => {
-    const idx = tabIndexForPath(pathname);
-    return idx >= 0 ? idx : 0;
-  }, [pathname]);
+  // -1 on screens that aren't a tab (like the full chat): no tab is highlighted.
+  const activeIdx = useMemo(() => tabIndexForPath(pathname), [pathname]);
 
   const count = ITEMS.length;
   const pillWidth = 100 / count;
@@ -61,6 +55,7 @@ export function BottomNav({ badges }: { badges?: Partial<Record<string, boolean>
           style={{
             width: `calc(${pillWidth}% - 4px)`,
             left: `calc(${pillLeft}% + 2px)`,
+            opacity: activeIdx < 0 ? 0 : 1,
           }}
           aria-hidden
         />

@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Bell, MapPin, Palette, ChevronRight } from "lucide-react";
+import { Bell, Map as MapIcon, MapPin, Palette, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, GhostButton, PrimaryButton, SectionTitle, TextInput } from "@/components/ui-kit";
@@ -11,6 +11,7 @@ import { SignInPanel } from "@/components/SignInPanel";
 import { compressImage } from "@/lib/image";
 import { useIsAdmin } from "@/lib/admin";
 import { clearMyLocation } from "@/lib/location";
+import { useMapSettings, type MapKind } from "@/lib/map-settings";
 import { askNotificationPermission, canNotify } from "@/lib/reminders";
 import { useAuthUser, useCouple, usePartner, useProfile, useRefreshSession } from "@/lib/session";
 
@@ -220,6 +221,8 @@ function ProfilePage() {
       </Link>
 
 
+      <MapSettingsCard />
+
       <SectionTitle>Privacy</SectionTitle>
       <Card>
         <div className="flex items-center gap-3">
@@ -329,5 +332,79 @@ function ProfilePage() {
         <GhostButton onClick={() => void signOut()}>Sign out</GhostButton>
       </div>
     </AppLayout>
+  );
+}
+
+const MAPS: { id: MapKind; label: string; note: string }[] = [
+  { id: "classic", label: "Classic map", note: "The simple map you know" },
+  { id: "3d", label: "3D map", note: "3D buildings, satellite, street photos" },
+];
+
+/** Which map "Where we are" uses, and the free keys for its extras. Saved on this phone. */
+function MapSettingsCard() {
+  const [map, setMap] = useMapSettings();
+  return (
+    <>
+      <SectionTitle>Map</SectionTitle>
+      <Card>
+        <div className="flex items-start gap-3">
+          <MapIcon className="mt-0.5 size-5 shrink-0 text-primary" />
+          <p className="text-xs text-muted-foreground">
+            Choose the map for Where we are. This is saved on this phone only.
+          </p>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Map">
+          {MAPS.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              role="radio"
+              aria-checked={map.kind === m.id}
+              onClick={() => setMap({ kind: m.id })}
+              className={`press rounded-2xl border-2 p-3 text-left ${
+                map.kind === m.id ? "border-primary bg-primary/10" : "border-border bg-card"
+              }`}
+            >
+              <span className="block text-sm font-bold">{m.label}</span>
+              <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
+                {m.note}
+              </span>
+            </button>
+          ))}
+        </div>
+        {map.kind === "3d" ? (
+          <div className="mt-4 space-y-3">
+            <Field label="Street photos key (Mapillary, free)">
+              <TextInput
+                value={map.mapillaryToken}
+                onChange={(e) => setMap({ mapillaryToken: e.target.value })}
+                placeholder="MLY|…"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </Field>
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              Make a free account at mapillary.com, open Developers, register an app, and paste its
+              Client Token here. Without it, street photos stay off. Not every street has photos.
+            </p>
+            <Field label="Sharper satellite key (ArcGIS, free, optional)">
+              <TextInput
+                value={map.arcgisKey}
+                onChange={(e) => setMap({ arcgisKey: e.target.value })}
+                placeholder="AAPK…"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </Field>
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              Without a key, satellite photos come from Sentinel-2: clear for cities and nature,
+              blurry up close. For street-level detail, make a free ArcGIS Location Platform
+              account, create an API key with &quot;Static basemap tiles&quot;, and paste it here
+              (2 million free map tiles a month).
+            </p>
+          </div>
+        ) : null}
+      </Card>
+    </>
   );
 }

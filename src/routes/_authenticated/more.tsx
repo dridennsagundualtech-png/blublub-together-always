@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { HelpCircle, Images, UserCog, ChevronRight, BookHeart, Palette } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
-import { useSoundSetting } from "@/hooks/use-sound";
+import { MORE_LINKS, SoundToggle } from "@/components/MoreMenu";
 import { useBadges } from "@/lib/badges";
 
 export const Route = createFileRoute("/_authenticated/more")({
@@ -22,23 +22,13 @@ export const Route = createFileRoute("/_authenticated/more")({
   component: MorePage,
 });
 
-const SECTIONS = [
-  { to: "/photos", label: "Memories", icon: Images, tint: "tile-sky" },
-  { to: "/questions", label: "Daily Questions", icon: HelpCircle, badge: "question", tint: "tile-lilac" },
-  { to: "/memory-book", label: "Memory Book (PDF)", icon: BookHeart, tint: "tile-pink" },
-  { to: "/appearance", label: "Appearance", icon: Palette, tint: "tile-peach" },
-  { to: "/profile", label: "Profile & Settings", icon: UserCog, tint: "tile-cream" },
-] as const;
-
-
 function MorePage() {
-  const { enabled, setEnabled } = useSoundSetting();
   const { data: badges } = useBadges();
 
   return (
     <AppLayout title="More" subtitle="Everything else" critter="seal">
       <ul className="grid grid-cols-2 gap-3">
-        {SECTIONS.map((s) => (
+        {MORE_LINKS.map((s) => (
           <li key={s.to}>
             <Link
               to={s.to}
@@ -59,20 +49,7 @@ function MorePage() {
       </ul>
 
 
-      <div className="card-soft mt-4 flex items-center justify-between p-4">
-        <span className="text-sm font-semibold">Sound effects</span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
-          onClick={() => setEnabled(!enabled)}
-          className={`press h-7 w-12 rounded-full transition-colors ${enabled ? "bg-primary" : "bg-muted"}`}
-        >
-          <span
-            className={`block size-6 rounded-full bg-card shadow-soft transition-transform ${enabled ? "translate-x-5" : "translate-x-0.5"}`}
-          />
-        </button>
-      </div>
+      <SoundToggle className="card-soft mt-4 p-4" />
     </AppLayout>
   );
 }

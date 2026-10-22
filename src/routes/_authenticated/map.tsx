@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Crosshair, ExternalLink, Heart, MapPin, MapPinOff, Navigation } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { MiniMap, type MapPoint } from "@/components/MiniMap";
 import { Card, SectionTitle } from "@/components/ui-kit";
 import { useLocationPublisher, useLocations, timeAgo } from "@/lib/location";
+import { useMapSettings } from "@/lib/map-settings";
 import { useAuthUser, useMembers, usePartner, useProfile } from "@/lib/session";
+
+// The 3D map (MapLibre) only loads for people who picked it in Profile & Settings → Map.
+const WorldMap = lazy(() => import("@/components/WorldMap"));
 
 export const Route = createFileRoute("/_authenticated/map")({
   head: () => ({
@@ -100,6 +104,7 @@ function MapPage() {
   const { data: locations } = useLocations();
   const locationStatus = useLocationPublisher();
   const [focusId, setFocusId] = useState<string | null>(null);
+  const [mapSettings] = useMapSettings();
 
   const rows = members ?? [];
   const points: MapPoint[] = rows.flatMap((m) => {
@@ -127,7 +132,15 @@ function MapPage() {
       critter="penguin"
       critterPose="curious"
     >
-      <MiniMap points={points} focusId={focusId} height={340} />
+      {mapSettings.kind === "3d" ? (
+        <Suspense
+          fallback={<div className="animate-pulse rounded-3xl bg-muted" style={{ height: 340 }} />}
+        >
+          <WorldMap points={points} focusId={focusId} height={340} />
+        </Suspense>
+      ) : (
+        <MiniMap points={points} focusId={focusId} height={340} />
+      )}
 
       {/* Map controls */}
       {points.length > 0 ? (

@@ -1,4 +1,5 @@
-// AUTO-GENERATED from the uploaded pixel cat reaction pack.
+// The pixel cat reaction pack (served from Lovable's asset store), plus our own cats in the
+// same style in public/feelings/ (50x50 grid, 10px pixels, the pack's colours).
 export type FeelingOption = { key: string; label: string; url: string };
 
 export const FEELINGS: FeelingOption[] = [
@@ -21,6 +22,26 @@ export const FEELINGS: FeelingOption[] = [
   { key: "very-happy", label: "Very happy", url: "/__l5e/assets-v1/8e998019-1942-4fe3-96e2-ecbe8a8b61cf/feel-assets_playground_todayeat_very_happy.png" },
   { key: "very-tired", label: "Drained", url: "/__l5e/assets-v1/6824f856-e6c0-46c1-8e07-aa0c91104012/feel-assets_playground_todayeat_very_tired.png" },
   { key: "vivid", label: "Full of energy", url: "/__l5e/assets-v1/7413a081-3c01-443f-a923-cf77d1dec782/feel-assets_playground_todayeat_vivid.png" },
+  { key: "missing-you", label: "Missing you", url: "/feelings/missing-you.png" },
+  { key: "in-love", label: "In love", url: "/feelings/in-love.png" },
+  { key: "shy", label: "Shy", url: "/feelings/shy.png" },
+  { key: "excited", label: "Excited", url: "/feelings/excited.png" },
+  { key: "worried", label: "Worried", url: "/feelings/worried.png" },
+  { key: "sick", label: "Sick", url: "/feelings/sick.png" },
+  { key: "grateful", label: "Grateful", url: "/feelings/grateful.png" },
+  { key: "need-a-hug", label: "Need a hug", url: "/feelings/need-a-hug.png" },
+  { key: "sleepy", label: "Sleepy", url: "/feelings/sleepy.png" },
+  { key: "proud", label: "Proud", url: "/feelings/proud.png" },
+  { key: "grumpy", label: "Grumpy", url: "/feelings/grumpy.png" },
+  { key: "celebrating", label: "Celebrating", url: "/feelings/celebrating.png" },
+  { key: "bored", label: "Bored", url: "/feelings/bored.png" },
+  { key: "super-angry", label: "Super angry", url: "/feelings/super-angry.png" },
+  { key: "making-bread", label: "Making bread", url: "/feelings/making-bread.png" },
+  { key: "working", label: "Working", url: "/feelings/working.png" },
+  { key: "working-out", label: "Working out", url: "/feelings/working-out.png" },
+  { key: "hanging-out", label: "Hanging out", url: "/feelings/hanging-out.png" },
+  { key: "feeling-hot", label: "Feeling hot", url: "/feelings/feeling-hot.png" },
+  { key: "feeling-cold", label: "Feeling cold", url: "/feelings/feeling-cold.png" },
 ];
 
 export const FEELING_BY_KEY = new Map(FEELINGS.map((f) => [f.key, f]));

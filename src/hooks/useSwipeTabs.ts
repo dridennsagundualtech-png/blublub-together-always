@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useOpenSideMenu } from "@/lib/side-menu";
 
 /** Main bottom-nav order — swipe left = next, swipe right = previous. */
 export const MAIN_TAB_ROUTES = [
@@ -8,8 +9,6 @@ export const MAIN_TAB_ROUTES = [
   "/wellbeing",
   "/games",
   "/nest",
-  "/chat",
-  "/more",
 ] as const;
 
 export const TAB_DIR_KEY = "blublub-tab-dir";
@@ -96,18 +95,21 @@ export function useSwipeTabs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const startRef = useRef<Start | null>(null);
   const draggingRef = useRef(false);
+  const openMenu = useOpenSideMenu();
 
   const go = useCallback(
     (dir: -1 | 1) => {
       const idx = tabIndexForPath(pathname);
       if (idx < 0) return;
       const next = idx + dir;
-      if (next < 0 || next >= MAIN_TAB_ROUTES.length) return;
+      // One more swipe past the last tab slides the side bar (More) in.
+      if (next >= MAIN_TAB_ROUTES.length) return openMenu();
+      if (next < 0) return;
       // dir 1 = next tab = content slides from right (finger swiped left)
       const slide: "left" | "right" = dir === 1 ? "left" : "right";
       navigateWithDir(navigate, MAIN_TAB_ROUTES[next]!, slide);
     },
-    [navigate, pathname],
+    [navigate, pathname, openMenu],
   );
 
   const begin = useCallback((x: number, y: number, target: EventTarget | null) => {

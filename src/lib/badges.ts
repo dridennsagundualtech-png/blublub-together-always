@@ -111,6 +111,7 @@ export function useBadges() {
 
       return {
         unreadChat: (msgs.count ?? 0) > 0,
+        unreadCount: msgs.count ?? 0,
         question: (partnerAnswered && !iAnswered) || (partnerAnswered && !seenToday),
         diary: isNew(diaryAt, readSeenAt(myId, "diary")),
         calendar: isNew(eventAt, readSeenAt(myId, "calendar")),

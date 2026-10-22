@@ -15,6 +15,8 @@ import {
   THEME_STORAGE_KEY as STORAGE_KEY,
 } from "@/lib/theme";
 import { DevThemeHost } from "@/components/DevThemeHost";
+import { Menu } from "lucide-react";
+import { useOpenSideMenu } from "@/lib/side-menu";
 import { TAB_DIR_KEY, useSwipeTabs } from "@/hooks/useSwipeTabs";
 
 export function AppLayout({
@@ -41,6 +43,7 @@ export function AppLayout({
   useLocationPublisher();
   useCommitmentReminders();
   const swipe = useSwipeTabs();
+  const openMenu = useOpenSideMenu();
   const [slideClass, setSlideClass] = useState("");
 
   useEffect(() => {
@@ -100,13 +103,28 @@ export function AppLayout({
               <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
-          <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10">
-            <Doodle
-              critter={critter ?? critterFor(title)}
-              pose={critterPose ?? poseFor(title)}
-              size={34}
-            />
-          </span>
+          {/* The critter opens the side bar (More); the dot means something in there is new. */}
+          <button
+            type="button"
+            onClick={openMenu}
+            aria-label={badges?.question ? "Open menu, something new" : "Open menu"}
+            className="press relative grid size-10 shrink-0 place-items-center rounded-full"
+            style={{ background: "color-mix(in oklab, var(--color-primary) 10%, transparent)" }}
+          >
+            <span className="grid size-10 place-items-center overflow-hidden rounded-full">
+              <Doodle
+                critter={critter ?? critterFor(title)}
+                pose={critterPose ?? poseFor(title)}
+                size={34}
+              />
+            </span>
+            <span className="absolute -bottom-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-card text-foreground shadow-soft">
+              <Menu className="size-2.5" strokeWidth={3} />
+            </span>
+            {badges?.question ? (
+              <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive" />
+            ) : null}
+          </button>
         </div>
       </header>
 
@@ -142,11 +160,9 @@ export function AppLayout({
 
       <BottomNav
         badges={{
-          "/chat": badges?.unreadChat,
           "/calendar": badges?.calendar,
           "/nest": badges?.budget,
           "/games": badges?.games,
-          "/more": badges?.question,
         }}
       />
     </div>
