@@ -1,13 +1,10 @@
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BottomNav } from "@/components/BottomNav";
 import { Doodle, critterFor, poseFor, type Critter, type Pose } from "@/components/Doodles";
 import { PairingScreen } from "@/components/CoupleGate";
 import { useBadges } from "@/lib/badges";
 import { useAuthUser, useCouple, useCoupleId, useProfile } from "@/lib/session";
-import { useLocationPublisher } from "@/lib/location";
-import { useCommitmentReminders } from "@/lib/commitments";
 import {
   applyColors,
   normalizeTheme,
@@ -17,8 +14,24 @@ import {
 import { DevThemeHost } from "@/components/DevThemeHost";
 import { Menu } from "lucide-react";
 import { useOpenSideMenu } from "@/lib/side-menu";
-import { TAB_DIR_KEY, useSwipeTabs } from "@/hooks/useSwipeTabs";
+import { TAB_DIR_KEY } from "@/hooks/useSwipeTabs";
 
+/** Which way the page slides in (set by a tab tap or swipe), read once per page change. */
+function takeSlideClass() {
+  let dir = "left";
+  try {
+    dir = sessionStorage.getItem(TAB_DIR_KEY) || "left";
+    sessionStorage.removeItem(TAB_DIR_KEY);
+  } catch {
+    /* ignore */
+  }
+  return dir === "right" ? "page-gym-from-left" : "page-gym-from-right";
+}
+
+/**
+ * One page: its header and content. The background, tab bar and swipe live in the signed-in
+ * layout (routes/_authenticated/route.tsx) so they stay put while pages change.
+ */
 export function AppLayout({
   title,
   subtitle,
@@ -40,11 +53,11 @@ export function AppLayout({
   const coupleId = useCoupleId();
   const { data: couple } = useCouple();
   const { data: badges } = useBadges();
-  useLocationPublisher();
-  useCommitmentReminders();
-  const swipe = useSwipeTabs();
   const openMenu = useOpenSideMenu();
-  const [slideClass, setSlideClass] = useState("");
+  // Starts with the slide class so the page's very first frame is already animating
+  // (setting it in an effect showed the page once, then hid it and slid it in).
+  const [slideClass, setSlideClass] = useState(takeSlideClass);
+  const firstPath = useRef(true);
 
   useEffect(() => {
     const fromCouple = (couple as { theme?: unknown } | null | undefined)?.theme;
@@ -67,41 +80,24 @@ export function AppLayout({
     }
   }, [couple, pathname]);
 
-  // Page slide animation when route changes (from swipe or tab)
+  // Page slide animation when route changes (from swipe or tab); the class comes off afterwards
+  // so the next change on the same page (e.g. another game) can slide again.
   useEffect(() => {
-    let dir = "left";
-    try {
-      dir = sessionStorage.getItem(TAB_DIR_KEY) || "left";
-      sessionStorage.removeItem(TAB_DIR_KEY);
-    } catch {
-      /* ignore */
-    }
-    const cls = dir === "right" ? "page-gym-from-left" : "page-gym-from-right";
-    setSlideClass(cls);
+    if (firstPath.current) firstPath.current = false;
+    else setSlideClass(takeSlideClass());
     const t = window.setTimeout(() => setSlideClass(""), 420);
     return () => window.clearTimeout(t);
   }, [pathname]);
 
   return (
-    <div
-      className="page-wash min-h-screen bg-background pb-28"
-      style={swipe.style}
-      onTouchStart={swipe.onTouchStart}
-      onTouchEnd={swipe.onTouchEnd}
-      onTouchCancel={swipe.onTouchCancel}
-      onMouseDown={swipe.onMouseDown}
-      onMouseUp={swipe.onMouseUp}
-      onMouseLeave={swipe.onMouseLeave}
-    >
+    <>
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-5 py-3.5">
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-display text-[1.35rem] font-extrabold tracking-tight">
               {title}
             </h1>
-            {subtitle ? (
-              <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
-            ) : null}
+            {subtitle ? <p className="truncate text-xs text-muted-foreground">{subtitle}</p> : null}
           </div>
           {/* The critter opens the side bar (More); the dot means something in there is new. */}
           <button
@@ -157,14 +153,6 @@ export function AppLayout({
       </div>
 
       <DevThemeHost />
-
-      <BottomNav
-        badges={{
-          "/calendar": badges?.calendar,
-          "/nest": badges?.budget,
-          "/games": badges?.games,
-        }}
-      />
-    </div>
+    </>
   );
 }

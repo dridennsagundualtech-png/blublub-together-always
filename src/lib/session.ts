@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { signedUrls } from "@/lib/signed-urls";
 
 export type Profile = Tables<"profiles">;
 export type Couple = Tables<"couples">;
@@ -69,8 +70,7 @@ export function useMemberAvatars() {
     enabled: paths.length > 0,
     staleTime: 30 * 60_000,
     queryFn: async () => {
-      const { data } = await supabase.storage.from("avatars").createSignedUrls(paths, 3600);
-      const byPath = new Map((data ?? []).map((d) => [d.path ?? "", d.signedUrl]));
+      const byPath = await signedUrls("avatars", paths);
       const map: Record<string, string> = {};
       for (const m of members ?? []) {
         const url = m.avatar_url ? byPath.get(m.avatar_url) : null;

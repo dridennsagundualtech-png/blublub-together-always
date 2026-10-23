@@ -1,6 +1,7 @@
 /** Look Back: fetches your memories for a date range and builds the story (lookback-story.ts). */
 import { supabase } from "@/integrations/supabase/client";
 import { buildLookBack, type LookPhoto, type LookQuestion, type Slide } from "@/lib/lookback-story";
+import { signedUrls } from "@/lib/signed-urls";
 
 export type { Slide } from "@/lib/lookback-story";
 export { SLIDE_MS } from "@/lib/lookback-story";
@@ -58,10 +59,7 @@ export async function loadLookBack(opts: {
 
   const rows = photos.data ?? [];
   const paths = rows.map((p) => p.storage_path!).filter(Boolean);
-  const { data: signed } = paths.length
-    ? await supabase.storage.from("photos").createSignedUrls(paths, 3600)
-    : { data: [] };
-  const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl] as const));
+  const urlByPath = await signedUrls("photos", paths);
   const lookPhotos: LookPhoto[] = rows
     .map((p) => ({
       id: p.id,

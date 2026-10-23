@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { signedUrl } from "@/lib/signed-urls";
 
 /** Plays a chat voice note from the private `voice` bucket via a signed URL. */
 export function VoiceNote({
@@ -16,12 +16,9 @@ export function VoiceNote({
 
   useEffect(() => {
     let active = true;
-    void supabase.storage
-      .from("voice")
-      .createSignedUrl(path, 3600)
-      .then(({ data }) => {
-        if (active) setUrl(data?.signedUrl ?? null);
-      });
+    void signedUrl("voice", path).then((u) => {
+      if (active) setUrl(u);
+    });
     return () => {
       active = false;
     };

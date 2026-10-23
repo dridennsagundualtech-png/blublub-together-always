@@ -27,6 +27,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, Field, PrimaryButton, TextArea, TextInput } from "@/components/ui-kit";
 import { todayISO } from "@/lib/badges";
 import { compressImage } from "@/lib/image";
+import { signedUrls } from "@/lib/signed-urls";
 import { cn } from "@/lib/utils";
 import { ReactionGlyph, StyleIcon } from "@/components/pixel-art";
 import { useAuthUser, useCoupleId, useMembers } from "@/lib/session";
@@ -103,14 +104,7 @@ function PhotosPage() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       const paths = (data ?? []).map((p) => p.storage_path).filter((x): x is string => !!x);
-      const signed = paths.length
-        ? ((await supabase.storage.from("photos").createSignedUrls(paths, 3600)).data ?? [])
-        : [];
-      const urlByPath = new Map<string, string>();
-      paths.forEach((path, i) => {
-        const u = signed[i]?.signedUrl;
-        if (u) urlByPath.set(path, u);
-      });
+      const urlByPath = await signedUrls("photos", paths);
       return (data ?? []).map((p) => ({
         ...p,
         url: p.storage_path ? (urlByPath.get(p.storage_path) ?? null) : null,
@@ -126,7 +120,7 @@ function PhotosPage() {
         const path = `${coupleId}/${crypto.randomUUID()}.jpg`;
         const { error: upErr } = await supabase.storage
           .from("photos")
-          .upload(path, blob, { contentType: "image/jpeg" });
+          .upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000" });
         if (upErr) throw upErr;
         const { error } = await supabase.from("photos").insert({
           couple_id: coupleId!,

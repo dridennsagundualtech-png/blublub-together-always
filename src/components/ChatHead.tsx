@@ -169,6 +169,8 @@ export function ChatHead() {
             aria-label={`Chat with ${name}${unread ? `, ${unread} unread` : ""}`}
             onClick={openChat}
             onPointerDown={(e) => {
+              // Phones send no click after a drag, so a leftover flag would swallow the next tap.
+              justDragged.current = false;
               press.current = {
                 x0: e.clientX,
                 y0: e.clientY,
@@ -208,8 +210,10 @@ export function ChatHead() {
               setDrag(null);
             }}
             data-no-page-swipe
-            className="press grid size-full touch-none select-none place-items-center overflow-hidden rounded-full border-[3px] border-white text-primary-foreground shadow-float"
-            style={{ background: "var(--color-primary)" }}
+            className="press grid size-full select-none place-items-center overflow-hidden rounded-full border-[3px] border-white text-primary-foreground shadow-float"
+            // Inline: the global button rule (touch-action: manipulation) beats the touch-none
+            // class, and then phones treat the drag as a page scroll and cancel it.
+            style={{ background: "var(--color-primary)", touchAction: "none" }}
           >
             {photo ? (
               <img src={photo} alt="" draggable={false} className="size-full object-cover" />

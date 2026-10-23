@@ -12,6 +12,7 @@ import { timeAgo } from "@/lib/location";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useBadges, todayISO } from "@/lib/badges";
 import { daysUntilAnniversary, useAnniversaryReminder } from "@/lib/reminders";
+import { signedUrl } from "@/lib/signed-urls";
 import {
   daysTogether,
   useAuthUser,
@@ -126,10 +127,7 @@ function HomePage() {
         .maybeSingle();
       if (error) throw error;
       if (!data?.storage_path) return null;
-      const signed = await supabase.storage
-        .from("photos")
-        .createSignedUrl(data.storage_path, 3600);
-      return { ...data, url: signed.data?.signedUrl ?? null };
+      return { ...data, url: await signedUrl("photos", data.storage_path) };
     },
   });
 

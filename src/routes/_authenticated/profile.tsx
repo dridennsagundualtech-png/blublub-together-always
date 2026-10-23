@@ -13,6 +13,7 @@ import { useIsAdmin } from "@/lib/admin";
 import { clearMyLocation } from "@/lib/location";
 import { useMapSettings, type MapKind } from "@/lib/map-settings";
 import { askNotificationPermission, canNotify } from "@/lib/reminders";
+import { forgetAllSignedUrls, forgetSignedUrl, signedUrl } from "@/lib/signed-urls";
 import { useAuthUser, useCouple, usePartner, useProfile, useRefreshSession } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -108,8 +109,8 @@ function ProfilePage() {
         .update({ avatar_url: path })
         .eq("id", user!.id);
       if (error) throw error;
-      const { data } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
-      setAvatarUrl(data?.signedUrl ?? null);
+      forgetSignedUrl("avatars", path); // same path, new picture: needs a new link
+      setAvatarUrl(await signedUrl("avatars", path));
     },
     onSuccess: () => {
       refresh();
@@ -134,6 +135,7 @@ function ProfilePage() {
 
   async function signOut() {
     await supabase.auth.signOut();
+    forgetAllSignedUrls();
     await navigate({ to: "/", replace: true });
   }
 

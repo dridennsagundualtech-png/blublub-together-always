@@ -90,7 +90,7 @@ export function ChatThread({ variant }: { variant: "page" | "sheet" }) {
       const path = `${coupleId}/${user!.id}-${Date.now()}.webm`;
       const { error: upErr } = await supabase.storage
         .from("voice")
-        .upload(path, blob, { contentType: blob.type || "audio/webm" });
+        .upload(path, blob, { contentType: blob.type || "audio/webm", cacheControl: "31536000" });
       if (upErr) throw upErr;
       const { error } = await supabase.from("messages").insert({
         couple_id: coupleId!,

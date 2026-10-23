@@ -653,17 +653,17 @@ html.shadows-off .tile-cream {
 }
 
 
-/* —— GymMane-inspired page transitions (fade + slide + scale + soft blur) —— */
+/* —— GymMane-inspired page transitions (fade + slide + scale) ——
+   Only opacity and transform, which phones animate on the GPU; a blur over the whole page
+   had to be redrawn every frame and made the slide stutter. */
 
 @keyframes page-gym-in-from-right {
   0% {
     opacity: 0;
-    filter: blur(8px);
     transform: translateX(22px) scale(1.03);
   }
   100% {
     opacity: 1;
-    filter: blur(0);
     transform: translateX(0) scale(1);
   }
 }
@@ -671,12 +671,10 @@ html.shadows-off .tile-cream {
 @keyframes page-gym-in-from-left {
   0% {
     opacity: 0;
-    filter: blur(8px);
     transform: translateX(-22px) scale(1.03);
   }
   100% {
     opacity: 1;
-    filter: blur(0);
     transform: translateX(0) scale(1);
   }
 }
@@ -716,13 +714,6 @@ html.shadows-off .tile-cream {
 
 .nav-icon-lift {
   transform: translateY(-2px) scale(1.08);
-}
-
-/* View Transitions API */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.32s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ================= Game corner motion ================= */

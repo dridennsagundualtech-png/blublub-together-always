@@ -66,24 +66,9 @@ function navigateWithDir(
   } catch {
     /* ignore */
   }
-
-  const go = () => {
-    void navigate({ to });
-  };
-
-  // Smooth browser View Transition when available (Chrome/Android, Safari 18+)
-  const doc = document as Document & {
-    startViewTransition?: (cb: () => void) => { finished: Promise<void> };
-  };
-  if (typeof doc.startViewTransition === "function") {
-    try {
-      doc.startViewTransition(go);
-      return;
-    } catch {
-      /* fall through */
-    }
-  }
-  go();
+  // The page's own slide animates the change (AppLayout); a browser View Transition on top of it
+  // froze the screen for a moment and played two animations at once.
+  void navigate({ to });
 }
 
 /**

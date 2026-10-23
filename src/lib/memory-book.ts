@@ -9,6 +9,7 @@
  */
 import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
+import { signedUrls } from "@/lib/signed-urls";
 import { paintPhoto, paintStage, prepareLook, rgba, traits, type Look } from "@/lib/style-paint";
 
 export const PAGE_W = 595.28;
@@ -156,10 +157,7 @@ export async function prepareBook(opts: {
 
   // One request for every photo link, then four downloads at a time.
   const paths = posts.map((p) => p.storage_path).filter((x): x is string => !!x);
-  const { data: signed } = paths.length
-    ? await supabase.storage.from("photos").createSignedUrls(paths, 600)
-    : { data: [] };
-  const urlByPath = new Map((signed ?? []).map((x) => [x.path, x.signedUrl] as const));
+  const urlByPath = await signedUrls("photos", paths);
   let done = 0;
   opts.onProgress(0, paths.length);
   const shrunk = await mapLimit(posts, 4, async (p) => {

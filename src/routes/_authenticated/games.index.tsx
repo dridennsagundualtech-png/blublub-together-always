@@ -432,7 +432,7 @@ function RoomPage() {
             </button>
           ))}
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <div className="mt-1 text-[11px] text-muted-foreground">
           {(room?.seed_room_id ?? roomPages[0]?.id ?? "main") !== resolvedPageId ? (
             <button
               type="button"
@@ -451,7 +451,7 @@ function RoomPage() {
           )}
           Your seed only shows its grown-up form from step 5 — but you can pick who they'll become
           any time.
-        </p>
+        </div>
       </div>
     </div>
   );
