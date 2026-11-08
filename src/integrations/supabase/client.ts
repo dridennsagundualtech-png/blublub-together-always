@@ -2,13 +2,13 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { brokeredPreviewStorage } from './previewAuthStorage';
-
-const SUPABASE_URL = "https://chthflbsqcjskalrrswd.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNodGhmbGJzcWNqc2thbHJyc3dkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODE5MzYsImV4cCI6MjEwMTg1NzkzNn0.cXiAS2tbzmWYnmyhb6lhFf46l61scrbgbqtpWOnfAz4";
-
+ 
+const SUPABASE_URL = "https://gwanqnpeuzruzuwksfsp.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3YW5xbnBldXpydXp1d2tzZnNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxMDY2MzUsImV4cCI6MjEwOTY4MjYzNX0.c7c3go0ueIfL5MwQ6l83ZrIDVqfHhIiO1AkcYyvkkBA";
+ 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
-
+ 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: brokeredPreviewStorage(),
