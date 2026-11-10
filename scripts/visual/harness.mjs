@@ -25,6 +25,8 @@ const userObj = (id, email) => ({
 
 /** Shared fake database so two pages (two "phones") can play each other. */
 export function makeDb(theme) {
+  // SPICY=1 lets the pretend users open the 18+ dice page (premium + switched on + age confirmed).
+  const spicy = process.env.SPICY === "1";
   return {
     games: [],
     theme: theme ?? null,
@@ -34,7 +36,8 @@ export function makeDb(theme) {
         couple_id: COUPLE,
         display_name: "Den",
         avatar_url: null,
-        adult_confirmed: false,
+        adult_confirmed: spicy,
+        spicy_enabled: spicy,
         is_premium: true,
       },
       {
@@ -42,7 +45,8 @@ export function makeDb(theme) {
         couple_id: COUPLE,
         display_name: "Angel",
         avatar_url: null,
-        adult_confirmed: false,
+        adult_confirmed: spicy,
+        spicy_enabled: spicy,
         is_premium: true,
       },
     ],

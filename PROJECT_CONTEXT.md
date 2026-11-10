@@ -101,6 +101,15 @@ pixel sprite in the Pixel skin (both are rendered; CSS shows one). Sprite data l
 **House rule for all games: pixel-art graphics in every skin**, to match Our Room (whose
 furniture and backgrounds are a pixel-art pack).
 
+How to make something pixel (all in `src/pixel.css`):
+
+- Wrap it in `.pixel-zone`. Inside, mascots are the pixel sprites, the font is the pixel font,
+  corners are square.
+- New game UI: build it from the `px-*` pieces (`px-frame`, `px-btn`, `px-chip`, `px-cell`…).
+- An existing page made of ordinary app cards/buttons: just put it in a zone — the zone
+  restyles those shared pieces too. For a whole page use `<AppLayout pixel>` (Food Roulette
+  and the dice page do this).
+
 ### The arcade module (`src/arcade/`)
 
 Deliberately separate from the app's business logic:

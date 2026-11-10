@@ -5,6 +5,33 @@
 
 ---
 
+## 2026-11-10 — Milestone 5b: Food Roulette and the dice in the pixel look (Claude)
+
+**What was done**
+
+- New, general tool: **any page built from the app's ordinary cards, buttons and inputs turns
+  pixel when it sits in a `.pixel-zone`** ("Shared app pieces inside a pixel zone" in
+  `src/pixel.css`). The zone squares the corners, draws the chunky outline and hard shadow, and
+  switches off each skin's own decorations (ribbons, rivets, grass, frosted glass) inside it.
+- `AppLayout` got an optional `pixel` prop (default off) that puts the page body in a pixel
+  zone. `food.tsx` and `spicy.tsx` use it — two lines each instead of rewriting those pages.
+- Food wheel: hard pixel edges and ink outlines between the slices.
+- **Bug fix:** reloading `/spicy` (or opening it by link) always bounced to the games list,
+  because the access check ran before the sign-in check had finished. It now waits for it.
+  People without access are still sent away (verified).
+
+**Files changed**: `src/pixel.css`, `src/components/AppLayout.tsx` (one optional prop),
+`src/routes/_authenticated/food.tsx`, `src/routes/_authenticated/spicy.tsx`,
+`scripts/visual/harness.mjs` (`SPICY=1` lets the pretend users open the dice page).
+
+**Verified**: Food Roulette in Classic, Jelly and Glass (identical pixel look); a spin lands and
+moves to stage 2; "Your own list" tab; dice page with access (`SPICY=1`) and the redirect
+without access; `tsc`, `bun test`, `vite build`; lint counts of the three old files unchanged.
+
+**Not verified**: the dice roll and round-timer animations were not exercised, only rendered.
+
+---
+
 ## 2026-11-10 — Milestone 5: app-wide polish and theme audit (Claude)
 
 **Method**: screenshots of Home, Nest, Care, Calendar, Appearance and the Game corner in all

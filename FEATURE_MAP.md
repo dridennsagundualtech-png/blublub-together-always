@@ -26,8 +26,8 @@
 | Cycle tracking | `/period` | `routes/_authenticated/period.tsx` | `cycle_logs` | yes |
 | Commitments | `/commitments` | `routes/_authenticated/commitments.tsx`, `lib/commitments.ts` | `commitments`, `commitment_logs` | yes |
 | Map | `/map` | `routes/_authenticated/map.tsx`, `components/WorldMap.tsx`, `components/MiniMap.tsx`, `lib/location.ts` | `locations` | yes |
-| Food roulette | `/food` | `routes/_authenticated/food.tsx`, `lib/food-art.ts` | — | yes |
-| 18+ dice (premium) | `/spicy` | `routes/_authenticated/spicy.tsx`, `components/games/DiceRoller.tsx` | — | yes |
+| Food roulette (pixel look via `<AppLayout pixel>`) | `/food` | `routes/_authenticated/food.tsx`, `lib/food-art.ts` | — | yes |
+| 18+ dice (premium; pixel look via `<AppLayout pixel>`) | `/spicy` | `routes/_authenticated/spicy.tsx`, `components/games/DiceRoller.tsx` | — | yes |
 | Profile & settings | `/profile` | `routes/_authenticated/profile.tsx` | `profiles`, `redeem_codes` | yes |
 | Appearance | `/appearance` | `components/StylePicker.tsx`, `components/ThemeEditor.tsx`, `components/DevThemeHost.tsx`, `lib/theme.ts` | `couples.theme` | yes |
 | Admin | `/admin-codes`, `/admin-users` | `routes/_authenticated/admin-*.tsx`, `lib/admin*.ts` | `redeem_codes`, `user_roles` | yes |

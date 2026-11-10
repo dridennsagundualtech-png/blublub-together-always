@@ -31,7 +31,6 @@ Milestone 6 — final regression pass over everything touched, tidy the docs, ha
 ## Pending ideas (not started, need owner's OK where marked)
 
 - Pixel icons for the remaining Lucide glyphs inside game areas (flag, pause, arrows, fork).
-- Food Roulette and the 18+ dice in the pixel look (they are games too, but were out of scope).
 - Hop Up ideas: pick your mascot, moving hazards in the night zones, tilt-to-steer.
 - Share arcade best scores with the partner (needs a database column or table → **ask owner**).
 - Arcade games earning Love Points for Our Room (writes to `rooms` → **ask owner**).
@@ -56,3 +55,5 @@ Milestone 6 — final regression pass over everything touched, tidy the docs, ha
 - 2026-11-10 — Milestone 4 (Claude): Game corner redesign; pixel banner on the Our Room page.
 - 2026-11-10 — Milestone 5 (Claude): theme audit; readable panel + accent text; Jelly tile fix;
   chat button position fix; keyboard focus ring.
+- 2026-11-10 — Milestone 5b (Claude): Food Roulette + dice page in the pixel look; `/spicy`
+  reload fix.

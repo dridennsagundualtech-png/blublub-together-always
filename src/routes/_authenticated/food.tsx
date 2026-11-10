@@ -109,7 +109,8 @@ function Wheel({
       <svg
         ref={wheelRef}
         viewBox="0 0 320 320"
-        className="size-72 drop-shadow-sm"
+        className="size-72"
+        shapeRendering="crispEdges"
         style={{
           transform: `rotate(${angle}deg)`,
           transition: spinning ? "transform 4s cubic-bezier(0.15, 0.9, 0.2, 1)" : "none",
@@ -126,8 +127,8 @@ function Wheel({
               <path
                 d={`M160 160 L${x1} ${y1} A${R} ${R} 0 ${slice > 180 ? 1 : 0} 1 ${x2} ${y2} Z`}
                 fill={WHEEL_COLORS[i % WHEEL_COLORS.length]}
-                stroke="var(--color-card)"
-                strokeWidth={2}
+                stroke="var(--px-ink)"
+                strokeWidth={3}
               />
               {o.url ? (
                 <image
@@ -158,7 +159,7 @@ function Wheel({
             </g>
           );
         })}
-        <circle cx={160} cy={160} r={34} fill="var(--color-card)" stroke="var(--color-border)" strokeWidth={2} />
+        <circle cx={160} cy={160} r={34} fill="var(--color-card)" stroke="var(--px-ink)" strokeWidth={3} />
       </svg>
       <div className="pointer-events-none absolute left-1/2 top-1/2 grid size-[68px] -translate-x-1/2 -translate-y-1/2 place-items-center">
         <Doodle critter="cat" pose="curious" size={48} />
@@ -176,7 +177,13 @@ function FoodPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("classic");
 
   return (
-    <AppLayout title="Food Roulette" subtitle="Narrow it down, one spin at a time" critter="cat">
+    // `pixel`: a game like the others, drawn in the pixel look in every app style.
+    <AppLayout
+      title="Food Roulette"
+      subtitle="Narrow it down, one spin at a time"
+      critter="cat"
+      pixel
+    >
       <Link to="/games/arcade" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
         <ArrowLeft className="size-3.5" /> Back to games
       </Link>

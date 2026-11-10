@@ -38,6 +38,7 @@ export function AppLayout({
   critter,
   critterPose,
   requireCouple = true,
+  pixel = false,
   children,
 }: {
   title: string;
@@ -45,6 +46,8 @@ export function AppLayout({
   critter?: Critter;
   critterPose?: Pose;
   requireCouple?: boolean;
+  /** Draw the whole page body in the pixel-art look (game pages) — see src/pixel.css. */
+  pixel?: boolean;
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -124,7 +127,9 @@ export function AppLayout({
         </div>
       </header>
 
-      <div className={`page-transition-root mx-auto max-w-lg px-5 ${slideClass}`}>
+      <div
+        className={`page-transition-root mx-auto max-w-lg px-5 ${slideClass} ${pixel ? "pixel-zone" : ""}`}
+      >
         {!user ? (
           <Link
             to="/profile"

@@ -69,13 +69,15 @@ const CLOTHING_DICE: DieDef[] = [
 
 function SpicyPage() {
   const navigate = useNavigate();
-  const { data: user } = useAuthUser();
+  const { data: user, isLoading: userLoading } = useAuthUser();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { isLoading: adminLoading } = useIsAdmin();
   const spicy = useSpicyAccess();
   const refresh = useRefreshSession();
 
-  const resolving = profileLoading || adminLoading;
+  // Wait for the sign-in check too: the profile can't start loading before it, and without
+  // this a reload of this page was sent back to the games list before access was known.
+  const resolving = userLoading || profileLoading || adminLoading;
 
   useEffect(() => {
     if (!resolving && !spicy) void navigate({ to: "/games/arcade", replace: true });
@@ -84,7 +86,14 @@ function SpicyPage() {
   if (resolving || !spicy) return null;
 
   return (
-    <AppLayout title="18+ Dice" subtitle="Premium · adults only" critter="seal" critterPose="peek">
+    // `pixel`: a game like the others, drawn in the pixel look in every app style.
+    <AppLayout
+      title="18+ Dice"
+      subtitle="Premium · adults only"
+      critter="seal"
+      critterPose="peek"
+      pixel
+    >
       <Link to="/games/arcade" className="press mb-3 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
         <ArrowLeft className="size-3.5" /> Back to games
       </Link>

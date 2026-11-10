@@ -233,6 +233,74 @@
   animation: px-pop-in 0.24s steps(4, end) both;
 }
 
+/* ===================== Shared app pieces inside a pixel zone =====================
+ * Some game pages (Food Roulette, the dice) are built from the app's ordinary cards, buttons
+ * and inputs. Wrapping such a page in .pixel-zone turns those pieces pixel as well, whatever
+ * the app style: square corners, chunky outline, hard shadow — and none of a skin's own
+ * decorations (ribbons, rivets, grass, frosted glass). `!important` is needed only where the
+ * skins themselves use it. */
+:root .pixel-zone *,
+:root .pixel-zone *::before,
+:root .pixel-zone *::after {
+  border-radius: 0 !important;
+}
+:root:root
+  .pixel-zone
+  :is(
+    .card-soft,
+    .card-raised,
+    .card-outline,
+    .surface-quiet,
+    .grad-box,
+    .tile-pink,
+    .tile-lilac,
+    .tile-peach,
+    .tile-sky,
+    .tile-cream,
+    .tile-icy
+  ) {
+  border-color: transparent;
+  box-shadow:
+    var(--px-outline),
+    0 calc(var(--px) * 3) 0 0 var(--px-shade) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+:root:root .pixel-zone :is(.card-soft, .card-raised, .card-outline, .surface-quiet)::before,
+:root:root .pixel-zone :is(.card-soft, .card-raised, .card-outline, .surface-quiet)::after {
+  content: none !important;
+}
+/* The see-through "quiet" card gets a solid paper fill so the outline reads as a frame. */
+:root:root .pixel-zone .surface-quiet {
+  background-color: var(--px-paper);
+}
+:root:root .pixel-zone :is(button, a):is([class*="bg-primary"], [class*="bg-gradient"]),
+:root:root
+  .pixel-zone
+  button:is(
+    [class*="bg-card"],
+    [class*="bg-muted"],
+    [class*="bg-secondary"],
+    [class*="bg-accent"],
+    [class*="bg-destructive"]
+  ) {
+  border-color: transparent;
+  box-shadow:
+    var(--px-outline),
+    inset 0 calc(var(--px) * -1) 0 0 color-mix(in oklab, black 16%, transparent),
+    inset 0 var(--px) 0 0 color-mix(in oklab, white 45%, transparent) !important;
+}
+:root:root
+  .pixel-zone
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select) {
+  border-color: transparent;
+  box-shadow: var(--px-outline) !important;
+}
+:root:root .pixel-zone svg.lucide {
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
 /* ===================== Arcade cabinet ===================== */
 .arcade-cabinet {
   padding: calc(var(--px) * 2);
