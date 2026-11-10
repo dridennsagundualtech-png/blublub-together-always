@@ -23,7 +23,20 @@ export default defineConfig({
     tailwindcss(),
   ],
   resolve: {
-    alias: { "@": path.resolve(process.cwd(), "src") },
+    // Order matters: the two exact swaps must come before the general "@" shortcut.
+    alias: [
+      // A phone app has no server. The web app's server-only pieces are swapped for small
+      // client-safe stand-ins (see the notes at the top of each file in src/spa/).
+      {
+        find: /^@\/lib\/admin\.functions$/,
+        replacement: path.resolve(process.cwd(), "src/spa/admin.functions.ts"),
+      },
+      {
+        find: /^@tanstack\/react-start$/,
+        replacement: path.resolve(process.cwd(), "src/spa/react-start.ts"),
+      },
+      { find: "@", replacement: path.resolve(process.cwd(), "src") },
+    ],
   },
   base: "./",
   build: {

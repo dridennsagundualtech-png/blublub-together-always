@@ -5,6 +5,75 @@
 
 ---
 
+## 2026-11-10 — Milestone 8: the phone build works again (Claude)
+
+**Owner's request**: "please fix the phone app build".
+
+`npm run build:spa` is the static build that Capacitor wraps into the phone app. It had two
+separate problems; fixing the first one exposed the second.
+
+**Problem 1 — it did not build.** `Missing "#tanstack-start-entry" specifier in
+"@tanstack/start-server-core"`. The owner-only "Member access" page
+(`routes/_authenticated/admin-users.tsx`) calls *server functions* (`lib/admin.functions.ts`),
+which belong to the web app's server and use the secret admin key. A phone app has no server,
+and the phone build was trying to bundle that server framework.
+
+*Fix* — phone build only, in `vite.config.spa.ts`: two exact module swaps.
+
+| The web app uses | The phone build gets instead | What it does there |
+| --- | --- | --- |
+| `@/lib/admin.functions` | `src/spa/admin.functions.ts` | Same three function names; each one answers "Member access is managed in the web app, not in the phone app." The page shows that as its message. |
+| `@tanstack/react-start` | `src/spa/react-start.ts` | Only `useServerFn`, which hands the function straight back. |
+
+Why not make the admin tools work on the phone: they need the secret admin key, and a key
+packed into a phone app can be extracted by anyone who downloads it. Web-only is the safe
+answer. Verified: none of `SERVICE_ROLE`, `service_role`, `supabaseAdmin`, `createServerFn`,
+`requireSupabaseAuth` appear anywhere in the built phone bundle.
+
+**Problem 2 — it built, but froze on start.** Nothing was drawn and the page stopped
+responding about a second after loading. A debugger pause showed React stuck in an endless
+loop (`getParentHydrationBoundary`). Cause: the app's outer frame (`RootShell` in
+`routes/__root.tsx`) draws `<html>`, `<head>` and `<body>` itself, as the web version needs,
+but the phone entry mounted the app inside a `<div id="root">` *within* that same body, so
+React owned the body from inside the body.
+
+*Fix* — `src/main.spa.tsx` now mounts on the whole document (`createRoot(document)`), which is
+how the web version runs, and the unused mount box was removed from `spa/index.html`.
+
+**The web app is untouched**: no file used by the normal build changed. `routes/__root.tsx`,
+`admin-users.tsx` and `admin.functions.ts` are exactly as before; the web build still contains
+its server functions.
+
+**Files changed**: `vite.config.spa.ts`, `src/main.spa.tsx`, `spa/index.html`; added
+`src/spa/admin.functions.ts`, `src/spa/react-start.ts`, `scripts/visual/spa-smoke.mjs`;
+`scripts/visual/harness.mjs` (`ADMIN=1` makes the pretend user the owner).
+
+**Verified (actually run)**
+
+| Check | Result |
+| --- | --- |
+| `npm run build:spa` | builds (139 files, 7 MB) |
+| The built app, served and opened in a phone-sized browser: `scripts/visual/spa-smoke.mjs` | 14 / 14 pass — home, Pixel style and its font requested, Play tab, Game corner, Hop Up starts and draws, Tic-Tac-Toe, Daily question, Nest, Member access note, no page errors |
+| Secret/server code in the phone bundle | none found |
+| `tsc`, `bun test` (20), normal `vite build` | pass; web build still has its server functions |
+| Milestone 5's font fix for the phone build | now confirmed: the style fonts are requested |
+
+**Not verified — needs a real phone / Capacitor**
+
+- Wrapping `dist/` with Capacitor and running it on Android (there is no Capacitor config in
+  this repository, so that step happens elsewhere).
+- **Our Room art in the phone app.** Furniture, backgrounds and part of the feelings pack are
+  addressed as `/__l5e/assets-v1/...`, i.e. relative to whichever site serves the app. On
+  Lovable hosting that works. Inside a phone app the "site" is the app itself, so these
+  pictures may not load. If they don't, the phone build needs those addresses pointed at the
+  live site — a small change in `vite.config.spa.ts`, not done here because it cannot be
+  tested from the sandbox.
+- Opening the phone build at a deep address (e.g. reloading on `/games/arcade`) does not work,
+  because it is built with relative file paths. That is by design for Capacitor, which always
+  starts the app at its front page.
+
+---
+
 ## 2026-11-10 — Milestone 7: daily-question answers never expire (Claude)
 
 **Owner's request**: "I want no expiration on daily questions answered, I want to review it

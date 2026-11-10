@@ -40,6 +40,8 @@ src/
     room/                 Our Room stage
     ui/                   shadcn/ui primitives (generated; avoid editing)
   arcade/                 SOLO ARCADE MODULE (canvas games). Self-contained — see below
+  spa/                    PHONE BUILD ONLY: stand-ins for the web app's server-only modules
+  main.spa.tsx            entry of the phone build (the web build does not use it)
   lib/                    data hooks and helpers (one file per feature)
   integrations/supabase/  generated Supabase client + types (do not edit by hand)
   styles.css              design tokens (CSS variables) + shared utility classes + game motion
@@ -143,9 +145,12 @@ The app talks to the arcade through exactly two things: the registry (for menus)
 
 ## Known quirks
 
-- **The phone build is currently broken**: `npm run build:spa` fails because client pages
-  import TanStack Start server functions (admin tools). Pre-existing; see DEVELOPMENT_LOG
-  milestone 5. The web build is fine.
+- **The phone build has no server.** `vite.config.spa.ts` swaps the two server-only modules
+  for client-safe stand-ins in `src/spa/` (the owner's "Member access" page says it is
+  web-only there), and `src/main.spa.tsx` mounts the app on the whole document because
+  `RootShell` draws `<html>`/`<body>` itself. If a page starts importing something new from
+  `@tanstack/react-start`, the phone build fails with "not exported by src/spa/react-start.ts":
+  add a client-safe stand-in there. Never let server code or the admin key into that bundle.
 
 - The README still mentions an older Supabase project id; the code uses the project in
   `src/integrations/supabase/client.ts`.

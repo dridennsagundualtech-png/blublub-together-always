@@ -83,6 +83,8 @@ export async function mockSupabase(context, db, who) {
     if (p.startsWith("/auth/v1/user"))
       return json(userObj(who, who === ME ? "den@example.com" : "angel@example.com"));
     if (p.startsWith("/auth/v1/")) return json({});
+    // ADMIN=1 makes the pretend user the owner account (has_role → true).
+    if (p.startsWith("/rest/v1/rpc/has_role")) return json(process.env.ADMIN === "1");
     if (p.startsWith("/rest/v1/rpc/")) return json(null);
     if (p.startsWith("/rest/v1/")) {
       const table = p.slice("/rest/v1/".length);

@@ -9,7 +9,11 @@ import "./styles.css";
 
 const router = getRouter();
 
-createRoot(document.getElementById("root")!).render(
+// Mount on the whole document, not on a box inside it. The app's outer frame
+// (`RootShell` in routes/__root.tsx) draws <html>, <head> and <body> itself — that is how the
+// web version works. Mounted inside a <div> in the body, React ended up owning the body from
+// within the body and froze the page in an endless loop on the first touch.
+createRoot(document).render(
   <StrictMode>
     <RouterProvider router={router} />
   </StrictMode>,

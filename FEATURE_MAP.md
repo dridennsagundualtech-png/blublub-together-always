@@ -30,7 +30,7 @@
 | 18+ dice (premium; pixel look via `<AppLayout pixel>`) | `/spicy` | `routes/_authenticated/spicy.tsx`, `components/games/DiceRoller.tsx` | — | yes |
 | Profile & settings | `/profile` | `routes/_authenticated/profile.tsx` | `profiles`, `redeem_codes` | yes |
 | Appearance | `/appearance` | `components/StylePicker.tsx`, `components/ThemeEditor.tsx`, `components/DevThemeHost.tsx`, `lib/theme.ts` | `couples.theme` | yes |
-| Admin | `/admin-codes`, `/admin-users` | `routes/_authenticated/admin-*.tsx`, `lib/admin*.ts` | `redeem_codes`, `user_roles` | yes |
+| Admin (Member access uses server functions: web app only; the phone build shows a note instead) | `/admin-codes`, `/admin-users` | `routes/_authenticated/admin-*.tsx`, `lib/admin*.ts`, phone stand-ins in `src/spa/` | `redeem_codes`, `user_roles` | yes |
 
 ## Our Room (the "main game")
 

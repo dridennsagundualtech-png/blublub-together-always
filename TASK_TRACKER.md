@@ -24,6 +24,7 @@
 | 5 | App-wide visual polish, theme (skin) audit and fixes | ✅ done |
 | 6 | Final regression pass, docs, hand-over report | ✅ done |
 | 7 | Daily-question archive: answered days never expire; merged to `main` | ✅ done |
+| 8 | Phone build (`npm run build:spa`) builds and runs again | ✅ done |
 
 ## Current task
 
@@ -34,7 +35,7 @@ daily-question answers that never expire) are done and merged into `main`.
 
 1. **Owner tries it on a real phone** (checklist in TESTING_GUIDE §6) and reports what feels
    off — especially the steering in Hop Up and the tap strength in Wing It.
-2. **Fix the phone build** (`npm run build:spa`) — see "Blocked" below.
+2. **Build the phone app with Capacitor and try it on a phone** — see "Blocked" below.
 3. **Tune the arcade games** from that feedback (constants at the top of each `logic.ts`).
 4. Optional ideas from the list below.
 
@@ -50,10 +51,11 @@ daily-question answers that never expire) are done and merged into `main`.
 
 ## Blocked / needs the owner
 
-- **Phone build is broken** (`npm run build:spa` fails; it already failed before this work).
-  See DEVELOPMENT_LOG, milestone 5. Needs a decision on the admin server functions in the
-  phone app. A follow-up task was suggested to the owner.
 - Real-device checks listed in TESTING_GUIDE §6 (real accounts, touch feel, sound).
+- **Phone app on a real phone**: the build works again (milestone 8) but wrapping it with
+  Capacitor and running it on Android could not be tried here. Watch for Our Room pictures:
+  they are addressed relative to the web site and may not load inside the phone app — see
+  DEVELOPMENT_LOG milestone 8 for the small follow-up if so.
 
 ## Completed
 
@@ -69,3 +71,5 @@ daily-question answers that never expire) are done and merged into `main`.
   reload fix.
 - 2026-11-10 — Milestone 6 (Claude): final regression pass, hand-over notes.
 - 2026-11-10 — Milestone 7 (Claude): daily-question answers never expire; merged to `main`.
+- 2026-11-10 — Milestone 8 (Claude): phone build fixed (server-only modules swapped out for the
+  phone build; app mounted on the whole document).

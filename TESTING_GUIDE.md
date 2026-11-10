@@ -36,9 +36,29 @@ The solo arcade games work signed out.
 | Game logic tests | `bun test` | all pass |
 | Build | `npx vite build` | ends with "You can preview this build…" |
 | Lint (changed files only) | `npx eslint <files you touched>` | no errors |
+| Phone build | `npm run build:spa` | ends with "built in …", creates `dist/` |
+| Phone build runs | see "Phone build smoke test" below | `ALL PASSED` |
 
-`npm run build:spa` (the phone build) is **known to fail** at the moment — see
-DEVELOPMENT_LOG milestone 5 — so it is not in the table yet. Add it once fixed.
+A build that succeeds is not enough for the phone app: it once built fine and then froze on
+start. Always run the smoke test after touching `vite.config.spa.ts`, `src/main.spa.tsx`,
+`src/spa/`, `spa/index.html` or `routes/__root.tsx`.
+
+### Phone build smoke test
+
+```bash
+npm run build:spa
+npx vite preview --config vite.config.spa.ts --port 4173 --host 127.0.0.1 &
+ADMIN=1 BASE=http://127.0.0.1:4173 node scripts/visual/spa-smoke.mjs /tmp/shots/spa
+```
+
+It opens the built app at its front page and moves around inside it like the phone app does
+(14 checks). `ADMIN=1` makes the pretend user the owner, to check the "Member access" note.
+
+Also make sure no server code leaked into the phone bundle (must print nothing):
+
+```bash
+grep -rlE "SERVICE_ROLE|service_role|supabaseAdmin|createServerFn" dist
+```
 
 `npx eslint .` on the whole repo reports ~2,700 old formatting problems — that is the known
 baseline (see DEVELOPMENT_LOG). Only make sure *your* files are clean.
@@ -159,7 +179,8 @@ These cannot be verified in the sandbox; the owner (or an agent with access) sho
 - Real sign-in and two real accounts playing a two-player game with live realtime updates.
 - Our Room with real furniture art next to the new game art (style match).
 - Touch feel, sound and frame rate of the arcade games on an actual phone.
-- The Capacitor phone build (`npm run build:spa`) on Android.
+- The phone build wrapped with Capacitor on a real Android phone — in particular whether the
+  Our Room pictures load there (see DEVELOPMENT_LOG milestone 8).
 
 ## 7. Deployment
 
