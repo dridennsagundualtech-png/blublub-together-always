@@ -20,7 +20,7 @@
 | Memories (photos) | `/photos` | `routes/_authenticated/photos.tsx`, `lib/signed-urls.ts` | `photos`, `photo_reactions`, `photo_comments` | yes |
 | Memory Book (PDF) | `/memory-book` | `routes/_authenticated/memory-book.tsx`, `lib/memory-book.ts`, `lib/style-paint.ts` | `photos` | yes |
 | Look Back video | from Memories | `components/LookBack.tsx`, `lib/lookback-*.ts` | several | yes |
-| Daily questions | `/questions` | `routes/_authenticated/questions.tsx` | `questions`, `question_answers` | yes |
+| Daily questions (answers reveal when both replied; the Archive keeps every answer forever) | `/questions` | `routes/_authenticated/questions.tsx` | `questions`, `question_answers` | yes |
 | Wellbeing hub | `/wellbeing` | `routes/_authenticated/wellbeing.tsx` | — | yes |
 | Cool-down | `/cooldown` | `routes/_authenticated/cooldown.tsx`, `lib/feelings.ts` | `cooldowns` | yes |
 | Cycle tracking | `/period` | `routes/_authenticated/period.tsx` | `cycle_logs` | yes |

@@ -85,6 +85,12 @@ SCENARIO=resign node scripts/visual/play-two-player.mjs /tmp/shots/tp connect4
 
 A line starting with `FAIL:` means a rule was broken (e.g. a move out of turn was accepted).
 
+Daily-question archive (old answers must never disappear) — 12 checks, prints PASS/FAIL:
+
+```bash
+node scripts/visual/questions-archive.mjs /tmp/shots/questions
+```
+
 `SPICY=1` in front of any of these commands lets the pretend users open the 18+ dice page.
 
 If the console shows `Cannot read properties of undefined (reading '_nonReactive')` from
@@ -123,6 +129,13 @@ Run these after touching shared styles, games, or navigation.
 - [ ] Best score survives a page reload.
 - [ ] No page scroll or tab swipe while playing; works with touch and with keyboard.
 - [ ] Sound follows the app's sound switch (Profile → sound effects).
+
+### Daily questions
+- [ ] Today's answers stay hidden until both have answered.
+- [ ] Archive → Answered lists every past day you answered, however old; "Show older answers"
+      reaches the very first one.
+- [ ] Archive → Not answered: last 30 days you skipped, plus any older day only your partner
+      answered; answering late reveals both answers under Answered.
 
 ### Food Roulette and dice
 - [ ] Food Roulette: a spin lands on a slice, ticks, and moves to the next stage; "Your own

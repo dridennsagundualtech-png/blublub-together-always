@@ -211,7 +211,15 @@ function QuestionsPage() {
   );
 }
 
-const ARCHIVE_DAYS = 30;
+/**
+ * How far back the "Not answered" list goes for days nobody answered. This only limits
+ * catching up: answers that exist are kept and shown forever, however old they are.
+ */
+const CATCH_UP_DAYS = 30;
+/** The database hands rows over in pages of at most this many; we ask until it runs out. */
+const PAGE_SIZE = 1000;
+/** Answered days shown at first, and how many more each "Show older" adds. */
+const SHOW_STEP = 30;
 
 /** Past days, split into ones you answered and ones you still can catch up on. */
 function QuestionArchive({ today }: { today: string }) {
@@ -221,6 +229,7 @@ function QuestionArchive({ today }: { today: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"answered" | "missed">("answered");
+  const [shown, setShown] = useState(SHOW_STEP);
   const { data: bank } = useQuestionBank();
   const occasionCtx: OccasionCtx = {
     anniversary: members?.find((m) => m.anniversary_date)?.anniversary_date ?? null,
@@ -232,20 +241,29 @@ function QuestionArchive({ today }: { today: string }) {
     queryKey: ["question-archive", coupleId],
     enabled: !!coupleId && open,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("question_answers")
-        .select("*, questions(prompt)")
-        .eq("couple_id", coupleId!)
-        .order("answer_date", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
+      // Every answer ever written, not just the first page — old answers must never drop out.
+      const all = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const { data, error } = await supabase
+          .from("question_answers")
+          .select("*, questions(prompt)")
+          .eq("couple_id", coupleId!)
+          .order("answer_date", { ascending: false })
+          .order("id", { ascending: true }) // a fixed order, so pages never overlap or skip
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        all.push(...(data ?? []));
+        if (!data || data.length < PAGE_SIZE) break;
+      }
+      return all;
     },
   });
 
-  const pastDates = useMemo(() => {
+  /** The last few weeks, newest first: days you can still catch up on even if nobody answered. */
+  const recentDates = useMemo(() => {
     const out: string[] = [];
     const base = Date.parse(`${today}T00:00:00Z`);
-    for (let i = 1; i <= ARCHIVE_DAYS; i++) {
+    for (let i = 1; i <= CATCH_UP_DAYS; i++) {
       out.push(new Date(base - i * 86_400_000).toISOString().slice(0, 10));
     }
     return out;
@@ -257,12 +275,35 @@ function QuestionArchive({ today }: { today: string }) {
     return map;
   }, [rows]);
 
-  const answeredDates = pastDates.filter((d) =>
-    (byDate[d] ?? []).some((a) => a.created_by === user?.id),
-  );
-  const missedDates = pastDates.filter(
-    (d) => !(byDate[d] ?? []).some((a) => a.created_by === user?.id),
-  );
+  const iAnswered = (d: string) => (byDate[d] ?? []).some((a) => a.created_by === user?.id);
+  // Dates are "YYYY-MM-DD", so comparing them as text compares them as dates.
+  const pastWithAnswers = Object.keys(byDate)
+    .filter((d) => d < today)
+    .sort()
+    .reverse();
+
+  // Every past day you answered, newest first. No time limit: nothing here ever expires.
+  const answeredDates = pastWithAnswers.filter(iAnswered);
+
+  // Still open to answer: skipped days from the last few weeks, plus ANY older day your partner
+  // answered and you didn't — otherwise their answer could never be revealed.
+  const oldestRecent = recentDates[recentDates.length - 1] ?? today;
+  const missedDates = [
+    ...recentDates.filter((d) => !iAnswered(d)),
+    ...pastWithAnswers.filter((d) => d < oldestRecent && !iAnswered(d)),
+  ];
+
+  /** The question of a past day: the one already answered that day if there is one. */
+  const questionOn = (date: string) => {
+    const row = byDate[date]?.[0] as
+      | { question_id?: string; questions?: { prompt?: string } | null }
+      | undefined;
+    const planned = questionFor(bank, date, occasionCtx);
+    return {
+      id: row?.question_id ?? planned?.id ?? null,
+      prompt: row?.questions?.prompt ?? planned?.prompt ?? "Daily question",
+    };
+  };
 
   const nameOf = (id: string) =>
     id === user?.id ? "You" : (members?.find((m) => m.id === id)?.display_name ?? "Partner");
@@ -336,17 +377,12 @@ function QuestionArchive({ today }: { today: string }) {
               </Card>
             ) : (
               <ul className="space-y-3">
-                {answeredDates.map((date) => (
+                {answeredDates.slice(0, shown).map((date) => (
                   <li key={date} className="card-soft p-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {fmt(date)}
                     </p>
-                    <p className="mt-1 text-sm font-extrabold">
-                      {(byDate[date]?.[0] as { questions?: { prompt?: string } } | undefined)
-                        ?.questions?.prompt ??
-                        questionFor(bank, date, occasionCtx)?.prompt ??
-                        "Daily question"}
-                    </p>
+                    <p className="mt-1 text-sm font-extrabold">{questionOn(date).prompt}</p>
                     <ul className="mt-2 space-y-2">
                       {(byDate[date] ?? []).map((a) => (
                         <li key={a.id} className="rounded-2xl bg-muted/60 px-3 py-2">
@@ -357,6 +393,21 @@ function QuestionArchive({ today }: { today: string }) {
                     </ul>
                   </li>
                 ))}
+                {answeredDates.length > shown ? (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => setShown((n) => n + SHOW_STEP)}
+                      className="press w-full rounded-full border border-border bg-card px-3 py-2.5 text-xs font-bold"
+                    >
+                      Show older answers ({answeredDates.length - shown} more)
+                    </button>
+                  </li>
+                ) : (
+                  <li className="text-center text-xs text-muted-foreground">
+                    That&apos;s all of them — answers are kept forever.
+                  </li>
+                )}
               </ul>
             )
           ) : missedDates.length === 0 ? (
@@ -370,8 +421,8 @@ function QuestionArchive({ today }: { today: string }) {
                   key={date}
                   date={date}
                   label={fmt(date)}
-                  prompt={questionFor(bank, date, occasionCtx)?.prompt ?? "Daily question"}
-                  questionId={questionFor(bank, date, occasionCtx)?.id ?? null}
+                  prompt={questionOn(date).prompt}
+                  questionId={questionOn(date).id}
                   partnerAnswered={(byDate[date] ?? []).length > 0}
                   pending={answerLate.isPending}
                   onSubmit={(body, questionId) => answerLate.mutate({ date, questionId, body })}

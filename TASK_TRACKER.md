@@ -23,11 +23,12 @@
 | 4 | Game corner hub redesign (pixel game cards, solo + two-player sections) | ✅ done |
 | 5 | App-wide visual polish, theme (skin) audit and fixes | ✅ done |
 | 6 | Final regression pass, docs, hand-over report | ✅ done |
+| 7 | Daily-question archive: answered days never expire; merged to `main` | ✅ done |
 
 ## Current task
 
-None in progress. Everything in the owner's request of 2026-11-10 is done on branch
-`claude/hopeful-meitner-01bzra` and waiting for the owner to try it and merge.
+None in progress. The owner's requests of 2026-11-10 (games, pixel look, theme audit, and
+daily-question answers that never expire) are done and merged into `main`.
 
 ## Recommended next milestones (in this order)
 
@@ -67,3 +68,4 @@ None in progress. Everything in the owner's request of 2026-11-10 is done on bra
 - 2026-11-10 — Milestone 5b (Claude): Food Roulette + dice page in the pixel look; `/spicy`
   reload fix.
 - 2026-11-10 — Milestone 6 (Claude): final regression pass, hand-over notes.
+- 2026-11-10 — Milestone 7 (Claude): daily-question answers never expire; merged to `main`.

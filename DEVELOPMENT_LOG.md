@@ -5,6 +5,46 @@
 
 ---
 
+## 2026-11-10 — Milestone 7: daily-question answers never expire (Claude)
+
+**Owner's request**: "I want no expiration on daily questions answered, I want to review it
+whenever I want."
+
+**What was wrong**: nothing was ever deleted. The Archive on the Daily question page simply
+walked back a fixed 30 days (`ARCHIVE_DAYS = 30`) and showed only those days, so an answer
+older than a month stopped being displayed. A second, slower limit was hiding behind it: the
+database hands over at most 1,000 rows per request, so after roughly 500 days of both partners
+answering, the oldest answers would have been cut off as well.
+
+**What changed** (`src/routes/_authenticated/questions.tsx`, the `QuestionArchive` part only)
+
+- **Answered** now lists every past day you answered, newest first, with no time limit. It
+  shows 30 days at first and a "Show older answers (N more)" button; the end of the list says
+  "answers are kept forever".
+- The archive loads the whole history page by page instead of the first 1,000 rows.
+- **Not answered** still covers the last 30 days for catching up, and additionally keeps any
+  older day your partner answered and you did not — otherwise that answer could never be
+  revealed. Their text stays hidden until you answer, as before.
+- When answering late on a day your partner already answered, the question shown and saved is
+  the one they answered (taken from their saved answer), not recomputed from today's question
+  list, so the two answers always belong to the same question.
+
+No database change: same table, same columns, read-only query plus the existing insert.
+
+**Verified** (`scripts/visual/questions-archive.mjs`, 12 checks, all pass) with a pretend history
+of 1,214 answers going back 1,000 days: 606 answered days listed; answers from 45 and 400 days
+ago visible; the 1,000-day-old answer reachable; history fetched in two pages; a 60-day-old
+day only the partner answered is still answerable, stays hidden until answered, saves against
+the partner's question, and then appears under Answered. `tsc`, `bun test` (20), `vite build`
+pass; lint error count of `questions.tsx` unchanged.
+
+**Not verified**: against the real database (the test uses the in-memory stand-in).
+
+**Published**: after this milestone the branch was merged into `main` at the owner's request
+(fast-forward, no history rewritten).
+
+---
+
 ## 2026-11-10 — Milestone 6: final regression pass and hand-over (Claude)
 
 **Regression run on the final code** (two simulated phones, in-memory database)

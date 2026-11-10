@@ -133,6 +133,30 @@ export async function mockSupabase(context, db, who) {
           return json(wantsObject ? row : []);
         }
       }
+      // Any other table a test has filled in (db.tables.<name> = [rows]): equality filters,
+      // ordering, paging, and the real API's cap of 1000 rows per request.
+      const seeded = db.tables?.[table];
+      if (seeded && method === "GET") {
+        let rows = seeded.filter((r) => Object.entries(f).every(([k, v]) => String(r[k]) === v));
+        const order = (url.searchParams.get("order") || "").split(",").filter(Boolean);
+        rows = [...rows].sort((a, b) => {
+          for (const part of order) {
+            const [col, dir] = part.split(".");
+            if (a[col] === b[col]) continue;
+            return (a[col] < b[col] ? -1 : 1) * (dir === "desc" ? -1 : 1);
+          }
+          return 0;
+        });
+        const offset = Number(url.searchParams.get("offset") || 0);
+        const limit = Math.min(1000, Number(url.searchParams.get("limit") || 1000));
+        db.requests?.push({ table, offset, limit });
+        return json(rows.slice(offset, offset + limit));
+      }
+      if (seeded && method === "POST") {
+        const row = { id: crypto.randomUUID(), ...JSON.parse(req.postData() || "{}") };
+        seeded.push(row);
+        return json(wantsObject ? row : [row], 201);
+      }
       if (method === "GET") return json(wantsObject ? null : []);
       return json(wantsObject ? null : []);
     }
