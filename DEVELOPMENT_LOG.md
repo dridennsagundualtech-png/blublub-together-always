@@ -5,6 +5,50 @@
 
 ---
 
+## 2026-11-10 — Milestone 5: app-wide polish and theme audit (Claude)
+
+**Method**: screenshots of Home, Nest, Care, Calendar, Appearance and the Game corner in all
+8 skins (48 screens), plus 12 further pages in Classic. Every skin renders; nothing was broken
+outright. The problems found were shared ones, so they were fixed once at the source rather
+than page by page.
+
+| # | Problem found | Cause | Fix |
+| --- | --- | --- | --- |
+| 1 | "Nest tools" / "Care tools" titles and subtitles nearly invisible (white on a pale gradient) in every skin | `.panel-dark` always used white text, but the theme paints the panel with the couple's light gradient | `applyColors()` now sets `--panel-foreground` (dark or white, whichever reads better on the gradient — `readableOn()` in `lib/theme.ts`); `.panel-dark` uses it; new helpers `panel-soft-text`, `panel-chip` replace hard-coded `text-white/70`, `bg-white/10`. Cyberpunk gets dark text on its neon panel. |
+| 2 | Pink link / accent text and icons very faint on the pale page (about 1.6:1 contrast) | `text-primary` used the pastel fill colour as text colour | New `--primary-ink` (the same hue, deeper) used by `.text-primary` and `.chip`. Fills (`bg-primary`) keep the pure colour. Scrapbook keeps its own darker ink. |
+| 3 | Jelly: big tile buttons (e.g. the style picker) squeezed into ovals, text clipped | Jelly gave every filled button `border-radius: 999px` | Radius is now `1.9rem` (same as Jelly cards): normal buttons are still pills, tall tiles stay rounded boxes. |
+| 4 | Chat button 17 px off the right edge in the Pixel skin (2 px off elsewhere) | The page slide-in animation briefly overflows sideways; on phones that widens `window.innerWidth`, which the button read at that moment | The page container clips sideways overflow (`overflow-x-clip` in `_authenticated/route.tsx`), and `ChatHead` measures `documentElement.clientWidth`. Measured afterwards: identical position in Classic, Pixel and Jelly; width stays 390 during a tab change; sticky header and tab bar unaffected. |
+| 5 | No visible keyboard focus | none defined | Global `:focus-visible` outline (keyboard only; taps and clicks don't show it). |
+| 6 | Phone build's HTML shell loaded 2 of the 10 fonts the skins use | `spa/index.html` was never updated when skins were added | Font list copied from `routes/__root.tsx`. **Unverified** — see below. |
+
+**Files changed**: `src/styles.css`, `src/skins.css`, `src/lib/theme.ts`,
+`src/components/ChatHead.tsx`, `src/routes/_authenticated/{route,nest,wellbeing}.tsx`,
+`spa/index.html`.
+
+**Verified**: before/after screenshots in Classic, Cyberpunk, Jelly, Pixel, Glass, Scrapbook,
+Steampunk, Nature; chat-button position measured; sideways overflow measured during a page
+change; `tsc`, `bun test`, `vite build` pass; lint error counts of the touched old files are
+unchanged.
+
+**⚠ Known issue found (not caused by this work, not fixed)**
+
+`npm run build:spa` — the static build wrapped by Capacitor for the phone app — **fails**:
+`Missing "#tanstack-start-entry" specifier in "@tanstack/start-server-core"`. It fails the
+same way on the original commit `bea9ae3`. Cause: client-reachable files import TanStack Start
+server features (`admin-users.tsx` → `useServerFn`, `lib/admin.functions.ts` →
+`createServerFn` + auth middleware), which a plain client build cannot bundle. Fixing it needs
+a decision about what the admin server functions should do in an app with no server, so it
+was reported to the owner as a suggested follow-up task instead of being changed here.
+Consequence: fix 6 above could not be tested, and a new phone app cannot be built until this
+is resolved. The web app (Lovable hosting, `npm run build`) is unaffected.
+
+**Left alone on purpose**
+
+- The look of each skin (shapes, materials, fonts) — they are distinct and working.
+- Old formatting-only lint noise.
+
+---
+
 ## 2026-11-10 — Milestone 4: Game corner redesign (Claude)
 
 **What was done**

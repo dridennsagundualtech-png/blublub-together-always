@@ -268,6 +268,28 @@ export function gradientEnabledFor(map: ThemeMap, pathname: string): boolean {
   return map.gradientScreens.includes(screenIdForPath(pathname));
 }
 
+/** How bright a "#rrggbb" colour looks, 0 (black) to 1 (white). Unknown formats count as dark. */
+function luminance(hex: string): number {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return 0;
+  const n = parseInt(m[1]!, 16);
+  const channel = (v: number) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  return (
+    0.2126 * channel((n >> 16) & 255) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255)
+  );
+}
+
+/** Dark or white text, whichever reads better on a surface painted with these colours. */
+export function readableOn(...colours: string[]): string {
+  const average = colours.reduce((sum, c) => sum + luminance(c), 0) / Math.max(1, colours.length);
+  // Around 0.24 the app's dark ink and white are equally readable; above that, dark wins.
+  // The cut sits a little higher so mid-tone gradients keep the white they were designed with.
+  return average > 0.3 ? "#3F2A3A" : "#FFFFFF";
+}
+
 export function applyColors(map: ThemeMap, pathname?: string) {
   const root = document.documentElement;
   root.dataset["skin"] = map.skin ?? "classic";
@@ -297,6 +319,8 @@ export function applyColors(map: ThemeMap, pathname?: string) {
   root.style.setProperty("--grad-hero-to", map.gradTo);
   root.style.setProperty("--grad-panel-from", map.gradFrom);
   root.style.setProperty("--grad-panel-to", map.gradTo);
+  // The big "tools" panels are painted with this gradient; give them text that can be read on it.
+  root.style.setProperty("--panel-foreground", readableOn(map.gradFrom, map.gradTo));
 
   root.style.setProperty("--box-grad-from", map.boxGradFrom || map.soft);
   root.style.setProperty("--box-grad-to", map.boxGradTo || map.main);

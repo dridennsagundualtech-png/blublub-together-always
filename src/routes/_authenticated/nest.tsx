@@ -199,7 +199,7 @@ function NestPage() {
       <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Nest tools</p>
-          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
+          <p className="mx-auto mt-1 panel-soft-text max-w-[16rem] text-xs">
             Diary, lists, dreams and money — kept in one cozy place
           </p>
         </div>

@@ -206,7 +206,7 @@ function WellbeingPage() {
       <div className="panel-dark relative mt-6 px-4 pb-5 pt-6">
         <div className="relative text-center">
           <p className="font-display text-2xl font-bold">Care tools</p>
-          <p className="mx-auto mt-1 max-w-[16rem] text-xs text-white/70">
+          <p className="mx-auto mt-1 panel-soft-text max-w-[16rem] text-xs">
             Soft tools for feelings, cycles, distance and gentle goals
           </p>
         </div>
@@ -225,12 +225,12 @@ function WellbeingPage() {
                 <span
                   className={cn(
                     "grid size-11 place-items-center rounded-full",
-                    active ? "bg-primary text-primary-foreground" : "bg-white/10 text-white/80",
+                    active ? "bg-primary text-primary-foreground" : "panel-chip",
                   )}
                 >
                   <Icon className="size-5" />
                 </span>
-                <span className="text-[10px] font-semibold text-white/80">{f.label}</span>
+                <span className="text-[10px] font-semibold opacity-80">{f.label}</span>
               </button>
             );
           })}

@@ -207,7 +207,9 @@
     [class*="bg-accent"],
     [class*="bg-destructive"]
   ) {
-  border-radius: 999px;
+  /* Same corner as the Jelly cards: ordinary buttons still come out as pills, but tall
+     tile-like buttons stay rounded boxes (a full pill squeezed and clipped their text). */
+  border-radius: 1.9rem;
   border-color: transparent;
   box-shadow:
     inset 0 4px 0 color-mix(in oklab, white 65%, transparent),
@@ -517,6 +519,8 @@
   --grad-hero-to: var(--neon-purple) !important;
   --grad-panel-from: var(--neon-blue) !important;
   --grad-panel-to: var(--neon-purple) !important;
+  /* Dark text on the bright neon panel (white was unreadable on it). */
+  --panel-foreground: #0b1022 !important;
   --box-grad-from: var(--neon-blue) !important;
   --box-grad-to: var(--neon-purple) !important;
   --background: #070b1d;

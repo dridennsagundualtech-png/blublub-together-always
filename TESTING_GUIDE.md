@@ -37,6 +37,9 @@ The solo arcade games work signed out.
 | Build | `npx vite build` | ends with "You can preview this build…" |
 | Lint (changed files only) | `npx eslint <files you touched>` | no errors |
 
+`npm run build:spa` (the phone build) is **known to fail** at the moment — see
+DEVELOPMENT_LOG milestone 5 — so it is not in the table yet. Add it once fixed.
+
 `npx eslint .` on the whole repo reports ~2,700 old formatting problems — that is the known
 baseline (see DEVELOPMENT_LOG). Only make sure *your* files are clean.
 
@@ -119,6 +122,9 @@ Run these after touching shared styles, games, or navigation.
 - [ ] Each of the 8 skins: Home, Nest, Game corner, one two-player game, one arcade game —
       text readable, nothing clipped, buttons look like buttons.
 - [ ] Changing colours in Appearance still recolours everything, including the games.
+- [ ] "Nest tools" / "Care tools" panel text is readable with a light gradient and with a dark
+      one (Appearance → pick the "Midnight soft" preset to test the dark case).
+- [ ] The floating chat button sits fully on screen, same place in every skin.
 - [ ] With "reduce motion" on, nothing essential is hidden and nothing loops distractingly.
 
 ## 6. Things only a real device / real account can confirm

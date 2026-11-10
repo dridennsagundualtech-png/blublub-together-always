@@ -55,7 +55,9 @@ function Shell() {
 
   return (
     <div
-      className="page-wash min-h-screen bg-background pb-28"
+      // overflow-x-clip: a page sliding in sits a little past the screen edge for a moment; without
+      // the clip that widens the phone's viewport, which pushed floating buttons off-screen.
+      className="page-wash min-h-screen overflow-x-clip bg-background pb-28"
       style={swipe.style}
       onTouchStart={swipe.onTouchStart}
       onTouchEnd={swipe.onTouchEnd}

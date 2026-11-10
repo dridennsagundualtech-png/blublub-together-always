@@ -27,10 +27,13 @@ function loadPos(): Pos {
 
 /** Where the head may go: inside the app column, under the header, above the tab bar. */
 function bounds() {
-  const col = Math.max(0, (window.innerWidth - 512) / 2);
+  // The document's width, not window.innerWidth: on phones innerWidth grows for a moment
+  // whenever something overflows sideways (a page sliding in), which parked the button off-screen.
+  const width = document.documentElement.clientWidth || window.innerWidth;
+  const col = Math.max(0, (width - 512) / 2);
   return {
     left: col + EDGE,
-    right: window.innerWidth - col - EDGE - SIZE,
+    right: width - col - EDGE - SIZE,
     top: 76,
     bottom: window.innerHeight - 92 - SIZE,
   };
@@ -195,7 +198,11 @@ export function ChatHead() {
               // Let go: snap to the nearest side, remember the spot.
               justDragged.current = true;
               const next: Pos = {
-                side: drag.x + SIZE / 2 < window.innerWidth / 2 ? "left" : "right",
+                side:
+                  drag.x + SIZE / 2 <
+                  (document.documentElement.clientWidth || window.innerWidth) / 2
+                    ? "left"
+                    : "right",
                 y: drag.y / window.innerHeight,
               };
               setPos(next);

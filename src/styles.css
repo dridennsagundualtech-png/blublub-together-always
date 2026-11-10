@@ -166,6 +166,11 @@
   --grad-panel-to: #1A1528;
   --grad-panel-angle: 180deg;
 
+  /* Accent TEXT. The couple's main colour is usually a pastel: lovely as a fill, far too
+     faint as small text on a light page (about 1.6:1 contrast). Text and line icons use a
+     deeper ink of the same hue instead; fills (bg-primary) keep the pure colour. */
+  --primary-ink: color-mix(in oklab, var(--primary) 48%, var(--foreground));
+
   /* When 1, soft boxes/cards around the app use gradients */
   --boxes-use-gradient: 0;
   --box-grad-from: var(--card);
@@ -246,6 +251,17 @@
   button {
     touch-action: manipulation;
   }
+
+  /* Keyboard users can see where they are (taps and clicks don't trigger this). */
+  :where(a, button, [role="button"], summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--primary-ink);
+    outline-offset: 2px;
+  }
+}
+
+/* Outside any layer on purpose, so it wins over Tailwind's own .text-primary utility. */
+.text-primary {
+  color: var(--primary-ink);
 }
 
 /* ===== BOX / CARD UTILITIES (all driven by variables) ===== */
@@ -300,10 +316,20 @@ html.boxes-gradient .grad-box {
 @utility panel-dark {
   border-radius: var(--panel-radius);
   background-image: linear-gradient(var(--grad-panel-angle), var(--grad-panel-from), var(--grad-panel-to));
-  color: white;
+  /* The panel takes the couple's gradient, which is usually light: lib/theme.ts picks dark or
+     white text to suit it (white is the fallback for the built-in dark panel). */
+  color: var(--panel-foreground, white);
   overflow: hidden;
   position: relative;
   box-shadow: var(--shadow-float);
+}
+
+/* Quieter text and a faint chip on the panel, in whichever text colour the panel uses. */
+@utility panel-soft-text {
+  opacity: 0.78;
+}
+@utility panel-chip {
+  background-color: color-mix(in oklab, currentColor 12%, transparent);
 }
 
 @utility list-row {
@@ -539,7 +565,7 @@ a[href]:active.bg-primary {
   font-size: 0.75rem;
   font-weight: 700;
   background: color-mix(in oklab, var(--primary) 12%, var(--card));
-  color: var(--color-primary);
+  color: var(--primary-ink);
   border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent);
 }
 

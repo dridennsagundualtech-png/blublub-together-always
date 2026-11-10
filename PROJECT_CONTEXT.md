@@ -72,6 +72,16 @@ Two independent layers:
 So: always build screens from the shared classes and CSS variables, never hard-coded colours,
 and every skin keeps working.
 
+Two rules that keep text readable (added after the theme audit):
+
+- **Accent text uses `--primary-ink`, not `--primary`.** The couple's main colour is a pastel:
+  right for fills (`bg-primary`), too faint for text. The `text-primary` class already maps to
+  the ink; in custom CSS write `color: var(--primary-ink)`.
+- **Never hard-code white text on a themed surface.** On the big gradient panels
+  (`.panel-dark`) text inherits `--panel-foreground`, which `applyColors()` sets to dark or
+  white depending on the couple's gradient. Use `panel-soft-text` / `panel-chip` for quieter
+  text and chips there.
+
 ### Mascots
 
 `<Doodle critter="cat|seal|penguin" pose="…">` draws a soft PNG in most skins and a 24×24
@@ -123,6 +133,10 @@ The app talks to the arcade through exactly two things: the registry (for menus)
 7. Sounds go through `playChirp()` (`src/hooks/use-sound.ts`) so the user's sound switch works.
 
 ## Known quirks
+
+- **The phone build is currently broken**: `npm run build:spa` fails because client pages
+  import TanStack Start server functions (admin tools). Pre-existing; see DEVELOPMENT_LOG
+  milestone 5. The web build is fine.
 
 - The README still mentions an older Supabase project id; the code uses the project in
   `src/integrations/supabase/client.ts`.
