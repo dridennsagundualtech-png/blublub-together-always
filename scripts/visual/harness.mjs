@@ -11,7 +11,8 @@ export const COUPLE = "33333333-3333-4333-8333-333333333333";
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const exp = Math.floor(Date.now() / 1000) + 3600 * 24;
-const jwt = (sub) => `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub, exp, role: "authenticated", aud: "authenticated" })}.sig`;
+const jwt = (sub) =>
+  `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub, exp, role: "authenticated", aud: "authenticated" })}.sig`;
 const userObj = (id, email) => ({
   id,
   aud: "authenticated",
@@ -28,8 +29,22 @@ export function makeDb(theme) {
     games: [],
     theme: theme ?? null,
     profiles: [
-      { id: ME, couple_id: COUPLE, display_name: "Den", avatar_url: null, adult_confirmed: false, is_premium: true },
-      { id: PARTNER, couple_id: COUPLE, display_name: "Angel", avatar_url: null, adult_confirmed: false, is_premium: true },
+      {
+        id: ME,
+        couple_id: COUPLE,
+        display_name: "Den",
+        avatar_url: null,
+        adult_confirmed: false,
+        is_premium: true,
+      },
+      {
+        id: PARTNER,
+        couple_id: COUPLE,
+        display_name: "Angel",
+        avatar_url: null,
+        adult_confirmed: false,
+        is_premium: true,
+      },
     ],
   };
 }
@@ -53,22 +68,35 @@ export async function mockSupabase(context, db, who) {
       route.fulfill({
         status,
         contentType: "application/json",
-        headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" },
+        headers: {
+          "access-control-allow-origin": "*",
+          "access-control-allow-headers": "*",
+          "access-control-allow-methods": "*",
+        },
         body: JSON.stringify(body),
       });
     if (method === "OPTIONS") return json({});
-    if (p.startsWith("/auth/v1/user")) return json(userObj(who, who === ME ? "den@example.com" : "angel@example.com"));
+    if (p.startsWith("/auth/v1/user"))
+      return json(userObj(who, who === ME ? "den@example.com" : "angel@example.com"));
     if (p.startsWith("/auth/v1/")) return json({});
     if (p.startsWith("/rest/v1/rpc/")) return json(null);
     if (p.startsWith("/rest/v1/")) {
       const table = p.slice("/rest/v1/".length);
       const f = parseFilters(url);
       if (table === "profiles") {
-        const rows = db.profiles.filter((r) => Object.entries(f).every(([k, v]) => String(r[k]) === v));
+        const rows = db.profiles.filter((r) =>
+          Object.entries(f).every(([k, v]) => String(r[k]) === v),
+        );
         return json(wantsObject ? (rows[0] ?? null) : rows);
       }
       if (table === "couples") {
-        const c = { id: COUPLE, invite_code: "ABC123", anniversary: "2020-03-04", theme: db.theme, created_at: "2026-01-01T00:00:00Z" };
+        const c = {
+          id: COUPLE,
+          invite_code: "ABC123",
+          anniversary: "2020-03-04",
+          theme: db.theme,
+          created_at: "2026-01-01T00:00:00Z",
+        };
         return json(wantsObject ? c : [c]);
       }
       if (table === "games") {
@@ -109,7 +137,10 @@ export async function mockSupabase(context, db, who) {
   });
 }
 
-export async function openPhone(browser, { signedIn = false, who = ME, db = makeDb(), skin = null, theme = null, scale = 1 } = {}) {
+export async function openPhone(
+  browser,
+  { signedIn = false, who = ME, db = makeDb(), skin = null, theme = null, scale = 1 } = {},
+) {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: scale,
@@ -130,7 +161,8 @@ export async function openPhone(browser, { signedIn = false, who = ME, db = make
   await context.addInitScript(
     ([signed, sess, skinId, themeObj]) => {
       try {
-        if (signed) localStorage.setItem("sb-gwanqnpeuzruzuwksfsp-auth-token", JSON.stringify(sess));
+        if (signed)
+          localStorage.setItem("sb-gwanqnpeuzruzuwksfsp-auth-token", JSON.stringify(sess));
         if (themeObj) localStorage.setItem("blublub-theme-v2", JSON.stringify(themeObj));
         else if (skinId) {
           localStorage.setItem(

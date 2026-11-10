@@ -43,6 +43,7 @@ src/
   lib/                    data hooks and helpers (one file per feature)
   integrations/supabase/  generated Supabase client + types (do not edit by hand)
   styles.css              design tokens (CSS variables) + shared utility classes + game motion
+  pixel.css               the pixel-art look of every game (`.pixel-zone`, `px-*` pieces)
   skins.css               the 8 app styles ("skins"): classic, pixel, jelly, glass, scrapbook,
                           cyberpunk, steampunk, nature
 supabase/migrations/      database history (applied by Lovable/Supabase, not by us)
@@ -90,7 +91,7 @@ pixel sprite in the Pixel skin (both are rendered; CSS shows one). Sprite data l
 **House rule for all games: pixel-art graphics in every skin**, to match Our Room (whose
 furniture and backgrounds are a pixel-art pack).
 
-### The arcade module (`src/arcade/`) — *being built, see TASK_TRACKER.md*
+### The arcade module (`src/arcade/`)
 
 Deliberately separate from the app's business logic:
 

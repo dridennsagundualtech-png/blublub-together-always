@@ -38,6 +38,7 @@ import { Route as AuthenticatedWellbeingRouteImport } from './routes/_authentica
 import { Route as AuthenticatedGamesIndexRouteImport } from './routes/_authenticated/games.index'
 import { Route as AuthenticatedGamesKindRouteImport } from './routes/_authenticated/games.$kind'
 import { Route as AuthenticatedGamesArcadeRouteImport } from './routes/_authenticated/games.arcade'
+import { Route as AuthenticatedGamesPlayGameRouteImport } from './routes/_authenticated/games.play.$game'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -185,6 +186,12 @@ const AuthenticatedGamesArcadeRoute =
     path: '/games/arcade',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGamesPlayGameRoute =
+  AuthenticatedGamesPlayGameRouteImport.update({
+    id: '/games/play/$game',
+    path: '/games/play/$game',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games/arcade': typeof AuthenticatedGamesArcadeRoute
   '/games/': typeof AuthenticatedGamesIndexRoute
+  '/games/play/$game': typeof AuthenticatedGamesPlayGameRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -245,6 +253,7 @@ export interface FileRoutesByTo {
   '/games/$kind': typeof AuthenticatedGamesKindRoute
   '/games/arcade': typeof AuthenticatedGamesArcadeRoute
   '/games': typeof AuthenticatedGamesIndexRoute
+  '/games/play/$game': typeof AuthenticatedGamesPlayGameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -277,6 +286,7 @@ export interface FileRoutesById {
   '/_authenticated/games/$kind': typeof AuthenticatedGamesKindRoute
   '/_authenticated/games/arcade': typeof AuthenticatedGamesArcadeRoute
   '/_authenticated/games/': typeof AuthenticatedGamesIndexRoute
+  '/_authenticated/games/play/$game': typeof AuthenticatedGamesPlayGameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/games/$kind'
     | '/games/arcade'
     | '/games/'
+    | '/games/play/$game'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/games/$kind'
     | '/games/arcade'
     | '/games'
+    | '/games/play/$game'
   id:
     | '__root__'
     | '/_authenticated'
@@ -370,6 +382,7 @@ export interface FileRouteTypes {
     | '/_authenticated/games/$kind'
     | '/_authenticated/games/arcade'
     | '/_authenticated/games/'
+    | '/_authenticated/games/play/$game'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -583,6 +596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGamesArcadeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/games/play/$game': {
+      id: '/_authenticated/games/play/$game'
+      path: '/games/play/$game'
+      fullPath: '/games/play/$game'
+      preLoaderRoute: typeof AuthenticatedGamesPlayGameRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -613,6 +633,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGamesKindRoute: typeof AuthenticatedGamesKindRoute
   AuthenticatedGamesArcadeRoute: typeof AuthenticatedGamesArcadeRoute
   AuthenticatedGamesIndexRoute: typeof AuthenticatedGamesIndexRoute
+  AuthenticatedGamesPlayGameRoute: typeof AuthenticatedGamesPlayGameRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -642,6 +663,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGamesKindRoute: AuthenticatedGamesKindRoute,
   AuthenticatedGamesArcadeRoute: AuthenticatedGamesArcadeRoute,
   AuthenticatedGamesIndexRoute: AuthenticatedGamesIndexRoute,
+  AuthenticatedGamesPlayGameRoute: AuthenticatedGamesPlayGameRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

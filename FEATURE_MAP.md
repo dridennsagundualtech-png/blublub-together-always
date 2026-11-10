@@ -70,7 +70,7 @@ Flow (shared by all five): **lock in a task → play → result card shows who o
 **Do not change** the shape of the saved `state` JSON of these games or the `kind` strings:
 games in progress and the history rely on them. Visual changes only.
 
-### Solo arcade games — `/games/play/$game` *(planned — milestones 1–2)*
+### Solo arcade games — `/games/play/$game`
 
 | Piece | File |
 | --- | --- |
@@ -80,7 +80,10 @@ games in progress and the history rely on them. Visual changes only.
 | Best scores (device only) | `arcade/scores.ts` → `localStorage["blublub:arcade:best:<game>"]` |
 | Engine | `arcade/engine/*` |
 | Hop Up (platformer: climb higher = more points) | `arcade/games/hop/*` |
-| Wing It (flap through gaps) | `arcade/games/wing/*` |
+| Wing It (flap through gaps) | `arcade/games/wing/*` *(planned — milestone 2)* |
+| Shared arcade art (hearts, clouds, sky, mascot sprites) | `arcade/art.ts` |
+| Sprite component for menus | `arcade/PixelSprite.tsx` |
+| Pixel look shared by all games | `src/pixel.css` (`.pixel-zone`, `px-*`) |
 
 No Supabase. No login needed to play.
 

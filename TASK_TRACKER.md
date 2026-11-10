@@ -17,8 +17,8 @@
 | # | Milestone | Status |
 | --- | --- | --- |
 | 0 | Assessment, project memory files, baseline checkpoint | ✅ done |
-| 1 | Arcade engine + **Hop Up** (platformer) + route + entry in Game corner | ⏳ next |
-| 2 | **Wing It** (flap game) on the same engine | ⬜ pending |
+| 1 | Arcade engine + **Hop Up** (platformer) + route + entry in Game corner | ✅ done |
+| 2 | **Wing It** (flap game) on the same engine | ⏳ next |
 | 3 | Pixel makeover of the 5 two-player games (shared pixel kit, motion, result screen) | ⬜ pending |
 | 4 | Game corner hub redesign (pixel game cards, solo + two-player sections) | ⬜ pending |
 | 5 | App-wide visual polish, theme (skin) audit and fixes | ⬜ pending |
@@ -26,10 +26,12 @@
 
 ## Current task
 
-Milestone 1 — see DEVELOPMENT_LOG.md for the plan and decisions.
+Milestone 2 — Wing It. Reuse `src/arcade/engine`; add `games/wing/`, register it in
+`arcade/registry.ts`, add `tests/arcade/wing.test.ts`.
 
 ## Pending ideas (not started, need owner's OK where marked)
 
+- Hop Up ideas: pick your mascot, moving hazards in the night zones, tilt-to-steer.
 - Share arcade best scores with the partner (needs a database column or table → **ask owner**).
 - Arcade games earning Love Points for Our Room (writes to `rooms` → **ask owner**).
 - Clean the lint baseline with one formatting-only commit (large diff → **ask owner**).
@@ -45,3 +47,4 @@ Milestone 1 — see DEVELOPMENT_LOG.md for the plan and decisions.
 ## Completed
 
 - 2026-11-10 — Milestone 0 (Claude).
+- 2026-11-10 — Milestone 1 (Claude): arcade engine, Hop Up, pixel zone styles, first tests.

@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronRight, Dices, Grid3x3, Hand, Layers, Utensils, Sparkles, Heart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui-kit";
 import { useBadges, useMarkSeen } from "@/lib/badges";
 import { GAME_META, useGameHistory, useSeats, type GameKind } from "@/lib/games";
 import { useSpicyAccess } from "@/lib/admin";
+import { PixelSprite } from "@/arcade/PixelSprite";
+import { ARCADE_GAMES } from "@/arcade/registry";
+import { loadBest } from "@/arcade/scores";
 
 export const Route = createFileRoute("/_authenticated/games/arcade")({
   head: () => ({
@@ -42,6 +45,11 @@ function ArcadePage() {
   const { nameOf, me } = useSeats(null);
   const [showHistory, setShowHistory] = useState(false);
   const spicy = useSpicyAccess();
+  // Arcade bests live on this device (see arcade/scores.ts); read them once the page is shown.
+  const [bests, setBests] = useState<Record<string, number>>({});
+  useEffect(() => {
+    setBests(Object.fromEntries(ARCADE_GAMES.map((g) => [g.id, loadBest(g.id)])));
+  }, []);
 
   const tally = history.reduce(
     (acc, g) => {
@@ -91,6 +99,24 @@ function ArcadePage() {
           Across all five games · {history.length} played
         </p>
       </StatCard>
+
+      <SectionTitle>Solo arcade</SectionTitle>
+      <ul className="pixel-zone grid grid-cols-2 gap-2">
+        {ARCADE_GAMES.map((game) => (
+          <li key={game.id}>
+            <Link
+              to="/games/play/$game"
+              params={{ game: game.id }}
+              className="px-frame px-tint-sky flex h-full flex-col items-center gap-1 p-3 text-center"
+            >
+              <PixelSprite frames={game.icon} size={56} />
+              <span className="text-base font-bold leading-tight">{game.title}</span>
+              <span className="text-xs leading-snug opacity-80">{game.blurb}</span>
+              <span className="px-chip mt-auto">BEST {bests[game.id] ?? 0}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
 
       <SectionTitle>Loser-task games</SectionTitle>
       <ul className="space-y-2">

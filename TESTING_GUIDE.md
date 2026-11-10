@@ -33,7 +33,7 @@ The solo arcade games work signed out.
 | Check | Command | Expected |
 | --- | --- | --- |
 | Types | `npx tsc --noEmit` | no output, exit 0 |
-| Game logic tests | `bun test` | all pass (tests arrive with milestone 1) |
+| Game logic tests | `bun test` | all pass |
 | Build | `npx vite build` | ends with "You can preview this build…" |
 | Lint (changed files only) | `npx eslint <files you touched>` | no errors |
 
@@ -60,6 +60,15 @@ FULL=1 node scripts/visual/shot.mjs /tmp/shots/full cyberpunk 1 /nest     # whol
 ```
 
 Skins: `classic pixel jelly glass scrapbook cyberpunk steampunk nature`.
+
+Arcade games:
+
+```bash
+# plays a run (start, steer, pause, resume, game over) and screenshots each step
+node scripts/visual/arcade.mjs /tmp/shots/hop hop            # add a skin name and 1 for signed in
+# watches the self-playing title demo; screenshots the game screen at the given seconds
+node scripts/visual/demo.mjs /tmp/shots/hopdemo hop 4,26,48
+```
 
 Two phones playing each other (shared pretend database): pass the same `makeDb()` object to
 two `openPhone()` calls, one with `who: ME` and one with `who: PARTNER` (a ready-made script

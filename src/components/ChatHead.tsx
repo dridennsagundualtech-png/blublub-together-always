@@ -143,7 +143,8 @@ export function ChatHead() {
     <>
       {!open && !onChatPage ? (
         <div
-          className="fixed z-[45]"
+          // "chat-head" lets the arcade hide the bubble while a run is being played (pixel.css).
+          className="chat-head fixed z-[45]"
           style={{
             left: x,
             top: y,
