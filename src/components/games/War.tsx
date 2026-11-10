@@ -1,9 +1,11 @@
 import { Doodle, type Critter, type Pose } from "@/components/Doodles";
-import { Card, PrimaryButton } from "@/components/ui-kit";
+import { PixelEmoji } from "@/components/pixel-art";
 import { playChirp } from "@/hooks/use-sound";
 import { finishPatch, shuffle, useUpdateGame } from "@/lib/games";
 import type { GameViewProps } from "@/components/games/GameShell";
 import { TaskBar } from "@/components/games/TaskBar";
+import { Burst, Pips, PixelBoard, PixelStage, Versus } from "@/components/games/pixel-kit";
+import { cn } from "@/lib/utils";
 
 const ROUNDS = 13;
 const BACKS: { critter: Critter; pose: Pose }[] = [
@@ -36,7 +38,7 @@ export function newWar(): WarState {
   };
 }
 
-export function War({ game, seat, players, nameOf }: GameViewProps) {
+export function War({ game, me, seat, players, nameOf }: GameViewProps) {
   const update = useUpdateGame();
   const s = game.state as WarState;
   const other = seat === 0 ? 1 : 0;
@@ -75,65 +77,87 @@ export function War({ game, seat, players, nameOf }: GameViewProps) {
     update.mutate({ id: game.id, patch: patch as never });
   }
 
+  const round = Math.min(s.round, ROUNDS);
+  // Worded for whoever is looking (the note saved with the game was written on one phone only).
+  const [a, b] = s.flip ?? [0, 0];
+  const roundText = !s.flip
+    ? null
+    : a === b
+      ? "Tie — nobody scores"
+      : players[a! > b! ? 0 : 1] === me
+        ? "You take the round"
+        : `${nameOf(players[a! > b! ? 0 : 1])} takes the round`;
+
   return (
-    <>
-      <TaskBar
-        game={game}
-        status={`Round ${Math.min(s.round, ROUNDS)} of ${ROUNDS}`}
-        onResignTo={players[other]}
+    <PixelStage>
+      <TaskBar game={game} status={`Round ${round} of ${ROUNDS}`} onResignTo={players[other]} />
+      <Versus
+        players={players}
+        me={me}
+        nameOf={nameOf}
+        scores={[s.scores[0] ?? 0, s.scores[1] ?? 0]}
       />
 
-      <Card className="mt-4 text-center">
-        <div className="flex items-center justify-center gap-6">
+      <PixelBoard className="text-center">
+        <div className="flex justify-center" title={`Round ${round} of ${ROUNDS}`}>
+          <Pips total={ROUNDS} filled={s.flip ? round : round - 1} />
+        </div>
+
+        <div className="mt-4 flex items-end justify-center gap-7">
           {[0, 1].map((p) => {
             const mine = s.flip?.[p] ?? 0;
             const theirs = s.flip?.[p === 0 ? 1 : 0] ?? 0;
             const wins = !!s.flip && mine > theirs;
+            const rank = s.flip ? rankLabel(mine) : "";
             return (
               <div key={p} className="grid place-items-center gap-2">
-                <div className={`flip-scene h-28 w-20 rounded-2xl ${wins ? "lift-win" : ""}`}>
-                  <div className={`flip-card rounded-2xl ${s.flip ? "is-flipped" : ""}`}>
-                    <div className="flip-face rounded-2xl bg-secondary shadow-soft">
-                      <Doodle critter={back.critter} pose={back.pose} size={48} />
+                <div className={cn("flip-scene relative h-32 w-24", wins && "px-lift")}>
+                  <div className={cn("flip-card", s.flip && "is-flipped")}>
+                    <div className="flip-face px-card-back">
+                      <Doodle critter={back.critter} pose={back.pose} size={52} />
                     </div>
                     <div
-                      className={`flip-face flip-face-front rounded-2xl bg-card shadow-soft ${
-                        wins ? "ring-2 ring-primary" : ""
-                      }`}
+                      className={cn("flip-face flip-face-front px-card", wins && "px-card--win")}
                     >
-                      <span className="text-3xl font-extrabold text-primary">
-                        {s.flip ? rankLabel(mine) : ""}
+                      <span className="absolute left-1.5 top-1 text-base font-bold leading-none">
+                        {rank}
                       </span>
+                      <PixelEmoji name="heart" size={16} className="absolute left-1 top-6" />
+                      <span className="text-5xl font-bold leading-none">{rank}</span>
+                      <PixelEmoji name="heart" size={16} className="absolute bottom-1.5 right-1" />
                     </div>
                   </div>
+                  {wins ? <Burst key={s.round} spread={54} /> : null}
                 </div>
-                <p className="text-xs font-bold">{nameOf(players[p])}</p>
-                <p className="text-xs text-muted-foreground">{s.scores[p] ?? 0} won</p>
+                <p className="text-sm font-bold leading-none">
+                  {players[p] === me ? "You" : nameOf(players[p])}
+                </p>
               </div>
             );
           })}
         </div>
 
-        {s.note ? (
-          <p
-            key={s.round}
-            className="rise-in mt-4 text-sm font-bold"
-            style={{ animationDelay: "0.4s" }}
-          >
-            {s.note}
-          </p>
-        ) : null}
+        <p
+          key={s.round}
+          className={cn("mt-3 min-h-5 text-base font-bold", roundText && "px-pop-in")}
+          style={{ animationDelay: "0.4s" }}
+        >
+          {roundText ?? "High card takes the round"}
+        </p>
 
-        <div className="mt-4">
-          {s.flip ? (
-            <PrimaryButton onClick={next}>
-              {s.round >= ROUNDS ? "Finish game" : "Next round"}
-            </PrimaryButton>
-          ) : (
-            <PrimaryButton onClick={flip}>Flip cards</PrimaryButton>
-          )}
-        </div>
-      </Card>
-    </>
+        <button
+          type="button"
+          className="px-btn px-btn--block mt-2"
+          disabled={update.isPending}
+          onClick={() => {
+            playChirp("tap");
+            if (s.flip) next();
+            else flip();
+          }}
+        >
+          {s.flip ? (s.round >= ROUNDS ? "Finish game" : "Next round") : "Flip cards"}
+        </button>
+      </PixelBoard>
+    </PixelStage>
   );
 }

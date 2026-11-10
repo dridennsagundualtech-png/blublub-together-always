@@ -70,9 +70,17 @@ node scripts/visual/arcade.mjs /tmp/shots/hop hop            # add a skin name a
 node scripts/visual/demo.mjs /tmp/shots/hopdemo hop 4,26,48
 ```
 
-Two phones playing each other (shared pretend database): pass the same `makeDb()` object to
-two `openPhone()` calls, one with `who: ME` and one with `who: PARTNER` (a ready-made script
-is planned for milestone 3).
+Two phones ("Den" and "Angel") playing a whole game against each other on a shared pretend
+database — prints the final status and takes screenshots at each stage:
+
+```bash
+node scripts/visual/play-two-player.mjs /tmp/shots/tp tictactoe      # or connect4 memory rps war
+node scripts/visual/play-two-player.mjs /tmp/shots/tp rps cyberpunk  # in another skin
+SCENARIO=draw   node scripts/visual/play-two-player.mjs /tmp/shots/tp tictactoe
+SCENARIO=resign node scripts/visual/play-two-player.mjs /tmp/shots/tp connect4
+```
+
+A line starting with `FAIL:` means a rule was broken (e.g. a move out of turn was accepted).
 
 What the mock cannot show: Our Room furniture/backgrounds and the feelings pack (hosted by
 Lovable), realtime pushes (the mock has no websocket — a page sees the partner's move after
@@ -94,7 +102,8 @@ Run these after touching shared styles, games, or navigation.
 - [ ] Only the player whose turn it is can move (RPS and War: both act).
 - [ ] A win ends the game on both phones and the result card shows the task and the winner.
 - [ ] A full board with no winner ends as a draw.
-- [ ] The flag button gives up and awards the win to the partner.
+- [ ] The flag button asks first ("Give up?"); a second tap gives up and awards the win to the
+      partner. Waiting 3.5 s cancels.
 - [ ] Game corner scoreboard and history include the finished game.
 - [ ] A game that was already in progress before an update still opens (saved data unchanged).
 

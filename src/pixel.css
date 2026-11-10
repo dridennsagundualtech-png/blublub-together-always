@@ -107,6 +107,14 @@
   padding: 0.45rem 0.7rem;
   font-size: 0.85rem;
 }
+.px-btn--danger {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+/* Full width, leaving room for the outline. */
+.px-btn--block {
+  width: calc(100% - var(--px) * 2);
+}
 .px-btn:disabled {
   opacity: 0.55;
   cursor: default;
@@ -302,11 +310,501 @@
   color: var(--muted-foreground);
 }
 
+/* ===================== Two-player boards ===================== */
+
+/* Text field in the pixel look */
+.px-input {
+  width: 100%;
+  margin: var(--px);
+  width: calc(100% - var(--px) * 2);
+  padding: 0.7rem 0.8rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 1rem;
+  outline: none;
+  box-shadow:
+    var(--px-outline),
+    inset 0 var(--px) 0 0 var(--px-shade);
+}
+.px-input:focus-visible {
+  box-shadow:
+    var(--px-outline),
+    inset 0 var(--px) 0 0 var(--px-shade),
+    0 0 0 calc(var(--px) * 2) var(--ring);
+}
+.px-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* Who is playing, whose turn it is, and the score */
+.px-versus {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+.px-vs {
+  align-self: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+.px-plate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: var(--px);
+  padding: 0.4rem 0.5rem;
+  background: var(--px-paper);
+  box-shadow: var(--px-outline);
+  opacity: 0.72;
+}
+.px-plate--right {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.px-plate--active {
+  opacity: 1;
+  background: color-mix(in oklab, var(--primary) 34%, var(--px-paper));
+  box-shadow:
+    var(--px-outline),
+    0 calc(var(--px) * 2) 0 0 var(--px-shade);
+}
+.px-plate--quiet {
+  opacity: 1;
+}
+/* A little arrow that hops above the plate of whoever has to move */
+.px-plate--active::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--px) * -4);
+  left: 50%;
+  width: calc(var(--px) * 3);
+  height: calc(var(--px) * 2);
+  margin-left: calc(var(--px) * -1.5);
+  background: var(--px-ink);
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 66.6% 50%, 66.6% 100%, 33.3% 100%, 33.3% 50%, 0 50%);
+  animation: px-bob 0.6s steps(2, jump-none) infinite;
+}
+.px-pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--px);
+}
+.px-plate--right .px-pips {
+  justify-content: flex-end;
+}
+.px-pip {
+  width: calc(var(--px) * 3);
+  height: calc(var(--px) * 3);
+  background: color-mix(in oklab, var(--px-ink) 16%, var(--px-paper));
+  box-shadow: inset 0 0 0 var(--px) color-mix(in oklab, var(--px-ink) 40%, transparent);
+}
+.px-pip--on {
+  background: var(--primary);
+  box-shadow: inset 0 0 0 var(--px) var(--px-ink);
+}
+
+/* The play field */
+.px-board {
+  padding: calc(var(--px) * 3);
+}
+.px-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  /* A paper tile sunk into the board. */
+  background: color-mix(in oklab, var(--px-paper) 90%, var(--accent));
+  box-shadow:
+    inset var(--px) var(--px) 0 0 color-mix(in oklab, var(--px-ink) 26%, transparent),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 color-mix(in oklab, white 70%, transparent);
+}
+/* An empty square you may play: a small dot that blinks */
+.px-cell--open::after {
+  content: "";
+  width: calc(var(--px) * 2);
+  height: calc(var(--px) * 2);
+  background: color-mix(in oklab, var(--px-ink) 30%, transparent);
+  animation: px-blink 1.2s steps(1, end) infinite;
+}
+.px-cell--win {
+  background: color-mix(in oklab, var(--honey) 75%, var(--px-paper));
+  animation: px-flash 0.5s steps(1, end) 6;
+}
+
+/* A "pixel circle": a square with stepped corners */
+.px-round {
+  clip-path: polygon(
+    25% 0,
+    75% 0,
+    75% 12.5%,
+    87.5% 12.5%,
+    87.5% 25%,
+    100% 25%,
+    100% 75%,
+    87.5% 75%,
+    87.5% 87.5%,
+    75% 87.5%,
+    75% 100%,
+    25% 100%,
+    25% 87.5%,
+    12.5% 87.5%,
+    12.5% 75%,
+    0 75%,
+    0 25%,
+    12.5% 25%,
+    12.5% 12.5%,
+    25% 12.5%
+  );
+}
+.px-hole {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  /* A deep shade of the board's own colour, so the holes look cut into it. */
+  background: color-mix(in oklab, var(--sky) 42%, var(--px-ink));
+}
+/* One position on a board of holes: the hole behind, the coin (if any) in front. */
+.px-slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.px-slot > .px-hole {
+  position: absolute;
+  inset: 0;
+}
+.px-coin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  /* Light from the top left: a hard-edged highlight and shade. */
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, white 55%, transparent) 0 22%,
+      transparent 22% 78%,
+      color-mix(in oklab, black 16%, transparent) 78%
+    ),
+    var(--coin, var(--primary));
+}
+.px-coin--0 {
+  --coin: var(--sky);
+}
+.px-coin--1 {
+  --coin: var(--primary);
+}
+.px-drop {
+  display: grid;
+  place-items: center;
+  height: 1.9rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--px-ink);
+  opacity: 0.3;
+}
+.px-drop--live {
+  opacity: 1;
+  cursor: pointer;
+  animation: px-bob 0.7s steps(2, jump-none) infinite;
+}
+.px-drop::before {
+  content: "";
+  width: calc(var(--px) * 5);
+  height: calc(var(--px) * 3);
+  background: currentColor;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 33.3%,
+    80% 33.3%,
+    80% 66.6%,
+    60% 66.6%,
+    60% 100%,
+    40% 100%,
+    40% 66.6%,
+    20% 66.6%,
+    20% 33.3%,
+    0 33.3%
+  );
+}
+
+/* Playing cards */
+.px-card {
+  position: relative;
+  box-shadow: var(--px-outline);
+  background: var(--px-paper);
+}
+.px-card-back {
+  box-shadow: var(--px-outline);
+  background-color: color-mix(in oklab, var(--accent) 60%, var(--px-paper));
+  background-image:
+    linear-gradient(
+      45deg,
+      color-mix(in oklab, white 30%, transparent) 25%,
+      transparent 25% 75%,
+      color-mix(in oklab, white 30%, transparent) 75%
+    ),
+    linear-gradient(
+      45deg,
+      color-mix(in oklab, white 30%, transparent) 25%,
+      transparent 25% 75%,
+      color-mix(in oklab, white 30%, transparent) 75%
+    );
+  background-size: calc(var(--px) * 4) calc(var(--px) * 4);
+  background-position:
+    0 0,
+    calc(var(--px) * 2) calc(var(--px) * 2);
+}
+.px-card--matched {
+  background: color-mix(in oklab, var(--mint) 70%, var(--px-paper));
+}
+.px-card--win {
+  background: color-mix(in oklab, var(--honey) 60%, var(--px-paper));
+}
+/* A big choice tile (Rock Paper Scissors throws) */
+.px-throw {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  margin: var(--px);
+  padding: 0.6rem 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--px-paper);
+  color: var(--foreground);
+  cursor: pointer;
+  box-shadow:
+    var(--px-outline),
+    0 calc(var(--px) * 2) 0 0 var(--px-shade);
+}
+.px-throw:disabled {
+  cursor: default;
+}
+.px-throw--picked {
+  background: color-mix(in oklab, var(--primary) 45%, var(--px-paper));
+  transform: translateY(var(--px));
+  box-shadow: var(--px-outline);
+}
+.px-throw--out {
+  opacity: 0.4;
+}
+.pixel-zone .flip-card {
+  transition: transform 0.36s steps(6, end);
+}
+.pixel-zone .flip-face {
+  border-radius: 0;
+}
+
+/* A slip of paper with a dashed edge: the loser's task */
+.px-ticket {
+  margin: var(--px);
+  padding: 0.6rem 0.75rem;
+  background: color-mix(in oklab, var(--honey) 45%, var(--px-paper));
+  outline: var(--px) dashed var(--px-ink);
+  outline-offset: calc(var(--px) * -1);
+}
+
+/* —— Board motion (stepped, like sprite frames) —— */
+@keyframes px-piece-pop {
+  0% {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.px-piece-pop {
+  animation: px-piece-pop 0.32s steps(3, end) both;
+}
+@keyframes px-piece-drop {
+  0% {
+    transform: translateY(calc(var(--drop, 1) * -112%));
+  }
+  72% {
+    transform: translateY(0);
+  }
+  86% {
+    transform: translateY(-16%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+.px-piece-drop {
+  animation: px-piece-drop calc(0.2s + var(--drop, 1) * 0.07s) steps(5, end) both;
+}
+@keyframes px-flash {
+  0%,
+  49.9% {
+    filter: brightness(1);
+  }
+  50%,
+  100% {
+    filter: brightness(1.22) saturate(1.2);
+  }
+}
+.px-flash {
+  animation: px-flash 0.5s steps(1, end) 6;
+}
+@keyframes px-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--px) * -2));
+  }
+}
+.px-hop {
+  animation: px-hop 0.5s steps(2, jump-none) infinite;
+}
+@keyframes px-shake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  25% {
+    transform: translateX(calc(var(--px) * -1)) rotate(-8deg);
+  }
+  75% {
+    transform: translateX(var(--px)) rotate(8deg);
+  }
+}
+.px-shake {
+  animation: px-shake 0.4s steps(4, end) infinite;
+}
+@keyframes px-clash-left {
+  0% {
+    transform: translateX(-160%);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(18%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes px-clash-right {
+  0% {
+    transform: translateX(160%);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(-18%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+.px-clash-left {
+  animation: px-clash-left 0.42s steps(6, end) both;
+}
+.px-clash-right {
+  animation: px-clash-right 0.42s steps(6, end) both;
+}
+.px-lift {
+  transform: translateY(calc(var(--px) * -3));
+  transition: transform 0.24s steps(3, end) 0.4s;
+}
+/* A burst of little squares flying out from the middle of something */
+.px-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.px-burst i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--px) * 2);
+  height: calc(var(--px) * 2);
+  margin: calc(var(--px) * -1) 0 0 calc(var(--px) * -1);
+  background: var(--c, var(--honey));
+  animation: px-burst 0.6s steps(6, end) var(--d, 0s) both;
+}
+@keyframes px-burst {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x, 0), var(--y, 0));
+    opacity: 0;
+  }
+}
+/* Three dots that light up one after another: "waiting…" */
+.px-wait {
+  display: inline-flex;
+  gap: var(--px);
+  vertical-align: middle;
+}
+.px-wait i {
+  width: calc(var(--px) * 2);
+  height: calc(var(--px) * 2);
+  background: currentColor;
+  animation: px-blink 0.9s steps(1, end) infinite;
+}
+.px-wait i:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.px-wait i:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .px-bob,
   .px-blink,
-  .px-pop-in {
+  .px-pop-in,
+  .px-piece-pop,
+  .px-piece-drop,
+  .px-flash,
+  .px-hop,
+  .px-shake,
+  .px-clash-left,
+  .px-clash-right,
+  .px-cell--win,
+  .px-cell--open::after,
+  .px-plate--active::before,
+  .px-drop--live,
+  .px-wait i {
     animation: none;
+  }
+  .px-burst {
+    display: none;
+  }
+  .pixel-zone .flip-card,
+  .px-lift {
+    transition: none;
   }
   /* Two-frame sprites rest on their first frame. */
   .px-f0 {

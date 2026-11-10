@@ -1,13 +1,20 @@
 import { useRef, type CSSProperties } from "react";
 import { Doodle } from "@/components/Doodles";
-import { Card } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
 import { finishPatch, useUpdateGame } from "@/lib/games";
 import type { GameViewProps } from "@/components/games/GameShell";
 import { TaskBar } from "@/components/games/TaskBar";
+import {
+  Caption,
+  PixelBoard,
+  PixelStage,
+  SEAT_CRITTER,
+  Versus,
+} from "@/components/games/pixel-kit";
+import { cn } from "@/lib/utils";
 
-const COLS = 7;
-const ROWS = 6;
+export const COLS = 7;
+export const ROWS = 6;
 
 type C4State = { board: (number | null)[] };
 
@@ -19,7 +26,7 @@ const at = (board: (number | null)[], r: number, c: number) =>
   r < 0 || r >= ROWS || c < 0 || c >= COLS ? undefined : board[r * COLS + c];
 
 /** The four winning cells for `seat`, or null. */
-function fourCells(board: (number | null)[], seat: number): number[] | null {
+export function fourCells(board: (number | null)[], seat: number): number[] | null {
   const dirs = [
     [0, 1],
     [1, 0],
@@ -65,31 +72,34 @@ export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) 
     const patch: Record<string, unknown> = { state: { board: next } };
     if (fourCells(next, seat)) Object.assign(patch, finishPatch(players[seat] ?? null));
     else if (next.every((c) => c != null)) Object.assign(patch, finishPatch(null));
-    else patch['turn'] = players[other];
+    else patch["turn"] = players[other];
     update.mutate({ id: game.id, patch: patch as never });
   }
 
   return (
-    <>
+    <PixelStage>
       <TaskBar
         game={game}
         status={myTurn ? "Your turn — drop a piece" : `${nameOf(game.turn)}'s turn`}
         onResignTo={players[other]}
       />
+      <Versus players={players} me={me} nameOf={nameOf} turn={game.turn} />
 
-      <Card className="mt-4 overflow-hidden">
+      <PixelBoard tint="sky" className="overflow-hidden">
         <div className="grid grid-cols-7 gap-1">
-          {Array.from({ length: COLS }).map((_, c) => (
-            <button
-              key={`h-${c}`}
-              type="button"
-              aria-label={`Drop in column ${c + 1}`}
-              onClick={() => drop(c)}
-              className="press rounded-xl bg-muted py-1 text-xs font-extrabold text-muted-foreground"
-            >
-              ↓
-            </button>
-          ))}
+          {Array.from({ length: COLS }).map((_, c) => {
+            const open = myTurn && board[c] == null; // top hole of the column still free
+            return (
+              <button
+                key={`h-${c}`}
+                type="button"
+                aria-label={`Drop in column ${c + 1}`}
+                onClick={() => drop(c)}
+                className={cn("px-drop", open && "px-drop--live")}
+                style={{ animationDelay: `${(c % 2) * 0.35}s` }}
+              />
+            );
+          })}
           {board.map((cell, i) => (
             <button
               key={i}
@@ -97,31 +107,35 @@ export function ConnectFour({ game, me, seat, players, nameOf }: GameViewProps) 
               tabIndex={-1}
               aria-hidden="true"
               onClick={() => drop(i % COLS)}
-              className={`grid aspect-square place-items-center rounded-full bg-secondary ${
-                winning.has(i) ? "win-glow" : ""
-              }`}
+              className="px-slot"
             >
+              <i className="px-hole px-round" />
               {cell == null ? null : (
                 // Keyed by what's in the cell, so a new piece mounts and falls down its column.
                 <span
                   key={`${i}-${cell}`}
-                  className={placedAtOpen.current[i] ? undefined : "piece-drop"}
+                  className={cn(
+                    "px-coin px-round",
+                    `px-coin--${cell}`,
+                    !placedAtOpen.current[i] && "px-piece-drop",
+                    winning.has(i) && "px-flash",
+                  )}
                   style={{ "--drop": Math.floor(i / COLS) + 1 } as CSSProperties}
                 >
                   <Doodle
-                    critter={cell === 0 ? "penguin" : "seal"}
-                    pose={cell === 0 ? "default" : "wave"}
-                    size={30}
+                    critter={SEAT_CRITTER[cell as 0 | 1]}
+                    pose={winning.has(i) ? "cheer" : "default"}
+                    size={28}
                   />
                 </span>
               )}
             </button>
           ))}
         </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          You are {seat === 0 ? "penguin 🐧" : "seal 🦭"}
-        </p>
-      </Card>
-    </>
+      </PixelBoard>
+      <Caption>
+        You are the {SEAT_CRITTER[seat]} · {seat === 0 ? "blue" : "pink"} pieces
+      </Caption>
+    </PixelStage>
   );
 }

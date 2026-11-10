@@ -1,10 +1,17 @@
 import { useRef } from "react";
 import { Doodle } from "@/components/Doodles";
-import { Card } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
 import { finishPatch, useUpdateGame } from "@/lib/games";
 import type { GameViewProps } from "@/components/games/GameShell";
 import { TaskBar } from "@/components/games/TaskBar";
+import {
+  Caption,
+  PixelBoard,
+  PixelStage,
+  SEAT_CRITTER,
+  Versus,
+} from "@/components/games/pixel-kit";
+import { cn } from "@/lib/utils";
 
 const LINES = [
   [0, 1, 2],
@@ -25,6 +32,15 @@ function winnerOf(board: (number | null)[]): number | null {
   return null;
 }
 
+/** The three squares of a finished line, or an empty list. */
+export function winLineOf(board: (number | null)[]): number[] {
+  return (
+    LINES.find(
+      ([a, b, c]) => board[a!] != null && board[a!] === board[b!] && board[a!] === board[c!],
+    ) ?? []
+  );
+}
+
 export function newTicTacToe() {
   return { board: Array(9).fill(null) as (number | null)[] };
 }
@@ -34,11 +50,7 @@ export function TicTacToe({ game, me, seat, players, nameOf }: GameViewProps) {
   const state = game.state as { board: (number | null)[] };
   const board = state.board ?? Array(9).fill(null);
   const myTurn = game.turn === me;
-  const winLine = new Set(
-    LINES.find(
-      ([a, b, c]) => board[a!] != null && board[a!] === board[b!] && board[a!] === board[c!],
-    ) ?? [],
-  );
+  const winLine = new Set(winLineOf(board));
 
   const placedAtOpen = useRef(board.map((c) => c != null));
 
@@ -52,48 +64,50 @@ export function TicTacToe({ game, me, seat, players, nameOf }: GameViewProps) {
     const patch: Record<string, unknown> = { state: { board: next } };
     if (w != null) Object.assign(patch, finishPatch(players[w] ?? null));
     else if (full) Object.assign(patch, finishPatch(null));
-    else patch['turn'] = players[seat === 0 ? 1 : 0];
+    else patch["turn"] = players[seat === 0 ? 1 : 0];
     update.mutate({ id: game.id, patch: patch as never });
   }
 
   return (
-    <>
+    <PixelStage>
       <TaskBar
         game={game}
         status={myTurn ? "Your turn" : `${nameOf(game.turn)}'s turn`}
         onResignTo={players[seat === 0 ? 1 : 0]}
       />
-      <Card className="mt-4">
-        <div className="mx-auto grid max-w-xs grid-cols-3 gap-2">
+      <Versus players={players} me={me} nameOf={nameOf} turn={game.turn} />
+      <PixelBoard>
+        <div className="mx-auto grid max-w-xs grid-cols-3 gap-1.5">
           {board.map((cell, i) => (
             <button
               key={i}
               type="button"
-              aria-label={`Square ${i + 1}`}
+              aria-label={`Square ${i + 1}, ${cell == null ? "empty" : SEAT_CRITTER[cell as 0 | 1]}`}
               onClick={() => play(i)}
-              className={`press grid aspect-square place-items-center rounded-2xl bg-muted ${
-                winLine.has(i) ? "win-glow" : ""
-              }`}
+              className={cn(
+                "px-cell",
+                winLine.has(i) && "px-cell--win",
+                cell == null && myTurn && "px-cell--open",
+              )}
             >
               {cell == null ? null : (
+                // Keyed by what's in the square, so a new piece mounts and pops in.
                 <span
                   key={`${i}-${cell}`}
-                  className={placedAtOpen.current[i] ? undefined : "piece-pop"}
+                  className={placedAtOpen.current[i] ? undefined : "px-piece-pop"}
                 >
                   <Doodle
-                    critter={cell === 0 ? "penguin" : "seal"}
-                    pose={winLine.has(i) ? "cheer" : cell === 0 ? "default" : "wave"}
-                    size={44}
+                    critter={SEAT_CRITTER[cell as 0 | 1]}
+                    pose={winLine.has(i) ? "cheer" : "default"}
+                    size={60}
                   />
                 </span>
               )}
             </button>
           ))}
         </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          You are {seat === 0 ? "penguin 🐧" : "seal 🦭"}
-        </p>
-      </Card>
-    </>
+      </PixelBoard>
+      <Caption>You are the {SEAT_CRITTER[seat]}</Caption>
+    </PixelStage>
   );
 }

@@ -5,6 +5,73 @@
 
 ---
 
+## 2026-11-10 — Milestone 3: pixel makeover of the two-player games (Claude)
+
+**What was done** (looks and motion only — rules, saved data and realtime are unchanged)
+
+- New shared pieces in `components/games/pixel-kit.tsx`: `PixelStage`, `PixelBoard`, `Versus`
+  (both players, score, whose turn — the mover's plate lights up and an arrow hops above it),
+  `Pips`, `Burst` (sparkle of pixel squares), `Waiting`, `Caption`. Styles in `src/pixel.css`.
+- Every game is now pixel art in every app style (pixel mascots, pixel frames, pixel font,
+  stepped "sprite frame" animations):
+  - **Tic-Tac-Toe** — tile board, pieces pop in, empty squares blink when it is your turn.
+  - **Connect Four** — board with pixel-round holes, critter coins (blue = penguin, pink =
+    seal) that fall and bounce, arrows that hop over the columns you can use.
+  - **Memory Match** — patterned card backs with a pixel heart, stepped flip, a matched pair
+    turns mint and sparkles; scores sit in the player bar.
+  - **Rock Paper Scissors** — big throw tiles with idle bobbing critters, your pick shakes and
+    locks in, score shown as pips, the last round replays as a clash with the winner cheering.
+  - **War** — pixel playing cards, 13-pip round tracker, winning card lifts and sparkles.
+- Start screen: the two mascots squaring up, game name, pixel input and button; Enter starts.
+- Result screen: winner cheering / loser asleep, a **recap of how it ended** (final board for
+  Tic-Tac-Toe and Connect Four, final score for the others — `components/games/Recap.tsx`),
+  the task on a dashed "ticket".
+- **Give up now takes two taps** (first tap shows "Give up?" for 3.5 s). One stray tap used to
+  forfeit the game and the task.
+
+**Bugs fixed on the way**
+
+- RPS "X won the round" and War "X takes the round" were saved as text by whichever phone made
+  the move, using "You" for itself — so the partner could read "You won" when they had lost.
+  The text is now worked out on each phone from the saved picks/cards. The saved fields are
+  still written exactly as before (no data shape change).
+- Memory: the flip card was an inline `<span>`, which ignores width/height, so the card faces
+  had no size. It is now `display: block`. (Not confirmed whether production showed this.)
+
+**Files changed**
+
+- Added: `src/components/games/pixel-kit.tsx`, `src/components/games/Recap.tsx`,
+  `scripts/visual/play-two-player.mjs`.
+- Edited: `src/components/games/{GameShell,TaskBar,TicTacToe,ConnectFour,Memory,Rps,War}.tsx`,
+  `src/pixel.css`. `DiceRoller.tsx` and `registry.ts` were not touched.
+
+**Verified (actually run)** — two simulated phones on a shared in-memory database
+
+| Scenario | Result |
+| --- | --- |
+| Start disabled until a task is typed; task shown on both phones | pass |
+| Tic-Tac-Toe: full game to a win; out-of-turn taps ignored | pass |
+| Tic-Tac-Toe: full board, no line → draw | pass |
+| Connect Four: vertical four wins; coins animate | pass |
+| Memory: mismatch flips back and passes the turn; all 6 pairs found; winner by pairs | pass |
+| RPS: best of 3 ends at 2 wins; per-phone wording correct | pass |
+| War: 13 rounds, then winner by rounds won | pass |
+| Give up: one tap does nothing final, second tap gives the partner the win | pass |
+| Result card + recap on both phones; scoreboard and history on the hub | pass |
+| Skins: classic, cyberpunk, scrapbook | readable, pixel look kept |
+| `tsc`, `bun test` (20), `vite build`, eslint on changed files | pass |
+
+A diff check confirmed that no line of the rules code (`play`, `drop`, `flip`, `pick`, `next`,
+the state written to the database) changed apart from quote formatting.
+
+**Not verified here**
+
+- Real realtime between two real accounts (the mock refetches instead of receiving a push).
+- A game that was already in progress before this update: the state shape is unchanged, so it
+  should simply open in the new look.
+
+---
+
 ## 2026-11-10 — Milestone 2: Wing It (Claude)
 
 **What was done**

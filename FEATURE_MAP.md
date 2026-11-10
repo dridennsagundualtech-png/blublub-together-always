@@ -57,8 +57,9 @@ Flow (shared by all five): **lock in a task → play → result card shows who o
 | --- | --- |
 | Route | `routes/_authenticated/games.$kind.tsx` |
 | Shared flow (start card, result card) | `components/games/GameShell.tsx` |
-| Task + give-up bar | `components/games/TaskBar.tsx` |
-| Shared pixel pieces (stage frame, player bar, sparkles) | `components/games/pixel-kit.tsx` *(planned — milestone 3)* |
+| Task + give-up bar (give up = two taps) | `components/games/TaskBar.tsx` |
+| Shared pixel pieces (stage frame, player bar, sparkles) | `components/games/pixel-kit.tsx` |
+| How a finished game ended (final board / score) | `components/games/Recap.tsx` |
 | Game list | `components/games/registry.ts`, labels in `lib/games.ts` (`GAME_META`) |
 | Data hooks | `lib/games.ts` — table `games`, kept live with Supabase realtime |
 | Tic-Tac-Toe | `components/games/TicTacToe.tsx` |

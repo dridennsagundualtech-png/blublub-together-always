@@ -1,7 +1,8 @@
 import { useMemo, useState, type ReactNode, type CSSProperties } from "react";
 import { toast } from "sonner";
 import { Doodle } from "@/components/Doodles";
-import { Card, Field, PrimaryButton, TextInput } from "@/components/ui-kit";
+import { GameRecap } from "@/components/games/Recap";
+import { SEAT_CRITTER } from "@/components/games/pixel-kit";
 import { playChirp } from "@/hooks/use-sound";
 import {
   GAME_META,
@@ -12,6 +13,7 @@ import {
   type GameKind,
   type GameRow,
 } from "@/lib/games";
+import { cn } from "@/lib/utils";
 
 export type GameViewProps = {
   game: GameRow;
@@ -46,55 +48,93 @@ export function GameShell({
     [all, kind],
   );
 
-  if (isLoading) return <Card className="text-sm text-muted-foreground">Loading…</Card>;
+  if (isLoading) {
+    return (
+      <div className="pixel-zone">
+        <div className="px-frame grid place-items-center gap-1 p-6">
+          <span className="px-hop">
+            <Doodle critter="cat" pose="default" size={48} />
+          </span>
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (game && seats.me) {
     return (
-      <>{children({ game, me: seats.me, seat: seats.seat as 0 | 1, players: seats.players, nameOf: seats.nameOf })}</>
+      <>
+        {children({
+          game,
+          me: seats.me,
+          seat: seats.seat as 0 | 1,
+          players: seats.players,
+          nameOf: seats.nameOf,
+        })}
+      </>
     );
   }
 
   const showResult = lastDone && !dismissed.includes(lastDone.id);
+  const canStart = !!task.trim() && !create.isPending;
 
   return (
-    <>
+    <div className="pixel-zone">
       {showResult ? <ResultCard game={lastDone} nameOf={seats.nameOf} me={seats.me} /> : null}
 
-      <Card className={showResult ? "mt-4" : ""}>
-        <div className="space-y-3">
-          <p className="text-sm font-bold">{GAME_META[kind].label}</p>
-          <Field label="Task for the loser">
-            <TextInput
+      <div className={cn("px-frame p-4", showResult && "mt-4")}>
+        {/* The two players squaring up */}
+        <div className="flex items-end justify-center gap-4" aria-hidden="true">
+          <span className="px-hop">
+            <Doodle critter={SEAT_CRITTER[0]} pose="wave" size={56} />
+          </span>
+          <span className="px-vs pb-4 text-lg">VS</span>
+          <span className="px-hop" style={{ animationDelay: "0.25s" }}>
+            <Doodle critter={SEAT_CRITTER[1]} pose="wave" size={56} />
+          </span>
+        </div>
+        <p className="mt-1 text-center text-xl font-bold leading-tight">{GAME_META[kind].label}</p>
+        <p className="text-center text-sm text-muted-foreground">{GAME_META[kind].blurb}</p>
+
+        <form
+          className="mt-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!canStart) return;
+            playChirp("tap");
+            if (lastDone) setDismissed((d) => [...d, lastDone.id]);
+            create.mutate(
+              { kind, task: task.trim(), state: newState() },
+              {
+                onSuccess: () => {
+                  setTask("");
+                  playChirp("success");
+                },
+                onError: (e: Error) => toast.error(e.message),
+              },
+            );
+          }}
+        >
+          <label className="block">
+            <span className="px-label">Task for the loser</span>
+            <input
+              className="px-input mt-1"
               value={task}
               onChange={(e) => setTask(e.target.value)}
               placeholder="e.g. make coffee tomorrow"
               maxLength={200}
+              enterKeyHint="go"
             />
-          </Field>
-          <PrimaryButton
-            disabled={!task.trim() || create.isPending}
-            onClick={() => {
-              if (lastDone) setDismissed((d) => [...d, lastDone.id]);
-              create.mutate(
-                { kind, task: task.trim(), state: newState() },
-                {
-                  onSuccess: () => {
-                    setTask("");
-                    playChirp("success");
-                  },
-                  onError: (e: Error) => toast.error(e.message),
-                },
-              );
-            }}
-          >
-            Lock in task & start
-          </PrimaryButton>
-          <p className="text-xs text-muted-foreground">
-            The task is locked before the game starts — the loser has to do it.
-          </p>
-        </div>
-      </Card>
-    </>
+          </label>
+          <button type="submit" className="px-btn px-btn--block mt-2" disabled={!canStart}>
+            {create.isPending ? "Starting…" : "Lock in task & start"}
+          </button>
+        </form>
+        <p className="mt-2 text-sm leading-snug text-muted-foreground">
+          The task is locked before the game starts — the loser has to do it.
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -109,27 +149,42 @@ export function ResultCard({
 }) {
   const iLost = !game.is_draw && !!game.winner_id && game.winner_id !== me;
   const iWon = !game.is_draw && !!game.winner_id && game.winner_id === me;
+  // The starter of a game is the penguin, the other player the seal.
+  const mine = SEAT_CRITTER[game.created_by === me ? 0 : 1];
+  const theirs = SEAT_CRITTER[game.created_by === me ? 1 : 0];
   return (
-    <div className="card-soft rise-in relative overflow-hidden p-6 text-center">
+    <div className="px-frame px-pop-in relative overflow-hidden p-5 text-center">
       {iWon ? <Confetti /> : null}
-      <Doodle
-        critter={iLost ? "seal" : "penguin"}
-        pose={iLost ? "sleep" : "wave"}
-        size={64}
-        className="absolute -right-2 -top-2 opacity-50"
-      />
-      <p className="text-2xl font-extrabold">
+      <div className="flex items-end justify-center gap-3" aria-hidden="true">
+        {game.is_draw ? (
+          <>
+            <Doodle critter={mine} pose="wave" size={64} />
+            <Doodle critter={theirs} pose="wave" size={64} />
+          </>
+        ) : (
+          <>
+            <span className={iWon ? "px-hop" : undefined}>
+              <Doodle critter={mine} pose={iWon ? "cheer" : "sleep"} size={iWon ? 76 : 56} />
+            </span>
+            <span className={iLost ? "px-hop" : undefined}>
+              <Doodle critter={theirs} pose={iLost ? "cheer" : "sleep"} size={iLost ? 76 : 56} />
+            </span>
+          </>
+        )}
+      </div>
+      <p className="mt-1 text-3xl font-bold leading-tight">
         {game.is_draw ? "It's a draw!" : iLost ? "You lost!" : "You won!"}
       </p>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {game.is_draw ? "Nobody owes anything 🩷" : `${nameOf(game.winner_id)} took the win`}
+      <p className="text-sm text-muted-foreground">
+        {game.is_draw ? "Nobody owes anything" : `${nameOf(game.winner_id)} took the win`}
       </p>
+      <GameRecap game={game} />
       {game.task ? (
-        <div className="mt-4 rounded-2xl bg-accent px-4 py-3 text-accent-foreground">
-          <p className="text-xs font-bold uppercase tracking-wide opacity-70">
+        <div className="px-ticket mt-3">
+          <p className="px-label">
             {game.is_draw ? "The task on the line was" : "The loser's task"}
           </p>
-          <p className="mt-1 text-base font-extrabold">{game.task}</p>
+          <p className="mt-0.5 break-words text-lg font-bold leading-tight">{game.task}</p>
         </div>
       ) : null}
     </div>

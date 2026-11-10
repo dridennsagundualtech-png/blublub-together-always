@@ -1,16 +1,24 @@
 import { Doodle, type Critter } from "@/components/Doodles";
-import { Card, GhostButton } from "@/components/ui-kit";
 import { playChirp } from "@/hooks/use-sound";
 import { finishPatch, useUpdateGame } from "@/lib/games";
 import type { GameViewProps } from "@/components/games/GameShell";
 import { TaskBar } from "@/components/games/TaskBar";
+import {
+  Burst,
+  Caption,
+  PixelBoard,
+  PixelStage,
+  Versus,
+  Waiting,
+} from "@/components/games/pixel-kit";
+import { cn } from "@/lib/utils";
 
 type Throw = "cat" | "seal" | "penguin";
 
-const THROWS: { key: Throw; critter: Critter; label: string }[] = [
-  { key: "cat", critter: "cat", label: "Cat · rock" },
-  { key: "seal", critter: "seal", label: "Seal · paper" },
-  { key: "penguin", critter: "penguin", label: "Penguin · scissors" },
+const THROWS: { key: Throw; critter: Critter; name: string; plays: string }[] = [
+  { key: "cat", critter: "cat", name: "Cat", plays: "Rock" },
+  { key: "seal", critter: "seal", name: "Seal", plays: "Paper" },
+  { key: "penguin", critter: "penguin", name: "Penguin", plays: "Scissors" },
 ];
 
 /** returns 0 for a draw, 1 if a beats b, -1 otherwise */
@@ -32,7 +40,7 @@ export function newRps(): RpsState {
   return { picks: [null, null], scores: [0, 0], round: 1, best: 3, last: null };
 }
 
-export function Rps({ game, seat, players, nameOf }: GameViewProps) {
+export function Rps({ game, me, seat, players, nameOf }: GameViewProps) {
   const update = useUpdateGame();
   const s = game.state as RpsState;
   const other = seat === 0 ? 1 : 0;
@@ -82,76 +90,121 @@ export function Rps({ game, seat, players, nameOf }: GameViewProps) {
     update.mutate({ id: game.id, patch: patch as never });
   }
 
+  const choosingLength = s.round === 1 && !s.picks.some(Boolean);
+  // Who took the last round (0 or 1), or null for a drawn round — only used to pose the critters.
+  const lastCmp = s.last ? compare(s.last.picks[0]!, s.last.picks[1]!) : 0;
+  const lastWinner = lastCmp === 0 ? null : lastCmp === 1 ? 0 : 1;
+
   return (
-    <>
+    <PixelStage>
       <TaskBar
         game={game}
         status={myPick ? "Waiting for your partner…" : "Pick your throw"}
         onResignTo={players[other]}
       />
+      <Versus
+        players={players}
+        me={me}
+        nameOf={nameOf}
+        scores={[s.scores[0] ?? 0, s.scores[1] ?? 0]}
+        pips={needed}
+      />
 
-      <Card className="mt-4 text-center">
-        <p className="text-sm font-bold">
-          {s.scores[0] ?? 0} — {s.scores[1] ?? 0}
+      <PixelBoard>
+        <p className="px-label text-center">
+          Round {s.round} · first to {needed}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {nameOf(players[0])} vs {nameOf(players[1])} · first to {needed}
-        </p>
-        {s.round === 1 && !s.picks.some(Boolean) ? (
-          <div className="mt-3 flex justify-center gap-2">
+        {choosingLength ? (
+          <div className="mt-1 flex justify-center">
             {[3, 5].map((b) => (
-              <GhostButton
+              <button
                 key={b}
-                className={s.best === b ? "border-primary text-primary" : ""}
-                onClick={() => setBest(b)}
+                type="button"
+                aria-pressed={s.best === b}
+                className={cn("px-btn px-btn--small", s.best !== b && "px-btn--ghost")}
+                onClick={() => {
+                  playChirp("pop");
+                  setBest(b);
+                }}
               >
                 Best of {b}
-              </GhostButton>
+              </button>
             ))}
           </div>
         ) : null}
-      </Card>
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        {THROWS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            disabled={!!myPick}
-            onClick={() => pick(t.key)}
-            className={`press card-soft grid place-items-center gap-1 p-3 transition-opacity ${
-              myPick === t.key ? "match-pop ring-2 ring-primary" : ""
-            } ${myPick && myPick !== t.key ? "opacity-50" : ""}`}
-          >
-            <Doodle critter={t.critter} pose="default" size={48} />
-            <span className="text-[10px] font-bold">{t.label}</span>
-          </button>
-        ))}
-      </div>
+        <div className="mt-2 grid grid-cols-3 gap-1">
+          {THROWS.map((t, i) => (
+            <button
+              key={t.key}
+              type="button"
+              disabled={!!myPick}
+              aria-pressed={myPick === t.key}
+              onClick={() => pick(t.key)}
+              className={cn(
+                "px-throw",
+                myPick === t.key && "px-throw--picked",
+                myPick && myPick !== t.key && "px-throw--out",
+              )}
+            >
+              <span
+                className={!myPick ? "px-bob" : myPick === t.key ? "px-shake" : undefined}
+                style={{ animationDelay: `${i * 0.2}s` }}
+              >
+                <Doodle critter={t.critter} pose="default" size={56} />
+              </span>
+              <span className="text-sm font-bold leading-tight">{t.plays}</span>
+              <span className="text-xs leading-tight text-muted-foreground">{t.name}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-3">
+          {myPick ? (
+            <Caption>
+              Locked in — waiting for {nameOf(players[other])} <Waiting />
+            </Caption>
+          ) : (
+            <Caption>Cat beats penguin · penguin beats seal · seal beats cat</Caption>
+          )}
+        </div>
+      </PixelBoard>
 
       {s.last ? (
-        <Card className="mt-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-            Last round
-          </p>
-          <div key={s.round} className="mt-2 flex items-center justify-center gap-4">
-            <span className="clash-left">
-              <Doodle critter={s.last.picks[0] as Critter} size={48} />
+        <div className="px-frame p-3 text-center">
+          <p className="px-label">Last round</p>
+          <div key={s.round} className="relative mt-1 flex items-end justify-center gap-5">
+            <span className="px-clash-left">
+              <Doodle
+                critter={s.last.picks[0] as Critter}
+                pose={lastWinner === 0 ? "cheer" : "default"}
+                size={56}
+              />
             </span>
-            <span className="text-xs font-bold">vs</span>
-            <span className="clash-right">
-              <Doodle critter={s.last.picks[1] as Critter} size={48} />
+            <span className="px-vs pb-4">VS</span>
+            <span className="px-clash-right">
+              <Doodle
+                critter={s.last.picks[1] as Critter}
+                pose={lastWinner === 1 ? "cheer" : "default"}
+                size={56}
+              />
             </span>
+            <Burst />
           </div>
           <p
             key={`r-${s.round}`}
-            className="rise-in mt-1 text-sm font-bold"
+            className="px-pop-in mt-1 text-base font-bold"
             style={{ animationDelay: "0.35s" }}
           >
-            {s.last.result}
+            {/* Worded for whoever is looking: the saved text was written on one phone only. */}
+            {lastWinner == null
+              ? "Draw round"
+              : players[lastWinner] === me
+                ? "You won the round"
+                : `${nameOf(players[lastWinner])} won the round`}
           </p>
-        </Card>
+        </div>
       ) : null}
-    </>
+    </PixelStage>
   );
 }

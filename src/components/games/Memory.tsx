@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Doodle, type Critter, type Pose } from "@/components/Doodles";
-import { Card } from "@/components/ui-kit";
+import { PixelEmoji } from "@/components/pixel-art";
 import { playChirp } from "@/hooks/use-sound";
 import { finishPatch, shuffle, useUpdateGame } from "@/lib/games";
 import type { GameViewProps } from "@/components/games/GameShell";
 import { TaskBar } from "@/components/games/TaskBar";
+import { Burst, Caption, PixelBoard, PixelStage, Versus } from "@/components/games/pixel-kit";
+import { cn } from "@/lib/utils";
 
 const FACES: { critter: Critter; pose: Pose }[] = [
   { critter: "cat", pose: "default" },
@@ -14,7 +16,6 @@ const FACES: { critter: Critter; pose: Pose }[] = [
   { critter: "penguin", pose: "curious" },
   { critter: "penguin", pose: "sleep" },
 ];
-
 
 type MemoryState = {
   deck: number[];
@@ -34,6 +35,8 @@ export function Memory({ game, me, seat, players, nameOf }: GameViewProps) {
   const myTurn = game.turn === me;
   const other = seat === 0 ? 1 : 0;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Pairs already found when the game was opened don't replay their sparkle.
+  const matchedAtOpen = useRef(new Set(s.matched));
 
   // The active player's client clears a failed pair and hands over the turn.
   useEffect(() => {
@@ -78,46 +81,60 @@ export function Memory({ game, me, seat, players, nameOf }: GameViewProps) {
     update.mutate({ id: game.id, patch: patch as never });
   }
 
+  const pairsLeft = (s.deck.length - s.matched.length) / 2;
+
   return (
-    <>
+    <PixelStage>
       <TaskBar
         game={game}
         status={myTurn ? "Your turn — flip two" : `${nameOf(game.turn)}'s turn`}
         onResignTo={players[other]}
       />
+      <Versus
+        players={players}
+        me={me}
+        nameOf={nameOf}
+        turn={game.turn}
+        scores={[s.scores[0] ?? 0, s.scores[1] ?? 0]}
+      />
 
-      <Card className="mt-4">
-        <div className="grid grid-cols-4 gap-2">
+      <PixelBoard>
+        <div className="grid grid-cols-4 gap-2.5">
           {s.deck.map((face, i) => {
-            const shown = s.flipped.includes(i) || s.matched.includes(i);
-            const f = FACES[face]!;
             const matched = s.matched.includes(i);
+            const shown = s.flipped.includes(i) || matched;
+            const f = FACES[face]!;
             return (
               <button
                 key={i}
                 type="button"
                 aria-label={shown ? `${f.critter} card` : "Face-down card"}
                 onClick={() => flip(i)}
-                className={`press flip-scene aspect-square rounded-2xl ${matched ? "match-pop" : ""}`}
+                className="flip-scene relative aspect-square border-0 bg-transparent p-0"
               >
-                <span className={`flip-card rounded-2xl ${shown ? "is-flipped" : ""}`}>
-                  <span className="flip-face rounded-2xl bg-muted">
-                    <span className="text-lg font-extrabold text-muted-foreground">🩷</span>
+                {/* "block": a span is inline by default and would ignore the card's size */}
+                <span className={cn("flip-card block", shown && "is-flipped")}>
+                  <span className="flip-face px-card-back">
+                    <PixelEmoji name="heart" size={22} />
                   </span>
                   <span
-                    className={`flip-face flip-face-front rounded-2xl bg-accent ${matched ? "opacity-60" : ""}`}
+                    className={cn(
+                      "flip-face flip-face-front px-card",
+                      matched && "px-card--matched",
+                    )}
                   >
-                    <Doodle critter={f.critter} pose={f.pose} size={40} />
+                    <Doodle critter={f.critter} pose={f.pose} size={44} />
                   </span>
                 </span>
+                {matched && !matchedAtOpen.current.has(i) ? <Burst /> : null}
               </button>
             );
           })}
         </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          {nameOf(players[0])} {s.scores[0] ?? 0} — {s.scores[1] ?? 0} {nameOf(players[1])}
-        </p>
-      </Card>
-    </>
+      </PixelBoard>
+      <Caption>
+        {pairsLeft} pair{pairsLeft === 1 ? "" : "s"} left · a match earns another turn
+      </Caption>
+    </PixelStage>
   );
 }
