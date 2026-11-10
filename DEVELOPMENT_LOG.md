@@ -5,6 +5,57 @@
 
 ---
 
+## 2026-11-10 — Milestone 2: Wing It (Claude)
+
+**What was done**
+
+- Second arcade game **Wing It** (`src/arcade/games/wing/`): the penguin mascot, drawn from
+  the side with a three-pose flapping wing, flies between ice pillars over an arctic sea.
+  Tap = one flap. +1 per pillar passed, +3 per fish caught. Touching ice or the sea ends the
+  run. The sky changes every 10 points (day → golden hour → dusk → polar night with northern
+  lights). An original game in the "tap to flap" genre: own name, character, art and scenery.
+- Registered in `arcade/registry.ts`, so it appears in the Game corner and at
+  `/games/play/wing` with no other app change.
+- **Bug fix found on the way:** the pixel font (Pixelify Sans) draws the "fi"/"fl" ligatures
+  like a capital A — "fish" read "Ash", and in the existing Pixel skin "five games" read
+  "Ave games". Ligatures are now off in the Pixel skin (`skins.css`) and in every pixel zone
+  (`pixel.css`).
+
+**Files changed**
+
+- Added: `src/arcade/games/wing/{logic,render,sprites,index}.ts`, `tests/arcade/wing.test.ts`.
+- Edited: `src/arcade/registry.ts` (one line), `src/pixel.css` + `src/skins.css` (ligatures).
+
+**Verified (actually run)**
+
+| Check | Result |
+| --- | --- |
+| `tsc --noEmit` | pass |
+| `bun test` | 20 tests pass (11 Hop Up, 9 Wing It) |
+| `vite build` | pass |
+| `eslint` on all new files | clean |
+| Browser: title demo, start, flap, pause/resume, crash into sea, game-over card | works, no page errors |
+| Browser: night sky zone via the demo (50 s) | renders (aurora, moon, stars) |
+| Pixel skin Game corner: "five games" text | now correct |
+
+**Implemented but not fully tested**
+
+- Sounds, and the feel of tapping on a real phone. Tuning constants are at the top of
+  `games/wing/logic.ts` (`GRAVITY`, `FLAP_SPEED`, `SPACING`, `gapAt`, `speedAt`, `MAX_STEP`).
+
+**Discoveries**
+
+- Fairness is proven by a test: a demo player limited to human tapping speed (one flap per
+  7 ticks at most) scores 150–200 in 90 s on 11 of 12 seeds. The first tuning (stronger flap,
+  bigger height steps between gaps) made the same player die within a dozen pillars — one flap
+  lifted the penguin almost half the smallest gap. A flap now lifts ~21 px; the gap never goes
+  below 52 px; consecutive gaps differ by at most 46 px.
+- A flap sets the upward speed rather than adding to it, so "fly along the bottom of the safe
+  band and flap when you sink to it" is the stable way to play — the demo player does exactly
+  that.
+
+---
+
 ## 2026-11-10 — Milestone 1: arcade engine + Hop Up (Claude)
 
 **What was done**

@@ -80,7 +80,7 @@ games in progress and the history rely on them. Visual changes only.
 | Best scores (device only) | `arcade/scores.ts` → `localStorage["blublub:arcade:best:<game>"]` |
 | Engine | `arcade/engine/*` |
 | Hop Up (platformer: climb higher = more points) | `arcade/games/hop/*` |
-| Wing It (flap through gaps) | `arcade/games/wing/*` *(planned — milestone 2)* |
+| Wing It (flap through gaps) | `arcade/games/wing/*` |
 | Shared arcade art (hearts, clouds, sky, mascot sprites) | `arcade/art.ts` |
 | Sprite component for menus | `arcade/PixelSprite.tsx` |
 | Pixel look shared by all games | `src/pixel.css` (`.pixel-zone`, `px-*`) |

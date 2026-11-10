@@ -22,6 +22,8 @@
     calc(var(--px) * -1) 0 0 0 var(--px-ink), var(--px) 0 0 0 var(--px-ink);
   font-family: var(--font-pixel);
   letter-spacing: 0;
+  /* The pixel font's "fi" / "fl" ligatures look like a capital A ("fish" reads "Ash"). */
+  font-variant-ligatures: none;
   color: var(--foreground);
 }
 

@@ -18,16 +18,17 @@
 | --- | --- | --- |
 | 0 | Assessment, project memory files, baseline checkpoint | ✅ done |
 | 1 | Arcade engine + **Hop Up** (platformer) + route + entry in Game corner | ✅ done |
-| 2 | **Wing It** (flap game) on the same engine | ⏳ next |
-| 3 | Pixel makeover of the 5 two-player games (shared pixel kit, motion, result screen) | ⬜ pending |
+| 2 | **Wing It** (flap game) on the same engine | ✅ done |
+| 3 | Pixel makeover of the 5 two-player games (shared pixel kit, motion, result screen) | ⏳ next |
 | 4 | Game corner hub redesign (pixel game cards, solo + two-player sections) | ⬜ pending |
 | 5 | App-wide visual polish, theme (skin) audit and fixes | ⬜ pending |
 | 6 | Final regression pass, docs, hand-over report | ⬜ pending |
 
 ## Current task
 
-Milestone 2 — Wing It. Reuse `src/arcade/engine`; add `games/wing/`, register it in
-`arcade/registry.ts`, add `tests/arcade/wing.test.ts`.
+Milestone 3 — pixel makeover of the two-player games. Visual changes only: the saved `state`
+JSON, the `kind` strings and the realtime wiring in `lib/games.ts` must not change. Build shared
+pieces in `components/games/pixel-kit.tsx` on top of `src/pixel.css`.
 
 ## Pending ideas (not started, need owner's OK where marked)
 
@@ -48,3 +49,4 @@ Milestone 2 — Wing It. Reuse `src/arcade/engine`; add `games/wing/`, register 
 
 - 2026-11-10 — Milestone 0 (Claude).
 - 2026-11-10 — Milestone 1 (Claude): arcade engine, Hop Up, pixel zone styles, first tests.
+- 2026-11-10 — Milestone 2 (Claude): Wing It; fixed the pixel font's fi/fl ligature bug.

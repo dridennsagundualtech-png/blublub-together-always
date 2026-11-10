@@ -33,6 +33,8 @@
 :root[data-skin="pixel"] .font-sans {
   font-family: var(--font-pixel);
   letter-spacing: 0;
+  /* This font's "fi" / "fl" ligatures look like a capital A ("five" reads "Ave"): turn them off. */
+  font-variant-ligatures: none;
 }
 
 /* No rounded corners — the notched outline makes the pixel corner */
