@@ -22,11 +22,20 @@
 | 3 | Pixel makeover of the 5 two-player games (shared pixel kit, motion, result screen) | ✅ done |
 | 4 | Game corner hub redesign (pixel game cards, solo + two-player sections) | ✅ done |
 | 5 | App-wide visual polish, theme (skin) audit and fixes | ✅ done |
-| 6 | Final regression pass, docs, hand-over report | ⏳ next |
+| 6 | Final regression pass, docs, hand-over report | ✅ done |
 
 ## Current task
 
-Milestone 6 — final regression pass over everything touched, tidy the docs, hand-over report.
+None in progress. Everything in the owner's request of 2026-11-10 is done on branch
+`claude/hopeful-meitner-01bzra` and waiting for the owner to try it and merge.
+
+## Recommended next milestones (in this order)
+
+1. **Owner tries it on a real phone** (checklist in TESTING_GUIDE §6) and reports what feels
+   off — especially the steering in Hop Up and the tap strength in Wing It.
+2. **Fix the phone build** (`npm run build:spa`) — see "Blocked" below.
+3. **Tune the arcade games** from that feedback (constants at the top of each `logic.ts`).
+4. Optional ideas from the list below.
 
 ## Pending ideas (not started, need owner's OK where marked)
 
@@ -57,3 +66,4 @@ Milestone 6 — final regression pass over everything touched, tidy the docs, ha
   chat button position fix; keyboard focus ring.
 - 2026-11-10 — Milestone 5b (Claude): Food Roulette + dice page in the pixel look; `/spicy`
   reload fix.
+- 2026-11-10 — Milestone 6 (Claude): final regression pass, hand-over notes.

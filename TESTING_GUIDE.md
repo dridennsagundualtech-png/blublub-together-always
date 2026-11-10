@@ -85,6 +85,12 @@ SCENARIO=resign node scripts/visual/play-two-player.mjs /tmp/shots/tp connect4
 
 A line starting with `FAIL:` means a rule was broken (e.g. a move out of turn was accepted).
 
+`SPICY=1` in front of any of these commands lets the pretend users open the 18+ dice page.
+
+If the console shows `Cannot read properties of undefined (reading '_nonReactive')` from
+`preloadRoute`, that is the app's own tab preloading being interrupted by the test's page
+change — harmless and intermittent (see DEVELOPMENT_LOG, milestone 6).
+
 What the mock cannot show: Our Room furniture/backgrounds and the feelings pack (hosted by
 Lovable), realtime pushes (the mock has no websocket — a page sees the partner's move after
 its next refetch), photos, storage.
@@ -117,6 +123,12 @@ Run these after touching shared styles, games, or navigation.
 - [ ] Best score survives a page reload.
 - [ ] No page scroll or tab swipe while playing; works with touch and with keyboard.
 - [ ] Sound follows the app's sound switch (Profile → sound effects).
+
+### Food Roulette and dice
+- [ ] Food Roulette: a spin lands on a slice, ticks, and moves to the next stage; "Your own
+      list" keeps its entries after a reload.
+- [ ] Dice page: opens for an account with access (also after a reload); an account without
+      access is sent back to the Game corner.
 
 ### Themes
 - [ ] Each of the 8 skins: Home, Nest, Game corner, one two-player game, one arcade game —
