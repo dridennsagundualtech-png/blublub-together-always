@@ -144,7 +144,9 @@ console.log(
 // Scoreboard and history on the hub.
 await a.page.goto(`${BASE}/games/arcade`, { waitUntil: "domcontentloaded" });
 await settle(a.page, 1500);
-await shot(a, "6-hub");
+await a.page.getByRole("button", { name: /show \(/i }).click();
+await settle(a.page, 300);
+await a.page.screenshot({ path: `${out}-${kind}-6-hub.png`, fullPage: true });
 for (const phone of [a, b]) {
   const real = phone.errors.filter((e) => !/WebSocket|404/.test(e));
   if (real.length) console.log([...new Set(real)].join("\n"));

@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   ChevronRight,
-  Gamepad2,
   Image as ImageIcon,
   Lock,
   Maximize2,
@@ -579,25 +578,37 @@ function RoomPage() {
       <Card>{seedPanel}</Card>
 
       <SectionTitle>More to do</SectionTitle>
-      <ul className="space-y-2">
-        <li>
-          <Link to="/games/arcade" className="press card-soft flex items-center gap-3 p-4">
-            <span className="relative grid size-10 place-items-center rounded-full bg-accent text-accent-foreground">
-              <Gamepad2 className="size-5" />
-              {badges?.games ? (
-                <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-destructive ring-2 ring-card" />
-              ) : null}
+      {/* The games are pixel art like the room, so their doorway is too (see src/pixel.css). */}
+      <div className="pixel-zone">
+        <Link
+          to="/games/arcade"
+          className="px-frame px-tint-accent relative flex items-center gap-3 p-3"
+        >
+          {badges?.games ? (
+            <span
+              className="px-chip px-blink absolute -right-1 -top-1 bg-destructive text-destructive-foreground"
+              aria-label="A game needs you"
+            >
+              !
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-bold">Game corner</span>
-              <span className="block truncate text-xs text-muted-foreground">
-                Five two-player games and food roulette
-              </span>
+          ) : null}
+          <span className="flex shrink-0 items-end" aria-hidden="true">
+            <span className="px-hop">
+              <Doodle critter="penguin" pose="cheer" size={44} />
             </span>
-            <ChevronRight className="size-4 text-muted-foreground" />
-          </Link>
-        </li>
-      </ul>
+            <span className="px-hop" style={{ animationDelay: "0.25s" }}>
+              <Doodle critter="cat" pose="wave" size={44} />
+            </span>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-lg font-bold leading-tight">Game corner</span>
+            <span className="block text-sm leading-snug text-muted-foreground">
+              7 pixel games — play together or solo
+            </span>
+          </span>
+          <ChevronRight className="size-5 shrink-0" />
+        </Link>
+      </div>
 
       {placed.length === 0 ? (
         <div className="mt-3">

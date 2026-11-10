@@ -5,6 +5,35 @@
 
 ---
 
+## 2026-11-10 — Milestone 4: Game corner redesign (Claude)
+
+**What was done**
+
+- `routes/_authenticated/games.arcade.tsx` rebuilt in the pixel look:
+  - **Scoreboard** with both mascots; whoever leads cheers and hops.
+  - **Play together**: a card per two-player game with a small still of the real board
+    (built from the same `px-*` pieces, so previews can't drift from the games). A blinking
+    "!" replaces the red dot when a game needs you; "IN PLAY" marks a game in progress.
+  - **Solo arcade**: animated sprite cards with the best score.
+  - **Also here** (Food Roulette, 18+ Dice) and **Game history** in the same frames; a history
+    row shows the winner's mascot and names the partner instead of the word "partner".
+- Our Room page: the plain "Game corner" row became a pixel banner with two mascots and
+  "7 pixel games — play together or solo". Same position, same red-dot logic.
+
+**Files changed**: `src/routes/_authenticated/games.arcade.tsx` (rewritten, same data hooks),
+`src/routes/_authenticated/games.index.tsx` (one block replaced, one unused import removed),
+`scripts/visual/play-two-player.mjs`.
+
+**Verified**: hub with an empty history and with finished games (scoreboard, history rows);
+banner on the Our Room page; `tsc`, `bun test`, `vite build` pass; lint error count of
+`games.index.tsx` unchanged (45 before, 45 after — all old formatting).
+
+**Note for the next agent**: Lucide line icons are still used for Food Roulette / 18+ Dice and
+for small UI glyphs (arrows, flag, pause). Replacing them with pixel icons is listed in
+TASK_TRACKER as an idea, not done.
+
+---
+
 ## 2026-11-10 — Milestone 3: pixel makeover of the two-player games (Claude)
 
 **What was done** (looks and motion only — rules, saved data and realtime are unchanged)
