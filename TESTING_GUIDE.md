@@ -115,7 +115,13 @@ Daily-question archive (old answers must never disappear) — 12 checks, prints 
 node scripts/visual/questions-archive.mjs /tmp/shots/questions
 ```
 
-`SPICY=1` in front of any of these commands lets the pretend users open the 18+ dice page.
+The slot machine on the 18+ page (reels must match the written result) — 20 checks:
+
+```bash
+SPICY=1 node scripts/visual/slot-machine.mjs /tmp/shots/slot            # add a skin name to test another style
+```
+
+`SPICY=1` in front of any of these commands lets the pretend users open the 18+ page.
 
 If the console shows `Cannot read properties of undefined (reading '_nonReactive')` from
 `preloadRoute`, that is the app's own tab preloading being interrupted by the test's page
@@ -161,11 +167,13 @@ Run these after touching shared styles, games, or navigation.
 - [ ] Archive → Not answered: last 30 days you skipped, plus any older day only your partner
       answered; answering late reveals both answers under Answered.
 
-### Food Roulette and dice
+### Food Roulette and slots
 - [ ] Food Roulette: a spin lands on a slice, ticks, and moves to the next stage; "Your own
       list" keeps its entries after a reload.
-- [ ] Dice page: opens for an account with access (also after a reload); an account without
-      access is sent back to the Game corner.
+- [ ] 18+ slots page: opens for an account with access (also after a reload); an account
+      without access is sent back to the Game corner.
+- [ ] Slot machine: the lever and the button both spin; reels stop left to right; the middle
+      row of each reel is what the ticket says; the timer starts, pauses and resets.
 
 ### Themes
 - [ ] Each of the 8 skins: Home, Nest, Game corner, one two-player game, one arcade game —

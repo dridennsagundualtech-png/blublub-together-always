@@ -113,7 +113,7 @@ How to make something pixel (all in `src/pixel.css`):
 - New game UI: build it from the `px-*` pieces (`px-frame`, `px-btn`, `px-chip`, `px-cell`…).
 - An existing page made of ordinary app cards/buttons: just put it in a zone — the zone
   restyles those shared pieces too. For a whole page use `<AppLayout pixel>` (Food Roulette
-  and the dice page do this).
+  and the 18+ slots page do this).
 
 ### The arcade module (`src/arcade/`)
 

@@ -246,7 +246,7 @@ function ArcadePage() {
                   <Heart className="size-5" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-base font-bold leading-tight">18+ Dice</span>
+                  <span className="block text-base font-bold leading-tight">18+ Slots</span>
                   <span className="block text-xs leading-snug text-muted-foreground">
                     Premium · adults only
                   </span>

@@ -5,6 +5,55 @@
 
 ---
 
+## 2026-11-11 — Milestone 10: the dice became a pixel slot machine (Claude)
+
+**Owner's request**: "replace the dice with a pixel slot machine, because the design is quite
+sad and annoying."
+
+**What was done**
+
+- New `src/components/games/SlotMachine.tsx` replaces `DiceRoller.tsx` on the 18+ page
+  (`routes/_authenticated/spicy.tsx`). Same job as before — pick one option at random from each
+  list — shown as a slot machine instead of three tumbling dice:
+  - a cabinet in the couple's main colour with a lit "LUCKY SPIN" sign and chasing lamps
+    (they speed up during a spin);
+  - one reel per list; symbols run downwards and the reels stop one after another with a
+    small bounce; the middle row is the result, glowing, with a pointer on each side;
+  - a lamp under each reel that lights when that reel has locked in;
+  - a lever to pull (or the big Spin button);
+  - the result written out on a ticket, one line per reel, with a sparkle;
+  - before the first spin the result row is covered with "?" so nothing reads as a result.
+- The round timer was redrawn in the same look: large digits, a bar of blocks that go out one
+  by one, the last five seconds blink, and it buzzes when time is up.
+- The option lists themselves and the two modes are unchanged. Wording that said "dice" or
+  "roll" now says "slots" / "spin" (page title, Game corner entry, buttons, hints).
+- Premium and age checks are untouched.
+- Removed: `DiceRoller.tsx` and its 103 lines of 3D-dice styles in `styles.css` (nothing else
+  used them).
+- With "reduce motion" on there is no spinning: the result simply appears.
+
+**Files changed**: added `src/components/games/SlotMachine.tsx`,
+`scripts/visual/slot-machine.mjs`; edited `src/pixel.css` (slot machine styles),
+`src/routes/_authenticated/spicy.tsx`, `src/routes/_authenticated/games.arcade.tsx` (label),
+`src/styles.css` (dice styles removed); deleted `src/components/games/DiceRoller.tsx`.
+
+**Verified** — `SPICY=1 node scripts/visual/slot-machine.mjs`, 20 checks, all pass, in the
+Classic and Cyberpunk styles:
+
+| Check | Result |
+| --- | --- |
+| Result row covered before the first spin; no result shown yet | pass |
+| Five spins (one by the lever): the text on each reel's middle row is exactly the text on the result ticket, and each symbol sits exactly on the row (within 1 px) | pass |
+| Results vary between spins; button locked while spinning | pass |
+| Timer: starts at 01:00, counts down, pause holds, preset and reset work | pass |
+| Second mode has its own machine; reels and result agree | pass |
+| "Reduce motion": result appears at once and matches | pass |
+| No page errors; `tsc`, `bun test` (20), web build, phone build | pass |
+
+**Not verified**: sounds and the vibration (no audio or motor in the sandbox); feel on a phone.
+
+---
+
 ## 2026-11-11 — Milestone 9: Capacitor set up in the repository (Claude)
 
 **Owner's request**: add the Capacitor setup so that turning the phone build into an Android

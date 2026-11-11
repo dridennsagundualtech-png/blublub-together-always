@@ -745,109 +745,6 @@ html.shadows-off .tile-cream {
 
 /* ================= Game corner motion ================= */
 
-/* —— 3D dice: six faces, thrown, tumbling, landing on the result —— */
-.die-stage {
-  position: relative;
-  width: var(--die, 6rem);
-  height: calc(var(--die, 6rem) * 1.35);
-  margin: 0 auto;
-  perspective: 900px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.die-throw {
-  width: var(--die, 6rem);
-  height: var(--die, 6rem);
-  margin-bottom: calc(var(--die, 6rem) * 0.18);
-  transform-style: preserve-3d;
-}
-.die-cube {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 1.35s cubic-bezier(0.18, 0.75, 0.25, 1);
-  transition-delay: var(--die-delay, 0ms);
-}
-.die-face {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 0.35rem;
-  /* Sharp corners so the six faces meet like a solid cube, not flying paper. */
-  border-radius: 0;
-  font-size: calc(var(--die, 6rem) * 0.135);
-  font-weight: 800;
-  line-height: 1.1;
-  text-align: center;
-  color: var(--color-foreground);
-  border: 2px solid color-mix(in oklab, var(--color-foreground) 12%, transparent);
-  box-shadow:
-    inset 0 2px 0 color-mix(in oklab, white 55%, transparent),
-    inset 0 -3px 0 color-mix(in oklab, black 10%, transparent);
-  backface-visibility: hidden;
-}
-.die-face-front {
-  transform: translateZ(calc(var(--die, 6rem) / 2));
-}
-.die-face-back {
-  transform: rotateY(180deg) translateZ(calc(var(--die, 6rem) / 2));
-}
-.die-face-right {
-  transform: rotateY(90deg) translateZ(calc(var(--die, 6rem) / 2));
-}
-.die-face-left {
-  transform: rotateY(-90deg) translateZ(calc(var(--die, 6rem) / 2));
-}
-.die-face-top {
-  transform: rotateX(90deg) translateZ(calc(var(--die, 6rem) / 2));
-}
-.die-face-bottom {
-  transform: rotateX(-90deg) translateZ(calc(var(--die, 6rem) / 2));
-}
-/* Light from above: sides a little darker, top a little lighter, so it reads as a solid block. */
-.die-face-right,
-.die-face-left {
-  filter: brightness(0.9);
-}
-.die-face-top {
-  filter: brightness(1.05);
-}
-.die-face-bottom,
-.die-face-back {
-  filter: brightness(0.82);
-}
-.die-shadow {
-  position: absolute;
-  bottom: calc(var(--die, 6rem) * 0.04);
-  left: 50%;
-  width: 78%;
-  height: calc(var(--die, 6rem) * 0.16);
-  translate: -50% 0;
-  border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    color-mix(in oklab, var(--color-foreground) 28%, transparent),
-    transparent
-  );
-}
-.die-landed .die-face-front {
-  animation: die-glow 0.9s ease-out both;
-}
-@keyframes die-glow {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-primary) 70%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 14px transparent;
-  }
-}
-.dice-result {
-  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
 /* —— Board games —— */
 @keyframes piece-pop {
   0% {
@@ -1020,7 +917,6 @@ html.shadows-off .tile-cream {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .die-landed .die-face-front,
   .piece-pop,
   .piece-drop,
   .win-glow,
@@ -1028,11 +924,9 @@ html.shadows-off .tile-cream {
   .clash-left,
   .clash-right,
   .rise-in,
-  .dice-result,
   .confetti i {
     animation: none;
   }
-  .die-cube,
   .flip-card,
   .lift-win {
     transition: none;

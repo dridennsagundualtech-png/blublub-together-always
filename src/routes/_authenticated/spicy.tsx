@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { useIsAdmin, useSpicyAccess } from "@/lib/admin";
-import { DiceRoller, type DieDef } from "@/components/games/DiceRoller";
+import { SlotMachine, type ReelDef } from "@/components/games/SlotMachine";
 import { Card, GhostButton, PrimaryButton } from "@/components/ui-kit";
 import { Doodle } from "@/components/Doodles";
 import { playChirp } from "@/hooks/use-sound";
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/spicy")({
   component: SpicyPage,
 });
 
-const POSITION_DICE: DieDef[] = [
+const POSITION_REELS: ReelDef[] = [
   {
     label: "Focus",
     tone: "tile-pink",
@@ -52,7 +52,7 @@ const POSITION_DICE: DieDef[] = [
   },
 ];
 
-const CLOTHING_DICE: DieDef[] = [
+const CLOTHING_REELS: ReelDef[] = [
   {
     label: "Remove",
     tone: "tile-sky",
@@ -88,7 +88,7 @@ function SpicyPage() {
   return (
     // `pixel`: a game like the others, drawn in the pixel look in every app style.
     <AppLayout
-      title="18+ Dice"
+      title="18+ Slots"
       subtitle="Premium · adults only"
       critter="seal"
       critterPose="peek"
@@ -100,7 +100,7 @@ function SpicyPage() {
 
       <>
         {profile?.adult_confirmed ? (
-          <DiceGame />
+          <SlotGame />
         ) : (
           <Card className="text-center">
             <Doodle critter="penguin" pose="curious" size={56} className="mx-auto" />
@@ -135,11 +135,11 @@ function SpicyPage() {
 }
 
 const TABS = [
-  { id: "position", label: "Position dice" },
+  { id: "position", label: "Position reels" },
   { id: "clothing", label: "Clothing removal" },
 ] as const;
 
-function DiceGame() {
+function SlotGame() {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("position");
 
   return (
@@ -163,19 +163,19 @@ function DiceGame() {
       </div>
 
       {tab === "position" ? (
-        <DiceRoller
+        <SlotMachine
           key="position"
-          dice={POSITION_DICE}
+          reels={POSITION_REELS}
           withTimer
-          cta="Roll all three"
-          footnote="Take turns: the roller performs the combo for the round, then swap. Wild means you choose."
+          cta="Spin all three"
+          footnote="Take turns: whoever spins does the combo for the round, then swap. Wild means you choose."
         />
       ) : (
-        <DiceRoller
+        <SlotMachine
           key="clothing"
-          dice={CLOTHING_DICE}
-          cta="Roll the clothing dice"
-          footnote="Tap to roll — whatever lands, one item comes off. Wild is your partner's choice."
+          reels={CLOTHING_REELS}
+          cta="Spin the reels"
+          footnote="Pull the lever — whatever lands, one item comes off. Wild is your partner's choice."
         />
       )}
     </div>

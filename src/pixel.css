@@ -233,6 +233,264 @@
   animation: px-pop-in 0.24s steps(4, end) both;
 }
 
+/* ===================== Slot machine ===================== */
+.slot-cabinet {
+  padding: calc(var(--px) * 2);
+  /* A candy-coloured body with a lighter panel edge, like painted metal. */
+  background-color: color-mix(in oklab, var(--primary) 78%, var(--px-paper));
+  box-shadow:
+    var(--px-outline),
+    inset var(--px) var(--px) 0 0 color-mix(in oklab, white 55%, transparent),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 color-mix(in oklab, black 14%, transparent),
+    0 calc(var(--px) * 3) 0 0 var(--px-shade);
+}
+/* The sign across the top, with little lamps that chase each other */
+.slot-marquee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  /* Fixed dark board and warm-white letters, so the sign reads as lit in every app style
+     (the theme's ink colour is light in the dark styles). */
+  background: #3e3a55;
+  color: #fff3d6;
+}
+.slot-bulbs {
+  display: flex;
+  gap: var(--px);
+}
+.slot-bulb {
+  width: calc(var(--px) * 3);
+  height: calc(var(--px) * 3);
+  background: var(--honey);
+  animation: px-blink 0.9s steps(1, end) infinite;
+}
+.slot-bulb:nth-child(4n + 2) {
+  background: var(--primary);
+  animation-delay: 0.225s;
+}
+.slot-bulb:nth-child(4n + 3) {
+  background: var(--sky);
+  animation-delay: 0.45s;
+}
+.slot-bulb:nth-child(4n + 4) {
+  background: var(--mint);
+  animation-delay: 0.675s;
+}
+.slot-cabinet--spinning .slot-bulb {
+  animation-duration: 0.27s;
+}
+.slot-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: calc(var(--px) * 2);
+  padding: 0.6rem 0.2rem 0.3rem 0.35rem;
+}
+.slot-reels {
+  display: grid;
+  gap: calc(var(--px) * 3);
+}
+/* One reel: a window three symbols tall. The reel's colour comes from its tile-* class. */
+:root:root .pixel-zone .slot-window {
+  position: relative;
+  height: calc(var(--cell) * 3);
+  margin: var(--px);
+  overflow: hidden;
+  box-shadow:
+    var(--px-outline),
+    inset 0 calc(var(--px) * 2) 0 0 var(--px-shade) !important;
+}
+.slot-strip {
+  will-change: transform;
+}
+.slot-cell {
+  display: grid;
+  place-items: center;
+  height: var(--cell);
+  padding: 0 0.3rem;
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-wrap: balance;
+  box-shadow: inset 0 calc(var(--px) * -1) 0 0 color-mix(in oklab, var(--px-ink) 16%, transparent);
+}
+/* The rows above and below the result are dimmed… */
+.slot-window::before,
+.slot-window::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  height: var(--cell);
+  background: color-mix(in oklab, var(--px-paper) 66%, transparent);
+  pointer-events: none;
+}
+.slot-window::before {
+  top: 0;
+}
+.slot-window::after {
+  bottom: 0;
+}
+/* …and the result row is framed. */
+.slot-payline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--cell);
+  z-index: 2;
+  height: var(--cell);
+  /* A warm glow on the result row; multiply keeps the text on it crisp and dark. */
+  background: color-mix(in oklab, var(--honey) 70%, white);
+  mix-blend-mode: multiply;
+  box-shadow:
+    inset 0 var(--px) 0 0 var(--px-ink),
+    inset 0 calc(var(--px) * -1) 0 0 var(--px-ink);
+  pointer-events: none;
+}
+/* Two little pointers on the result row, one from each side */
+.slot-payline::before,
+.slot-payline::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: calc(var(--px) * 2);
+  height: calc(var(--px) * 4);
+  margin-top: calc(var(--px) * -2);
+  background: var(--px-ink);
+}
+.slot-payline::before {
+  left: 0;
+  clip-path: polygon(0 0, 50% 0, 50% 25%, 100% 25%, 100% 75%, 50% 75%, 50% 100%, 0 100%);
+}
+.slot-payline::after {
+  right: 0;
+  clip-path: polygon(100% 0, 50% 0, 50% 25%, 0 25%, 0 75%, 50% 75%, 50% 100%, 100% 100%);
+}
+.slot-window--win .slot-payline {
+  animation: px-flash 0.5s steps(1, end) 4;
+}
+/* A lamp under each reel: dark while it turns, lit once it has locked in */
+.slot-lamp {
+  display: block;
+  width: calc(var(--px) * 4);
+  height: calc(var(--px) * 3);
+  margin: calc(var(--px) * 2) auto 0;
+  background: color-mix(in oklab, var(--px-ink) 45%, var(--primary));
+  box-shadow: var(--px-outline);
+}
+.slot-lamp--on {
+  background: #fff3a8;
+  box-shadow:
+    var(--px-outline),
+    0 0 0 calc(var(--px) * 2) color-mix(in oklab, #fff3a8 55%, transparent);
+}
+.slot-cover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--cell);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  height: var(--cell);
+  background: var(--px-paper);
+  box-shadow:
+    inset 0 var(--px) 0 0 var(--px-ink),
+    inset 0 calc(var(--px) * -1) 0 0 var(--px-ink);
+  font-size: 1.7rem;
+  font-weight: 700;
+  animation: px-bob 0.9s steps(2, jump-none) infinite;
+}
+/* The lever: a ball on a rod. Pulling it runs the ball down and back. */
+.slot-lever {
+  position: relative;
+  width: 2.1rem;
+  height: calc(var(--cell) * 3 + var(--px) * 2);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.slot-lever:disabled {
+  cursor: default;
+}
+.slot-lever-rod {
+  position: absolute;
+  left: 50%;
+  top: 0.9rem;
+  bottom: 0.7rem;
+  width: calc(var(--px) * 2);
+  margin-left: calc(var(--px) * -1);
+  background: var(--px-ink);
+}
+.slot-lever-ball {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  margin-left: -0.825rem;
+  background: var(--destructive);
+  box-shadow:
+    var(--px-outline),
+    inset var(--px) var(--px) 0 0 color-mix(in oklab, white 45%, transparent);
+}
+.slot-lever-base {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1.3rem;
+  height: 0.8rem;
+  margin-left: -0.65rem;
+  background: var(--px-paper);
+  box-shadow: var(--px-outline);
+}
+@keyframes slot-pull-ball {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45%,
+  60% {
+    transform: translateY(calc(var(--cell) * 2));
+  }
+}
+@keyframes slot-pull-rod {
+  0%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+  45%,
+  60% {
+    clip-path: inset(calc(var(--cell) * 2) 0 0 0);
+  }
+}
+.slot-lever--pulled .slot-lever-ball {
+  animation: slot-pull-ball 0.55s steps(6, end) both;
+}
+.slot-lever--pulled .slot-lever-rod {
+  animation: slot-pull-rod 0.55s steps(6, end) both;
+}
+/* Any press in a pixel zone drops the whole button one step; the lever moves its ball instead. */
+:root:root .pixel-zone .slot-lever:not(:disabled):active {
+  transform: none;
+}
+.slot-timer-bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--px);
+}
+.slot-timer-bar .px-pip {
+  width: auto;
+  height: calc(var(--px) * 4);
+}
+
 /* ===================== Shared app pieces inside a pixel zone =====================
  * Some game pages (Food Roulette, the dice) are built from the app's ordinary cards, buttons
  * and inputs. Wrapping such a page in .pixel-zone turns those pieces pixel as well, whatever
@@ -865,6 +1123,14 @@
   .px-plate--active::before,
   .px-drop--live,
   .px-wait i {
+    animation: none;
+  }
+  .slot-bulb,
+  .slot-cover,
+  .slot-window--win .slot-payline,
+  .slot-lamp--on,
+  .slot-lever--pulled .slot-lever-ball,
+  .slot-lever--pulled .slot-lever-rod {
     animation: none;
   }
   .px-burst {
