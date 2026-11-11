@@ -25,6 +25,7 @@
 | 6 | Final regression pass, docs, hand-over report | ✅ done |
 | 7 | Daily-question archive: answered days never expire; merged to `main` | ✅ done |
 | 8 | Phone build (`npm run build:spa`) builds and runs again | ✅ done |
+| 9 | Capacitor set up: Android project, one-command sync, icon, guide (`PHONE_APP.md`) | ✅ done |
 
 ## Current task
 
@@ -35,12 +36,16 @@ daily-question answers that never expire) are done and merged into `main`.
 
 1. **Owner tries it on a real phone** (checklist in TESTING_GUIDE §6) and reports what feels
    off — especially the steering in Hop Up and the tap strength in Wing It.
-2. **Build the phone app with Capacitor and try it on a phone** — see "Blocked" below.
+2. **Build the APK and try it on a phone** — follow `PHONE_APP.md`; see "Blocked" below.
 3. **Tune the arcade games** from that feedback (constants at the top of each `logic.ts`).
 4. Optional ideas from the list below.
 
 ## Pending ideas (not started, need owner's OK where marked)
 
+- A "Build APK" button on GitHub (a GitHub Actions workflow that compiles the APK in the cloud,
+  so no Android Studio is needed) — **ask owner**; it would also prove the Android project
+  compiles.
+- Native notifications in the phone app (needs a Capacitor plugin) — **ask owner**.
 - Pixel icons for the remaining Lucide glyphs inside game areas (flag, pause, arrows, fork).
 - Hop Up ideas: pick your mascot, moving hazards in the night zones, tilt-to-steer.
 - Share arcade best scores with the partner (needs a database column or table → **ask owner**).
@@ -51,11 +56,11 @@ daily-question answers that never expire) are done and merged into `main`.
 
 ## Blocked / needs the owner
 
-- Real-device checks listed in TESTING_GUIDE §6 (real accounts, touch feel, sound).
-- **Phone app on a real phone**: the build works again (milestone 8) but wrapping it with
-  Capacitor and running it on Android could not be tried here. Watch for Our Room pictures:
-  they are addressed relative to the web site and may not load inside the phone app — see
-  DEVELOPMENT_LOG milestone 8 for the small follow-up if so.
+- **First real APK build.** The Android project could not be compiled in the agent's workspace
+  (Google's download servers are blocked there). The owner builds it following `PHONE_APP.md`
+  and reports any error from Android Studio.
+- Real-device checks listed in TESTING_GUIDE §6 (real accounts, touch feel, sound, and in the
+  phone app: Our Room pictures, permission prompts, back button).
 
 ## Completed
 
@@ -73,3 +78,4 @@ daily-question answers that never expire) are done and merged into `main`.
 - 2026-11-10 — Milestone 7 (Claude): daily-question answers never expire; merged to `main`.
 - 2026-11-10 — Milestone 8 (Claude): phone build fixed (server-only modules swapped out for the
   phone build; app mounted on the whole document).
+- 2026-11-11 — Milestone 9 (Claude): Capacitor set up (Android project, commands, icon, guide).

@@ -23,6 +23,13 @@ const go = async (path) => {
   await settle(page, 1300);
 };
 
+// Pictures stored by Lovable ("/__l5e/…") must be asked for from the live web site, because a
+// phone app is not served from it.
+const hosted = [];
+page.on("request", (r) => {
+  if (r.url().includes("/__l5e/")) hosted.push(r.url());
+});
+
 await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
 await settle(page, 2500);
 check(
@@ -58,6 +65,14 @@ await settle(page, 1500);
 check(
   "Play tab opens Our Room",
   (await page.getByRole("heading", { name: "Our Room" }).count()) === 1,
+);
+const onLiveSite = hosted.filter((u) =>
+  u.startsWith("https://blublub-together-always.lovable.app/__l5e/"),
+);
+check(
+  "Our Room pictures are requested from the live web site",
+  hosted.length > 0 && onLiveSite.length === hosted.length,
+  `${onLiveSite.length} of ${hosted.length} requests`,
 );
 await page
   .getByRole("link", { name: /game corner/i })

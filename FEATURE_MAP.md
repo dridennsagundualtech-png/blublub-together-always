@@ -88,6 +88,16 @@ games in progress and the history rely on them. Visual changes only.
 
 No Supabase. No login needed to play.
 
+## Phone app (Android)
+
+| Piece | File |
+| --- | --- |
+| Owner's guide | `PHONE_APP.md` |
+| Capacitor settings | `capacitor.config.ts` |
+| Android project, permissions, icon | `android/` |
+| Phone build + server stand-ins + hosted-picture addresses | `vite.config.spa.ts`, `src/spa/`, `src/main.spa.tsx`, `spa/index.html` |
+| Icon / splash generator | `scripts/phone/make-android-art.py` |
+
 ## Things many screens share (change with care)
 
 | Shared piece | File | Used by |

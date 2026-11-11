@@ -24,7 +24,8 @@ cycle tracking, commitments, map), a decorated shared room ("Our Room") and a ga
 | Styling | Tailwind CSS v4, CSS variables, shadcn/ui pieces in `src/components/ui/` |
 | Backend | Supabase (auth, Postgres with row-level security, storage, realtime) |
 | Build | Vite 8 through `@lovable.dev/vite-tanstack-config` (server build, Cloudflare target) |
-| Phone build | `vite.config.spa.ts` → static `dist/` for Capacitor (`npm run build:spa`) |
+| Phone build | `vite.config.spa.ts` → static `dist/` (`npm run build:spa`) |
+| Phone app | Capacitor 8 wraps `dist/` into the Android project in `android/` (`npm run phone:sync`). See `PHONE_APP.md`. |
 | Package manager | **bun** (`bun.lock`) |
 | Tests | No test framework is installed. Game logic tests run with bun's built-in runner (`bun test`). |
 
@@ -50,6 +51,8 @@ src/
                           cyberpunk, steampunk, nature
 supabase/migrations/      database history (applied by Lovable/Supabase, not by us)
 tests/                    bun tests for pure game logic
+android/                  the Android project made by Capacitor (see PHONE_APP.md)
+capacitor.config.ts       the phone app's id, name and web folder
 ```
 
 ### Page pattern
@@ -136,7 +139,8 @@ The app talks to the arcade through exactly two things: the registry (for menus)
    commits) — Lovable mirrors the history (see `AGENTS.md`).
 3. **Do not edit generated files**: `src/integrations/supabase/*`, `src/routeTree.gen.ts`,
    `src/components/ui/*`.
-4. **No new dependencies without the owner's approval.** `bun.lock` points some packages at
+4. **No new dependencies without the owner's approval.** (Capacitor was approved on
+   2026-11-11.) `bun.lock` points some packages at
    Lovable's private mirror; changing it carelessly can break Lovable's build.
 5. **Mobile first.** Touch-friendly, no hover-only controls, safe-area padding. Anything that
    takes drags/taps over a large area needs `data-no-page-swipe` (pages change on swipe).

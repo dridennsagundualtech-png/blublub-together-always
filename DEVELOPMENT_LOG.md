@@ -5,6 +5,62 @@
 
 ---
 
+## 2026-11-11 — Milestone 9: Capacitor set up in the repository (Claude)
+
+**Owner's request**: add the Capacitor setup so that turning the phone build into an Android
+project is one command (new packages approved by the owner).
+
+**What was done**
+
+- Added `@capacitor/core`, `@capacitor/android` (dependencies) and `@capacitor/cli`
+  (dev dependency), all pinned to 8.6.0. `bun.lock` only gained entries; the 31 entries that
+  point at Lovable's package mirror are untouched (two shared helper packages, `semver` and
+  `yallist`, were re-arranged by bun — same versions for the packages that already used them).
+- `capacitor.config.ts` (app id `com.blublub.app`, name BLUBLUB, web folder `dist`) and the
+  generated Android project in `android/` (53 files, about 300 KB; build outputs and the copied
+  web files are git-ignored by Capacitor's own `.gitignore`).
+- Commands in `package.json`: `phone:sync` (phone build + copy into the Android project),
+  `phone:open` (open Android Studio), `phone:run` (build, install and start on a plugged-in
+  phone).
+- Android permissions for features the app already has: location (sharing, map), microphone
+  (voice notes), vibration. Marked as not required hardware.
+- App icon and start-up screen drawn from the app's own pixel cat instead of Capacitor's
+  placeholder logo (`scripts/phone/make-android-art.py`).
+- **Our Room pictures in the phone app**: the 720 picture addresses of the form
+  `"/__l5e/assets-v1/…"` are relative to the web site, so inside a phone app they would point at
+  nothing. The phone build now rewrites them to full addresses on the live web app
+  (`WEB_APP_ORIGIN` in `vite.config.spa.ts`). The web build is not affected.
+- `android` added to the lint and formatter ignore lists.
+- New guide for the owner: `PHONE_APP.md`.
+
+**Verified (actually run)**
+
+| Check | Result |
+| --- | --- |
+| `npm run phone:sync` | builds and copies; the copy in `android/` is identical to `dist/` |
+| `npx cap doctor` | "Android looking great!" |
+| Phone-build smoke test (`spa-smoke.mjs`) | 15 / 15, including "Our Room pictures are requested from the live web site" |
+| Hosted-picture addresses in the phone bundle | 0 relative, 720 on the live site |
+| `tsc`, `bun test` (20), normal `vite build` | pass |
+| `AndroidManifest.xml` | parses as valid XML with the expected permissions |
+
+**NOT verified — could not be done in this workspace**
+
+- **Compiling the APK.** Android's build tools download from Google's servers
+  (`dl.google.com`), which this workspace is not allowed to reach, so Gradle was never run.
+  The Android project is Capacitor's stock template plus permissions and artwork, but it has
+  not been compiled here. The first real build happens on the owner's computer.
+- Whether the live site actually serves the hosted pictures to a phone app (the host is not
+  reachable from here either). The addresses are exactly what a browser on the live site
+  requests, so it should — but it is unconfirmed.
+- Everything on a real phone: permissions prompts, back button, splash screen, icon.
+
+**Known limits of the phone app** (also in `PHONE_APP.md`): Member access is web-only; system
+notifications do not appear (the Android WebView has no web Notification API; the code already
+skips them safely); the APK is a debug build signed per computer.
+
+---
+
 ## 2026-11-10 — Milestone 8: the phone build works again (Claude)
 
 **Owner's request**: "please fix the phone app build".

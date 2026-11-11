@@ -51,8 +51,12 @@ npx vite preview --config vite.config.spa.ts --port 4173 --host 127.0.0.1 &
 ADMIN=1 BASE=http://127.0.0.1:4173 node scripts/visual/spa-smoke.mjs /tmp/shots/spa
 ```
 
+`npm run phone:sync` does the build and also copies it into the Android project; afterwards
+`npx cap doctor` should end with "Android looking great!". Compiling the APK itself needs
+Android Studio — see `PHONE_APP.md`.
+
 It opens the built app at its front page and moves around inside it like the phone app does
-(14 checks). `ADMIN=1` makes the pretend user the owner, to check the "Member access" note.
+(15 checks). `ADMIN=1` makes the pretend user the owner, to check the "Member access" note.
 
 Also make sure no server code leaked into the phone bundle (must print nothing):
 
