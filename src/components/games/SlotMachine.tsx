@@ -18,6 +18,13 @@ const NEXT_STOP_MS = 450;
 const reducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+/**
+ * A "wild" option leaves the choice to a person (e.g. "Wild — you pick"): any option whose
+ * text starts with the word Wild. When a reel lands on one, the result offers that reel's
+ * other options as buttons, so the choice made is recorded on the ticket.
+ */
+const isWild = (option: string) => /^wild\b/i.test(option.trim());
+
 /** Where the strip sits (px) so that item `index` of the strip is on the middle row. */
 const offsetFor = (index: number) => -(index - 1) * CELL;
 
@@ -43,6 +50,8 @@ export function SlotMachine({
   const [stopped, setStopped] = useState<boolean[] | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [pulls, setPulls] = useState(0);
+  /** For reels that landed on a wild: which option was chosen (reel number → option number). */
+  const [wildPicks, setWildPicks] = useState<Record<number, number>>({});
   const strips = useRef<(HTMLDivElement | null)[]>([]);
   const running = useRef<Animation[]>([]);
   const timers = useRef<number[]>([]);
@@ -70,6 +79,7 @@ export function SlotMachine({
     if (spinning) return;
     playChirp("pop");
     setPulls((n) => n + 1);
+    setWildPicks({}); // a new spin starts with nothing chosen
     const next = reels.map((r) => Math.floor(Math.random() * r.sides.length));
 
     if (reducedMotion()) {
@@ -185,7 +195,18 @@ export function SlotMachine({
                       </span>
                     ) : null}
                   </div>
-                  <i className={cn("slot-lamp", isStopped && "slot-lamp--on")} aria-hidden="true" />
+                  <i
+                    className={cn(
+                      "slot-lamp",
+                      isStopped && "slot-lamp--on",
+                      // A wild that is still waiting for a choice keeps its lamp blinking.
+                      done &&
+                        isWild(reel.sides[shown[i] ?? 0] ?? "") &&
+                        wildPicks[i] == null &&
+                        "px-blink",
+                    )}
+                    aria-hidden="true"
+                  />
                 </div>
               );
             })}
@@ -207,20 +228,95 @@ export function SlotMachine({
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {done ? reels.map((r, i) => `${r.label}: ${r.sides[shown[i] ?? 0]}`).join(", ") : ""}
+        {done
+          ? reels
+              .map((r, i) => {
+                const landed = r.sides[shown[i] ?? 0];
+                const pick = wildPicks[i];
+                return `${r.label}: ${landed}${pick != null ? `, chosen: ${r.sides[pick]}` : ""}`;
+              })
+              .join(", ")
+          : ""}
       </p>
 
       {done ? (
         <dl key={pulls} className="px-ticket px-pop-in relative text-left">
           <Burst count={10} spread={70} />
-          {reels.map((r, i) => (
-            <div key={r.label} className="flex items-baseline gap-2 py-0.5">
-              <dt className="px-label w-28 shrink-0 text-[0.7rem] leading-tight">{r.label}</dt>
-              <dd className="min-w-0 flex-1 text-base font-bold leading-tight">
-                {r.sides[shown[i] ?? 0]}
-              </dd>
-            </div>
-          ))}
+          {reels.map((r, i) => {
+            const landed = r.sides[shown[i] ?? 0] ?? "";
+            const wild = isWild(landed);
+            const pick = wildPicks[i];
+            return (
+              <div
+                key={r.label}
+                className={cn(
+                  "flex gap-x-2 py-0.5",
+                  // While a wild waits for a choice the row stacks, so the buttons get the full width.
+                  wild && pick == null ? "flex-col" : "items-baseline",
+                )}
+              >
+                <dt className="px-label w-28 shrink-0 text-[0.7rem] leading-tight">{r.label}</dt>
+                {/* data-landed: what the reel itself shows, whatever is chosen for a wild */}
+                <dd
+                  className="min-w-0 flex-1 text-base font-bold leading-tight"
+                  data-landed={landed}
+                >
+                  {!wild ? (
+                    landed
+                  ) : pick != null ? (
+                    <span className="px-pop-in inline-flex flex-wrap items-center gap-x-1.5">
+                      <span className="slot-wild-tag">WILD</span>
+                      <span className="slot-wild-choice">{r.sides[pick]}</span>
+                      <button
+                        type="button"
+                        className="slot-wild-change"
+                        onClick={() => {
+                          playChirp("tap");
+                          setWildPicks((prev) => {
+                            const rest = { ...prev };
+                            delete rest[i];
+                            return rest;
+                          });
+                        }}
+                      >
+                        change
+                      </button>
+                    </span>
+                  ) : (
+                    <>
+                      {landed}
+                      <span
+                        className="slot-wild-picker"
+                        role="group"
+                        aria-label={`Choose for ${r.label}`}
+                      >
+                        <span className="slot-wild-ask">
+                          {/partner/i.test(landed)
+                            ? "Tap what your partner chose:"
+                            : "Tap what you chose:"}
+                        </span>
+                        {r.sides.map((option, k) =>
+                          isWild(option) ? null : (
+                            <button
+                              key={option}
+                              type="button"
+                              className="px-btn px-btn--small px-btn--ghost"
+                              onClick={() => {
+                                playChirp("success");
+                                setWildPicks((prev) => ({ ...prev, [i]: k }));
+                              }}
+                            >
+                              {option}
+                            </button>
+                          ),
+                        )}
+                      </span>
+                    </>
+                  )}
+                </dd>
+              </div>
+            );
+          })}
         </dl>
       ) : null}
 

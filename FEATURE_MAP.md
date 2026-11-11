@@ -27,7 +27,7 @@
 | Commitments | `/commitments` | `routes/_authenticated/commitments.tsx`, `lib/commitments.ts` | `commitments`, `commitment_logs` | yes |
 | Map | `/map` | `routes/_authenticated/map.tsx`, `components/WorldMap.tsx`, `components/MiniMap.tsx`, `lib/location.ts` | `locations` | yes |
 | Food roulette (pixel look via `<AppLayout pixel>`) | `/food` | `routes/_authenticated/food.tsx`, `lib/food-art.ts` | — | yes |
-| 18+ slots (premium, age-gated): a pixel slot machine that picks one option per reel, plus a round timer | `/spicy` | `routes/_authenticated/spicy.tsx`, `components/games/SlotMachine.tsx` | — | yes |
+| 18+ slots (premium, age-gated): a pixel slot machine that picks one option per reel (a "Wild" lets you tap what was chosen), plus a round timer | `/spicy` | `routes/_authenticated/spicy.tsx`, `components/games/SlotMachine.tsx` | — | yes |
 | Profile & settings | `/profile` | `routes/_authenticated/profile.tsx` | `profiles`, `redeem_codes` | yes |
 | Appearance | `/appearance` | `components/StylePicker.tsx`, `components/ThemeEditor.tsx`, `components/DevThemeHost.tsx`, `lib/theme.ts` | `couples.theme` | yes |
 | Admin (Member access uses server functions: web app only; the phone build shows a note instead) | `/admin-codes`, `/admin-users` | `routes/_authenticated/admin-*.tsx`, `lib/admin*.ts`, phone stand-ins in `src/spa/` | `redeem_codes`, `user_roles` | yes |

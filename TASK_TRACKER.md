@@ -27,6 +27,7 @@
 | 8 | Phone build (`npm run build:spa`) builds and runs again | ✅ done |
 | 9 | Capacitor set up: Android project, one-command sync, icon, guide (`PHONE_APP.md`) | ✅ done |
 | 10 | 18+ dice replaced by a pixel slot machine | ✅ done |
+| 11 | Slot machine: tap what was chosen for a "Wild" | ✅ done |
 
 ## Current task
 
@@ -81,3 +82,4 @@ daily-question answers that never expire) are done and merged into `main`.
   phone build; app mounted on the whole document).
 - 2026-11-11 — Milestone 9 (Claude): Capacitor set up (Android project, commands, icon, guide).
 - 2026-11-11 — Milestone 10 (Claude): 18+ dice replaced by a pixel slot machine; merged to `main`.
+- 2026-11-11 — Milestone 11 (Claude): wild picker on the slot machine; merged to `main`.

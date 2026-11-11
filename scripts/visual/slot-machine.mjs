@@ -26,8 +26,30 @@ const onPayline = (page) =>
       };
     }),
   );
+/** What the result ticket says each reel landed on. */
 const ticket = (page) =>
-  page.evaluate(() => [...document.querySelectorAll(".px-ticket dd")].map((d) => d.textContent));
+  page.evaluate(() =>
+    [...document.querySelectorAll(".px-ticket dd")].map((d) => d.getAttribute("data-landed")),
+  );
+/**
+ * Make the next spin land where we want: the machine draws one random number per reel, so we
+ * hand it those numbers and then give the real generator back.
+ */
+const rig = (page, pick) =>
+  page.evaluate((mode) => {
+    const reels = [...document.querySelectorAll(".slot-strip")].map((strip) => {
+      const all = [...strip.children].map((c) => c.textContent);
+      return all.slice(0, all.length / 8); // the strip repeats the options 8 times
+    });
+    const queue = reels.map((options) => {
+      const wildAt = options.findIndex((o) => /^wild/i.test(o));
+      const index = mode === "wild" ? wildAt : wildAt === 0 ? 1 : 0;
+      return (index + 0.5) / options.length;
+    });
+    const real = Math.random;
+    Math.random = () => (queue.length ? queue.shift() : ((Math.random = real), real()));
+    return reels.map((options) => options.length);
+  }, pick);
 
 const { page, errors } = await openPhone(browser, {
   signedIn: true,
@@ -76,6 +98,71 @@ check(
   "results vary from spin to spin",
   seen.size >= 3,
   `${seen.size} different results in 5 spins`,
+);
+
+// —— Wild: when a reel lands on a wild, you tap what was chosen and it stays on the ticket ——
+const sizes = await rig(page, "wild");
+await spinButton.click();
+await page.waitForSelector(".px-ticket", { timeout: 6000 });
+await settle(page, 350);
+const landedWild = await ticket(page);
+check(
+  "(rigged) every reel landed on its wild",
+  landedWild.length === 3 && landedWild.every((t) => /^wild/i.test(t)),
+);
+const pickers = page.locator(".slot-wild-picker");
+check("each wild offers a picker", (await pickers.count()) === 3);
+const offered = await pickers.evaluateAll((groups) =>
+  groups.map((g) => [...g.querySelectorAll("button")].map((b) => b.textContent)),
+);
+check(
+  "a picker lists every other option of its own reel, and never the wild itself",
+  offered.every((list, i) => list.length === sizes[i] - 1 && list.every((t) => !/^wild/i.test(t))),
+  offered.map((l) => l.length).join(","),
+);
+check(
+  "a wild waiting for a choice keeps its lamp blinking",
+  (await page.locator(".slot-lamp.px-blink").count()) === 3,
+);
+await page.screenshot({ path: `${out}-5-wild-picker.png` });
+
+const firstChoice = offered[0][2];
+await pickers.first().getByRole("button", { name: firstChoice, exact: true }).click();
+await settle(page, 300);
+const row1 = page.locator(".px-ticket dd").first();
+check(
+  "tapping a choice writes it on the ticket, marked WILD",
+  (await row1.locator(".slot-wild-tag").count()) === 1 &&
+    (await row1.locator(".slot-wild-choice").innerText()) === firstChoice,
+);
+check("that reel's picker closes; the other two stay open", (await pickers.count()) === 2);
+check("the ticket still remembers the reel landed on wild", /^wild/i.test((await ticket(page))[0]));
+check("its lamp stops blinking", (await page.locator(".slot-lamp.px-blink").count()) === 2);
+await page.screenshot({ path: `${out}-6-wild-chosen.png` });
+
+await row1.getByRole("button", { name: "change" }).click();
+await settle(page, 200);
+check(
+  '"change" brings the picker back',
+  (await pickers.count()) === 3 && (await row1.locator(".slot-wild-tag").count()) === 0,
+);
+const secondChoice = offered[0][0];
+await pickers.first().getByRole("button", { name: secondChoice, exact: true }).click();
+await settle(page, 200);
+check(
+  "a different choice can be made",
+  (await row1.locator(".slot-wild-choice").innerText()) === secondChoice,
+);
+
+await rig(page, "plain");
+await spinButton.click();
+await page.waitForSelector(".px-ticket", { timeout: 6000 });
+await settle(page, 350);
+check(
+  "a new spin clears the choice; with no wild there is no picker",
+  (await pickers.count()) === 0 &&
+    (await page.locator(".slot-wild-tag").count()) === 0 &&
+    (await ticket(page)).every((t) => !/^wild/i.test(t)),
 );
 
 // Round timer.

@@ -115,7 +115,8 @@ Daily-question archive (old answers must never disappear) — 12 checks, prints 
 node scripts/visual/questions-archive.mjs /tmp/shots/questions
 ```
 
-The slot machine on the 18+ page (reels must match the written result) — 20 checks:
+The slot machine on the 18+ page (reels must match the written result; a wild offers a
+picker and keeps the choice) — 31 checks:
 
 ```bash
 SPICY=1 node scripts/visual/slot-machine.mjs /tmp/shots/slot            # add a skin name to test another style
@@ -174,6 +175,8 @@ Run these after touching shared styles, games, or navigation.
       without access is sent back to the Game corner.
 - [ ] Slot machine: the lever and the button both spin; reels stop left to right; the middle
       row of each reel is what the ticket says; the timer starts, pauses and resets.
+- [ ] When a reel lands on "Wild…", its line on the ticket offers that reel's other options;
+      tapping one shows it with a WILD tag; "change" lets you pick again; the next spin clears it.
 
 ### Themes
 - [ ] Each of the 8 skins: Home, Nest, Game corner, one two-player game, one arcade game —

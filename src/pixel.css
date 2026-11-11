@@ -480,6 +480,41 @@
 :root:root .pixel-zone .slot-lever:not(:disabled):active {
   transform: none;
 }
+/* —— A reel landed on "Wild": choose one of its other options, and the choice is kept —— */
+.slot-wild-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0.25rem calc(var(--px) * -1) 0;
+  font-weight: 600;
+}
+.slot-wild-ask {
+  width: 100%;
+  margin: 0 var(--px) 0.1rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+.slot-wild-picker .px-btn {
+  min-height: 2.5rem;
+}
+.slot-wild-tag {
+  padding: 0.1rem 0.35rem;
+  background: var(--px-ink);
+  color: #fff3a8;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+.slot-wild-change {
+  padding: 0.35rem 0.3rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .slot-timer-bar {
   display: grid;
   grid-auto-flow: column;

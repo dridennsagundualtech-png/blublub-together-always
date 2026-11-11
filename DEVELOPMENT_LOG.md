@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-11-11 — Milestone 11: choosing for a "Wild" on the slot machine (Claude)
+
+**Owner's request**: "whenever the wild pick appears, make a button where I can tap one of the
+choices so I know which one is the wild."
+
+**What was done** (`src/components/games/SlotMachine.tsx`, styles in `src/pixel.css`)
+
+- An option counts as wild when its text starts with the word "Wild" (`isWild`). Each reel has
+  exactly one today ("Wild — you pick" / "Wild — partner's choice").
+- When a reel lands on its wild, that line of the result ticket shows every *other* option of
+  the same reel as a button, under "Tap what you chose:" (or "…what your partner chose:" for
+  the partner's-choice wild).
+- Tapping one writes it on the ticket with a **WILD** tag in front, so it stays clear that
+  this line was the wild and what was picked for it. A small "change" link reopens the buttons.
+- The lamp under a reel keeps blinking while its wild is still waiting for a choice.
+- The choice is cleared by the next spin. Nothing is saved anywhere — it lives on the screen
+  only, like the rest of the result.
+- The reel itself still shows "Wild…" on its result row; only the ticket carries the choice.
+
+**Verified** — `SPICY=1 node scripts/visual/slot-machine.mjs`, now 31 checks, all pass in the
+Classic and Cyberpunk styles. The test forces every reel onto its wild (it hands the machine
+the random numbers for one spin), then checks: a picker per wild; each picker lists the 7 other
+options of its own reel and never the wild itself; a tap writes the choice with the WILD tag
+and closes only that picker; "change" reopens it and another choice can be made; lamps blink
+only while waiting; a following spin without a wild shows no picker and no tag. The earlier 20
+checks still pass. `tsc`, `bun test` (20), web build and phone build pass.
+
+**Not verified**: on a real phone.
+
+---
+
 ## 2026-11-11 — Milestone 10: the dice became a pixel slot machine (Claude)
 
 **Owner's request**: "replace the dice with a pixel slot machine, because the design is quite
